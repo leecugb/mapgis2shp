@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+title: "mapgis2shp: an open-source reader for MapGIS 6.x/67 binary vector formats"
+message: "If you use this software, please cite it as below."
+abstract: >-
+  mapgis2shp (import name pymapgis) is an open-source Python reader for the
+  MapGIS 6.x/67 closed binary vector formats (.wt point, .wl line, .wp
+  polygon). It reverse-engineers the on-disk layout, infers the coordinate
+  reference system, reconstructs polygon topology, and returns GeoPandas
+  GeoDataFrames / shapefiles, enabling Chinese geological-survey data locked
+  in the proprietary MapGIS format to enter the open-source geospatial stack.
+version: "2.0.4"
+date-released: 2026-07-21
+license: Apache-2.0
+repository-code: https://github.com/leecugb/mapgis2shp
+keywords:
+  - MapGIS
+  - GIS
+  - vector
+  - geopandas
+  - shapefile
+  - reverse-engineering
+  - geology
+authors:
+  - given-names: Shijie
+    family-names: Li
+    affiliation: China University of Geosciences (Beijing)
+preferred-citation:
+  type: software
+  title: "mapgis2shp: an open-source reader for MapGIS 6.x/67 binary vector formats"
+  authors:
+    - given-names: Shijie
+      family-names: Li
+      affiliation: China University of Geosciences (Beijing)
+  version: "2.0.4"
+  date-released: 2026-07-21
+  license: Apache-2.0
+  repository-code: https://github.com/leecugb/mapgis2shp
+  keywords:
+    - MapGIS
+    - GIS
+    - vector
+    - geopandas
+    - shapefile
+    - reverse-engineering
+    - geology
