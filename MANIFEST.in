@@ -1,0 +1,14 @@
+include README.md
+include LICENSE
+include verify_pymapgis.py
+include pymapgis_baseline.json
+recursive-include docs *.md
+recursive-include src pymapgis *.py
+
+# MapGIS binary data files are kept in the repository for integration tests
+# but are not shipped in the PyPI distribution.
+global-exclude *.WT
+global-exclude *.WL
+global-exclude *.WP
+global-exclude *.MPJ
+global-exclude *.TIF.ovr

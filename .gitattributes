@@ -1,0 +1,8 @@
+# Normalize line endings across platforms; keep text files LF in the repo.
+* text=auto eol=lf
+
+# Binary files must not be touched by line-ending conversion.
+*.png binary
+*.jpg binary
+*.tif binary
+*.mbtiles binary

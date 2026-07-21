@@ -1,0 +1,512 @@
+{
+  "LDLYAAA005.WL": {
+    "count": 16,
+    "bbox": [
+      73.49999900094726,
+      39.000000001929855,
+      75.00000099999441,
+      40.000000010579086
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 16
+    },
+    "invalid": 0
+  },
+  "LDLYAAE001.WL": {
+    "count": 1143,
+    "bbox": [
+      73.50148929782634,
+      39.00000000040029,
+      75.00000099999441,
+      40.00000003328248
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 1143
+    },
+    "invalid": 0
+  },
+  "LDLYAAE002.WP": {
+    "count": 128,
+    "bbox": [
+      73.49999999996275,
+      38.99999999999621,
+      74.99094219561695,
+      39.64473468292831
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "MultiPolygon": 88,
+      "Polygon": 40
+    },
+    "invalid": 0
+  },
+  "LDLYAAI002.WT": {
+    "count": 242,
+    "bbox": [
+      73.60872189266048,
+      39.02313595221242,
+      74.96354518933116,
+      39.97466304797418
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Point": 242
+    },
+    "invalid": 0
+  },
+  "LDZOFBA002.WL": {
+    "count": 2222,
+    "bbox": [
+      73.49999900075113,
+      39.00000000040029,
+      75.00000099999441,
+      40.00000003327712
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 2222
+    },
+    "invalid": 0
+  },
+  "LDZOFBA003.WL": {
+    "count": 310,
+    "bbox": [
+      73.49999900075113,
+      39.00000001975259,
+      75.00000099999441,
+      40.00000003327712
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 310
+    },
+    "invalid": 0
+  },
+  "LDZOFBA005.WL": {
+    "count": 4,
+    "bbox": [
+      73.75743975721352,
+      39.02525770761914,
+      74.99892931487689,
+      39.82776244046353
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 4
+    },
+    "invalid": 0
+  },
+  "LDZOFBA016.WT": {
+    "count": 305,
+    "bbox": [
+      73.70410125499775,
+      39.00417639220542,
+      74.99651963733831,
+      39.99815544698026
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Point": 305
+    },
+    "invalid": 0
+  },
+  "LDZOFBB001.WP": {
+    "count": 608,
+    "bbox": [
+      73.49999900075113,
+      38.99999999999661,
+      75.00000099999441,
+      40.00000003327712
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "MultiPolygon": 592,
+      "Polygon": 16
+    },
+    "invalid": 0
+  },
+  "LDZOFBB002.WP": {
+    "count": 10,
+    "bbox": [
+      74.35500043138602,
+      39.09499881584331,
+      75.00000099999441,
+      39.394691936269915
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "MultiPolygon": 10
+    },
+    "invalid": 0
+  },
+  "LDZOFBB003.WP": {
+    "count": 46,
+    "bbox": [
+      73.71111111970849,
+      38.99999999999615,
+      74.99999999999442,
+      39.97268040673517
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "MultiPolygon": 39,
+      "Polygon": 7
+    },
+    "invalid": 0
+  },
+  "LDZOFBB004.WP": {
+    "count": 49,
+    "bbox": [
+      73.50149029782634,
+      38.999999999995794,
+      75.00000099999441,
+      40.00000003327712
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "MultiPolygon": 48,
+      "Polygon": 1
+    },
+    "invalid": 0
+  },
+  "LDZOFBB009.WP": {
+    "count": 20,
+    "bbox": [
+      73.50909964131534,
+      39.15478158252966,
+      74.98196211207147,
+      39.736509164825385
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "MultiPolygon": 20
+    },
+    "invalid": 0
+  },
+  "LDZOFBB010.WP": {
+    "count": 4,
+    "bbox": [
+      73.49999999996267,
+      38.999999999995794,
+      74.99999999999442,
+      40.00000003192663
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "MultiPolygon": 4
+    },
+    "invalid": 0
+  },
+  "LDZOFBB098.WL": {
+    "count": 245,
+    "bbox": [
+      73.6660939361972,
+      39.00144320050782,
+      74.99710660500973,
+      39.99857471694215
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 245
+    },
+    "invalid": 0
+  },
+  "LDZOFBB099.WT": {
+    "count": 2024,
+    "bbox": [
+      73.54027795246446,
+      39.000433347421335,
+      74.99625730190496,
+      39.999197496828124
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Point": 2024
+    },
+    "invalid": 0
+  },
+  "LFZYBAA002.WL": {
+    "count": 5,
+    "bbox": [
+      73.49999999996209,
+      38.999999999994415,
+      75.00000099999441,
+      39.9999999999969
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 5
+    },
+    "invalid": 0
+  },
+  "LFZYBAB002.WL": {
+    "count": 24,
+    "bbox": [
+      73.49999900002994,
+      39.00000000061093,
+      75.00000099999441,
+      40.00000003316787
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 24
+    },
+    "invalid": 0
+  },
+  "LFZYBCBA01.WT": {
+    "count": 6,
+    "bbox": [
+      73.95553190473443,
+      38.992250278027704,
+      75.00316767479012,
+      39.985261242934484
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Point": 6
+    },
+    "invalid": 0
+  },
+  "LFZYBCBA02.WL": {
+    "count": 10,
+    "bbox": [
+      73.4333178115741,
+      38.997351336281945,
+      75.00062924591715,
+      39.99154894800095
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 10
+    },
+    "invalid": 0
+  },
+  "LFZYBCT001.WT": {
+    "count": 6981,
+    "bbox": [
+      73.50623114431869,
+      39.001351536333864,
+      74.99826524664292,
+      39.99999458118608
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Point": 6981
+    },
+    "invalid": 0
+  },
+  "LFZYBCT002.WL": {
+    "count": 2331,
+    "bbox": [
+      73.49999900159848,
+      39.000000000811596,
+      75.00000099999441,
+      40.000000033284145
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 2331
+    },
+    "invalid": 0
+  },
+  "LHCPGDAC01.WL": {
+    "count": 3,
+    "bbox": [
+      74.10630564375123,
+      39.11487277648112,
+      75.00000099999441,
+      40.00000000978101
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 3
+    },
+    "invalid": 0
+  },
+  "LHCPGDAC05.WP": {
+    "count": 2,
+    "bbox": [
+      74.45090174722189,
+      39.12735967488347,
+      74.66737675013013,
+      39.23527955743248
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Polygon": 2
+    },
+    "invalid": 0
+  },
+  "LHCPGDAC06.WL": {
+    "count": 2,
+    "bbox": [
+      74.45090174722189,
+      39.12735967488347,
+      74.66737575013013,
+      39.23527955743248
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 2
+    },
+    "invalid": 0
+  },
+  "LHCPGDAC08.WP": {
+    "count": 4,
+    "bbox": [
+      74.37748524452002,
+      39.15292914685094,
+      74.99469918238557,
+      39.44386740978757
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Polygon": 4
+    },
+    "invalid": 0
+  },
+  "LHCPGDAC09.WL": {
+    "count": 4,
+    "bbox": [
+      74.37748524452002,
+      39.15292914685094,
+      74.99469918238557,
+      39.44386740978757
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 4
+    },
+    "invalid": 0
+  },
+  "LHCPGDAC11.WP": {
+    "count": 8,
+    "bbox": [
+      74.34744222849793,
+      39.70080441453578,
+      74.99999999999442,
+      40.00000002975243
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Polygon": 5,
+      "MultiPolygon": 3
+    },
+    "invalid": 0
+  },
+  "LHCPGDAC12.WL": {
+    "count": 10,
+    "bbox": [
+      74.34744222849793,
+      39.70080441453578,
+      74.99999999999442,
+      40.00000002975243
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 10
+    },
+    "invalid": 0
+  },
+  "LHTQGTA001.WL": {
+    "count": 4,
+    "bbox": [
+      73.69389177069776,
+      39.0000000059946,
+      74.99999999999442,
+      40.00000003197615
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 4
+    },
+    "invalid": 0
+  },
+  "LYGREBA001.WL": {
+    "count": 71,
+    "bbox": [
+      73.5014393384295,
+      39.000000016321714,
+      75.00000099999441,
+      40.00000003328526
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 71
+    },
+    "invalid": 0
+  },
+  "LYGREBA004.WL": {
+    "count": 25,
+    "bbox": [
+      73.89100053049208,
+      39.17672009363549,
+      75.00000099999441,
+      39.94821208517838
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 25
+    },
+    "invalid": 0
+  },
+  "LZLPGDJ002.WL": {
+    "count": 3,
+    "bbox": [
+      73.93480539870572,
+      39.016884901936834,
+      74.99999999999442,
+      39.92257505583287
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "LineString": 3
+    },
+    "invalid": 0
+  },
+  "LZLPGDJ004.WP": {
+    "count": 2,
+    "bbox": [
+      73.90935931387304,
+      38.999999999996064,
+      74.88308504532047,
+      40.000000033260115
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "MultiPolygon": 2
+    },
+    "invalid": 0
+  },
+  "LZLPGDJ006.WP": {
+    "count": 1,
+    "bbox": [
+      74.50760119330872,
+      39.1790063407206,
+      74.91112042580608,
+      39.34357017856311
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Polygon": 1
+    },
+    "invalid": 0
+  },
+  "LZLPGDJ009.WP": {
+    "count": 2,
+    "bbox": [
+      73.96496582198176,
+      38.99999999999661,
+      74.71834094001748,
+      39.91113562745839
+    ],
+    "crs_wkt": "BOUNDCRS[SOURCECRS[GEOGCRS[\"unknown\",DATUM[\"Unknown based on Krassovsky, 1942 ellipsoid using towgs84=15.8,-154.4,-82.3,0,0,0,0\",ELLIPSOID[\"Krassovsky, 1942\",6378245,298.3,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]],CS[ellipsoidal,2],AXIS[\"longitude\",east,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]],AXIS[\"latitude\",north,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]]],TARGETCRS[GEOGCRS[\"WGS 84\",DATUM[\"World Geodetic System 1984\",ELLIPSOID[\"WGS 84\",6378137,298.257223563,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],CS[ellipsoidal,2],AXIS[\"latitude\",north,ORDER[1],ANGLEUNIT[\"degree\",0.0174532925199433]],AXIS[\"longitude\",east,ORDER[2],ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"EPSG\",4326]]],ABRIDGEDTRANSFORMATION[\"Transformation from unknown to WGS84\",METHOD[\"Position Vector transformation (geog2D domain)\",ID[\"EPSG\",9606]],PARAMETER[\"X-axis translation\",15.8,ID[\"EPSG\",8605]],PARAMETER[\"Y-axis translation\",-154.4,ID[\"EPSG\",8606]],PARAMETER[\"Z-axis translation\",-82.3,ID[\"EPSG\",8607]],PARAMETER[\"X-axis rotation\",0,ID[\"EPSG\",8608]],PARAMETER[\"Y-axis rotation\",0,ID[\"EPSG\",8609]],PARAMETER[\"Z-axis rotation\",0,ID[\"EPSG\",8610]],PARAMETER[\"Scale difference\",1,ID[\"EPSG\",8611]]]]",
+    "geom_types": {
+      "Polygon": 1,
+      "MultiPolygon": 1
+    },
+    "invalid": 0
+  }
+}

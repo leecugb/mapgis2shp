@@ -1,0 +1,80 @@
+[build-system]
+requires = ["hatchling>=1.18.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mapgis2shp"
+version = "2.0.4"
+description = "MapGIS is a widely used closed-source GIS platform in China, especially in geological surveying, engineering, and scientific research. pymapgis provides a lightweight, open-source reader for its native point, line, and polygon vector formats."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+authors = [
+    { name = "pymapgis contributors", email = "1045105061@qq.com" },
+]
+keywords = ["mapgis", "gis", "vector", "geopandas", "shapefile", "wt", "wl", "wp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+
+dependencies = [
+    "geopandas>=0.12",
+    "numpy>=1.21",
+    "pandas>=1.3",
+    "pyproj>=3.2",
+    "shapely>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build>=0.10",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+    "twine>=4.0",
+]
+[project.scripts]
+pymapgis = "pymapgis.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/pymapgis/pymapgis"
+Repository = "https://github.com/pymapgis/pymapgis.git"
+Issues = "https://github.com/pymapgis/pymapgis/issues"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/README.md",
+    "/LICENSE",
+    "/verify_pymapgis.py",
+    "/pymapgis_baseline.json",
+    "/docs",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pymapgis"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src" = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: tests that read real MapGIS files",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
