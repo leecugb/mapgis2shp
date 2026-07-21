@@ -46,15 +46,16 @@ dev = [
 pymapgis = "pymapgis.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/pymapgis/pymapgis"
-Repository = "https://github.com/pymapgis/pymapgis.git"
-Issues = "https://github.com/pymapgis/pymapgis/issues"
+Homepage = "https://github.com/leecugb/mapgis2shp"
+Repository = "https://github.com/leecugb/mapgis2shp.git"
+Issues = "https://github.com/leecugb/mapgis2shp/issues"
 
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
     "/README.md",
     "/LICENSE",
+    "/CITATION.cff",
     "/verify_pymapgis.py",
     "/pymapgis_baseline.json",
     "/docs",
