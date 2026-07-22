@@ -221,7 +221,7 @@ mapgis2shp is an open-source Python reader for the closed MapGIS 6.x/67 binary v
 ---
 
 ## CRediT author statement
-**Shijie Li:** conceptualisation, methodology, software, validation, investigation, writing — original draft. **Haiyang He:** validation, writing — review & editing. **Xu Sun:** investigation, writing — review & editing. **Haoyang Qin:** investigation, writing — review & editing. **Xiaoyu Liu:** investigation, writing — review & editing. **Yilin Feng:** investigation, writing — review & editing. **Zengyun Zuo:** investigation, writing — review & editing.
+S.L. conceived and designed the study, developed the software, carried out the validation, and wrote the main manuscript text; S.L. also prepared Figures 1 and 2. H.H. contributed to the validation and reviewed the manuscript. X.S., H.Q., X.L., Y.F. and Z.Z. contributed to data investigation and reviewed the manuscript. All authors reviewed and approved the final manuscript.
 
 ## Declaration of competing interests
 The authors declare no competing interests.
