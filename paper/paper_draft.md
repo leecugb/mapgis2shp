@@ -1,6 +1,6 @@
 # mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, validated against the native export
 
-**Authors:** Shijie Li\* (corresponding), Haiyang He, Xu Sun, Haoyang Qin, Xiaoyu Liu
+**Authors:** Shijie Li\* (corresponding), Haiyang He, Xu Sun, Haoyang Qin, Xiaoyu Liu, Yilin Feng, Zengyun Zuo
 **Affiliation:** Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China
 **Corresponding author email:** 1045105061@qq.com
 **Target journal:** Earth Science Informatics (Software article)
@@ -221,7 +221,7 @@ mapgis2shp is an open-source Python reader for the closed MapGIS 6.x/67 binary v
 ---
 
 ## CRediT author statement
-**Shijie Li:** conceptualisation, methodology, software, validation, investigation, writing — original draft. **Haiyang He:** validation, writing — review & editing. **Xu Sun:** investigation, writing — review & editing. **Haoyang Qin:** investigation, writing — review & editing. **Xiaoyu Liu:** investigation, writing — review & editing.
+**Shijie Li:** conceptualisation, methodology, software, validation, investigation, writing — original draft. **Haiyang He:** validation, writing — review & editing. **Xu Sun:** investigation, writing — review & editing. **Haoyang Qin:** investigation, writing — review & editing. **Xiaoyu Liu:** investigation, writing — review & editing. **Yilin Feng:** investigation, writing — review & editing. **Zengyun Zuo:** investigation, writing — review & editing.
 
 ## Declaration of competing interests
 The authors declare no competing interests.

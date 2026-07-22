@@ -2,7 +2,7 @@
 
 **To:** The Editor-in-Chief, *Earth Science Informatics*
 **From:** Shijie Li (corresponding author), on behalf of all authors
-(Shijie Li, Haiyang He, Xu Sun, Haoyang Qin, Xiaoyu Liu)
+(Shijie Li, Haiyang He, Xu Sun, Haoyang Qin, Xiaoyu Liu, Yilin Feng, Zengyun Zuo)
 **Affiliation:** Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China
 **Date:** 22 July 2026
 **Article type:** Software article
