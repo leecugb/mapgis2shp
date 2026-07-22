@@ -1,0 +1,109 @@
+{
+  "mapgis2shp": {
+    "label": "mapgis2shp",
+    "feature_count": 78873,
+    "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs",
+    "geom_types": {
+      "MultiPolygon": 71195,
+      "Polygon": 7667,
+      "GeometryCollection": 11
+    },
+    "invalid": 0,
+    "bbox": [
+      73.486464,
+      31.999999,
+      111.000001,
+      48.0
+    ],
+    "fields": [
+      "ID",
+      "面积",
+      "周长",
+      "FEATUREID",
+      "CHFCAC",
+      "DDCDJH",
+      "DDCDII",
+      "QDUECD",
+      "QDUECC",
+      "QDFCCB",
+      "GZEKG",
+      "DDCDJO",
+      "MDLHL",
+      "MDBRS",
+      "DDCDIL",
+      "YSPDAD"
+    ]
+  },
+  "reference": {
+    "label": "official MapGIS export",
+    "feature_count": 67039,
+    "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs",
+    "geom_types": {
+      "Polygon": 67036,
+      "MultiPolygon": 3
+    },
+    "invalid": 3,
+    "bbox": [
+      73.486464,
+      31.999999,
+      111.000001,
+      48.0
+    ],
+    "fields": [
+      "ID",
+      "面积",
+      "周长",
+      "FEATUREID",
+      "CHFCAC",
+      "DDCDJH",
+      "DDCDII",
+      "QDUECD",
+      "QDUECC",
+      "QDFCCB",
+      "GZEKG",
+      "DDCDJO",
+      "MDLHL",
+      "MDBRS",
+      "DDCDIL",
+      "YSPDAD",
+      "strat_code",
+      "ColorCode"
+    ]
+  },
+  "bbox_abs_diff": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "bbox_match": true,
+  "fields_common": [
+    "CHFCAC",
+    "DDCDII",
+    "DDCDIL",
+    "DDCDJH",
+    "DDCDJO",
+    "FEATUREID",
+    "GZEKG",
+    "ID",
+    "MDBRS",
+    "MDLHL",
+    "QDFCCB",
+    "QDUECC",
+    "QDUECD",
+    "YSPDAD",
+    "周长",
+    "面积"
+  ],
+  "fields_only_mapgis": [],
+  "fields_only_reference": [
+    "ColorCode",
+    "strat_code"
+  ],
+  "total_area_km2": {
+    "mapgis2shp": 2147783.761,
+    "reference": 2112611.689
+  },
+  "area_abs_diff_km2": 35172.072,
+  "area_rel_diff_pct": 1.664862
+}

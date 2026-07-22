@@ -60,6 +60,10 @@ Thumbs.db
 *.tiff
 *.mbtiles
 
+# Exceptions: keep paper figures (publication assets)
+!paper/figures/*.png
+!paper/figures/*.pdf
+
 # Generated analysis artifacts (regenerated from scripts, not source)
 *_debug.png
 conversation_context_*.jsonl
