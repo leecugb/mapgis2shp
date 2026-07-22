@@ -1,7 +1,9 @@
 # Cover Letter — Earth Science Informatics
 
 **To:** The Editor-in-Chief, *Earth Science Informatics*
-**From:** Shijie Li, China University of Geosciences (Beijing)
+**From:** Shijie Li (corresponding author), on behalf of all authors
+(Shijie Li, Haiyang He, Xu Sun, Haoyang Qin, Xiaoyu Liu)
+**Affiliation:** Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China
 **Date:** 22 July 2026
 **Article type:** Software article
 **Manuscript title:** *mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, with coordinate-reference inference and fidelity validation against the native MapGIS export*
@@ -25,14 +27,14 @@ A notable finding of the validation is that the reader is *more* faithful to the
 
 The work fits *Earth Science Informatics*' Software article type, with its required "Design and Implementation" and "Availability and Requirements" sections. The methodology---reverse-engineering a proprietary reader and quantifying fidelity against the reference implementation---generalises to other closed geoscience formats, which I hope makes it of broad interest to the journal's readership.
 
-I confirm that this manuscript is original, has not been published elsewhere, and is not under consideration by another journal. The software is open-source under Apache-2.0; the validation layers are real geological-survey data and are not redistributed, but the validation scripts, reports, and a synthetic test suite are provided in the repository. The author declares no competing interests.
+I confirm that this manuscript is original, has not been published elsewhere, and is not under consideration by another journal. The software is open-source under Apache-2.0; the validation layers are real geological-survey data and are not redistributed, but the validation scripts, reports, and a synthetic test suite are provided in the repository. The authors declare no competing interests. This work was supported by the National Science and Technology Major Project "Deep Earth Probe and Mineral Resources Exploration" (Program No. 2025ZD10069).
 
 Thank you for your consideration.
 
 Sincerely,
 
-Shijie Li
-China University of Geosciences (Beijing)
+Shijie Li (corresponding author)
+Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China
 Email: 1045105061@qq.com
 ORCID: [to be added]
 

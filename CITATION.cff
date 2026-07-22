@@ -24,14 +24,38 @@ keywords:
 authors:
   - given-names: Shijie
     family-names: Li
-    affiliation: China University of Geosciences (Beijing)
+    affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+  - given-names: Haiyang
+    family-names: He
+    affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+  - given-names: Xu
+    family-names: Sun
+    affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+  - given-names: Haoyang
+    family-names: Qin
+    affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+  - given-names: Xiaoyu
+    family-names: Liu
+    affiliation: Xi'an Mineral Resources Survey, China Geological Survey
 preferred-citation:
   type: software
   title: "mapgis2shp: an open-source reader for MapGIS 6.x/67 binary vector formats"
   authors:
     - given-names: Shijie
       family-names: Li
-      affiliation: China University of Geosciences (Beijing)
+      affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+    - given-names: Haiyang
+      family-names: He
+      affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+    - given-names: Xu
+      family-names: Sun
+      affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+    - given-names: Haoyang
+      family-names: Qin
+      affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+    - given-names: Xiaoyu
+      family-names: Liu
+      affiliation: Xi'an Mineral Resources Survey, China Geological Survey
   version: "2.0.6"
   date-released: 2026-07-22
   license: Apache-2.0
