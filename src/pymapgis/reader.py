@@ -761,8 +761,21 @@ class _PolygonTopologyBuilder:
 
             for shell_idx, hole_indices in shell_to_holes.items():
                 shell = remaining[shell_idx]
-                holes = [remaining[h] for h in hole_indices]
-                polygons.append(shapely.geometry.Polygon(shell, holes))
+                # A valid polygon shell needs at least 4 coordinates (3
+                # distinct vertices plus closure). Degenerate rings produced
+                # by arc merging -- collapsed slivers or near-zero-length arcs
+                # -- would otherwise raise ValueError in shapely; skip them.
+                if len(shell) < 4:
+                    continue
+                holes = [remaining[h] for h in hole_indices if len(remaining[h]) >= 4]
+                try:
+                    polygons.append(shapely.geometry.Polygon(shell, holes))
+                except (ValueError, OSError):
+                    # Extremely malformed shell: retry without holes, then skip.
+                    try:
+                        polygons.append(shapely.geometry.Polygon(shell))
+                    except (ValueError, OSError):
+                        continue
 
             remaining = next_remaining
 

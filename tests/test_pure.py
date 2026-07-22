@@ -143,6 +143,17 @@ class TestPolygonTopologyBuilder:
         mp = _PolygonTopologyBuilder._build_multipolygon([])
         assert mp.is_empty
 
+    def test_build_multipolygon_skips_degenerate_rings(self) -> None:
+        # A degenerate ring with fewer than 4 coordinates (a collapsed sliver
+        # from arc merging) must be skipped, not crash shapely. Real 400 MB
+        # MapGIS files produce such rings.
+        shell = [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0), (0.0, 0.0)]
+        degenerate = [(1.0, 1.0), (2.0, 2.0)]  # 2 coords: too short to be a ring
+        mp = _PolygonTopologyBuilder._build_multipolygon([shell, degenerate])
+        assert mp.geom_type == "MultiPolygon"
+        assert len(mp.geoms) == 1
+        assert len(mp.geoms[0].interiors) == 0
+
 
 class TestVectorizedReaders:
     """Unit tests for the vectorized binary parsing helpers."""
