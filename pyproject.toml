@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mapgis2shp"
-version = "2.0.5"
+version = "2.0.6"
 description = "MapGIS is a widely used closed-source GIS platform in China, especially in geological surveying, engineering, and scientific research. pymapgis provides a lightweight, open-source reader for its native point, line, and polygon vector formats."
 readme = "README.md"
 license = { file = "LICENSE" }
