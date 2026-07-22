@@ -142,8 +142,8 @@ gaps.
 This paper makes the following verified contributions:
 \begin{enumerate}
   \item The \textbf{first peer-reviewed software paper} on a MapGIS 6.x/67
-  reader. Crossref, arXiv, and OpenAlex return no such paper; the one
-  residual coverage gap is discussed in Section~\ref{sec:discussion}.
+  reader. Crossref, arXiv, OpenAlex, and a manual search of CNKI/Wanfang
+  return no such paper (Section~\ref{sec:discussion}).
   \item The \textbf{first reader independently validated against the reference
   implementation} (the official MapGIS export) with quantified fidelity, on two
   tiers: 36 small and medium layers (16{,}874 features; exact geometric
@@ -528,13 +528,16 @@ for long-term archival. The CRS-inference capability is of particular
 practical importance: users who currently rely on the native export silently
 lose the coordinate reference.
 
-\subsection{Residual coverage gap}
+\subsection{Literature coverage}
 The Crossref, OpenAlex, arXiv, and DOAJ indices contain no peer-reviewed
-MapGIS reader paper. Chinese-language databases (CNKI, Wanfang) were not
-machine-accessible during this study; a manual search is recommended before
-submission, to confirm that no Chinese thesis publishes a byte-level
-specification with validation. The open-source prior art enumerated in
-Section~\ref{sec:related} is fully covered.
+MapGIS reader paper. A manual search of Chinese-language databases (CNKI,
+Wanfang) was also carried out: the retrieved literature consists almost
+entirely of MapGIS--ArcGIS conversion-method studies and application notes
+built on the vendor SDK or the documented ASCII plain-code format, with
+effectively no open-source conversion tool and no byte-level specification
+accompanied by validation. The open-source prior art enumerated in
+Section~\ref{sec:related} is fully covered, and no further prior art
+affecting the novelty claims was identified.
 
 % =============================================================================
 \section{Conclusions}
