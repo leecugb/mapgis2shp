@@ -37,6 +37,12 @@ authors:
   - given-names: Xiaoyu
     family-names: Liu
     affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+  - given-names: Yilin
+    family-names: Feng
+    affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+  - given-names: Zengyun
+    family-names: Zuo
+    affiliation: Xi'an Mineral Resources Survey, China Geological Survey
 preferred-citation:
   type: software
   title: "mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, validated against the native export"
@@ -55,6 +61,12 @@ preferred-citation:
       affiliation: Xi'an Mineral Resources Survey, China Geological Survey
     - given-names: Xiaoyu
       family-names: Liu
+      affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+    - given-names: Yilin
+      family-names: Feng
+      affiliation: Xi'an Mineral Resources Survey, China Geological Survey
+    - given-names: Zengyun
+      family-names: Zuo
       affiliation: Xi'an Mineral Resources Survey, China Geological Survey
   version: "2.0.6"
   date-released: 2026-07-22
