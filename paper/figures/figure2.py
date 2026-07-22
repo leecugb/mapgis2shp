@@ -115,11 +115,11 @@ def figure2(png_path: str, pdf_path: str) -> None:
           fs=6.6, weight="bold")
 
     # ===== Panel b — verification =====================================
-    panel_label(ax, 0, 29, "b")
-    label(ax, 4, 29, "Reproducible verification & regression",
+    panel_label(ax, 0, 27, "b")
+    label(ax, 4, 27, "Reproducible verification & regression",
           fs=8, weight="bold", ha="left", va="bottom")
 
-    val_y, val_h = 11, 14
+    val_y, val_h = 9, 14
     block(ax, 3, val_y, 38, val_h, fc=VALID_SOFT, ec=VALID_C)
     label(ax, 22, val_y + val_h - 3.5, "Cross-validation harness", fs=6.4, weight="bold", color=VALID_C)
     label(ax, 22, val_y + val_h - 8, "36-layer 1:1 vs official MapGIS 6.7", fs=5.6)
@@ -138,7 +138,7 @@ def figure2(png_path: str, pdf_path: str) -> None:
     label(ax, 82, (val_y + val_h + 34) / 2, "verify", fs=5.0, color=VALID_C, ha="left", style="italic")
 
     # footer
-    label(ax, 3, 4.5,
+    label(ax, 3, 2.5,
           "Open source (Apache-2.0)  ·  Python $\\geq$ 3.9  ·  "
           "deps: geopandas · numpy · pandas · pyproj · shapely",
           fs=5.8, color=SUB, ha="left", va="bottom", style="italic")
