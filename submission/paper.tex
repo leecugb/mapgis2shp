@@ -1,6 +1,6 @@
 % mapgis2shp paper -- manuscript for Earth Science Informatics (Springer).
-% Requires sn-article.cls (Springer Nature LaTeX template).
-\documentclass[sn-basic]{sn-article}
+% Uses the Springer Nature sn-jnl class (sn-jnl.cls included in the package).
+\documentclass[sn-basic,Numbered]{sn-jnl}
 
 \usepackage{graphicx}
 \usepackage{booktabs}
@@ -13,16 +13,14 @@
 % ---- Metadata ----
 \title[mapgis2shp: an open-source MapGIS reader]{mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, validated against the native export}
 
-\author*[1]{Shijie Li}
-\email{1045105061@qq.com}
-\author*[1]{Haiyang He}
-\email{hehaiyangcugb@foxmail.com}
-\author[1]{Xu Sun}
-\author[1]{Haoyang Qin}
-\author[1]{Xiaoyu Liu}
-\author[1]{Yilin Feng}
-\author[1]{Zengyun Zuo}
-\affil[1]{Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China}
+\author*[1]{\fnm{Shijie} \sur{Li}}\email{1045105061@qq.com}
+\author*[1]{\fnm{Haiyang} \sur{He}}\email{hehaiyangcugb@foxmail.com}
+\author[1]{\fnm{Xu} \sur{Sun}}
+\author[1]{\fnm{Haoyang} \sur{Qin}}
+\author[1]{\fnm{Xiaoyu} \sur{Liu}}
+\author[1]{\fnm{Yilin} \sur{Feng}}
+\author[1]{\fnm{Zengyun} \sur{Zuo}}
+\affil[1]{\orgname{Xi'an Mineral Resources Survey, China Geological Survey}, \orgaddress{\city{Xi'an}, \country{China}}}
 
 \abstract{%
 MapGIS is a closed-source geographic information system that dominates
