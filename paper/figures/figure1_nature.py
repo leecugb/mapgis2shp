@@ -69,8 +69,8 @@ def figure1(png_path: str, pdf_path: str) -> None:
         ("magic", "WMAP·D2x", "0–7", GRAY_SOFT),
         ("file id", "int32", "8–11", GRAY_SOFT),
         ("data_start", "int32", "12–15", GRAY_SOFT),
-        ("index area", "10 × 10 B", "16–115", GRAY_SOFT),
         ("CRS bytes", "109 / 110 / 143 / 151", "header", ACCENT_SOFT),
+        ("index area", "10 × 10 B", "at data_start", GRAY_SOFT),
     ]
     n = len(items)
     gap = 1.2

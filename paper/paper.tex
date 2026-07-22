@@ -193,8 +193,9 @@ specification accompanies the software as a reference document.
 \caption{Byte-level layout of the MapGIS 6.x/67 vector formats. \textbf{(a)}
 Common file header: 8-byte magic (\texttt{WMAP\textbackslash{}D22}/\texttt{D21}/\texttt{D23}
 for point/line/polygon), file identifier, \texttt{data\_start} offset, the
-10-entry index area, and the coordinate-reference-system bytes (projection@109,
-ellipsoid@110, scale@143, central meridian@151 in \texttt{DDDMMSS.sss}).
+coordinate-reference-system bytes (projection@109, ellipsoid@110, scale@143,
+central meridian@151 in \texttt{DDDMMSS.sss}), and the 10-entry index area
+located at \texttt{data\_start}.
 \textbf{(b)} Type-specific record sections: \texttt{.wt} point coordinate
 records (93~B; X/Y doubles at offsets 7--14/15--22), \texttt{.wl} line index
 (57~B) plus 16-B XY coordinate pairs, and \texttt{.wp} arc index (57~B),
