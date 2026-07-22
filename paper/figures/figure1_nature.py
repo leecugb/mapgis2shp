@@ -85,17 +85,17 @@ def figure1(png_path: str, pdf_path: str) -> None:
         x += bw + gap
     ax_h.plot([4, 96], [y0 - 1.2, y0 - 1.2], color=INK, lw=0.5, zorder=1)
 
-    # legend
+    # legend (fixed positions so all 4 chips fit within 0-100)
     chip_y = 10
-    chips = [(GRAY_SOFT, INK, "header / index"),
-             (ACCENT_SOFT, ACCENT, "coordinates / CRS"),
-             (AMBER_SOFT, AMBER, "attributes (GBK)"),
-             (TOPO_SOFT, TOPO, "topology")]
-    cx = 4
-    for fc, ec, name in chips:
-        block(ax_h, cx, chip_y, 3.2, 4.5, fc=fc, ec=ec)
-        txt(ax_h, cx + 5, chip_y + 2.2, name, fs=6.0, ha="left")
-        cx += 5 + len(name) * 1.7 + 4
+    chips = [
+        (4, GRAY_SOFT, INK, "header / index"),
+        (28, ACCENT_SOFT, ACCENT, "coordinates / CRS"),
+        (54, AMBER_SOFT, AMBER, "attributes (GBK)"),
+        (80, TOPO_SOFT, TOPO, "topology"),
+    ]
+    for cx, fc, ec, name in chips:
+        block(ax_h, cx, chip_y, 3.0, 4.5, fc=fc, ec=ec)
+        txt(ax_h, cx + 4.5, chip_y + 2.2, name, fs=5.8, ha="left")
 
     # ===== Panel b — per-format sections ===============================
     ax_f.set_xlim(0, 100); ax_f.set_ylim(0, 100)
