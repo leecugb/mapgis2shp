@@ -27,7 +27,7 @@ A notable finding of the validation is that the reader is *more* faithful to the
 
 The work fits *Earth Science Informatics*' Software article type, with its required "Design and Implementation" and "Availability and Requirements" sections. The methodology---reverse-engineering a proprietary reader and quantifying fidelity against the reference implementation---generalises to other closed geoscience formats, which I hope makes it of broad interest to the journal's readership.
 
-I confirm that this manuscript is original, has not been published elsewhere, and is not under consideration by another journal. The software is open-source under Apache-2.0; the validation layers are real geological-survey data and are not redistributed, but the validation scripts, reports, and a synthetic test suite are provided in the repository. The authors declare no competing interests. This work was supported by the National Science and Technology Major Project "Deep Earth Probe and Mineral Resources Exploration" (Program No. 2025ZD10069).
+I confirm that this manuscript is original, has not been published elsewhere, and is not under consideration by another journal. The software is open-source under Apache-2.0; the validation layers are real geological-survey data and are not redistributed, but the validation scripts, reports, and a synthetic test suite are provided in the repository. The authors declare no competing interests. This work was supported by the Deep Earth Probe and Mineral Resources Exploration - National Science and Technology Major Project (Program No.2025ZD10069).
 
 Thank you for your consideration.
 

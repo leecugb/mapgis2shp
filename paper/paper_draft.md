@@ -5,7 +5,7 @@
 **Corresponding author email:** 1045105061@qq.com
 **Target journal:** Earth Science Informatics (Software article)
 **Version:** 2.0.6  ·  **Archived DOI:** https://doi.org/10.5281/zenodo.21487339
-**Funding:** National Science and Technology Major Project "Deep Earth Probe and Mineral Resources Exploration" (No. 2025ZD10069)
+**Funding:** Deep Earth Probe and Mineral Resources Exploration - National Science and Technology Major Project (Program No.2025ZD10069)
 
 ---
 
@@ -227,7 +227,7 @@ S.L. conceived and designed the study, developed the software, carried out the v
 The authors declare no competing interests.
 
 ## Funding
-This work was supported by the National Science and Technology Major Project "Deep Earth Probe and Mineral Resources Exploration" (Program No. 2025ZD10069).
+This work was supported by the Deep Earth Probe and Mineral Resources Exploration - National Science and Technology Major Project (Program No.2025ZD10069).
 
 ---
 
