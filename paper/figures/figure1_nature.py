@@ -51,8 +51,8 @@ def panel_label(ax, x, y, letter):
 
 def figure1(png_path: str, pdf_path: str) -> None:
     fig, (ax_h, ax_f) = plt.subplots(
-        2, 1, figsize=(7.4, 4.6),
-        gridspec_kw={"height_ratios": [1.0, 1.9], "hspace": 0.18},
+        2, 1, figsize=(7.4, 4.4),
+        gridspec_kw={"height_ratios": [0.62, 2.0], "hspace": 0.16},
     )
     for ax in (ax_h, ax_f):
         ax.set_axis_off()
@@ -84,18 +84,6 @@ def figure1(png_path: str, pdf_path: str) -> None:
             style="italic")
         x += bw + gap
     ax_h.plot([4, 96], [y0 - 1.2, y0 - 1.2], color=INK, lw=0.5, zorder=1)
-
-    # legend (fixed positions so all 4 chips fit within 0-100)
-    chip_y = 10
-    chips = [
-        (4, GRAY_SOFT, INK, "header / index"),
-        (28, ACCENT_SOFT, ACCENT, "coordinates / CRS"),
-        (54, AMBER_SOFT, AMBER, "attributes (GBK)"),
-        (80, TOPO_SOFT, TOPO, "topology"),
-    ]
-    for cx, fc, ec, name in chips:
-        block(ax_h, cx, chip_y, 3.0, 4.5, fc=fc, ec=ec)
-        txt(ax_h, cx + 4.5, chip_y + 2.2, name, fs=5.8, ha="left")
 
     # ===== Panel b — per-format sections ===============================
     ax_f.set_xlim(0, 100); ax_f.set_ylim(0, 100)
@@ -152,7 +140,19 @@ def figure1(png_path: str, pdf_path: str) -> None:
                 txt(ax_f, x + bw / 2, ly, ln, fs=fs, weight=wt, color=col)
             x += bw
 
-    txt(ax_f, left_margin, 2.5,
+    # legend (colour key for the section types in panel b)
+    chip_y = 9
+    chips = [
+        (4, GRAY_SOFT, INK, "header / index"),
+        (28, ACCENT_SOFT, ACCENT, "coordinates / CRS"),
+        (54, AMBER_SOFT, AMBER, "attributes (GBK)"),
+        (80, TOPO_SOFT, TOPO, "topology"),
+    ]
+    for cx, fc, ec, name in chips:
+        block(ax_f, cx, chip_y, 3.0, 4.5, fc=fc, ec=ec)
+        txt(ax_f, cx + 4.5, chip_y + 2.2, name, fs=5.8, ha="left")
+
+    txt(ax_f, left_margin, 2.0,
         "All integers little-endian; strings GBK.  Section widths schematic, not to scale.  "
         "Per-field offsets: point X/Y double @7–14/15–22; line point_count @10–13, "
         "point_offset @14–17; polygon topology left/right @8–11/12–15.  CRS central "
