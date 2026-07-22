@@ -1,17 +1,32 @@
 % mapgis2shp paper -- manuscript for Earth Science Informatics (Springer).
 % Uses the Springer Nature sn-jnl class (sn-jnl.cls included in the package).
-\documentclass[sn-basic,Numbered]{sn-jnl}
+% Preamble mirrors the official sn-article.tex sample (known to compile).
+\documentclass[sn-mathphys,Numbered]{sn-jnl}%
 
-\usepackage{graphicx}
-\usepackage{multirow}
-\usepackage{booktabs}
-\usepackage{amsmath}
-\usepackage{textcomp}
-\usepackage{manyfoot}
-\usepackage{url}
-\usepackage{xcolor}
-\usepackage{hyperref}
-\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{graphicx}%
+\usepackage{multirow}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{xcolor}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
+\usepackage{listings}%
+\usepackage{geometry}%
+\theoremstyle{thmstyleone}%
+\newtheorem{theorem}{Theorem}%
+\newtheorem{proposition}[theorem]{Proposition}%
+\theoremstyle{thmstyletwo}%
+\newtheorem{example}{Example}%
+\newtheorem{remark}{Remark}%
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}{Definition}%
+\raggedbottom%
 
 % ---- Metadata ----
 \title[mapgis2shp: an open-source MapGIS reader]{mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, validated against the native export}
@@ -566,16 +581,20 @@ distributed on PyPI under the Apache-2.0 licence.
   \item \textbf{Operating systems:} Windows, Linux, macOS
   \item \textbf{Dependencies:} Python~$\geq$~3.9; geopandas, numpy, pandas,
   pyproj, shapely
-  \item \textbf{Data availability:} the 36 validation layers and the 400~MB
-  extreme-scale file are real geological-survey data and are not redistributed
-  with the package. The cross-validation scripts
-  (\texttt{cross\_validate\_native.py} for the 36-layer 1:1 comparison and
-  \texttt{cross\_validate.py} for the large-file coverage-equivalence
-  comparison), the per-layer report (\texttt{cross\_validation\_report.csv}),
-  the large-file report (\texttt{cross\_validate\_large\_report.md}), and the
-  regression baseline (\texttt{pymapgis\_baseline.json}) are included in the
-  repository. Synthetic minimal fixtures are provided under \texttt{tests/}.
 \end{itemize}
+
+\section*{Data Availability Statement}
+The 36 MapGIS validation layers and the 400~MB extreme-scale file are real
+geological-survey data from the China Geological Survey and are not
+redistributed with the package. The reproducible cross-validation scripts
+(\texttt{cross\_validate\_native.py} for the 36-layer 1:1 comparison and
+\texttt{cross\_validate.py} for the large-file coverage-equivalence test),
+the per-layer results (\texttt{cross\_validation\_report.csv}), the
+large-file results (\texttt{cross\_validate\_large\_report.md}), the
+regression baseline (\texttt{pymapgis\_baseline.json}), and synthetic minimal
+test fixtures (\texttt{tests/}) are available in the \texttt{mapgis2shp}
+repository at \url{https://github.com/leecugb/mapgis2shp} and in the archived
+release at \url{https://doi.org/10.5281/zenodo.21487339}.
 
 % =============================================================================
 \section*{CRediT author statement}
