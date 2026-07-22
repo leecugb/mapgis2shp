@@ -1,4 +1,4 @@
-# mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, with coordinate-reference inference and fidelity validation against the native MapGIS export
+# mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, validated against the native export
 
 **Authors:** Shijie Li\* (corresponding), Haiyang He, Xu Sun, Haoyang Qin, Xiaoyu Liu
 **Affiliation:** Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China

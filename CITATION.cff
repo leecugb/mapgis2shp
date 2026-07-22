@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "mapgis2shp: an open-source reader for MapGIS 6.x/67 binary vector formats"
+title: "mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, validated against the native export"
 message: "If you use this software, please cite it as below."
 abstract: >-
   mapgis2shp (import name pymapgis) is an open-source Python reader for the
@@ -39,7 +39,7 @@ authors:
     affiliation: Xi'an Mineral Resources Survey, China Geological Survey
 preferred-citation:
   type: software
-  title: "mapgis2shp: an open-source reader for MapGIS 6.x/67 binary vector formats"
+  title: "mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, validated against the native export"
   authors:
     - given-names: Shijie
       family-names: Li

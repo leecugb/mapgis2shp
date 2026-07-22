@@ -6,7 +6,7 @@
 **Affiliation:** Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China
 **Date:** 22 July 2026
 **Article type:** Software article
-**Manuscript title:** *mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, with coordinate-reference inference and fidelity validation against the native MapGIS export*
+**Manuscript title:** *mapgis2shp: an open-source Python reader for the MapGIS 6.x/67 binary vector formats, validated against the native export*
 
 ---
 
