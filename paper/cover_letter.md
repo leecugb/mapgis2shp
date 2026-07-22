@@ -37,4 +37,4 @@ Email: 1045105061@qq.com
 ORCID: [to be added]
 
 **Software availability:** https://github.com/leecugb/mapgis2shp (PyPI: \`pip install mapgis2shp\`)
-**Archived DOI:** https://doi.org/10.5281/zenodo.21487339 (v2.0.5)
+**Archived DOI:** https://doi.org/10.5281/zenodo.21487339 (v2.0.6)
