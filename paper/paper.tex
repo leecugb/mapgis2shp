@@ -100,13 +100,18 @@ holds the bulk of existing survey data.
 \subsection{Related work}
 \label{sec:related}
 Several open-source MapGIS readers predate this work and warrant explicit
-acknowledgement. The author's own \texttt{pymapgis}~\cite{pymapgis2022} is a
-single-file Python reader that first published a byte-level format
-description. \texttt{MathsionYang/MapGIS2ArcGIS}~\cite{mathsionyang2019} (2019,
-C\#) independently parses the \texttt{.wl} structure at the record level.
-\texttt{BenChao1998/ConvertMapGIS}~\cite{convertmapgis2025} (2025), a
-derivative of \texttt{pymapgis}, republishes a detailed byte-level
-specification in its README and adds a graphical converter.
+acknowledgement. The present software, mapgis2shp, is the matured and
+validated successor to the first author's earlier single-file reader
+\texttt{pymapgis}~\cite{pymapgis2022}, which first published a byte-level
+format description; the present paper adds coordinate-reference inference, a
+vectorised parser, polygon-topology reconstruction, and---critically---independent
+validation against the reference implementation.
+\texttt{MathsionYang/MapGIS2ArcGIS}~\cite{mathsionyang2019} (2019, C\#)
+independently parses the \texttt{.wl} structure at the record level.
+\texttt{BenChao1998/ConvertMapGIS}~\cite{convertmapgis2025} (2025) is an
+independent third-party derivative of \texttt{pymapgis}---not authored by the
+present authors---that republishes a detailed byte-level specification in its
+README and adds a graphical converter.
 \texttt{WenboWong/OGC.net}~\cite{ogcnet2021} (2021, C\#) and earlier C\#
 format-bridge tools\footnote{\url{https://github.com/zenwalk/yuk-project-mapgis2arcgis}}
 are further examples. Chinese-language academic literature has also analysed
