@@ -150,5 +150,5 @@ def figure2(png_path: str, pdf_path: str) -> None:
 
 
 if __name__ == "__main__":
-    figure2("figure2_architecture_nature.png", "figure2_architecture_nature.pdf")
+    figure2("figure2_architecture.png", "figure2_architecture.pdf")
     print("wrote figure2")
