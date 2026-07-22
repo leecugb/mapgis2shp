@@ -1,7 +1,7 @@
 # Cover Letter — Earth Science Informatics
 
 **To:** The Editor-in-Chief, *Earth Science Informatics*
-**From:** Shijie Li (corresponding author), on behalf of all authors
+**From:** Shijie Li and Haiyang He (co-corresponding authors), on behalf of all authors
 (Shijie Li, Haiyang He, Xu Sun, Haoyang Qin, Xiaoyu Liu, Yilin Feng, Zengyun Zuo)
 **Affiliation:** Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China
 **Date:** 22 July 2026
@@ -33,9 +33,9 @@ Thank you for your consideration.
 
 Sincerely,
 
-Shijie Li (corresponding author)
+Shijie Li and Haiyang He (co-corresponding authors)
 Xi'an Mineral Resources Survey, China Geological Survey, Xi'an, China
-Email: 1045105061@qq.com
+Emails: 1045105061@qq.com (S. Li); hehaiyangcugb@foxmail.com (H. He)
 
 **Software availability:** https://github.com/leecugb/mapgis2shp (PyPI: `pip install mapgis2shp`)
 **Archived DOI:** https://doi.org/10.5281/zenodo.21487339 (v2.0.6)
