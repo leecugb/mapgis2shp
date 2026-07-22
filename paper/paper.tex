@@ -23,13 +23,14 @@
 \affil[1]{China University of Geosciences (Beijing), Beijing, China}
 
 \abstract{%
-MapGIS is a closed-source geographic information system that dominates Chinese
-geological surveying, yet its native binary vector formats---\texttt{.wt}
-(point), \texttt{.wl} (line), \texttt{.wp} (polygon)---are undocumented and are
-not readable by any mainstream open-source geospatial tool, including GDAL/OGR
-and QGIS. Geological-survey data locked in these formats therefore cannot enter
-open-source analysis pipelines without the proprietary software. We present
-\textbf{mapgis2shp} (PyPI name \texttt{mapgis2shp}, import name
+MapGIS is a closed-source geographic information system that dominates
+Chinese geological surveying, yet its native binary vector
+formats---\texttt{.wt} (point), \texttt{.wl} (line), and \texttt{.wp}
+(polygon)---remain undocumented and cannot be read by any mainstream
+open-source geospatial tool, including GDAL/OGR and QGIS. Survey data held in
+these formats are therefore effectively locked out of open-source analysis
+pipelines unless the proprietary software is used. We present
+\textbf{mapgis2shp} (PyPI distribution name \texttt{mapgis2shp}, import name
 \texttt{pymapgis}): an open-source, Apache-2.0 Python reader that
 reverse-engineers the MapGIS 6.x/67 binary layout, infers the coordinate
 reference system (CRS) from the file's projection and ellipsoid index codes,
@@ -37,24 +38,24 @@ reconstructs polygon topology from the arc--node structure, and returns
 standard \texttt{geopandas.GeoDataFrame} objects or ESRI shapefiles. Several
 open-source MapGIS readers already exist, but none has been independently
 validated against the reference implementation, none infers the CRS, and none
-has been peer-reviewed. We close these gaps with a reproducible
-cross-validation against the official MapGIS software on two tiers: (i) 36 real
-geological-survey layers comprising 16{,}874 features, where feature counts,
-attribute schemas, and geometries are identical (point distance, line Hausdorff
-distance, and polygon intersection-over-union all indicate exact coincidence
-within $10^{-7}$ degrees) and attribute values are semantically equivalent in
-99.9995\% of 95{,}006 compared cells; and (ii) a 400~MB polygon file of
-78{,}873 features, where bounding box, coordinate reference system, and the 16
-native attribute fields match the official export exactly, the reader produces
-zero invalid geometries versus three in the reference, and spatial coverage
-agrees with an intersection-over-union of 99.73\%. The only deviations are
-attributable to lossy rounding in the native shapefile export and to a
-quantified 1.66\% overlap artefact of the heuristic arc-merge reconstruction
-at shared boundaries---a summed-area effect that reduces to a 0.27\% real
-coverage difference. The reader in fact preserves source data more faithfully
-than the native export, which truncates floating-point fields and strips stored
-string padding. mapgis2shp is distributed on PyPI and archived with a citable
-DOI.}
+has been peer-reviewed. We address all three gaps through a reproducible
+cross-validation against the official MapGIS software, carried out on two
+tiers. First, across 36 real geological-survey layers comprising 16{,}874
+features, feature counts, attribute schemas, and geometries are identical
+(point distance, line Hausdorff distance, and polygon intersection-over-union
+all indicate exact coincidence within $10^{-7}$ degrees), and attribute values
+are semantically equivalent in 99.9995\% of 95{,}006 compared cells. Second,
+on a 400~MB polygon file of 78{,}873 features, the bounding box, coordinate
+reference system, and the 16 native attribute fields match the official export
+exactly, the reader produces zero invalid geometries against three in the
+reference, and spatial coverage agrees with an intersection-over-union of
+99.73\%. The only deviations are attributable to lossy rounding in the native
+shapefile export and to a quantified 1.66\% overlap artefact of the heuristic
+arc-merge reconstruction at shared boundaries---an effect that shrinks to a
+0.27\% real coverage difference once overlaps are unioned away. The reader
+in fact preserves source data more faithfully than the native export, which
+truncates floating-point fields and strips stored string padding. mapgis2shp
+is distributed on PyPI and archived under a citable DOI.}
 
 \keywords{MapGIS \and Reverse engineering \and Vector format \and GeoPandas \and Shapefile \and Geological survey \and Open source}
 
@@ -66,86 +67,88 @@ DOI.}
 % =============================================================================
 
 \subsection{Motivation}
-MapGIS (Zondy Cyber, Wuhan) is the de facto geographic information system of the
-Chinese geological-survey community and is widely used in regional geological
+MapGIS (Zondy Cyber, Wuhan) is the de facto geographic information system of
+the Chinese geological-survey community, underpinning regional geological
 mapping, mineral exploration, and engineering geology~\cite{ma2012,han2012}.
 Its native vector storage---the 6.x/67 generation's \texttt{.wt} (point),
 \texttt{.wl} (line), and \texttt{.wp} (polygon) binary files---is closed: the
-on-disk layout is not published by the vendor, and the format is distinct from
-the later MapGIS K9/10 ``open data format''. As a result, geological-survey data
-held in these files cannot be read by the open-source geospatial stack
+vendor does not publish the on-disk layout, and the format is distinct from the
+later MapGIS K9/10 ``open data format''. Consequently, survey data held in
+these files cannot be read by the open-source geospatial stack
 (GDAL/OGR, GeoPandas, QGIS, GRASS) without the proprietary software. This
 lock-in impedes reproducible analysis, data sharing, and long-term
-archival---concerns repeatedly raised in the open-science literature for
-proprietary geoscience formats.
+archival---issues that have been repeatedly raised for proprietary geoscience
+formats in the open-science literature.
 
 \subsection{The interoperability gap}
 We verified that \textbf{GDAL/OGR ships no MapGIS driver}: the official
 vector-driver index contains no \texttt{mapgis} entry, and the
-\texttt{OSGeo/gdal} issue tracker and pull requests contain zero mentions of
-``MapGIS'' or the vendor name ``ZondyCyber'' across the entire
+\texttt{OSGeo/gdal} issue tracker and pull requests contain no mention of
+``MapGIS'' or of the vendor name ``ZondyCyber'' across the entire
 organisation~\cite{gdalwebsite}. Because QGIS, GRASS, SAGA, and WhiteboxTools
-rely on GDAL/OGR for vector I/O~\cite{warmerdam2008}, none of them can open
-\texttt{.wt}/\texttt{.wl}/\texttt{.wp} files natively. The only documented
-MapGIS exchange route offered by the vendor is an ASCII ``plain-code'' format
-and the newer MapGIS~10 open format---neither of which is the legacy binary
-format that holds the bulk of existing survey data.
+all rely on GDAL/OGR for vector I/O~\cite{warmerdam2008}, none of them can open
+\texttt{.wt}/\texttt{.wl}/\texttt{.wp} files natively. The only exchange
+routes documented by the vendor are an ASCII ``plain-code'' format and the
+newer MapGIS~10 open format---neither of which is the legacy binary format that
+holds the bulk of existing survey data.
 
 \subsection{Related work}
 \label{sec:related}
-Several open-source MapGIS readers predate this work and must be acknowledged.
-The author's own \texttt{pymapgis}~\cite{pymapgis2022} is a single-file Python
-reader that first published a byte-level format description.
-\texttt{MathsionYang/MapGIS2ArcGIS}~\cite{mathsionyang2019} (2019, C\#)
-independently parses the \texttt{.wl} structure at the record level.
-\texttt{BenChao1998/ConvertMapGIS}~\cite{convertmapgis2025} (2025) is a
-derivative of \texttt{pymapgis} that republishes a detailed byte-level
+Several open-source MapGIS readers predate this work and warrant explicit
+acknowledgement. The author's own \texttt{pymapgis}~\cite{pymapgis2022} is a
+single-file Python reader that first published a byte-level format
+description. \texttt{MathsionYang/MapGIS2ArcGIS}~\cite{mathsionyang2019} (2019,
+C\#) independently parses the \texttt{.wl} structure at the record level.
+\texttt{BenChao1998/ConvertMapGIS}~\cite{convertmapgis2025} (2025), a
+derivative of \texttt{pymapgis}, republishes a detailed byte-level
 specification in its README and adds a graphical converter.
 \texttt{WenboWong/OGC.net}~\cite{ogcnet2021} (2021, C\#) and earlier C\#
 format-bridge tools\footnote{\url{https://github.com/zenwalk/yuk-project-mapgis2arcgis}}
-are earlier format-bridge tools. Chinese-language academic literature has also
-analysed the format programmatically---notably Wang~\cite{wang2013} on reading
-the \texttt{.wt} point file, Wu and Feng~\cite{wufeng2006} on
+are further examples. Chinese-language academic literature has also analysed
+the format programmatically---notably Wang~\cite{wang2013} on reading the
+\texttt{.wt} point file, Wu and Feng~\cite{wufeng2006} on
 MapGIS--Geodatabase conversion, and Chen~\cite{chen2000} on MapGIS format
-conversion in MATLAB---but these are short application notes, none ships an
+conversion in MATLAB---but these are short application notes: none ships an
 open-source reader, none publishes a byte-level specification, and none
 validates output correctness.
 
-Methodologically, the work follows a recognised genre of open-source readers
-for closed or under-documented scientific binary formats, including
+Methodologically, this work belongs to a well-established genre of open-source
+readers for closed or under-documented scientific binary formats, including
 \texttt{sas7bdat} for SAS files~\cite{shotwell2011}, \texttt{python-ags4} for
 AGS4 geotechnical files~\cite{senanayake2022}, and the long-running GDAL
-library~\cite{warmerdam2008} for numerous proprietary GIS formats; GeoSciML is
-a comparable geoscience-format specification effort~\cite{sen2005}, and
-van~den~Bos~\cite{vandenbos2014} discusses binary-format reverse-engineering
-methodology. Within the target journal, format-bridge software such as
-ArcGMT~\cite{wright1998} establishes precedent for this contribution type.
+library~\cite{warmerdam2008} for numerous proprietary GIS formats. GeoSciML
+provides a comparable geoscience-format specification
+effort~\cite{sen2005}, and van~den~Bos~\cite{vandenbos2014} discusses
+binary-format reverse-engineering methodology in general terms. Within the
+target journal, format-bridge software such as ArcGMT~\cite{wright1998}
+establishes precedent for this type of contribution.
 
-\textbf{Crucially, no prior MapGIS reader provides (i) independent validation
+\textbf{Crucially, no prior MapGIS reader offers (i) independent validation
 against the reference implementation, (ii) coordinate-reference inference, or
-(iii) a reproducible validation harness.} These are the gaps mapgis2shp closes.
+(iii) a reproducible validation harness.} The present work closes these three
+gaps.
 
 \subsection{Contributions}
 This paper makes the following verified contributions:
 \begin{enumerate}
   \item The \textbf{first peer-reviewed software paper} on a MapGIS 6.x/67
-  reader (Crossref, arXiv, and OpenAlex return no such paper; see
-  Section~\ref{sec:discussion} for the one residual coverage gap).
+  reader. Crossref, arXiv, and OpenAlex return no such paper; the one
+  residual coverage gap is discussed in Section~\ref{sec:discussion}.
   \item The \textbf{first reader independently validated against the reference
-  implementation} (official MapGIS export) with quantified fidelity, on two
-  tiers: 36 small/medium layers (16{,}874 features, exact geometric
-  coincidence, 99.9995\% attribute equivalence) and one 400~MB file (78{,}873
-  features, 99.73\% coverage IoU).
+  implementation} (the official MapGIS export) with quantified fidelity, on two
+  tiers: 36 small and medium layers (16{,}874 features; exact geometric
+  coincidence; 99.9995\% attribute equivalence) and one 400~MB file (78{,}873
+  features; 99.73\% coverage IoU).
   \item The \textbf{first reader that infers and attaches the CRS}: the native
   shapefile export omits the \texttt{.prj}, whereas mapgis2shp reconstructs a
   PROJ string (Krassovsky 1940 with \texttt{towgs84} for the test data) from
   the file's projection and ellipsoid index codes.
   \item A \textbf{reproducible, open-source (Apache-2.0) validation harness}
-  distributed on PyPI, with a 36-file regression baseline and an automated
-  cross-validation script.
+  distributed on PyPI, accompanied by a 36-file regression baseline and an
+  automated cross-validation script.
 \end{enumerate}
 We do not claim novelty for the reader, the byte-level specification, or
-shapefile conversion per se; these are prior art as enumerated above.
+shapefile conversion as such; these are prior art, as enumerated above.
 
 % =============================================================================
 \section{Background: the MapGIS 6.x/67 binary formats}
@@ -153,24 +156,24 @@ shapefile conversion per se; these are prior art as enumerated above.
 All three file types share a common top-level organisation: an 8-byte magic
 header (\texttt{WMAP\textbackslash{}D22} for points, \texttt{D21} for lines,
 \texttt{D23} for polygons), a 4-byte file-identifier int32, and a 4-byte
-\texttt{data\_start} offset locating a 10-entry index table. Each index entry
-is 10~bytes, of which the first 8 give a \texttt{(start, volume)} pair
-describing one sub-data region. Numeric values are little-endian; strings are
-GBK-encoded.
+\texttt{data\_start} offset that locates a 10-entry index table. Each index
+entry occupies 10~bytes, of which the first 8 hold a \texttt{(start, volume)}
+pair describing one sub-data region. Numeric values are little-endian, and
+strings are GBK-encoded.
 
-The point section stores 93-byte records (X/Y as little-endian double at
-offsets 7--14 and 15--22). The line and polygon files share a 57-byte arc-index
-record (point count at offset 10--13, byte offset into the coordinate section
-at 14--17) followed by a coordinate section of 16-byte XY pairs. The polygon
-file additionally stores a 24-byte topology record whose bytes 8--15 carry the
-left and right polygon identifiers of each arc, from which closed rings,
-shells, and holes are reconstructed.
+The point section stores 93-byte records, with X and Y as little-endian
+doubles at offsets 7--14 and 15--22 respectively. The line and polygon files
+share a 57-byte arc-index record (point count at offset 10--13; byte offset
+into the coordinate section at 14--17) followed by a coordinate section of
+16-byte XY pairs. The polygon file additionally stores a 24-byte topology
+record whose bytes 8--15 carry the left and right polygon identifiers of each
+arc, from which closed rings, shells, and holes are reconstructed.
 
-CRS information resides in fixed file-header offsets: projection type at byte
-109, ellipsoid at byte 110, scale denominator (double) at byte 143, and---for
-projected CRSes---the central meridian and standard parallels as
-\texttt{DDDMMSS.sss}-encoded doubles from byte 151 onward. The complete
-byte-level specification accompanies the software as a reference document.
+CRS information resides at fixed offsets in the file header: projection type
+at byte~109, ellipsoid at byte~110, scale denominator (double) at byte~143,
+and---for projected CRSes---the central meridian and standard parallels, encoded
+as \texttt{DDDMMSS.sss} doubles, from byte~151 onward. The complete byte-level
+specification accompanies the software as a reference document.
 
 \begin{figure}[t]
 \centering
@@ -181,11 +184,11 @@ for point/line/polygon), file identifier, \texttt{data\_start} offset, the
 10-entry index area, and the coordinate-reference-system bytes (projection@109,
 ellipsoid@110, scale@143, central meridian@151 in \texttt{DDDMMSS.sss}).
 \textbf{(b)} Type-specific record sections: \texttt{.wt} point coordinate
-records (93~B; X/Y double at offsets 7--14/15--22), \texttt{.wl} line index
+records (93~B; X/Y doubles at offsets 7--14/15--22), \texttt{.wl} line index
 (57~B) plus 16-B XY coordinate pairs, and \texttt{.wp} arc index (57~B),
 coordinate section, and 24-B topology records (left/right polygon identifiers
-at 8--11/12--15). Strips are schematic, not to scale; each block carries its
-record size. All integers little-endian; strings GBK.}
+at 8--11/12--15). Strips are schematic and not to scale; each block reports its
+record size. All integers are little-endian; strings are GBK.}
 \label{fig:layout}
 \end{figure}
 
@@ -196,45 +199,46 @@ record size. All integers little-endian; strings GBK.}
 \subsection{Architecture}
 mapgis2shp is organised as a thin pipeline: binary I/O $\rightarrow$ record
 model $\rightarrow$ Shapely geometries $\rightarrow$ GeoPandas
-\texttt{GeoDataFrame}. A \texttt{Reader} class parses the file fully on
-construction, exposing \texttt{.geodataframe}, \texttt{.fields}, \texttt{.crs},
-\texttt{.bbox}, and a \texttt{.to\_file()} passthrough. A small command-line
-interface (\texttt{pymapgis input.wp output.shp}) wraps the common conversion
-case. The package targets Python~$\geq$~3.9 and depends only on geopandas,
-numpy, pandas, pyproj, and shapely.
+\texttt{GeoDataFrame}. A \texttt{Reader} class parses the file in full on
+construction and exposes \texttt{.geodataframe}, \texttt{.fields},
+\texttt{.crs}, \texttt{.bbox}, and a \texttt{.to\_file()} passthrough. A small
+command-line interface (\texttt{pymapgis input.wp output.shp}) covers the
+common conversion case. The package targets Python~$\geq$~3.9 and depends only
+on geopandas, numpy, pandas, pyproj, and shapely.
 
 \subsection{Vectorised binary parsing}
-Binary records are decoded with NumPy structured dtypes rather than per-field
+Binary records are decoded using NumPy structured dtypes rather than per-field
 \texttt{struct.unpack} calls. The point, arc-index, and topology tables are
-materialised in a single \texttt{np.frombuffer} call each, and coordinate
-arrays are reshaped to $(n,2)$ and scaled in one vectorised multiply. This
-reduces parsing of the largest test polygon (608 features, 2{,}166 arcs) to
+each materialised in a single \texttt{np.frombuffer} call, and coordinate
+arrays are reshaped to $(n,2)$ and scaled in one vectorised multiply. As a
+result, parsing the largest test polygon (608 features, 2{,}166 arcs) takes
 ${\sim}0.33$~s on a laptop. Attribute-table field descriptors are unpacked in
-bulk via a precompiled \texttt{struct.Struct} of the 39-byte descriptor layout.
+bulk through a precompiled \texttt{struct.Struct} that mirrors the 39-byte
+descriptor layout.
 
 \subsection{Coordinate-reference inference}
-From the projection index (byte~109) and ellipsoid index (byte~110), mapgis2shp
-constructs a PROJ string. Longitude/latitude files (projection~0) yield a
-geographic CRS; Transverse Mercator~(5), Albers~(2), and Lambert~(3) yield
-projected CRSes with the central meridian decoded from the
-\texttt{DDDMMSS.sss} double by arithmetic (preserving fractional seconds and
-handling western longitudes). The supported ellipsoid codes include Krassovsky
-1940 (Beijing~1954), Xi'an~1980, WGS84, WGS72, and CGCS2000. When the ellipsoid
-code is unrecognised or the scale is zero, the reader returns an empty CRS
-rather than a guessed one, so downstream code can detect the gap.
+From the projection index (byte~109) and the ellipsoid index (byte~110),
+mapgis2shp constructs a PROJ string. Longitude/latitude files (projection~0)
+yield a geographic CRS; Transverse Mercator~(5), Albers~(2), and Lambert~(3)
+yield projected CRSes, with the central meridian decoded arithmetically from
+the \texttt{DDDMMSS.sss} double (thereby preserving fractional seconds and
+handling western longitudes correctly). Supported ellipsoid codes include
+Krassovsky 1940 (Beijing~1954), Xi'an~1980, WGS84, WGS72, and CGCS2000. When
+the ellipsoid code is unrecognised or the scale is zero, the reader returns an
+empty CRS rather than guessing, so that downstream code can detect the gap.
 
 \subsection{Polygon topology reconstruction}
-Polygon geometries are rebuilt from the arc--node topology: arcs whose left or
+Polygon geometries are rebuilt from the arc--node topology. Arcs whose left or
 right polygon identifier equals the target identifier are oriented
 consistently, chained into closed rings by endpoint matching, and classified
 into shells and holes by containment. Ring assembly uses a spatial hash on arc
-endpoints (cell size $10^{-5}$ map units) with a two-sided greedy walk and a
-closure-competition rule, reducing the merge from $O(n^{3})$ (a fresh all-pairs
-distance matrix each iteration) to $O(n)$ in the common case while preserving
-the semantics of the original nearest-pair heuristic. Rings that fail to close
-cleanly---a known artefact of source-data topological gaps---are passed through
-\texttt{shapely.make\_valid} so the output satisfies the OGC simple-features
-specification.
+endpoints (cell size $10^{-5}$ map units) combined with a two-sided greedy
+walk and a closure-competition rule, which reduces the merge from $O(n^{3})$
+(a fresh all-pairs distance matrix at every iteration) to $O(n)$ in the common
+case while preserving the semantics of the original nearest-pair heuristic.
+Rings that fail to close cleanly---a known artefact of topological gaps in the
+source data---are passed through \texttt{shapely.make\_valid} so that the
+output satisfies the OGC simple-features specification.
 
 \begin{figure}[t]
 \centering
@@ -244,23 +248,23 @@ pipeline (solid arrows): MapGIS \texttt{.wt}/\texttt{.wl}/\texttt{.wp} closed
 binary $\rightarrow$ binary I/O and record model (NumPy structured dtypes)
 $\rightarrow$ Shapely geometries $\rightarrow$ open outputs (GeoDataFrame /
 shapefile / GeoJSON). Dashed bypasses: CRS inference (projection/ellipsoid
-index codes $\rightarrow$ PROJ string) feeding the parser and output projection;
-polygon topology reconstruction (arc--node $\rightarrow$ rings $\rightarrow$
-shells/holes + \texttt{make\_valid}) feeding polygon geometry. The Reader API
-and CLI sit as a thin access layer over the whole pipeline. \textbf{(b)}
-Reproducible verification: the cross-validation harness (36-layer 1:1
-comparison vs.\ official MapGIS---geometry 100\%, attributes 99.9995\%; 400~MB
-coverage-equivalence test---IoU 99.73\%) and the regression baseline
-(\texttt{pymapgis\_baseline.json} + pytest), rising as dashed ``verify'' arrows
-into the pipeline.}
+index codes $\rightarrow$ PROJ string), feeding both the parser and the output
+projection; and polygon topology reconstruction (arc--node $\rightarrow$ rings
+$\rightarrow$ shells/holes + \texttt{make\_valid}), feeding polygon geometry.
+The Reader API and CLI form a thin access layer over the whole pipeline.
+\textbf{(b)} Reproducible verification: the cross-validation harness (36-layer
+1:1 comparison against the official MapGIS export---geometry 100\%, attributes
+99.9995\%; 400~MB coverage-equivalence test---IoU 99.73\%) and the regression
+baseline (\texttt{pymapgis\_baseline.json} + pytest), rising as dashed
+``verify'' arrows into the pipeline.}
 \label{fig:arch}
 \end{figure}
 
 % =============================================================================
 \section{Validation}
 % =============================================================================
-The validation chapter is the core of this contribution: it quantifies how
-closely mapgis2shp's output matches the reference implementation (official
+The validation section is the core of this contribution: it quantifies how
+closely the output of mapgis2shp matches the reference implementation (official
 MapGIS) on real production data.
 
 \subsection{Dataset}
@@ -268,100 +272,102 @@ The validation set comprises \textbf{36 MapGIS vector layers} drawn from
 1:50{,}000 geological-survey sheets in the Kurgan region (J43C001002, Xinjiang,
 China): 5 point layers, 18 line layers, and 13 polygon layers, totalling
 \textbf{16{,}874 features} (Table~\ref{tab:dataset}). The layers span geological
-boundaries, faults, attitudes, hydrology, and Quaternary geology, and include
-both small (2-feature) and large (6{,}981-feature) files.
+boundaries, faults, attitudes, hydrology, and Quaternary geology, and range
+from small (2-feature) to large (6{,}981-feature) files.
 
 \subsection{Protocol}
-Each layer was processed two ways: (i) read with mapgis2shp to produce a
-\texttt{GeoDataFrame}; (ii) exported to ESRI shapefile using the official
+Each layer was processed in two ways: (i) read with mapgis2shp to produce a
+\texttt{GeoDataFrame}, and (ii) exported to ESRI shapefile using the official
 MapGIS software under default settings. The two outputs were then aligned by
-the unique \texttt{ID} attribute and compared on four axes:
+the unique \texttt{ID} attribute and compared along four axes:
 \begin{itemize}
   \item \textbf{Count}: feature counts.
   \item \textbf{Schema}: attribute column-name sets.
   \item \textbf{Geometry}: point-to-point Euclidean distance; line Hausdorff
   distance; polygon intersection-over-union (IoU). A pair is deemed coincident
-  at tolerance $10^{-7}$~degrees.
-  \item \textbf{Attributes}: per-field semantic equivalence, with a classifier
-  that separates exact matches from cases where the native export is lossy
-  (floating-point truncation, numeric formatting, or whitespace stripping) and
-  from genuine mismatches.
+  at a tolerance of $10^{-7}$~degrees.
+  \item \textbf{Attributes}: per-field semantic equivalence, using a classifier
+  that distinguishes exact matches from cases in which the native export is
+  lossy (floating-point truncation, numeric formatting, or whitespace stripping)
+  and from genuine mismatches.
 \end{itemize}
-The full protocol is implemented in \texttt{cross\_validate\_native.py}, shipped
-with the software, and is fully reproducible.
+The full protocol is implemented in \texttt{cross\_validate\_native.py}, which
+ships with the software and is fully reproducible.
 
 \subsection{Results}
 Across all 36 layers and 16{,}874 features:
 \begin{itemize}
   \item \textbf{Feature counts} are identical for 36/36 layers
   (16{,}874~=~16{,}874).
-  \item \textbf{Schemas} are identical for 36/36 layers (all attribute column
-  names match).
-  \item \textbf{Geometry} matches for 100\% of aligned features in 36/36
-  layers. Point distances, line Hausdorff distances, and polygon $1-\mathrm{IoU}$
-  are all zero within $10^{-7}$~degrees---i.e., geometries are exactly
-  coincident.
+  \item \textbf{Schemas} are identical for 36/36 layers (every attribute column
+  name matches).
+  \item \textbf{Geometry} matches for 100\% of aligned features across all
+  36 layers. Point distances, line Hausdorff distances, and the polygon
+  $1-\mathrm{IoU}$ are all zero within $10^{-7}$~degrees---that is, the
+  geometries are exactly coincident.
   \item \textbf{Attributes} are semantically equivalent in \textbf{99.9995\%}
-  of the 95{,}006 compared cells. Only \textbf{2 cells} differ, both being
+  of the 95{,}006 compared cells. Only \textbf{2 cells} differ, both
   floating-point fields smaller than $10^{-6}$ that the native export rounds
-  coarsely (e.g., $6.69\times10^{-7}$ in mapgis2shp versus $1\times10^{-6}$ in
-  the native export). No genuine semantic attribute difference was found.
+  coarsely (for example, $6.69\times10^{-7}$ in mapgis2shp versus
+  $1\times10^{-6}$ in the native export). No genuine semantic attribute
+  difference was found.
   \item \textbf{CRS}: mapgis2shp reconstructs and attaches the CRS (Krassovsky
   1940 with \texttt{towgs84=15.8,-154.4,-82.3,$\ldots$}); the native shapefile
   export produces \textbf{no \texttt{.prj} file}, so the CRS is lost.
 \end{itemize}
 
 \subsection{The native export is lossy; mapgis2shp is not}
-In 10{,}245 of the 95{,}006 compared cells (10.8\%), mapgis2shp preserves source
-information that the native shapefile export discards (Table~\ref{tab:lossy}):
+In 10{,}245 of the 95{,}006 compared cells (10.8\%), mapgis2shp preserves
+source information that the native shapefile export discards
+(Table~\ref{tab:lossy}):
 \begin{enumerate}
   \item \textbf{Floating-point truncation}: the native export rounds floats to
-  2--6 significant figures (e.g., $0.6218423 \rightarrow 0.62$;
-  $4.88\times10^{-6} \rightarrow 5\times10^{-6}$); mapgis2shp preserves full
-  double precision.
+  2--6 significant figures (for example, $0.6218423 \rightarrow 0.62$ and
+  $4.88\times10^{-6} \rightarrow 5\times10^{-6}$), whereas mapgis2shp preserves
+  full double precision.
   \item \textbf{Numeric formatting}: values stored as floating-point are
-  exported by MapGIS as integer strings in some fields (e.g., \texttt{72.0} vs
-  \texttt{72}); mapgis2shp preserves the stored type.
-  \item \textbf{String padding}: the native export strips leading/trailing
-  whitespace that the binary field actually stores (e.g.,
-  \texttt{'113000\quad'} $\rightarrow$ \texttt{'113000'}); mapgis2shp preserves
-  the raw bytes.
+  exported by MapGIS as integer strings in some fields (for example,
+  \texttt{72.0} versus \texttt{72}); mapgis2shp preserves the stored type.
+  \item \textbf{String padding}: the native export strips leading and trailing
+  whitespace that the binary field actually stores (for example,
+  \texttt{'113000\quad'} $\rightarrow$ \texttt{'113000'}), whereas mapgis2shp
+  preserves the raw bytes.
 \end{enumerate}
-In other words, mapgis2shp is not merely equivalent to the native export---it
-is a strictly more faithful representation of the source binary data.
+mapgis2shp is therefore not merely equivalent to the native export; it is a
+strictly more faithful representation of the source binary data.
 
 \subsection{Extreme-scale validation}
 \label{sec:largescale}
 To stress the reader beyond the 36 survey layers, a single 400~MB MapGIS
 polygon file (78{,}873 features) was compared against an official MapGIS export
-of the same source. The official export had been post-processed (adjacent
-polygons dissolved and re-coloured), so a 1:1 feature-wise comparison is
-impossible; coverage equivalence was therefore assessed via geometric unions,
-with areas computed on the Krassovsky ellipsoid using \texttt{pyproj.Geod}
-(avoiding a costly reprojection of the full geometry set).
+of the same source. Because the official export had been post-processed
+(adjacent polygons dissolved and re-coloured), a 1:1 feature-wise comparison
+is impossible; coverage equivalence was therefore assessed through geometric
+unions, with areas computed on the Krassovsky ellipsoid using
+\texttt{pyproj.Geod} to avoid a costly reprojection of the full geometry set.
 
-Results:
+The results were as follows:
 \begin{itemize}
   \item \textbf{Bounding box}: exact match (difference~$=$~0).
   \item \textbf{CRS}: correctly inferred as Beijing-1954 / Krassovsky
   (longlat)---the official export had lost its \texttt{.prj} file.
   \item \textbf{Attribute fields}: the 16 native fields are identical; the
-  official export carries two additional fields (\texttt{strat\_code},
+  official export carries two additional fields (\texttt{strat\_code} and
   \texttt{ColorCode}) that are artefacts of its dissolve-and-recolour
   post-processing.
   \item \textbf{Invalid geometries}: mapgis2shp produced 0; the official export
   produced 3.
-  \item \textbf{Coverage equivalence}: union symmetric difference
-  $=$ 5{,}649.94~km$^{2}$ against $2.11\times10^{6}$~km$^{2}$ of coverage;
-  \textbf{coverage IoU $=$ 99.73\%}.
+  \item \textbf{Coverage equivalence}: the union symmetric difference is
+  5{,}649.94~km$^{2}$ against $2.11\times10^{6}$~km$^{2}$ of coverage, giving a
+  \textbf{coverage IoU of 99.73\%}.
 \end{itemize}
-The summed polygon areas differ by 1.66\% (mapgis2shp larger), but this is an
-overlap artefact of the greedy arc-merge reconstruction at shared boundaries
-(sliver bridging across topological gaps), not a coverage error: once overlaps
-are removed by the union, the real coverage difference is only 0.27\%. This
-quantifies the known limitation of the heuristic topology reconstruction at
-extreme scale (see Section~\ref{sec:discussion}). Table~\ref{tab:large}
-summarises the extreme-scale comparison.
+The summed polygon areas differ by 1.66\% (mapgis2shp being larger), but this
+is an overlap artefact of the greedy arc-merge reconstruction at shared
+boundaries (sliver bridging across topological gaps), not a coverage error:
+once overlaps are removed by the union, the real coverage difference is only
+0.27\%. This quantifies the known limitation of the heuristic topology
+reconstruction at extreme scale (see Section~\ref{sec:discussion}).
+Table~\ref{tab:large} summarises the extreme-scale comparison.
 
 \begin{table}[t]
 \centering
@@ -422,8 +428,8 @@ Whitespace stripping & \texttt{'113000\quad'} $\rightarrow$ \texttt{'113000'} & 
 
 \begin{table}[t]
 \centering
-\caption{Extreme-scale (400~MB, 78{,}873 features) validation against official
-MapGIS export.}
+\caption{Extreme-scale (400~MB, 78{,}873 features) validation against the
+official MapGIS export.}
 \label{tab:large}
 \begin{tabular}{lll}
 \toprule
@@ -447,11 +453,12 @@ Summed-area gap & +1.66\% & overlap artefact \\
 % =============================================================================
 Table~\ref{tab:tools} compares mapgis2shp with the prior open-source MapGIS
 readers and the Chinese academic precedents along the axes that distinguish
-this work: open-source licence, language, byte-level spec, CRS inference,
-independent validation against the reference implementation, PyPI distribution,
-and peer-reviewed publication. mapgis2shp is the only entry that infers the
-CRS, the only one validated against the official export, and the only one
-distributed as an installable package with a reproducible validation harness.
+this work: open-source licence, language, byte-level specification, CRS
+inference, independent validation against the reference implementation, PyPI
+distribution, and peer-reviewed publication. mapgis2shp is the only entry that
+infers the CRS, the only one validated against the official export, and the
+only one distributed as an installable package with a reproducible validation
+harness.
 
 \begin{table}[t]
 \centering
@@ -480,58 +487,59 @@ The reader supports the most common ellipsoid codes (Krassovsky, Xi'an~1980,
 WGS84, WGS72, CGCS2000) and the most common projections (geographic,
 Transverse Mercator, Albers, Lambert); unrecognised codes yield an empty CRS
 that downstream code must handle. The legacy MapGIS K9/10 formats are not
-supported---they are a different binary layout and would require a separate
-implementation. CRS inference depends on the file's index codes rather than a
+supported, as they use a different binary layout and would require a separate
+implementation. CRS inference relies on the file's index codes rather than a
 full parameter block, so unusual projections may be under-described. Polygon
-topology reconstruction is heuristic; while \texttt{make\_valid} guarantees
-valid output, rare topological gaps in source data can produce repaired
-(rather than exact) polygons. At extreme scale (the 400~MB test of
+topology reconstruction is heuristic: although \texttt{make\_valid} guarantees
+valid output, rare topological gaps in the source data can produce repaired
+rather than exact polygons. At extreme scale (the 400~MB test in
 Section~\ref{sec:largescale}), the greedy arc-merge introduces a quantified
-1.66\% overlap artefact in summed polygon areas at shared boundaries---a
-coverage difference of only 0.27\% once overlaps are unioned away, but a known
-limitation when exact planar partition is required. A planar-enforcement
-post-process (e.g., \texttt{shapely.union} of all polygons) would eliminate the
-overlaps at the cost of runtime, and is left as an option for users needing a
-strict partition. The reader is read-only.
+1.66\% overlap artefact in summed polygon areas at shared boundaries; this
+corresponds to a coverage difference of only 0.27\% once overlaps are unioned
+away, but it remains a known limitation when an exact planar partition is
+required. A planar-enforcement post-process (for example, \texttt{shapely.union}
+of all polygons) would eliminate the overlaps at the cost of runtime and is
+left as an option for users who need a strict partition. Finally, the reader
+is read-only.
 
 \subsection{Generalisability}
-The validation methodology---reverse-engineer a proprietary reader, then
-cross-validate against the reference implementation on real data with
+The validation methodology---reverse-engineering a proprietary reader and then
+cross-validating it against the reference implementation on real data, with
 quantified geometric and attribute fidelity---transfers directly to other
 closed geoscience formats. The cross-validation script is format-agnostic in
-structure and could anchor similar studies for formats where a reference
-implementation exists.
+structure and could anchor similar studies for any format for which a
+reference implementation exists.
 
 \subsection{Open-science implication}
 By making MapGIS 6.x/67 data readable from the open-source Python stack,
 mapgis2shp unlocks a large body of Chinese geological-survey data for
-reproducible research, integration with GDAL/GeoPandas/QGIS workflows, and
-long-term archival. The CRS-inference capability is practically important:
-users currently relying on the native export silently lose the coordinate
-reference.
+reproducible research, for integration with GDAL/GeoPandas/QGIS workflows, and
+for long-term archival. The CRS-inference capability is of particular
+practical importance: users who currently rely on the native export silently
+lose the coordinate reference.
 
 \subsection{Residual coverage gap}
 The Crossref, OpenAlex, arXiv, and DOAJ indices contain no peer-reviewed
 MapGIS reader paper. Chinese-language databases (CNKI, Wanfang) were not
 machine-accessible during this study; a manual search is recommended before
-submission to confirm no Chinese thesis publishes a byte-level specification
-with validation. The open-source prior art enumerated in
+submission, to confirm that no Chinese thesis publishes a byte-level
+specification with validation. The open-source prior art enumerated in
 Section~\ref{sec:related} is fully covered.
 
 % =============================================================================
 \section{Conclusions}
 % =============================================================================
 mapgis2shp is an open-source Python reader for the closed MapGIS 6.x/67 binary
-vector formats. Across 36 real geological-survey layers (16{,}874 features) its
-output is geometrically identical to and attribute-equivalent to the official
-MapGIS export (99.9995\% semantic equivalence, zero genuine mismatches), and on
-a 400~MB file (78{,}873 features) it attains 99.73\% coverage equivalence
-while producing fewer invalid geometries than the reference. It preserves
-source data more faithfully than the native export, which truncates
-floating-point fields and strips stored string padding, and additionally
-reconstructs the coordinate reference system that the native export discards.
-The software and its reproducible validation harness are distributed on PyPI
-under the Apache-2.0 licence.
+vector formats. Across 36 real geological-survey layers (16{,}874 features),
+its output is geometrically identical to and attribute-equivalent to the
+official MapGIS export (99.9995\% semantic equivalence, with zero genuine
+mismatches), and on a 400~MB file (78{,}873 features) it attains 99.73\%
+coverage equivalence while producing fewer invalid geometries than the
+reference. It preserves source data more faithfully than the native export,
+which truncates floating-point fields and strips stored string padding, and it
+additionally reconstructs the coordinate reference system that the native
+export discards. The software and its reproducible validation harness are
+distributed on PyPI under the Apache-2.0 licence.
 
 % =============================================================================
 \section*{Availability and Requirements}
@@ -548,8 +556,8 @@ under the Apache-2.0 licence.
   pyproj, shapely
   \item \textbf{Data availability:} the 36 validation layers and the 400~MB
   extreme-scale file are real geological-survey data and are not redistributed
-  with the package; the cross-validation scripts
-  (\texttt{cross\_validate\_native.py} for the 36-layer 1:1 comparison,
+  with the package. The cross-validation scripts
+  (\texttt{cross\_validate\_native.py} for the 36-layer 1:1 comparison and
   \texttt{cross\_validate.py} for the large-file coverage-equivalence
   comparison), the per-layer report (\texttt{cross\_validation\_report.csv}),
   the large-file report (\texttt{cross\_validate\_large\_report.md}), and the
@@ -560,8 +568,8 @@ under the Apache-2.0 licence.
 % =============================================================================
 \section*{CRediT author statement}
 % =============================================================================
-Shijie Li: conceptualisation, methodology, software, validation, investigation,
-writing---original draft.
+Shijie Li: conceptualisation, methodology, software, validation,
+investigation, writing---original draft.
 
 \section*{Declaration of competing interests}
 The author declares no competing interests.
