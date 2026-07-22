@@ -115,8 +115,8 @@ def figure2(png_path: str, pdf_path: str) -> None:
           fs=6.6, weight="bold")
 
     # ===== Panel b — verification =====================================
-    panel_label(ax, 0, 27, "b")
-    label(ax, 4, 27, "Reproducible verification & regression",
+    panel_label(ax, 0, 25, "b")
+    label(ax, 4, 25, "Reproducible verification & regression",
           fs=8, weight="bold", ha="left", va="bottom")
 
     val_y, val_h = 9, 14
