@@ -49,7 +49,7 @@ All three file types share a common top-level organisation: an 8-byte magic head
 
 The point section stores 93-byte records, with X and Y as little-endian doubles at offsets 7–14 and 15–22 respectively. The line and polygon files share a 57-byte arc-index record (point count at offset 10–13; byte offset into the coordinate section at 14–17) followed by a coordinate section of 16-byte XY pairs. The polygon file additionally stores a 24-byte topology record whose bytes 8–15 carry the left and right polygon identifiers of each arc, from which closed rings, shells, and holes are reconstructed.
 
-CRS information resides at fixed offsets in the file header: projection type at byte 109, ellipsoid at byte 110, scale denominator (double) at byte 143, and — for projected CRSes — the central meridian and standard parallels, encoded as `DDDMMSS.sss` doubles, from byte 151 onward. The complete byte-level specification accompanies the software as a reference document.
+CRS information resides at fixed offsets in the file header: projection type at byte 109, ellipsoid at byte 110, scale denominator (double) at byte 143, and — for projected CRSes — the central meridian and standard parallels, encoded as `DDDMMSS.sss` doubles, from byte 151 onward. The complete byte-level specification accompanies the software as a reference document. Figure 1 summarises this layout.
 
 **Figure 1.** Byte-level layout of the MapGIS 6.x/67 vector formats. **(a)** Common file header: 8-byte magic (`WMAP·D22`/`D21`/`D23` for point/line/polygon), file identifier, `data_start` offset, the coordinate-reference-system bytes (projection@109, ellipsoid@110, scale@143, central meridian@151 in `DDDMMSS.sss`), and the 10-entry index area located at `data_start`. **(b)** Type-specific record sections: `.wt` point coordinate records (93 B; X/Y doubles at offsets 7–14/15–22), `.wl` line index (57 B) plus 16-B XY coordinate pairs, and `.wp` arc index (57 B), coordinate section, and 24-B topology records (left/right polygon identifiers at 8–11/12–15). Strips are schematic and not to scale; each block reports its record size. All integers are little-endian; strings are GBK.
 
@@ -58,7 +58,7 @@ CRS information resides at fixed offsets in the file header: projection type at 
 ## 3. Design and Implementation
 
 ### 3.1 Architecture
-mapgis2shp is organised as a thin pipeline: binary I/O → record model → Shapely geometries → GeoPandas `GeoDataFrame`. A `Reader` class parses the file in full on construction and exposes `.geodataframe`, `.fields`, `.crs`, `.bbox`, and a `.to_file()` passthrough. A small command-line interface (`pymapgis input.wp output.shp`) covers the common conversion case. The package targets Python ≥ 3.9 and depends only on geopandas, numpy, pandas, pyproj, and shapely.
+mapgis2shp is organised as a thin pipeline: binary I/O → record model → Shapely geometries → GeoPandas `GeoDataFrame`. A `Reader` class parses the file in full on construction and exposes `.geodataframe`, `.fields`, `.crs`, `.bbox`, and a `.to_file()` passthrough. A small command-line interface (`pymapgis input.wp output.shp`) covers the common conversion case. The package targets Python ≥ 3.9 and depends only on geopandas, numpy, pandas, pyproj, and shapely. Figure 2 illustrates this pipeline.
 
 ### 3.2 Vectorised binary parsing
 Binary records are decoded using NumPy structured dtypes rather than per-field `struct.unpack` calls. The point, arc-index, and topology tables are each materialised in a single `np.frombuffer` call, and coordinate arrays are reshaped to (n,2) and scaled in one vectorised multiply. As a result, parsing the largest test polygon (608 features, 2,166 arcs) takes ~0.33 s on a laptop. Attribute-table field descriptors are unpacked in bulk through a precompiled `struct.Struct` that mirrors the 39-byte descriptor layout.
@@ -96,6 +96,8 @@ Across all 36 layers and 16,874 features:
 - **Geometry** matches for 100% of aligned features across all 36 layers. Point distances, line Hausdorff distances, and the polygon 1−IoU are all zero within 10⁻⁷ degrees — that is, the geometries are exactly coincident.
 - **Attributes** are semantically equivalent in **99.9995%** of the 95,006 compared cells. Only **2 cells** differ, both floating-point fields smaller than 10⁻⁶ that the native export rounds coarsely (for example, 6.69×10⁻⁷ in mapgis2shp versus 1×10⁻⁶ in the native export). No genuine semantic attribute difference was found.
 - **CRS**: mapgis2shp reconstructs and attaches the CRS (Krassovsky 1940 with `towgs84=15.8,-154.4,-82.3,…`); the native shapefile export produces **no `.prj` file**, so the CRS is lost.
+
+Table 2 summarises these results.
 
 ### 4.4 The native export is lossy; mapgis2shp is not
 In 10,245 of the 95,006 compared cells (10.8%), mapgis2shp preserves source information that the native shapefile export discards (Table 3):
