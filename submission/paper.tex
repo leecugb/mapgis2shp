@@ -64,7 +64,7 @@ All three file types share a common top-level organisation: an 8-byte magic head
 
 The point section stores 93-byte records, with X and Y as little-endian doubles at offsets 7--14 and 15--22 respectively. The line and polygon files share a 57-byte arc-index record (point count at offset 10--13; byte offset into the coordinate section at 14--17) followed by a coordinate section of 16-byte XY pairs. The polygon file additionally stores a 24-byte topology record whose bytes 8--15 carry the left and right polygon identifiers of each arc, from which closed rings, shells, and holes are reconstructed.
 
-CRS information resides at fixed offsets in the file header: projection type at byte~109, ellipsoid at byte~110, scale denominator (double) at byte~143, and---for projected CRSes---the central meridian and standard parallels, encoded as \texttt{DDDMMSS.sss} doubles, from byte~151 onward. The complete byte-level specification accompanies the software as a reference document.
+CRS information resides at fixed offsets in the file header: projection type at byte~109, ellipsoid at byte~110, scale denominator (double) at byte~143, and---for projected CRSes---the central meridian and standard parallels, encoded as \texttt{DDDMMSS.sss} doubles, from byte~151 onward. The complete byte-level specification accompanies the software as a reference document. Figure~\ref{fig:layout} summarises this layout.
 
 \begin{figure}[h]
 \centering
@@ -76,7 +76,7 @@ CRS information resides at fixed offsets in the file header: projection type at 
 \section{Design and Implementation}
 
 \subsection{Architecture}
-mapgis2shp is organised as a thin pipeline: binary I/O $\rightarrow$ record model $\rightarrow$ Shapely geometries $\rightarrow$ GeoPandas \texttt{GeoDataFrame}. A \texttt{Reader} class parses the file in full on construction and exposes \texttt{.geodataframe}, \texttt{.fields}, \texttt{.crs}, \texttt{.bbox}, and a \texttt{.to\_file()} passthrough. A small command-line interface (\texttt{pymapgis input.wp output.shp}) covers the common conversion case. The package targets Python~$\geq$~3.9 and depends only on geopandas, numpy, pandas, pyproj, and shapely.
+mapgis2shp is organised as a thin pipeline: binary I/O $\rightarrow$ record model $\rightarrow$ Shapely geometries $\rightarrow$ GeoPandas \texttt{GeoDataFrame}. A \texttt{Reader} class parses the file in full on construction and exposes \texttt{.geodataframe}, \texttt{.fields}, \texttt{.crs}, \texttt{.bbox}, and a \texttt{.to\_file()} passthrough. A small command-line interface (\texttt{pymapgis input.wp output.shp}) covers the common conversion case. The package targets Python~$\geq$~3.9 and depends only on geopandas, numpy, pandas, pyproj, and shapely. Figure~\ref{fig:arch} illustrates this pipeline.
 
 \subsection{Vectorised binary parsing}
 Binary records are decoded using NumPy structured dtypes rather than per-field \texttt{struct.unpack} calls. The point, arc-index, and topology tables are each materialised in a single \texttt{np.frombuffer} call, and coordinate arrays are reshaped to $(n,2)$ and scaled in one vectorised multiply. As a result, parsing the largest test polygon (608 features, 2{,}166 arcs) takes ${\sim}0.33$~s on a laptop. Attribute-table field descriptors are unpacked in bulk through a precompiled \texttt{struct.Struct} that mirrors the 39-byte descriptor layout.
@@ -139,6 +139,8 @@ Across all 36 layers and 16{,}874 features:
   \item \textbf{Attributes} are semantically equivalent in \textbf{99.9995\%} of the 95{,}006 compared cells. Only \textbf{2 cells} differ, both floating-point fields smaller than $10^{-6}$ that the native export rounds coarsely (for example, $6.69\times10^{-7}$ in mapgis2shp versus $1\times10^{-6}$ in the native export). No genuine semantic attribute difference was found.
   \item \textbf{CRS}: mapgis2shp reconstructs and attaches the CRS (Krassovsky 1940 with \texttt{towgs84=15.8,-154.4,-82.3,$\ldots$}); the native shapefile export produces \textbf{no \texttt{.prj} file}, so the CRS is lost.
 \end{itemize}
+
+Table~\ref{tab:results} summarises these results.
 
 \begin{table}[h]
 \centering
