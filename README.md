@@ -1,7 +1,8 @@
-# pymapgis
+# mapgis2shp
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21487339-blue.svg)](https://doi.org/10.5281/zenodo.21487339)
 
 Read MapGIS 6.x/67 vector files (`.wt`, `.wl`, `.wp`) into [GeoPandas](https://geopandas.org/) GeoDataFrames.
 
