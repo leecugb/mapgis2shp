@@ -1,0 +1,167 @@
+[
+  {
+    "order": 1,
+    "source_image": "page34_img2_row000.png",
+    "name": "实测、推测地质界线",
+    "symbol": "实线/虚线曲线",
+    "category": "boundary",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "示例色值示例色值"
+  },
+  {
+    "order": 2,
+    "source_image": "page34_img2_row001.png",
+    "name": "角度不整合、平行不整合、岩相界线",
+    "symbol": "实线+虚线/点线",
+    "category": "unconformity",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "实测、推测地质界线。实测活动断层。"
+  },
+  {
+    "order": 3,
+    "source_image": "page34_img2_row002.png",
+    "name": "实测正断层、实测逆断层",
+    "symbol": "实线+齿/三角齿",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "鲁履否整合、平行不整合、。。推测活动断层————。"
+  },
+  {
+    "order": 4,
+    "source_image": "page34_img2_row003.png",
+    "name": "实测平推断层",
+    "symbol": "实线+半箭头",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "实测正斯层、实测巡断层。。隐伏或物探推测断层—。"
+  },
+  {
+    "order": 5,
+    "source_image": "page34_img2_row004.png",
+    "name": "实测性质不明断层",
+    "symbol": "实线",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "实测平推断层就卫片解评断层。"
+  },
+  {
+    "order": 6,
+    "source_image": "page34_img2_row005.png",
+    "name": "推测性质不明断层",
+    "symbol": "长虚线",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "实测性质不明断层。。°」层理、片理、片麻理产状35%。。%"
+  },
+  {
+    "order": 7,
+    "source_image": "page34_img2_row006.png",
+    "name": "实测冲断层",
+    "symbol": "实线+三角齿",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "推测性质不明断层」———。劈理、裂隙、面理产状%5%。。"
+  },
+  {
+    "order": 8,
+    "source_image": "page34_img2_row007.png",
+    "name": "韧性剪切带",
+    "symbol": "红色平行双线",
+    "category": "shear_zone",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "实测冲断层　角岩化蚀变。"
+  },
+  {
+    "order": 9,
+    "source_image": "page34_img2_row008.png",
+    "name": "实测活动断层",
+    "symbol": "实线+双箭头",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "初性剪切带。火山口、活火山女"
+  },
+  {
+    "order": 10,
+    "source_image": "page35_img1_row000.png",
+    "name": "推测活动断层",
+    "symbol": "长虚线+双箭头",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "示例色值示例色值"
+  },
+  {
+    "order": 11,
+    "source_image": "page35_img1_row001.png",
+    "name": "隐伏或物探推测断层",
+    "symbol": "长虚线+点",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "脆韧性剪切带无脊椎动物化石、植物化石。"
+  },
+  {
+    "order": 12,
+    "source_image": "page35_img1_row002.png",
+    "name": "航卫片解译断层",
+    "symbol": "点划线",
+    "category": "fault",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "实测邀冲推覆断层。。同位素年龄采样点及说明」。。"
+  },
+  {
+    "order": 13,
+    "source_image": "page35_img1_row003.png",
+    "name": "层理、片理、片麻理产状",
+    "symbol": "产状符号",
+    "category": "attitude",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "推测巡冲推覆断层。金钉子及主要标准割面裴菱防。"
+  },
+  {
+    "order": 14,
+    "source_image": "page35_img1_row004.png",
+    "name": "劈理、裂隙、面理产状",
+    "symbol": "产状符号",
+    "category": "attitude",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "飞来峰构造。钻孔位置及编号　K107。"
+  },
+  {
+    "order": 15,
+    "source_image": "page35_img1_row005.png",
+    "name": "脆韧性剪切带",
+    "symbol": "红色平行双线",
+    "category": "shear_zone",
+    "R": null,
+    "G": null,
+    "B": null,
+    "raw_ocr": "构造窗地质代号x"
+  }
+]

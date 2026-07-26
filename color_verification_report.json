@@ -1,0 +1,979 @@
+{
+  "total_units": 57,
+  "matched_pixel": 57,
+  "mismatched_pixel": 0,
+  "total_features": 713,
+  "assignment_consistent": true,
+  "tolerance": 2,
+  "details": [
+    {
+      "code": "→ChA.",
+      "expected_hex": "#bcb781",
+      "sampled_hex": "#bcb781",
+      "sampled_rgb": [
+        188,
+        183,
+        129
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        7346,
+        1017
+      ]
+    },
+    {
+      "code": "→ChSt.",
+      "expected_hex": "#bcb781",
+      "sampled_hex": "#bcb781",
+      "sampled_rgb": [
+        188,
+        183,
+        129
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4904,
+        6471
+      ]
+    },
+    {
+      "code": "→C↓1→w",
+      "expected_hex": "#879999",
+      "sampled_hex": "#879999",
+      "sampled_rgb": [
+        135,
+        153,
+        153
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        8632,
+        6028
+      ]
+    },
+    {
+      "code": "→C↓1→y",
+      "expected_hex": "#879999",
+      "sampled_hex": "#879999",
+      "sampled_rgb": [
+        135,
+        153,
+        153
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        5335,
+        520
+      ]
+    },
+    {
+      "code": "→C↓2→P↓1→t",
+      "expected_hex": "#99cccc",
+      "sampled_hex": "#99cccc",
+      "sampled_rgb": [
+        153,
+        204,
+        204
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4240,
+        5611
+      ]
+    },
+    {
+      "code": "→C↓2→ak",
+      "expected_hex": "#b0bfbf",
+      "sampled_hex": "#b0bfbf",
+      "sampled_rgb": [
+        176,
+        191,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        5029,
+        603
+      ]
+    },
+    {
+      "code": "→C↓2→kk",
+      "expected_hex": "#b0bfbf",
+      "sampled_hex": "#b0bfbf",
+      "sampled_rgb": [
+        176,
+        191,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4894,
+        609
+      ]
+    },
+    {
+      "code": "→D↓1→s",
+      "expected_hex": "#a67373",
+      "sampled_hex": "#a67373",
+      "sampled_rgb": [
+        166,
+        115,
+        115
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        3201,
+        1211
+      ]
+    },
+    {
+      "code": "→D↓2→kz",
+      "expected_hex": "#bf9999",
+      "sampled_hex": "#bf9999",
+      "sampled_rgb": [
+        191,
+        153,
+        153
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        9135,
+        7974
+      ]
+    },
+    {
+      "code": "→D↓2→t",
+      "expected_hex": "#bf9999",
+      "sampled_hex": "#bf9999",
+      "sampled_rgb": [
+        191,
+        153,
+        153
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        3961,
+        904
+      ]
+    },
+    {
+      "code": "→D↓3→kz↑1",
+      "expected_hex": "#deb3bf",
+      "sampled_hex": "#deb3bf",
+      "sampled_rgb": [
+        222,
+        179,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6404,
+        1272
+      ]
+    },
+    {
+      "code": "→D↓3→kz↑2",
+      "expected_hex": "#deb3bf",
+      "sampled_hex": "#deb3bf",
+      "sampled_rgb": [
+        222,
+        179,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        7990,
+        940
+      ]
+    },
+    {
+      "code": "→D↓3→kz↑3",
+      "expected_hex": "#deb3bf",
+      "sampled_hex": "#deb3bf",
+      "sampled_rgb": [
+        222,
+        179,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        8723,
+        683
+      ]
+    },
+    {
+      "code": "→D↓3→q",
+      "expected_hex": "#deb3bf",
+      "sampled_hex": "#deb3bf",
+      "sampled_rgb": [
+        222,
+        179,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        8636,
+        8166
+      ]
+    },
+    {
+      "code": "→EK",
+      "expected_hex": "#8cff00",
+      "sampled_hex": "#8cff00",
+      "sampled_rgb": [
+        140,
+        255,
+        0
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4505,
+        3538
+      ]
+    },
+    {
+      "code": "→J↓1→k",
+      "expected_hex": "#4df2ff",
+      "sampled_hex": "#4df2ff",
+      "sampled_rgb": [
+        77,
+        242,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        9222,
+        735
+      ]
+    },
+    {
+      "code": "→J↓1→sh",
+      "expected_hex": "#4df2ff",
+      "sampled_hex": "#4df2ff",
+      "sampled_rgb": [
+        77,
+        242,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        9628,
+        1648
+      ]
+    },
+    {
+      "code": "→J↓2→t",
+      "expected_hex": "#8cfff2",
+      "sampled_hex": "#8cfff2",
+      "sampled_rgb": [
+        140,
+        255,
+        242
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6781,
+        224
+      ]
+    },
+    {
+      "code": "→J↓2→y",
+      "expected_hex": "#8cfff2",
+      "sampled_hex": "#8cfff2",
+      "sampled_rgb": [
+        140,
+        255,
+        242
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        9524,
+        567
+      ]
+    },
+    {
+      "code": "→J↓3→kz",
+      "expected_hex": "#ccffff",
+      "sampled_hex": "#ccffff",
+      "sampled_rgb": [
+        204,
+        255,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6063,
+        1250
+      ]
+    },
+    {
+      "code": "→K↓1→kz",
+      "expected_hex": "#8cff33",
+      "sampled_hex": "#8cff33",
+      "sampled_rgb": [
+        140,
+        255,
+        51
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4074,
+        3585
+      ]
+    },
+    {
+      "code": "→K↓2→Y",
+      "expected_hex": "#ccff73",
+      "sampled_hex": "#ccff73",
+      "sampled_rgb": [
+        204,
+        255,
+        115
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4360,
+        3440
+      ]
+    },
+    {
+      "code": "→N↓1→a",
+      "expected_hex": "#ffed73",
+      "sampled_hex": "#ffed73",
+      "sampled_rgb": [
+        255,
+        237,
+        115
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        8913,
+        3951
+      ]
+    },
+    {
+      "code": "→N↓1→k",
+      "expected_hex": "#ffed73",
+      "sampled_hex": "#ffed73",
+      "sampled_rgb": [
+        255,
+        237,
+        115
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4449,
+        4428
+      ]
+    },
+    {
+      "code": "→N↓1→p",
+      "expected_hex": "#ffed73",
+      "sampled_hex": "#ffed73",
+      "sampled_rgb": [
+        255,
+        237,
+        115
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        8858,
+        5378
+      ]
+    },
+    {
+      "code": "→N↓2→a",
+      "expected_hex": "#fff2b3",
+      "sampled_hex": "#fff2b3",
+      "sampled_rgb": [
+        255,
+        242,
+        179
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        2756,
+        5320
+      ]
+    },
+    {
+      "code": "→Pt↓1→K.",
+      "expected_hex": "#b8a260",
+      "sampled_hex": "#b8a260",
+      "sampled_rgb": [
+        184,
+        162,
+        96
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        3712,
+        6550
+      ]
+    },
+    {
+      "code": "→P↓2→q",
+      "expected_hex": "#f2ce30",
+      "sampled_hex": "#f2ce30",
+      "sampled_rgb": [
+        242,
+        206,
+        48
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        3390,
+        5798
+      ]
+    },
+    {
+      "code": "→Qh↑al",
+      "expected_hex": "#ffffbf",
+      "sampled_hex": "#ffffbf",
+      "sampled_rgb": [
+        255,
+        255,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6915,
+        3128
+      ]
+    },
+    {
+      "code": "→Qh↑fl",
+      "expected_hex": "#ffffbf",
+      "sampled_hex": "#ffffbf",
+      "sampled_rgb": [
+        255,
+        255,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6398,
+        7884
+      ]
+    },
+    {
+      "code": "→Qh↑gl",
+      "expected_hex": "#ffffbf",
+      "sampled_hex": "#ffffbf",
+      "sampled_rgb": [
+        255,
+        255,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6168,
+        5714
+      ]
+    },
+    {
+      "code": "→Qh↑pal",
+      "expected_hex": "#ffffbf",
+      "sampled_hex": "#ffffbf",
+      "sampled_rgb": [
+        255,
+        255,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4808,
+        7353
+      ]
+    },
+    {
+      "code": "→Qh↑pl",
+      "expected_hex": "#ffffbf",
+      "sampled_hex": "#ffffbf",
+      "sampled_rgb": [
+        255,
+        255,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        8291,
+        8148
+      ]
+    },
+    {
+      "code": "→Qh↑vl→-Qh↑ch",
+      "expected_hex": "#ffffbf",
+      "sampled_hex": "#ffffbf",
+      "sampled_rgb": [
+        255,
+        255,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6416,
+        8058
+      ]
+    },
+    {
+      "code": "→Qp↓1→X",
+      "expected_hex": "#f7f788",
+      "sampled_hex": "#f7f788",
+      "sampled_rgb": [
+        247,
+        247,
+        136
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6831,
+        4685
+      ]
+    },
+    {
+      "code": "→Qp↓2↑l",
+      "expected_hex": "#f7f788",
+      "sampled_hex": "#f7f788",
+      "sampled_rgb": [
+        247,
+        247,
+        136
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6145,
+        8115
+      ]
+    },
+    {
+      "code": "→Qp↓2→W",
+      "expected_hex": "#f7f788",
+      "sampled_hex": "#f7f788",
+      "sampled_rgb": [
+        247,
+        247,
+        136
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        3109,
+        2367
+      ]
+    },
+    {
+      "code": "→Qp↓3↑gfl",
+      "expected_hex": "#f7f788",
+      "sampled_hex": "#f7f788",
+      "sampled_rgb": [
+        247,
+        247,
+        136
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        7468,
+        5759
+      ]
+    },
+    {
+      "code": "→Qp↓3↑gl",
+      "expected_hex": "#f7f788",
+      "sampled_hex": "#f7f788",
+      "sampled_rgb": [
+        247,
+        247,
+        136
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        3131,
+        7039
+      ]
+    },
+    {
+      "code": "→Qp↓3↑pal",
+      "expected_hex": "#f7f788",
+      "sampled_hex": "#f7f788",
+      "sampled_rgb": [
+        247,
+        247,
+        136
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        6753,
+        7498
+      ]
+    },
+    {
+      "code": "→S↓3-4→t",
+      "expected_hex": "#c7d94d",
+      "sampled_hex": "#c7d94d",
+      "sampled_rgb": [
+        199,
+        217,
+        77
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4522,
+        915
+      ]
+    },
+    {
+      "code": "→T↓3→t",
+      "expected_hex": "#ffdeff",
+      "sampled_hex": "#ffdeff",
+      "sampled_rgb": [
+        255,
+        222,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        9390,
+        1148
+      ]
+    },
+    {
+      "code": "→βμ",
+      "expected_hex": "#33ff33",
+      "sampled_hex": "#33ff33",
+      "sampled_rgb": [
+        51,
+        255,
+        51
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        7345,
+        5972
+      ]
+    },
+    {
+      "code": "→γδT↓1",
+      "expected_hex": "#ff33bf",
+      "sampled_hex": "#ff33bf",
+      "sampled_rgb": [
+        255,
+        51,
+        191
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4651,
+        8180
+      ]
+    },
+    {
+      "code": "→γοC↓2",
+      "expected_hex": "#f25585",
+      "sampled_hex": "#f25585",
+      "sampled_rgb": [
+        242,
+        85,
+        133
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        9630,
+        6919
+      ]
+    },
+    {
+      "code": "→γπT↓3",
+      "expected_hex": "#ff66d9",
+      "sampled_hex": "#ff66d9",
+      "sampled_rgb": [
+        255,
+        102,
+        217
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        9422,
+        6023
+      ]
+    },
+    {
+      "code": "→γρ",
+      "expected_hex": "#f25585",
+      "sampled_hex": "#f25585",
+      "sampled_rgb": [
+        242,
+        85,
+        133
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        2924,
+        7381
+      ]
+    },
+    {
+      "code": "→δ",
+      "expected_hex": "#4de6ff",
+      "sampled_hex": "#4de6ff",
+      "sampled_rgb": [
+        77,
+        230,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        1565,
+        6472
+      ]
+    },
+    {
+      "code": "→δT↓1",
+      "expected_hex": "#33d9ff",
+      "sampled_hex": "#33d9ff",
+      "sampled_rgb": [
+        51,
+        217,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        5338,
+        8414
+      ]
+    },
+    {
+      "code": "→δοC↓2",
+      "expected_hex": "#19d9ff",
+      "sampled_hex": "#19d9ff",
+      "sampled_rgb": [
+        25,
+        217,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        8750,
+        6827
+      ]
+    },
+    {
+      "code": "→δοP",
+      "expected_hex": "#19d9ff",
+      "sampled_hex": "#19d9ff",
+      "sampled_rgb": [
+        25,
+        217,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        1856,
+        7532
+      ]
+    },
+    {
+      "code": "→ηγP",
+      "expected_hex": "#f25072",
+      "sampled_hex": "#f25072",
+      "sampled_rgb": [
+        242,
+        80,
+        114
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4185,
+        7964
+      ]
+    },
+    {
+      "code": "→ηγT↓2",
+      "expected_hex": "#ff4dcc",
+      "sampled_hex": "#ff4dcc",
+      "sampled_rgb": [
+        255,
+        77,
+        204
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        2757,
+        7511
+      ]
+    },
+    {
+      "code": "→νD",
+      "expected_hex": "#ffcc33",
+      "sampled_hex": "#ffcc33",
+      "sampled_rgb": [
+        255,
+        204,
+        51
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        2830,
+        7721
+      ]
+    },
+    {
+      "code": "→οφD↓1",
+      "expected_hex": "#f23049",
+      "sampled_hex": "#f23049",
+      "sampled_rgb": [
+        242,
+        48,
+        73
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        4048,
+        7323
+      ]
+    },
+    {
+      "code": "→τα",
+      "expected_hex": "#4de6ff",
+      "sampled_hex": "#4de6ff",
+      "sampled_rgb": [
+        77,
+        230,
+        255
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        3935,
+        1121
+      ]
+    },
+    {
+      "code": "→υ",
+      "expected_hex": "#33ff33",
+      "sampled_hex": "#33ff33",
+      "sampled_rgb": [
+        51,
+        255,
+        51
+      ],
+      "diff": 0,
+      "ok": true,
+      "note": "",
+      "px": [
+        3724,
+        649
+      ]
+    }
+  ]
+}

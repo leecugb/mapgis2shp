@@ -1,0 +1,431 @@
+[
+  {
+    "page": 14,
+    "row": 1,
+    "code": "Qh",
+    "rgb": [
+      255,
+      252,
+      215
+    ],
+    "hex": "#fffcd7",
+    "stage_ocr": "Qh",
+    "label_ocr": ""
+  },
+  {
+    "page": 14,
+    "row": 2,
+    "code": "Qh2-3",
+    "rgb": [
+      255,
+      253,
+      205
+    ],
+    "hex": "#fffdcd",
+    "stage_ocr": "Qh? 2-3",
+    "label_ocr": ""
+  },
+  {
+    "page": 14,
+    "row": 3,
+    "code": "Qh",
+    "rgb": [
+      255,
+      250,
+      186
+    ],
+    "hex": "#fffaba",
+    "stage_ocr": "Qh",
+    "label_ocr": "Qh"
+  },
+  {
+    "page": 14,
+    "row": 4,
+    "code": "Qh1-2",
+    "rgb": [
+      255,
+      249,
+      175
+    ],
+    "hex": "#fff9af",
+    "stage_ocr": "Qhl-2",
+    "label_ocr": ""
+  },
+  {
+    "page": 14,
+    "row": 5,
+    "code": "Qh",
+    "rgb": [
+      255,
+      249,
+      165
+    ],
+    "hex": "#fff9a5",
+    "stage_ocr": "Qh'",
+    "label_ocr": ""
+  },
+  {
+    "page": 14,
+    "row": 7,
+    "code": "Qp3",
+    "rgb": [
+      248,
+      241,
+      173
+    ],
+    "hex": "#f8f1ad",
+    "stage_ocr": "Qp3",
+    "label_ocr": ""
+  },
+  {
+    "page": 14,
+    "row": 8,
+    "code": "Qp2-3",
+    "rgb": [
+      248,
+      239,
+      162
+    ],
+    "hex": "#f8efa2",
+    "stage_ocr": "Qp? 2-3",
+    "label_ocr": ""
+  },
+  {
+    "page": 14,
+    "row": 9,
+    "code": "Qp",
+    "rgb": [
+      248,
+      238,
+      153
+    ],
+    "hex": "#f8ee99",
+    "stage_ocr": "Qp?",
+    "label_ocr": "Y55 Qp R255"
+  },
+  {
+    "page": 14,
+    "row": 10,
+    "code": "Qp11-2",
+    "rgb": [
+      248,
+      235,
+      141
+    ],
+    "hex": "#f8eb8d",
+    "stage_ocr": "Qpl 1-2",
+    "label_ocr": "G255 B115"
+  },
+  {
+    "page": 14,
+    "row": 11,
+    "code": "Qp1",
+    "rgb": [
+      244,
+      232,
+      130
+    ],
+    "hex": "#f4e882",
+    "stage_ocr": "Qp!",
+    "label_ocr": ""
+  },
+  {
+    "page": 15,
+    "row": 8,
+    "code": "E2",
+    "rgb": [
+      253,
+      211,
+      153
+    ],
+    "hex": "#fdd399",
+    "stage_ocr": "",
+    "label_ocr": "E2"
+  },
+  {
+    "page": 15,
+    "row": 15,
+    "code": "K2",
+    "rgb": [
+      209,
+      223,
+      128
+    ],
+    "hex": "#d1df80",
+    "stage_ocr": "",
+    "label_ocr": "K2"
+  },
+  {
+    "page": 15,
+    "row": 17,
+    "code": "K",
+    "rgb": [
+      158,
+      162,
+      137
+    ],
+    "hex": "#9ea289",
+    "stage_ocr": "",
+    "label_ocr": "Ki-2"
+  },
+  {
+    "page": 15,
+    "row": 18,
+    "code": "C45",
+    "rgb": [
+      173,
+      206,
+      93
+    ],
+    "hex": "#adce5d",
+    "stage_ocr": "",
+    "label_ocr": "C45"
+  },
+  {
+    "page": 16,
+    "row": 2,
+    "code": "J2",
+    "rgb": [
+      147,
+      205,
+      225
+    ],
+    "hex": "#93cde1",
+    "stage_ocr": "",
+    "label_ocr": "J2"
+  },
+  {
+    "page": 16,
+    "row": 11,
+    "code": "C151-2",
+    "rgb": [
+      205,
+      190,
+      199
+    ],
+    "hex": "#cdbec7",
+    "stage_ocr": "",
+    "label_ocr": "C15 1-2"
+  },
+  {
+    "page": 16,
+    "row": 16,
+    "code": "P2-3",
+    "rgb": [
+      217,
+      213,
+      201
+    ],
+    "hex": "#d9d5c9",
+    "stage_ocr": "",
+    "label_ocr": "P2-3"
+  },
+  {
+    "page": 16,
+    "row": 22,
+    "code": "P2",
+    "rgb": [
+      227,
+      179,
+      103
+    ],
+    "hex": "#e3b367",
+    "stage_ocr": "P2",
+    "label_ocr": "B153 Pi"
+  },
+  {
+    "page": 17,
+    "row": 1,
+    "code": "P1",
+    "rgb": [
+      224,
+      173,
+      92
+    ],
+    "hex": "#e0ad5c",
+    "stage_ocr": "P!",
+    "label_ocr": ""
+  },
+  {
+    "page": 17,
+    "row": 7,
+    "code": "C3",
+    "rgb": [
+      188,
+      199,
+      205
+    ],
+    "hex": "#bcc7cd",
+    "stage_ocr": "C3",
+    "label_ocr": "R166 G166 B149"
+  },
+  {
+    "page": 17,
+    "row": 8,
+    "code": "C",
+    "rgb": [
+      180,
+      191,
+      197
+    ],
+    "hex": "#b4bfc5",
+    "stage_ocr": "C?",
+    "label_ocr": ""
+  },
+  {
+    "page": 17,
+    "row": 13,
+    "code": "D1",
+    "rgb": [
+      232,
+      192,
+      156
+    ],
+    "hex": "#e8c09c",
+    "stage_ocr": "D!",
+    "label_ocr": ""
+  },
+  {
+    "page": 17,
+    "row": 14,
+    "code": "D2-3",
+    "rgb": [
+      187,
+      177,
+      168
+    ],
+    "hex": "#bbb1a8",
+    "stage_ocr": "",
+    "label_ocr": "D2-3"
+  },
+  {
+    "page": 17,
+    "row": 19,
+    "code": "D",
+    "rgb": [
+      193,
+      148,
+      119
+    ],
+    "hex": "#c19477",
+    "stage_ocr": "D?",
+    "label_ocr": "B153"
+  },
+  {
+    "page": 18,
+    "row": 7,
+    "code": "P",
+    "rgb": [
+      206,
+      206,
+      132
+    ],
+    "hex": "#cece84",
+    "stage_ocr": "",
+    "label_ocr": "PZ1"
+  },
+  {
+    "page": 19,
+    "row": 17,
+    "code": "Pt3",
+    "rgb": [
+      253,
+      211,
+      153
+    ],
+    "hex": "#fdd399",
+    "stage_ocr": "",
+    "label_ocr": "Pt3"
+  },
+  {
+    "page": 20,
+    "row": 1,
+    "code": "Pt",
+    "rgb": [
+      227,
+      182,
+      176
+    ],
+    "hex": "#e3b6b0",
+    "stage_ocr": "",
+    "label_ocr": "Pts Nh Nh2-3 (PP)"
+  },
+  {
+    "page": 20,
+    "row": 8,
+    "code": "J",
+    "rgb": [
+      219,
+      185,
+      111
+    ],
+    "hex": "#dbb96f",
+    "stage_ocr": "",
+    "label_ocr": "Jx M35 蓟县系"
+  },
+  {
+    "page": 20,
+    "row": 9,
+    "code": "Ch",
+    "rgb": [
+      194,
+      180,
+      141
+    ],
+    "hex": "#c2b48d",
+    "stage_ocr": "",
+    "label_ocr": "Ch R255 G166 长城系 B77"
+  },
+  {
+    "page": 20,
+    "row": 12,
+    "code": "C25",
+    "rgb": [
+      204,
+      178,
+      143
+    ],
+    "hex": "#ccb28f",
+    "stage_ocr": "",
+    "label_ocr": "C25"
+  },
+  {
+    "page": 20,
+    "row": 16,
+    "code": "Ar3",
+    "rgb": [
+      242,
+      208,
+      222
+    ],
+    "hex": "#f2d0de",
+    "stage_ocr": "",
+    "label_ocr": "Ar3亲 新太古界"
+  },
+  {
+    "page": 20,
+    "row": 18,
+    "code": "Ar",
+    "rgb": [
+      225,
+      171,
+      194
+    ],
+    "hex": "#e1abc2",
+    "stage_ocr": "",
+    "label_ocr": "Ar 太古界"
+  },
+  {
+    "page": 20,
+    "row": 20,
+    "code": "Hd1",
+    "rgb": [
+      208,
+      145,
+      136
+    ],
+    "hex": "#d09188",
+    "stage_ocr": "",
+    "label_ocr": "Hd 1冥古宇"
+  }
+]
