@@ -1,0 +1,261 @@
+[
+  {
+    "page": 1,
+    "text_len": 266,
+    "images": 0,
+    "drawings": 6,
+    "table": null
+  },
+  {
+    "page": 2,
+    "text_len": 6,
+    "images": 0,
+    "drawings": 0,
+    "table": null
+  },
+  {
+    "page": 3,
+    "text_len": 1063,
+    "images": 0,
+    "drawings": 1,
+    "table": null
+  },
+  {
+    "page": 4,
+    "text_len": 4,
+    "images": 0,
+    "drawings": 0,
+    "table": null
+  },
+  {
+    "page": 5,
+    "text_len": 0,
+    "images": 0,
+    "drawings": 0,
+    "table": null
+  },
+  {
+    "page": 6,
+    "text_len": 1249,
+    "images": 0,
+    "drawings": 1,
+    "table": null
+  },
+  {
+    "page": 7,
+    "text_len": 432,
+    "images": 0,
+    "drawings": 0,
+    "table": null
+  },
+  {
+    "page": 8,
+    "text_len": 534,
+    "images": 0,
+    "drawings": 1,
+    "table": null
+  },
+  {
+    "page": 9,
+    "text_len": 0,
+    "images": 0,
+    "drawings": 0,
+    "table": null
+  },
+  {
+    "page": 10,
+    "text_len": 831,
+    "images": 0,
+    "drawings": 0,
+    "table": null
+  },
+  {
+    "page": 11,
+    "text_len": 1050,
+    "images": 0,
+    "drawings": 182,
+    "table": null
+  },
+  {
+    "page": 12,
+    "text_len": 1376,
+    "images": 0,
+    "drawings": 0,
+    "table": null
+  },
+  {
+    "page": 13,
+    "text_len": 1143,
+    "images": 0,
+    "drawings": 0,
+    "table": null
+  },
+  {
+    "page": 14,
+    "text_len": 88,
+    "images": 2,
+    "drawings": 0,
+    "table": "表2 正式地层单位用色（第1页）"
+  },
+  {
+    "page": 15,
+    "text_len": 39,
+    "images": 1,
+    "drawings": 0,
+    "table": "表2 正式地层单位用色（续）"
+  },
+  {
+    "page": 16,
+    "text_len": 39,
+    "images": 1,
+    "drawings": 0,
+    "table": "表2 正式地层单位用色（续）"
+  },
+  {
+    "page": 17,
+    "text_len": 39,
+    "images": 1,
+    "drawings": 0,
+    "table": "表2 正式地层单位用色（续）"
+  },
+  {
+    "page": 18,
+    "text_len": 39,
+    "images": 1,
+    "drawings": 0,
+    "table": "表2 正式地层单位用色（续）"
+  },
+  {
+    "page": 19,
+    "text_len": 40,
+    "images": 1,
+    "drawings": 0,
+    "table": "表2 正式地层单位用色（续）"
+  },
+  {
+    "page": 20,
+    "text_len": 77,
+    "images": 1,
+    "drawings": 0,
+    "table": "表2 正式地层单位用色（续）+ 表3 跨时代地层单位用色"
+  },
+  {
+    "page": 21,
+    "text_len": 69,
+    "images": 1,
+    "drawings": 0,
+    "table": "表3 跨时代地层单位用色（续）+ 表4 非正式地层单位用色"
+  },
+  {
+    "page": 22,
+    "text_len": 96,
+    "images": 2,
+    "drawings": 0,
+    "table": "表5 第四系成因类型花纹及用色"
+  },
+  {
+    "page": 23,
+    "text_len": 102,
+    "images": 1,
+    "drawings": 0,
+    "table": "表5 第四系成因类型花纹及用色（续）+ 表6 新生代—古生代酸性—中酸性侵入岩用色"
+  },
+  {
+    "page": 24,
+    "text_len": 47,
+    "images": 1,
+    "drawings": 0,
+    "table": "表6 新生代—古生代酸性—中酸性侵入岩用色（续）"
+  },
+  {
+    "page": 25,
+    "text_len": 91,
+    "images": 2,
+    "drawings": 0,
+    "table": "表6 新生代—古生代酸性—中酸性侵入岩用色（续）+ 表7 元古宙酸性—中酸性侵入岩用色"
+  },
+  {
+    "page": 26,
+    "text_len": 134,
+    "images": 3,
+    "drawings": 0,
+    "table": "表7 元古宙酸性—中酸性侵入岩用色（续）+ 表8 太古宙—冥古宙酸性—中酸性侵入岩用色"
+  },
+  {
+    "page": 27,
+    "text_len": 84,
+    "images": 2,
+    "drawings": 0,
+    "table": "表9 中性侵入岩用色"
+  },
+  {
+    "page": 28,
+    "text_len": 120,
+    "images": 2,
+    "drawings": 0,
+    "table": "表9 中性侵入岩用色（续）+ 表10 基性侵入岩用色"
+  },
+  {
+    "page": 29,
+    "text_len": 88,
+    "images": 2,
+    "drawings": 0,
+    "table": "表10 基性侵入岩用色（续）+ 表11 超基性侵入岩用色 + 表12 碱性侵入岩用色"
+  },
+  {
+    "page": 30,
+    "text_len": 131,
+    "images": 3,
+    "drawings": 0,
+    "table": "表12 碱性侵入岩用色（续）+ 表13 煌斑岩、碳酸岩用色"
+  },
+  {
+    "page": 31,
+    "text_len": 144,
+    "images": 2,
+    "drawings": 0,
+    "table": "表13 煌斑岩、碳酸岩用色（续）+ 表14 脉岩用色 + 表15 侵入岩填充花纹用色"
+  },
+  {
+    "page": 32,
+    "text_len": 124,
+    "images": 2,
+    "drawings": 0,
+    "table": "表15 侵入岩填充花纹用色（续）+ 表16 新生代以前火山岩用色 + 表17 新生代火山岩用色"
+  },
+  {
+    "page": 33,
+    "text_len": 95,
+    "images": 2,
+    "drawings": 0,
+    "table": "表18 潜火山岩用色 + 表19 变质表壳岩用色 + 表20 变质深成岩用色 + 表21 特殊岩石单位用色"
+  },
+  {
+    "page": 34,
+    "text_len": 112,
+    "images": 2,
+    "drawings": 0,
+    "table": "表21 特殊岩石单位用色（续）+ 表22 其他地质要素用色"
+  },
+  {
+    "page": 35,
+    "text_len": 108,
+    "images": 2,
+    "drawings": 0,
+    "table": "表22 其他地质要素用色（续）+ 表23 地理要素用色 + 表24 网纹用色"
+  },
+  {
+    "page": 36,
+    "text_len": 30,
+    "images": 1,
+    "drawings": 0,
+    "table": "表24 网纹用色（续）"
+  },
+  {
+    "page": 37,
+    "text_len": 778,
+    "images": 0,
+    "drawings": 1,
+    "table": null
+  }
+]

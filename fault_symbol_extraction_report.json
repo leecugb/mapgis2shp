@@ -1,0 +1,44 @@
+[
+  {
+    "page": 34,
+    "text_len": 112,
+    "images": 2,
+    "drawings": 0,
+    "extracted_images": [
+      {
+        "image": "e:\\J43C001002\\MAPGIS\\JWD\\pdf_fault_symbol_images\\page34_img1.png",
+        "width": 1304,
+        "height": 620,
+        "colorspace": 3
+      },
+      {
+        "image": "e:\\J43C001002\\MAPGIS\\JWD\\pdf_fault_symbol_images\\page34_img2.png",
+        "width": 1298,
+        "height": 712,
+        "colorspace": 3
+      }
+    ],
+    "drawing_summaries": []
+  },
+  {
+    "page": 35,
+    "text_len": 108,
+    "images": 2,
+    "drawings": 0,
+    "extracted_images": [
+      {
+        "image": "e:\\J43C001002\\MAPGIS\\JWD\\pdf_fault_symbol_images\\page35_img1.png",
+        "width": 1296,
+        "height": 478,
+        "colorspace": 3
+      },
+      {
+        "image": "e:\\J43C001002\\MAPGIS\\JWD\\pdf_fault_symbol_images\\page35_img2.png",
+        "width": 1297,
+        "height": 629,
+        "colorspace": 3
+      }
+    ],
+    "drawing_summaries": []
+  }
+]
