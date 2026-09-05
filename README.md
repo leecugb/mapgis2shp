@@ -1,5 +1,6 @@
 # mapgis2shp
 
+[![PyPI version](https://img.shields.io/pypi/v/mapgis2shp.svg)](https://pypi.org/project/mapgis2shp/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21487339-blue.svg)](https://doi.org/10.5281/zenodo.21487339)
@@ -14,6 +15,9 @@ MapGIS is a widely used closed-source GIS platform in China, especially in geolo
 
 - Read **point** (`.wt`), **line** (`.wl`), and **polygon** (`.wp`) files
 - Decode GBK-encoded attribute fields and field names
+- Decode point graphic parameters (text/symbol kind, subgraph number, glyph size, rotation angle)
+- Decode line graphic parameters (style number, width in mm, pattern coefficients)
+- Decode polygon graphic parameters (fill colour / pattern numbers from the head_9 section)
 - Reconstruct polygon topology from arc records
 - Preserve or repair invalid polygon geometries with `shapely.make_valid`
 - Export to any format supported by GeoPandas / Fiona (Shapefile, GeoJSON, GeoPackage, etc.)
@@ -57,11 +61,22 @@ pymapgis input.wl output.geojson --driver GeoJSON
 pymapgis input.wp output.shp --no-make-valid
 ```
 
+The same interface is available as `python -m pymapgis input.wp output.shp`.
+
 ## API
 
-### `Reader(filepath, make_valid=True)`
+### `Reader(filepath, make_valid=True, read_point_params=False, read_graphic_params=False)`
 
-Main entry point for reading a MapGIS file.
+Main entry point for reading a MapGIS file. With `read_point_params=True`
+(point files only), the per-point graphic parameter area is decoded as well:
+the columns `point_type` (0 = text, 1 = symbol), `symbol_no`, `height`,
+`width`, `spacing` and `angle` (degrees, counter-clockwise from east) are
+appended to the GeoDataFrame and exposed separately as `point_params`.
+With `read_graphic_params=True`, graphic parameters are decoded for any
+file type — point parameters for `.wt` (as above), line parameters for
+`.wl` (`linetype`, `aux_linetype`, `width`, `x_coef`, `y_coef`, exposed as
+`line_params`), and polygon parameters for `.wp` (`fill_color`, `pattern`,
+`pattern_color` from the head_9 section, exposed as `polygon_params`).
 
 **Attributes**
 
@@ -73,11 +88,22 @@ Main entry point for reading a MapGIS file.
 | `fields` | `list[tuple]` | Field metadata: `(name, type_name, length)` |
 | `data` | `pandas.DataFrame` | Attribute table |
 | `geom` | `list[shapely.geometry]` | Geometry objects |
+| `point_params` | `pandas.DataFrame` | Point graphic parameters (`.wt`, opt-in) |
+| `line_params` | `pandas.DataFrame` | Line graphic parameters (`.wl`, opt-in) |
+| `polygon_params` | `pandas.DataFrame` | Polygon graphic parameters (`.wp`, opt-in) |
 | `geodataframe` | `geopandas.GeoDataFrame` | Combined attributes and geometry |
 
 **Methods**
 
 - `to_file(filepath, **kwargs)` — forward to `GeoDataFrame.to_file`
+- `len(reader)` — number of features
+- `str(reader)` — summary (`"n features (type POINT)"`); `repr(reader)` shows the constructor arguments
+- Context manager: `with Reader(...) as r:` (the file is fully parsed and closed in the constructor)
+
+### Constants
+
+- `POINT_TYPE_TEXT` (0) / `POINT_TYPE_SYMBOL` (1) — values of the `point_type` column for `.wt` graphic parameters
+- `pymapgis.__version__` — package version string
 
 ### Exceptions
 
@@ -86,13 +112,44 @@ Main entry point for reading a MapGIS file.
 - `TopoError` — polygon topology reconstruction error
 - `InvalidDirectoryError` — reserved for project/directory errors
 
+## Reading graphic parameters
+
+Beyond geometry and attributes, MapGIS files carry per-feature **graphic
+parameters** (how MapGIS draws the feature). Decoding is opt-in:
+
+```python
+from pymapgis import Reader, POINT_TYPE_SYMBOL
+
+# Point files: annotation vs. subgraph symbol, symbol number, glyph size,
+# rotation angle
+with Reader("points.wt", read_graphic_params=True) as r:
+    symbols = r.geodataframe[r.geodataframe.point_type == POINT_TYPE_SYMBOL]
+    print(symbols[["symbol_no", "height", "width", "angle"]].head())
+
+# Line files: style number, width in millimetres, pattern coefficients
+with Reader("lines.wl", read_graphic_params=True) as r:
+    print(r.geodataframe[["linetype", "width", "x_coef", "y_coef"]].head())
+
+# Polygon files: fill colour / pattern numbers (head_9 section)
+with Reader("polygons.wp", read_graphic_params=True) as r:
+    print(r.geodataframe[["fill_color", "pattern", "pattern_color"]].head())
+```
+
+> **Warning — not self-contained.** Style, colour, symbol and pattern
+> numbers are indices into the MapGIS system libraries (Slib, line-style
+> library, pattern library) of the *originating* MapGIS installation; the
+> glyph definitions are not stored in the data files. The same number may
+> mean different things under a different or customised library. Field
+> layouts were reverse-engineered and validated on the layers of map sheet
+> J43C001002 — verify against your own data before relying on them.
+
 ## Supported formats
 
-| Extension | Geometry type | Notes |
-|-----------|---------------|-------|
-| `.wt` | Point | 93-byte fixed record size |
-| `.wl` | LineString | 57-byte arc index + coordinate block |
-| `.wp` | Polygon/MultiPolygon | Arc index + topology table + coordinate block |
+| Extension | Geometry type | Graphic parameters | Notes |
+|-----------|---------------|--------------------|-------|
+| `.wt` | Point | kind / symbol number / size / angle | 93-byte fixed record size |
+| `.wl` | LineString | style number / width / coefficients | 57-byte arc index + coordinate block |
+| `.wp` | Polygon/MultiPolygon | fill colour / pattern (head_9) | Arc index + topology table + coordinate block |
 
 CRS detection supports the most common projections found in MapGIS 6.x files, including longitude/latitude, Gauss-Krüger (Transverse Mercator), Lambert Conformal Conic, and Albers Equal-Area. Because MapGIS stores only projection and ellipsoid **index numbers**, the complete CRS depends on external MapGIS index files (`ellip.dat`, etc.).
 
@@ -216,7 +273,36 @@ Single point record structure:
 | Reserved | 1–6 | 6 | - | Unused |
 | X coordinate | 7–14 | 8 | double | X value |
 | Y coordinate | 15–22 | 8 | double | Y value |
-| Reserved | 23–92 | 70 | - | Unused |
+| Graphic parameters | 23–92 | 70 | - | Point graphic parameters (see below) |
+
+#### Point graphic parameters (bytes 23–92)
+
+> Reverse-engineered in September 2026 and validated on the annotation layers
+> of map sheet J43C001002. The byte at offset 31 selects the point kind; the
+> remaining fields are interpreted according to that kind. Sizes are in
+> millimetres and the angle in degrees (counter-clockwise from east, matching
+> the `atan2(dy, dx)` line-tangent convention — verified by fault symbols
+> whose rotation is parallel (mod 180°) to their parent fault's strike).
+
+| Content | Offset within record | Bytes | Type | Description |
+|---------|----------------------|-------|------|-------------|
+| Reserved | 23–30 | 8 | - | Unused (always zero) |
+| Point kind | 31 | 1 | uint8 | 0 = text annotation, 1 = subgraph symbol |
+| Reserved | 32 | 1 | - | Unused |
+| Subgraph number | 33–34 | 2 | int16 | Symbol points: symbol-library number; 0 for text |
+| Text height | 33–36 | 4 | float32 | Text points: character height in mm (overlaps the subgraph number; interpret by kind) |
+| Height | 37–40 | 4 | float32 | Symbol points: glyph height (mm); text points: character width (mm) |
+| Width | 41–44 | 4 | float32 | Symbol points: glyph width (mm); text points: character spacing (mm) |
+| Rotation angle | 45–48 | 4 | float32 | Symbol / text rotation angle in degrees |
+| Reserved | 49–92 | 44 | - | Not fully decoded (class codes observed at offsets 75 and 83; not read) |
+
+> **These parameters are not self-contained.** The subgraph number is an
+> index into the MapGIS system symbol library (Slib) of the originating
+> MapGIS installation; the glyph definitions are not stored in the file.
+> Under a different or customised library the same number may map to a
+> different glyph, and what a rotation of zero means depends on the glyph
+> design. Interpret the values only in the context of the symbol library
+> (and library version) that produced the data.
 
 ### Line files (`.wl`)
 
@@ -251,7 +337,37 @@ Single line index structure:
 | Reserved | 0–9 | 10 | - | Unused |
 | Anchor point count | 10–13 | 4 | int32 | Number of coordinate points in this line |
 | Anchor coordinate offset | 14–17 | 4 | int32 | Offset relative to coordinate-section start |
-| Reserved | 18–56 | 39 | - | Unused |
+| Graphic parameters | 18–56 | 39 | - | Line graphic parameters (see below) |
+
+#### Line graphic parameters (bytes 18–56)
+
+> Reverse-engineered in September 2026 and validated on all 18 line layers of
+> map sheet J43C001002 (widths are geologically plausible for every layer,
+> 0.05–4 mm; style numbers cluster by line category).
+
+| Content | Offset within record | Bytes | Type | Description |
+|---------|----------------------|-------|------|-------------|
+| Reserved | 18–21 | 4 | - | Unused |
+| Line-style number | 22–23 | 2 | int16 | Index into the MapGIS line-style library (1 = plain solid) |
+| Auxiliary style number | 24–25 | 2 | int16 | Auxiliary line-style index |
+| Class code | 26–27 | 2 | int16 | Varies by layer category; exact meaning undetermined |
+| Reserved | 28–29 | 2 | - | Unused |
+| Line width | 30–33 | 4 | float32 | Width in millimetres |
+| Reserved | 34 | 1 | - | Padding |
+| X coefficient | 35–38 | 4 | float32 | Pattern X scale (unaligned) |
+| Y coefficient | 39–42 | 4 | float32 | Pattern Y scale (unaligned) |
+| Undecoded | 43–56 | 14 | - | Small per-class values; layout not yet pinned down |
+
+> Line-style and colour numbers reference the external MapGIS line-style
+> library and are not self-contained (same dependency as point parameters).
+
+#### Additional sections
+
+Beyond the documented sections (lines / coordinates / attributes), `.wl`
+files in J43C001002 carry further per-line sections in the header index:
+head_4 (24 bytes per line), head_7 (32 bytes per line) and head_8 (4 bytes
+per line). Their content shows no correlation with display parameters and
+their purpose is undetermined (possibly topology/annotation linkages).
 
 #### Coordinate data section
 
@@ -273,8 +389,9 @@ Index-section meaning:
 |------|-----------------------------------|---------|
 | head_1 | 0 | Arc data section start and size |
 | head_2 | 10 | Coordinate data section start and size |
-| head_3 | 20 | Unused |
+| head_3 | 20 | Present in J43C001002; purpose undetermined |
 | head_4 | 30 | Polygon topology data section start and size |
+| head_9 | 80 | Polygon graphic-parameter section (see below) |
 | head_10 | 90 | Attribute data section start and size |
 
 #### Arc data section
@@ -302,6 +419,28 @@ The first 16 bytes of each record contain 4 little-endian int32 values. The pars
 | Reserved | 16–23 | 8 | - | Unused |
 
 > Polygon IDs are 1-based. To reconstruct a polygon, select all arcs whose left or right polygon ID equals the target ID. If the left ID matches, the arc coordinates are usually reversed so that the polygon boundary is consistently on the same side of the arc. The arcs are then chained by matching endpoints into closed rings, and rings are classified as shells or holes to build `Polygon` / `MultiPolygon` geometries.
+
+#### Polygon graphic-parameter section (head_9)
+
+> Reverse-engineered in September 2026 and validated on all 13 polygon layers
+> of map sheet J43C001002: the section holds exactly one record per polygon,
+> and its fields are 100% consistent within each geological unit.
+
+The section stores one record per **40 bytes**, the first record is empty,
+and record *i* (0-based after the empty record) belongs to polygon ID *i + 1*:
+
+| Content | Offset within record | Bytes | Type | Description |
+|---------|----------------------|-------|------|-------------|
+| Kind byte | 0 | 1 | uint8 | Observed value 1 |
+| Class code | 1 | 1 | uint8 | Varies by geological unit; meaning undetermined |
+| Reserved | 2–3 | 2 | - | Unused |
+| Fill colour | 4–5 | 2 | int16 | Fill colour index (candidate) |
+| Fill-pattern number | 6–7 | 2 | int16 | Pattern-library index; clusters by rock category (sedimentary ~3866–3931, intrusive 384–388, metamorphic 751–758) |
+| Pattern colour | 8–9 | 2 | int16 | Pattern colour index (candidate) |
+| Undecoded | 10–39 | 30 | - | Pattern sub-parameters for patterned units; layout not yet pinned down |
+
+> Colour and pattern numbers reference the external MapGIS colour/pattern
+> libraries and are not self-contained (same dependency as point parameters).
 
 #### Polygon reconstruction key points
 
@@ -369,14 +508,32 @@ String fields are read up to the first `\x00`. Date fields are year (int16) + mo
 2. **Polygon topology tolerance**: Arc endpoints may have tiny deviations, and some source data may contain topological gaps or self-intersections. Geometry validity repair is recommended after reading.
 3. **Encoding**: Field names and string attribute values use GBK. Illegal bytes are typically truncated at the first invalid byte.
 4. **Scale**: In projected coordinate systems internal coordinates are often in millimeters and are converted to meters by `scale / 1000`; for longitude/latitude systems `scale` is usually 1.
+5. **Graphic parameters are library-dependent**: symbol, line-style, colour and pattern numbers reference the MapGIS system libraries (Slib, line-style and pattern libraries) of the originating installation, which are not embedded in the file. They are only meaningful together with those libraries (and their versions); some field assignments are validated candidates rather than certainties (see the per-section notes).
+
+## Changelog
+
+### 2.2.1
+- Packaging fix: `pymapgis.rendering` is under active development and is not yet ready for distribution (it is also undocumented and requires matplotlib, which is not a declared dependency). It is now excluded from the wheel and sdist; the published package again focuses on reading/conversion. The module remains in the source repository and will be published as a separate package or extra once it stabilises
+
+### 2.2.0
+- `read_graphic_params=True`: decode line graphic parameters (`.wl`: `linetype`, `aux_linetype`, `width`, `x_coef`, `y_coef`) and polygon graphic parameters (`.wp` head_9 section: `fill_color`, `pattern`, `pattern_color`), exposed as `line_params` / `polygon_params` and joined into the GeoDataFrame
+- Format documentation: line graphic-parameter area (bytes 18–56), polygon head_9 section, additional `.wl` index sections
+
+### 2.1.0
+- `read_point_params=True`: decode point graphic parameters (`.wt`: `point_type`, `symbol_no`, `height`, `width`, `spacing`, `angle`), exposed as `point_params` and joined into the GeoDataFrame
+- New constants `POINT_TYPE_TEXT` / `POINT_TYPE_SYMBOL`
+- Format documentation: point graphic-parameter area (bytes 23–92)
+
+### 2.0.x
+- Matured reader: CRS inference, vectorised parsing, polygon-topology reconstruction, GBK attribute decoding, CLI
 
 ## Development
 
 Clone the repository and install in editable mode with dev dependencies:
 
 ```bash
-git clone https://github.com/pymapgis/pymapgis.git
-cd pymapgis
+git clone https://github.com/leecugb/mapgis2shp.git
+cd mapgis2shp
 pip install -e ".[dev]"
 ```
 
