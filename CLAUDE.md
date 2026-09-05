@@ -74,10 +74,11 @@ python3 verify_rendered_colors.py               # 核验颜色一致性
 
 - **投影坐标系**：所有图层读取后设为 EPSG:4326，并统一投影到 **WGS84 UTM Zone 43N（EPSG:32643）**。UTM 为正形投影，可保证产状符号的走向线与倾向短刺严格垂直。
 - **透明度**：地质面填充 `alpha=1.0`，避免 PNG 颜色偏离配色表。
+- **面要素不描边**：所有地质面图层一律 `linewidth=0`（不绘制面边界）。地质界线全部由 `LDZOFBA002` 线图层负责，断层由断层线图层负责，非地层区边界由 `LDZOFBB009`/`010` 描边负责；覆盖率经核查为 100%（残余段均在图廓边缘或属 009/010 共边）。
 - **非地层图层**：`LDZOFBB009`/`010` 不填充米色，仅绘制边界，防止覆盖地质面色。
 - **地质代号标注**：`LDZOFBB099.WT` 中的代号是碎片化注记对象（如 `N#-1` 与 `a` 分离），渲染器优先使用 `reconstruct_geological_labels.py` 生成的完整标注点。
 - **产状符号**：`LDZOFBA016.WT` 存储走向/倾向/倾角，`LDZOFBB099.WT` 的 `CHFCEC == "产状"` 提供倾角数字注记；渲染为走向线 + 倾向短刺 + 倾角注记。
-- **断裂构造**：`LDZOFBA003.WL`（实测）、`LYGREBA001.WL`（解译）、`LZLPGDJ002.WL`（深部）三类断层按 `fault_rendering_styles.json` 分层、分型绘制符号与倾角注记；类型代码地质含义待图例最终确认，当前为临时映射。
+- **断裂构造**：`LDZOFBA003.WL`（实测）、`LYGREBA001.WL`（解译）、`LZLPGDJ002.WL`（深部）三类断层按 `fault_rendering_styles.json` 分层、分型绘制符号与倾角注记；GZEEB 类型代码已经用户核实定稿（`gzeeb_code_analysis.md`），图例 11 类映射已存档（正断层/性质不明断层本幅 0 条，代码待确认，详见该文档 §6.4 待完善清单）。
 - **专题图**：运行 `python3 render_thematic_maps.py` 可分别输出 `kurgan_thematic_ldzo.png`（地质-建造构造）与 `kurgan_thematic_ldly.png`（水系）；运行 `python3 render_combined_thematic_maps.py` 可输出合并版 `kurgan_thematic_combined.png`。
 
 ## 注意事项

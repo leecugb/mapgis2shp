@@ -43,6 +43,41 @@ _LINE_RECORD_SIZE = 57
 _ARC_RECORD_SIZE = 57
 _TOPO_RECORD_SIZE = 24
 
+# Point-record graphic parameter area (reverse-engineered, validated on
+# annotation layers of J43C001002; see docs/MapGIS_Vector_Format.md).
+# The 70 bytes after X/Y hold the display parameters MapGIS uses to draw the
+# point: byte 31 selects the point kind, and the size/angle fields follow a
+# kind-dependent layout (float32, millimetres / degrees).
+_POINT_TYPE_OFFSET = 31
+_POINT_SYMBOL_NO_OFFSET = 33  # int16 subgraph number (symbol points only)
+_POINT_TEXT_HEIGHT_OFFSET = 33  # float32 text height (text points only)
+_POINT_SIZE2_OFFSET = 37  # float32: symbol height / text width
+_POINT_SIZE3_OFFSET = 41  # float32: symbol width / text spacing
+_POINT_ANGLE_OFFSET = 45  # float32 rotation angle, degrees (CCW from east)
+
+# Values of the point-kind byte at _POINT_TYPE_OFFSET.
+POINT_TYPE_TEXT = 0
+POINT_TYPE_SYMBOL = 1
+
+# Line-record graphic parameter offsets (reverse-engineered 2026-09; see
+# docs/MapGIS_Vector_Format.md).  The 39 bytes after the coordinate offset in
+# each 57-byte line record hold the line display parameters.  Note the
+# coefficient floats are NOT 4-byte aligned.
+_LINE_LINETYPE_OFFSET = 22  # int16 line-style number (style-library index)
+_LINE_AUX_LINETYPE_OFFSET = 24  # int16 auxiliary line-style number
+_LINE_WIDTH_OFFSET = 30  # float32 line width, millimetres
+_LINE_X_COEF_OFFSET = 35  # float32 pattern X coefficient (unaligned)
+_LINE_Y_COEF_OFFSET = 39  # float32 pattern Y coefficient (unaligned)
+
+# Polygon graphic parameters live in the dedicated header section head_9
+# (index 8): one 40-byte record per polygon, first record empty, record i+1
+# corresponding to polygon ID i+1 (reverse-engineered 2026-09).
+_POLYGON_PARAM_SECTION = 8
+_POLYGON_PARAM_RECORD_SIZE = 40
+_POLY_FILL_COLOR_OFFSET = 4  # int16 fill colour index (assignment candidate)
+_POLY_PATTERN_OFFSET = 6  # int16 fill-pattern number (pattern-library index)
+_POLY_PATTERN_COLOR_OFFSET = 8  # int16 pattern colour index (candidate)
+
 # MapGIS stores geometry type codes in the attribute table.
 _ATTR_TYPE_STRING = 0
 _ATTR_TYPE_BYTE = 1
@@ -428,6 +463,79 @@ def _read_points(
     return [shapely.geometry.Point(xy) for xy in coords]
 
 
+_POINT_PARAM_COLUMNS = ["point_type", "symbol_no", "height", "width", "spacing", "angle"]
+
+
+def _read_point_params(
+    file_obj: BinaryIO, start: int, section_size: int
+) -> pd.DataFrame:
+    """Decode the graphic-parameter area of point records.
+
+    Byte 31 of each 93-byte record distinguishes text annotations
+    (``POINT_TYPE_TEXT``) from subgraph symbols (``POINT_TYPE_SYMBOL``).  The
+    remaining fields share the same offsets but their meaning depends on the
+    kind:
+
+    ============= ============================ ============================
+    column        symbol point                 text point
+    ============= ============================ ============================
+    ``symbol_no`` int16 subgraph number @33    always 0
+    ``height``    float32 glyph height @37     float32 text height @33 (mm)
+    ``width``     float32 glyph width @41      float32 text width @37 (mm)
+    ``spacing``   NaN                          float32 char spacing @41 (mm)
+    ``angle``     float32 rotation @45, degrees counter-clockwise from east
+    ============= ============================ ============================
+
+    The angle convention is validated empirically: fault-symbol rotations in
+    J43C001002 annotation layers are parallel (mod 180) to the tangent angle
+    computed as ``atan2(dy, dx)`` of the associated line.
+
+    These parameters are *not* self-contained: ``symbol_no`` is an index into
+    the MapGIS system symbol library (Slib) of the originating MapGIS
+    installation, and the glyph definitions are not stored in the file.  The
+    same number may map to different glyphs under a different or customised
+    library, and what a rotation of zero means depends on the glyph design.
+    Interpret the values only in the context of the symbol library (and
+    library version) that produced the data.
+    """
+    file_obj.seek(start)
+    buf = file_obj.read(section_size)
+    count = max(0, len(buf) // _POINT_RECORD_SIZE - 1)
+    if count == 0:
+        return pd.DataFrame(columns=_POINT_PARAM_COLUMNS)
+
+    # Overlapping views of the kind-dependent fields: symbol_no (int16 @33)
+    # overlaps the text height (float32 @33), so both are decoded for every
+    # record and selected per record afterwards.
+    dtype = np.dtype({
+        "names": ["point_type", "symbol_no", "f33", "f37", "f41", "angle"],
+        "formats": ["u1", "<i2", "<f4", "<f4", "<f4", "<f4"],
+        "offsets": [
+            _POINT_TYPE_OFFSET,
+            _POINT_SYMBOL_NO_OFFSET,
+            _POINT_TEXT_HEIGHT_OFFSET,
+            _POINT_SIZE2_OFFSET,
+            _POINT_SIZE3_OFFSET,
+            _POINT_ANGLE_OFFSET,
+        ],
+        "itemsize": _POINT_RECORD_SIZE,
+    })
+    records = np.frombuffer(buf, dtype=dtype, offset=_POINT_RECORD_SIZE, count=count)
+
+    is_symbol = records["point_type"] == POINT_TYPE_SYMBOL
+    return pd.DataFrame(
+        {
+            "point_type": records["point_type"].astype(np.int64),
+            "symbol_no": np.where(is_symbol, records["symbol_no"], 0).astype(np.int64),
+            "height": np.where(is_symbol, records["f37"], records["f33"]),
+            "width": np.where(is_symbol, records["f41"], records["f37"]),
+            "spacing": np.where(is_symbol, np.nan, records["f41"]),
+            "angle": records["angle"].astype(np.float64),
+        },
+        columns=_POINT_PARAM_COLUMNS,
+    )
+
+
 def _read_arc_index(
     file_obj: BinaryIO, start: int, section_size: int, record_size: int
 ) -> List[Tuple[int, int]]:
@@ -494,6 +602,106 @@ def _read_lines(
         coords = np.frombuffer(raw, dtype="<d").reshape(-1, 2) * scale
         geoms.append(shapely.geometry.LineString(coords))
     return geoms
+
+
+_LINE_PARAM_COLUMNS = ["linetype", "aux_linetype", "width", "x_coef", "y_coef"]
+
+
+def _read_line_params(
+    file_obj: BinaryIO, start: int, section_size: int
+) -> pd.DataFrame:
+    """Decode the graphic-parameter area of line records.
+
+    Each 57-byte line index record carries the line display parameters after
+    the coordinate offset: the int16 style number at 22 (index into the
+    MapGIS line-style library, e.g. 1 = plain solid line), the int16
+    auxiliary style number at 24, the float32 width in millimetres at 30,
+    and the float32 pattern coefficients at 35 (X) and 39 (Y) -- note the
+    latter two are deliberately unaligned in the record.
+
+    Like point parameters, the style numbers reference the external MapGIS
+    line-style library and are not self-contained.
+    """
+    file_obj.seek(start)
+    buf = file_obj.read(section_size)
+    count = max(0, len(buf) // _LINE_RECORD_SIZE - 1)
+    if count == 0:
+        return pd.DataFrame(columns=_LINE_PARAM_COLUMNS)
+
+    dtype = np.dtype({
+        "names": ["linetype", "aux_linetype", "width", "x_coef", "y_coef"],
+        "formats": ["<i2", "<i2", "<f4", "<f4", "<f4"],
+        "offsets": [
+            _LINE_LINETYPE_OFFSET,
+            _LINE_AUX_LINETYPE_OFFSET,
+            _LINE_WIDTH_OFFSET,
+            _LINE_X_COEF_OFFSET,
+            _LINE_Y_COEF_OFFSET,
+        ],
+        "itemsize": _LINE_RECORD_SIZE,
+    })
+    records = np.frombuffer(buf, dtype=dtype, offset=_LINE_RECORD_SIZE, count=count)
+    return pd.DataFrame(
+        {
+            "linetype": records["linetype"].astype(np.int64),
+            "aux_linetype": records["aux_linetype"].astype(np.int64),
+            "width": records["width"].astype(np.float64),
+            "x_coef": records["x_coef"].astype(np.float64),
+            "y_coef": records["y_coef"].astype(np.float64),
+        },
+        columns=_LINE_PARAM_COLUMNS,
+    )
+
+
+_POLYGON_PARAM_COLUMNS = ["fill_color", "pattern", "pattern_color"]
+
+
+def _read_polygon_params(
+    file_obj: BinaryIO, start: int, section_size: int
+) -> pd.DataFrame:
+    """Decode per-polygon graphic parameters from the head_9 section.
+
+    The section holds one 40-byte record per polygon (first record empty);
+    record *i* (0-based after the empty record) belongs to polygon ID *i + 1*.
+    Best-supported interpretation of the leading bytes, validated by 100%
+    within-class consistency on J43C001002 polygon layers:
+
+    - int16 @4: fill colour index (candidate)
+    - int16 @6: fill-pattern number -- sedimentary units cluster around
+      3866-3928, intrusive rocks 384-388, metamorphic rocks 751-754
+    - int16 @8: pattern colour index (candidate)
+
+    The remaining bytes carry further pattern sub-parameters whose layout is
+    not yet pinned down; colour and pattern numbers reference the external
+    MapGIS colour/pattern libraries and are not self-contained.
+    """
+    file_obj.seek(start)
+    buf = file_obj.read(section_size)
+    count = max(0, len(buf) // _POLYGON_PARAM_RECORD_SIZE - 1)
+    if count == 0:
+        return pd.DataFrame(columns=_POLYGON_PARAM_COLUMNS)
+
+    dtype = np.dtype({
+        "names": ["fill_color", "pattern", "pattern_color"],
+        "formats": ["<i2", "<i2", "<i2"],
+        "offsets": [
+            _POLY_FILL_COLOR_OFFSET,
+            _POLY_PATTERN_OFFSET,
+            _POLY_PATTERN_COLOR_OFFSET,
+        ],
+        "itemsize": _POLYGON_PARAM_RECORD_SIZE,
+    })
+    records = np.frombuffer(
+        buf, dtype=dtype, offset=_POLYGON_PARAM_RECORD_SIZE, count=count
+    )
+    return pd.DataFrame(
+        {
+            "fill_color": records["fill_color"].astype(np.int64),
+            "pattern": records["pattern"].astype(np.int64),
+            "pattern_color": records["pattern_color"].astype(np.int64),
+        },
+        columns=_POLYGON_PARAM_COLUMNS,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -822,6 +1030,22 @@ class Reader:
         artifacts produced by the MapGIS arc-merging step without changing areas
         in any meaningful way. Set to False to obtain the raw reconstructed
         geometries (matching the behaviour of the original 1.0 reader).
+    read_point_params : bool, optional
+        Point files (``.wt``) only: also decode the per-point graphic
+        parameter area (text vs. symbol kind, subgraph number, glyph size in
+        millimetres, rotation angle in degrees). The columns ``point_type``,
+        ``symbol_no``, ``height``, ``width``, ``spacing`` and ``angle`` are
+        appended to :attr:`geodataframe` and are also available separately as
+        :attr:`point_params`. Default False (attribute table only).
+    read_graphic_params : bool, optional
+        Decode graphic parameters for any file type: point parameters for
+        ``.wt`` (as above), line parameters for ``.wl`` (columns ``linetype``,
+        ``aux_linetype``, ``width``, ``x_coef``, ``y_coef``, exposed as
+        :attr:`line_params`), and polygon parameters for ``.wp`` (columns
+        ``fill_color``, ``pattern``, ``pattern_color`` from the head_9
+        section, exposed as :attr:`polygon_params`). Style and colour numbers
+        reference the external MapGIS symbol/line-style/pattern libraries and
+        are not self-contained. Default False.
 
     Examples
     --------
@@ -830,16 +1054,28 @@ class Reader:
     ...     r.geodataframe.to_file("example.shp")
     """
 
-    def __init__(self, filepath: Any, make_valid: bool = True) -> None:
+    def __init__(
+        self,
+        filepath: Any,
+        make_valid: bool = True,
+        read_point_params: bool = False,
+        read_graphic_params: bool = False,
+    ) -> None:
         self._filepath = os.fspath(filepath)
         self._make_valid = make_valid
+        self._read_point_params = read_point_params
+        self._read_graphic_params = read_graphic_params
         self.shapeType: Optional[str] = None
         self.crs: Any = ""
         self.bbox: Optional[np.ndarray] = None
         self.fields: List[Tuple[str, str, int]] = []
         self.data: pd.DataFrame = pd.DataFrame()
         self.geom: List[shapely.geometry.base.BaseGeometry] = []
+        self.point_params: pd.DataFrame = pd.DataFrame()
+        self.line_params: pd.DataFrame = pd.DataFrame()
+        self.polygon_params: pd.DataFrame = pd.DataFrame()
         self.geodataframe: gpd.GeoDataFrame = gpd.GeoDataFrame()
+        self._polygon_active_ids: List[int] = []
 
         # The file is fully parsed and closed here; the context-manager
         # interface is kept only for backward compatibility.
@@ -875,10 +1111,14 @@ class Reader:
 
         if self.shapeType == "POINT":
             self.geom = _read_points(file_obj, geom_start, geom_size, scale)
+            if self._read_point_params or self._read_graphic_params:
+                self.point_params = _read_point_params(file_obj, geom_start, geom_size)
         elif self.shapeType == "LINE":
             self.geom = _read_lines(
                 file_obj, geom_start, geom_size, coord_start, coord_size, scale
             )
+            if self._read_graphic_params:
+                self.line_params = _read_line_params(file_obj, geom_start, geom_size)
         elif self.shapeType == "POLYGON":
             self.geom = self._read_polygons(
                 file_obj,
@@ -889,6 +1129,14 @@ class Reader:
                 scale,
                 header_entries[3],
             )
+            if self._read_graphic_params:
+                params = _read_polygon_params(file_obj, *header_entries[_POLYGON_PARAM_SECTION])
+                # head_9 record i (0-based after the empty first record)
+                # belongs to polygon ID i + 1; select the active IDs exactly
+                # like the attribute rows in _read_polygons.
+                self.polygon_params = params.iloc[
+                    [pid - 1 for pid in self._polygon_active_ids if 1 <= pid <= len(params)]
+                ]
 
         self._build_geodataframe()
 
@@ -913,6 +1161,7 @@ class Reader:
 
         # Active polygon IDs are the non-zero values in columns 2 and 3.
         active_ids = sorted({int(pid) for pid in topology[:, 2:4].flatten() if pid != 0})
+        self._polygon_active_ids = active_ids
 
         # MapGIS polygon IDs are 1-based; the attribute table rows are 0-based.
         self.data = self.data.iloc[[pid - 1 for pid in active_ids if 1 <= pid <= len(self.data)]]
@@ -924,7 +1173,17 @@ class Reader:
 
     def _build_geodataframe(self) -> None:
         """Assemble the final GeoDataFrame and bounding box."""
-        self.geodataframe = gpd.GeoDataFrame(self.data, crs=self.crs, geometry=self.geom)
+        data = self.data
+        # Graphic parameters align 1:1 with their features (points and lines
+        # are never filtered; polygon params are filtered by the same active
+        # IDs as the attribute rows), so same-length frames join column-wise.
+        for params in (self.point_params, self.line_params, self.polygon_params):
+            if not params.empty and len(params) == len(data):
+                data = pd.concat(
+                    [data.reset_index(drop=True), params.reset_index(drop=True)],
+                    axis=1,
+                )
+        self.geodataframe = gpd.GeoDataFrame(data, crs=self.crs, geometry=self.geom)
         if self.geom:
             bounds = self.geodataframe.bounds
             self.bbox = np.array([
