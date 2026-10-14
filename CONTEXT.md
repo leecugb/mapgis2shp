@@ -3,7 +3,7 @@
 ## 项目状态总览
 
 - **包名（PyPI）**：`mapgis2shp`
-- **当前版本**：`2.0.3`
+- **当前版本**：`2.3.0`
 - **PyPI 页面**：https://pypi.org/project/mapgis2shp/
 - **Python 导入名**：`pymapgis`（`from pymapgis import Reader`）
 - **安装命令**：`pip install mapgis2shp`
@@ -18,6 +18,14 @@
 | 2.0.1 | （由用户手动发布，内容同 2.0.0 附近） |
 | 2.0.2 | 代码级梳理优化（见下文） |
 | 2.0.3 | 删除 `rendering` 模块，包聚焦读取转换 |
+| 2.0.8 | README 同步（保留继承说明与 DOI，移除论文链接） |
+| 2.2.1 | 点/线/面图形参数区解码（`read_graphic_params`）；写出器图形参数回填 |
+| 2.3.0 | **图形库解析器入包**：`SubgraphLib`（Subgraph.lib 符号几何，含未索引尾段链式走查）+ `LinestyLib`（LINESTY.lib 线型，子线/元素模板/节奏/双参数组合）；`.WL @26=线颜色` 字段（官方参数序）；`.WP head_9` 面参数布局修订为 u8@5/@6/@9（订正 int16 错位读法）；CLI 新增 `pymapgis lib` 子命令与 `--graphic-params` 开关；发布件排除 `semantics` 子包；**裁定表剥离**（ADJUDICATED/PAIR_SEMANTICS 含地质语义与图幅统计，迁至仓内 `linesty_adjudicated.py` 并经 hatch 排除，`__init__` 不导出；发布环境惰性加载降级为纯格式级判定） |
+
+## 包定位（2026-10-14 用户裁定）
+
+- **mapgis2shp = pymapgis 的分发封装**：PyPI 分发名 `mapgis2shp`，实体库导入名 `pymapgis`，功能边界 = MapGIS 矢量文件读/写/转换 + 图形库（Subgraph.lib/LINESTY.lib）解析。
+- **地质语义解析不是它的功能**：`src/pymapgis/semantics/`（与已排除的 `rendering/`）是仓内 JWD 管线代码，仅活在源码树（editable 环境可用），**自 2.3.0 起不进入 sdist/wheel**。发布件 = `__init__/reader/writer/cli/slib/linesty/__main__/_version` 8 模块；`verify_pymapgis.py` 仅依赖 Reader/Writer，可在 sdist 内运行。
 
 ## 项目结构
 
@@ -283,3 +291,25 @@ python3 render_strict_standard_map.py --dpi 200
 python3 verify_rendering.py
 ```
 
+
+---
+
+# 2026-09-13 追加：《新疆区域地质志》解析成果
+
+780 页扫描版《新疆维吾尔自治区区域地质志》（1993，地质专报第32号）第一篇地层全 13 章解析完成。
+
+## 产出（data/ 下持续使用）
+
+| 文件 | 用途 |
+|------|------|
+| `data/xinjiang_stratigraphic_contacts.csv` | 全书地层单元接触关系总表 355 行（含 28 个对比表检核补录单元） |
+| `data/stratigraphic_geologic_age_table.csv` + 根目录同名 .md | 地层-地质年代表（单元→代/纪/世/统 + ICS 2023 Ma 标尺） |
+| `data/boundary_contact_priors.json` | 界线接触关系先验库 331 规则，供渲染管线判别无 GZBD 编码界线的接触类型 |
+| `_contacts_to_priors.py` | 总表→先验库转换器（2026-09-13 修复版，重跑即可再生成） |
+
+## 要点
+
+- 印刷页 = 渲染文件页 − 偏移（0/−1/−2/−3 四段，见存档 README）；CSV 页码为印刷页
+- 先验库优先级：志书 > 裁定 > 通用 > GZBD 兜底（有意设计，志书与裁定不相交）
+- memoir_multi 47 对多关系属设计内（分区差异），渲染取首项
+- 存档：`archive/2026-09-13_xinjiang_memoir_stratigraphy/`（含快照与本表说明）

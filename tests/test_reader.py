@@ -257,7 +257,7 @@ class TestLineParams:
         with Reader(path, read_graphic_params=True) as reader:
             lp = reader.line_params
             assert list(lp.columns) == [
-                "linetype", "aux_linetype", "width", "x_coef", "y_coef"
+                "linetype", "aux_linetype", "color", "width", "x_coef", "y_coef"
             ]
             assert len(lp) == 310
             assert "width" in reader.geodataframe.columns
@@ -267,6 +267,8 @@ class TestLineParams:
             # Boundary faults (41) are thickest, regional faults (28) next.
             assert gdf.loc[gz == "41", "width"].round(2).eq(0.8).all()
             assert gdf.loc[gz == "28", "width"].round(2).eq(0.5).all()
+            # The whole fault layer is drawn in colour 6 (black family).
+            assert (lp["color"] == 6).all()
             # Inferred faults (04) use dashed style 2; revived faults (31)
             # style 18; nappe boundaries (07) style 38.
             assert (gdf.loc[gz == "04", "linetype"] == 2).all()
@@ -303,12 +305,13 @@ class TestPolygonParams:
 
     @pytest.mark.integration
     def test_pattern_clusters_by_rock_category(self) -> None:
-        """Fill-pattern numbers cluster by layer: sedimentary ~3900,
-        intrusive 384-388, metamorphic 751-758."""
+        """Fill-pattern numbers cluster by layer: sedimentary 26-91,
+        intrusive 128-132, metamorphic 239-246 (uint8 head_9 layout pinned
+        2026-10-14; the former int16 misread shifted these by the flag byte)."""
         for fname, lo, hi in [
-            ("LDZOFBB001.WP", 3866, 3931),
-            ("LDZOFBB003.WP", 384, 388),
-            ("LDZOFBB004.WP", 751, 758),
+            ("LDZOFBB001.WP", 26, 91),
+            ("LDZOFBB003.WP", 128, 132),
+            ("LDZOFBB004.WP", 239, 246),
         ]:
             path = Path(fname)
             if not path.exists():
@@ -332,4 +335,4 @@ class TestPolygonParams:
             assert len(gdf) == 46
             # Patterned intrusive bodies carry non-zero pattern params;
             # every row must have a pattern in the intrusive range.
-            assert gdf["pattern"].between(384, 388).all()
+            assert gdf["pattern"].between(128, 132).all()

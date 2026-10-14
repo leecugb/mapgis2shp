@@ -31,7 +31,74 @@ _SRC = Path(__file__).parent / "src"
 if _SRC.is_dir() and str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from pymapgis import Reader
+from pymapgis import Reader, Writer  # noqa: E402
+
+
+def roundtrip_file(path: str, tmpdir: Path) -> Dict[str, Any]:
+    """Read one MapGIS file, write it back with ``Writer``, and re-read it.
+
+    Compares feature count and bounding box against the original, and the
+    total area for polygon layers.  Writes only into *tmpdir*.
+    """
+    result: Dict[str, Any] = {"path": path, "ok": False}
+    t0 = time.time()
+    try:
+        with Reader(path, read_graphic_params=True) as source:
+            gdf = source.geodataframe
+            expected_count = len(source)
+            expected_bbox = source.bbox
+        out = tmpdir / Path(path).name
+        Writer(gdf).to_file(out)
+        with Reader(out) as reader:
+            result["count"] = len(reader)
+            result["duration"] = time.time() - t0
+            ok = len(reader) == expected_count and np.allclose(
+                reader.bbox, expected_bbox, atol=1e-9
+            )
+            if reader.shapeType == "POLYGON":
+                src_area = float(gdf.geometry.area.sum())
+                new_area = float(reader.geodataframe.geometry.area.sum())
+                result["area_rel_diff"] = abs(new_area - src_area) / max(src_area, 1e-30)
+                ok = ok and result["area_rel_diff"] < 1e-9
+            result["ok"] = ok
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+        result["duration"] = time.time() - t0
+    return result
+
+
+def roundtrip() -> int:
+    """Round-trip every MapGIS file in the current directory through Writer."""
+    import tempfile
+
+    warnings.filterwarnings("ignore")
+    files = sorted(glob.glob("*.WT") + glob.glob("*.WL") + glob.glob("*.WP"))
+    if not files:
+        print("No MapGIS files found in the current directory.")
+        return 0
+    errors = []
+    print(f"Round-tripping {len(files)} files (Reader -> Writer -> Reader)...")
+    with tempfile.TemporaryDirectory(prefix="pymapgis_rt_") as tmp:
+        for path in files:
+            result = roundtrip_file(path, Path(tmp))
+            status = "OK" if result["ok"] else "FAIL"
+            line = (
+                f"{path}: {status} | {result.get('count', '-')} features | "
+                f"{result.get('duration', 0.0):.3f}s"
+            )
+            if "area_rel_diff" in result:
+                line += f" | area_rel_diff={result['area_rel_diff']:.2e}"
+            if "error" in result:
+                line += f" | {result['error']}"
+            print(line)
+            if not result["ok"]:
+                errors.append(result)
+    print()
+    if errors:
+        print(f"ROUND-TRIP FAILED: {len(errors)} file(s)")
+        return 1
+    print("All files round-tripped successfully (not recorded in baseline).")
+    return 0
 
 
 def load_baseline(path: str = "pymapgis_baseline.json") -> Dict[str, Any]:
@@ -123,7 +190,11 @@ def main() -> int:
 
         if not result["ok"]:
             errors.append(result)
-            if "baseline_count_diff" in result or "baseline_bbox_diff" in result or "baseline_crs_diff" in result:
+            if (
+                "baseline_count_diff" in result
+                or "baseline_bbox_diff" in result
+                or "baseline_crs_diff" in result
+            ):
                 baseline_diffs.append(result)
 
     print()
@@ -167,4 +238,6 @@ def capture_baseline(output: str = "pymapgis_baseline.json") -> None:
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--capture-baseline":
         sys.exit(capture_baseline())
+    if len(sys.argv) > 1 and sys.argv[1] == "--roundtrip":
+        sys.exit(roundtrip())
     sys.exit(main())
