@@ -15,10 +15,13 @@ from pymapgis.reader import (
     _PolygonTopologyBuilder,
     _raw_dms_to_degrees,
     _read_arc_index,
+    _read_line_params,
     _read_points,
+    _read_polygon_params,
     _read_struct,
     _read_topology_table,
 )
+from pymapgis.slib import SubgraphLib
 
 
 class TestDecodeGbk:
@@ -213,3 +216,448 @@ class TestVectorizedReaders:
         assert topo[0, 3] == 2
         assert topo[1, 2] == 3
         assert topo[1, 3] == 4
+
+
+# ---------------------------------------------------------------------------
+# Graphic-parameter decodes (official MapGIS layouts, pinned 2026-10-14)
+# ---------------------------------------------------------------------------
+
+
+class TestPublicApi:
+    """包级导出：图形库解析器（Subgraph.lib / LINESTY.lib）为公共 API。
+
+    裁定表（ADJUDICATED / PAIR_SEMANTICS，含地质语义）不是包级导出，
+    也不进发布件（2026-10-14 包定位裁定）——它们是仓内
+    pymapgis.linesty_adjudicated 的内容。
+    """
+
+    def test_library_parsers_exported(self) -> None:
+        import pymapgis
+
+        for name in (
+            "SubgraphLib", "LinestyLib", "compose_feature_style",
+            "classify_form", "census", "symbol_geometries", "fit_circle",
+        ):
+            assert hasattr(pymapgis, name), name
+        for name in ("ADJUDICATED", "PAIR_SEMANTICS", "pair_semantics"):
+            assert not hasattr(pymapgis, name), name
+
+    def test_adjudicated_tables_repo_side(self) -> None:
+        """仓内环境（可导入 linesty_adjudicated）裁定表可用。"""
+        from pymapgis import linesty
+
+        assert linesty.pair_semantics(17, 0) is not None
+        adj, _ = linesty._adjudicated_tables()
+        assert 2 in adj  # 线型 2（纯虚线）有裁定
+
+    def test_adjudicated_tables_degrade_without_module(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path
+    ) -> None:
+        """发布环境（linesty_adjudicated 缺席）功能完整降级。"""
+        import sys
+
+        import pymapgis.linesty as linesty
+
+        real_module = sys.modules.pop("pymapgis.linesty_adjudicated", None)
+        monkeypatch.setitem(sys.modules, "pymapgis.linesty_adjudicated", None)
+        try:
+            adj, pairs = linesty._adjudicated_tables()
+            assert adj == {} and pairs == {}
+            assert linesty.pair_semantics(17, 0) is None
+        finally:
+            if real_module is not None:
+                sys.modules["pymapgis.linesty_adjudicated"] = real_module
+
+
+class TestLineParams:
+    """线图形参数：官方字段序 线型号@22/辅助线型号@24/线颜色@26/
+    线宽@30/X系数@35/Y系数@39。"""
+
+    def test_decode_includes_color(self) -> None:
+        empty = b"\x00" * 57
+        record = bytearray(57)
+        struct.pack_into("<h", record, 22, 211)
+        struct.pack_into("<h", record, 24, 0)
+        struct.pack_into("<h", record, 26, 194)
+        struct.pack_into("<f", record, 30, 0.7)
+        struct.pack_into("<f", record, 35, 10.0)
+        struct.pack_into("<f", record, 39, 2.5)
+        buf = empty + bytes(record)
+
+        f = io.BytesIO(buf)
+        params = _read_line_params(f, 0, len(buf))
+        assert list(params.columns) == [
+            "linetype", "aux_linetype", "color", "width", "x_coef", "y_coef",
+        ]
+        row = params.iloc[0]
+        assert row["linetype"] == 211
+        assert row["aux_linetype"] == 0
+        assert row["color"] == 194
+        assert row["width"] == pytest.approx(0.7)
+        assert row["x_coef"] == pytest.approx(10.0)
+        assert row["y_coef"] == pytest.approx(2.5)
+
+
+class TestPolygonParams:
+    """区图形参数：u8 布局 @5 填充色/@6 图案号/@9 图案色（2026-10-14
+    三幅字节级实证定版）。
+
+    回归锚：旧 int16@4 错位读法把 (byte4=0, byte5=fill) 读成 fill<<8
+    （fill=70 → 17920）；本测试 byte4 恒 0，若回归旧读法 fill_color
+    将不等于 70。
+    """
+
+    def test_decode_u8_layout(self) -> None:
+        empty = b"\x00" * 40
+        record = bytearray(40)
+        record[0] = 1
+        record[5] = 70
+        record[6] = 26
+        record[7] = 15
+        record[9] = 9
+        buf = empty + bytes(record)
+
+        f = io.BytesIO(buf)
+        params = _read_polygon_params(f, 0, len(buf))
+        assert list(params.columns) == ["fill_color", "pattern", "pattern_color"]
+        row = params.iloc[0]
+        assert row["fill_color"] == 70
+        assert row["pattern"] == 26
+        assert row["pattern_color"] == 9
+
+
+class TestSlibTailChain:
+    """Subgraph.lib 未索引尾段走查 + 末条索引记录 0xBE 假阳性回归。
+
+    合成迷你库：2 条索引记录 + 1 条尾段记录（后跟一条签名合法但无法
+    出链的终止签名——模拟真实库 #1996 处的诚实停止）。末条索引记录的
+    载荷内嵌 0xBEBEBEBE（旧"0xBE×3 预留区"扫描会在此截断记录区）。
+    """
+
+    @staticmethod
+    def _record(t: int, pts: list) -> bytes:
+        n = 2 * len(pts)
+        header = struct.pack("<4H", t, n, 0, len(pts))
+        payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
+        return header + payload
+
+    def test_tail_access_and_be_regression(self, tmp_path) -> None:
+        rec0 = self._record(1, [(0.1, 0.2), (0.3, 0.4)])
+        # 末条索引记录：载荷内埋 0xBEBEBEBE×2（0xBE 假阳性陷阱）
+        rec1 = (struct.pack("<4H", 2, 4, 0, 2)
+                + struct.pack("<2f", 0.1, 0.2) + b"\xbe" * 8)
+        rec2 = self._record(3, [(0.5, 0.5), (0.4, 0.4)])
+        # 终止签名：(62, 6) + 6 个正常坐标点后接全零（无法出链 → 停）
+        sentinel = (struct.pack("<2H", 62, 6)
+                    + struct.pack("<6f", 0.1, 0.2, 0.3, 0.4, 0.5, 0.5))
+        data = (struct.pack("<2I", 8, 8 + len(rec0))
+                + rec0 + rec1 + rec2 + sentinel + b"\x00" * 32)
+
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+        lib = SubgraphLib(str(path))
+
+        assert lib.n_indexed == 2
+        assert lib.n_tail == 1
+        assert lib.symbol_count == 3
+        # 末条索引记录不再被 0xBE 截断（旧实现此处返回空记录）
+        s1 = lib.decode(1)
+        assert s1 is not None and s1.n_points == 2
+        assert lib.record_bounds(1) == (8 + len(rec0), 8 + len(rec0) + len(rec1))
+        # 尾段符号可达
+        s2 = lib.decode(2)
+        assert s2 is not None and s2.type == 3 and s2.n_points == 2
+        # 越界诚实返回 None
+        assert lib.decode(3) is None
+
+
+# ---------------------------------------------------------------------------
+# Writer helpers
+# ---------------------------------------------------------------------------
+
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+import shapely.geometry  # noqa: E402
+
+from pymapgis.reader import _FIELD_DESCRIPTOR_STRUCT  # noqa: E402
+from pymapgis.writer import (  # noqa: E402
+    WriterError,
+    _assemble_file,
+    _crs_header_fields,
+    _degrees_to_raw_dms,
+    _encode_gbk_field,
+    _fields_from_dataframe,
+    _is_missing,
+    _pack_attribute_field,
+    _pack_field_descriptor,
+    _PolygonArcDecomposer,
+)
+
+
+class TestDegreesToRawDms:
+    def test_typical_central_meridian(self) -> None:
+        assert _degrees_to_raw_dms(73.0) == pytest.approx(730000.0)
+
+    def test_with_minutes_seconds(self) -> None:
+        assert _degrees_to_raw_dms(73.2583333333) == pytest.approx(731530.0, abs=1e-3)
+
+    def test_negative(self) -> None:
+        assert _degrees_to_raw_dms(-73.2583333333) == pytest.approx(-731530.0, abs=1e-3)
+
+    def test_roundtrip_with_reader(self) -> None:
+        for value in (0.0, 73.0, -73.2583333333, 39.5002777777, 1.0):
+            assert _raw_dms_to_degrees(_degrees_to_raw_dms(value)) == pytest.approx(value)
+
+
+class TestEncodeGbkField:
+    def test_chinese_padded(self) -> None:
+        buf = _encode_gbk_field("你好", 6)
+        assert buf == "你好".encode("gbk") + b"\x00\x00"
+
+    def test_truncation_never_splits_multibyte(self) -> None:
+        # "中" is 2 bytes in GBK; a 3-byte budget must not keep half of it.
+        buf = _encode_gbk_field("中文ab", 3)
+        assert buf.decode("gbk").rstrip("\x00") == "中"
+
+    def test_unencodable_replaced(self) -> None:
+        buf = _encode_gbk_field("a€b", 3)
+        assert buf == b"a?b"
+
+    def test_exact_fit(self) -> None:
+        assert _encode_gbk_field("abc", 3) == b"abc"
+
+
+class TestIsMissing:
+    def test_variants(self) -> None:
+        assert _is_missing(None)
+        assert _is_missing(pd.NA)
+        assert _is_missing(pd.NaT)
+        assert _is_missing(float("nan"))
+        assert not _is_missing(0)
+        assert not _is_missing("")
+
+
+class TestPackAttributeField:
+    def _spec(self, type_code, storage, declared=0, decimals=0):
+        from pymapgis.writer import _FieldSpec
+
+        return _FieldSpec("f", type_code, 1, storage, declared, decimals, "f")
+
+    def test_string_roundtrip(self) -> None:
+        spec = self._spec(0, 5, 4)
+        buf = _pack_attribute_field("中文", spec)
+        assert _decode_attribute_field(buf, _Field("f", 0, 0, 4, 0)) == "中文"
+
+    def test_int_roundtrip(self) -> None:
+        spec = self._spec(3, 4, 8)
+        buf = _pack_attribute_field(42, spec)
+        assert _decode_attribute_field(buf, _Field("f", 3, 0, 8, 0)) == 42
+
+    def test_double_roundtrip_and_nan(self) -> None:
+        spec = self._spec(5, 8, 15, 6)
+        buf = _pack_attribute_field(3.14, spec)
+        assert _decode_attribute_field(buf, _Field("f", 5, 0, 15, 6)) == pytest.approx(3.14)
+        buf_nan = _pack_attribute_field(None, spec)
+        assert np.isnan(_decode_attribute_field(buf_nan, _Field("f", 5, 0, 15, 6)))
+
+    def test_missing_int_is_zero(self) -> None:
+        spec = self._spec(3, 4, 8)
+        assert _decode_attribute_field(
+            _pack_attribute_field(pd.NA, spec), _Field("f", 3, 0, 8, 0)
+        ) == 0
+
+    def test_date_roundtrip(self) -> None:
+        spec = self._spec(6, 4, 8)
+        buf = _pack_attribute_field(datetime.date(2020, 1, 2), spec)
+        assert _decode_attribute_field(buf, _Field("f", 6, 0, 8, 0)) == datetime.date(2020, 1, 2)
+
+    def test_nat_date_is_zero_bytes(self) -> None:
+        spec = self._spec(6, 4, 8)
+        buf = _pack_attribute_field(pd.NaT, spec)
+        assert buf == b"\x00" * 4
+        assert _decode_attribute_field(buf, _Field("f", 6, 0, 8, 0)) is None
+
+    def test_time_roundtrip(self) -> None:
+        spec = self._spec(7, 10, 8)
+        buf = _pack_attribute_field(datetime.time(3, 4, 5, 500000), spec)
+        assert _decode_attribute_field(buf, _Field("f", 7, 0, 8, 0)) == datetime.time(
+            3, 4, 5, 500000
+        )
+
+
+class TestFieldsFromDataFrame:
+    def test_dtype_mapping(self) -> None:
+        df = pd.DataFrame(
+            {
+                "b": pd.array([1, 2], dtype="int8"),
+                "s": pd.array([1, 2], dtype="int16"),
+                "i": pd.array([1, 2], dtype="int32"),
+                "big": pd.array([2**40, 2**41], dtype="int64"),
+                "f": pd.array([1.5, 2.5], dtype="float32"),
+                "d": pd.array([1.5, 2.5], dtype="float64"),
+                "txt": ["中文", "abc"],
+                "dt": pd.to_datetime(["2020-01-01", "2021-02-03"]),
+            }
+        )
+        with pytest.warns(UserWarning):
+            specs = _fields_from_dataframe(df)
+        codes = {s.source: s.type_code for s in specs}
+        assert codes == {"b": 1, "s": 2, "i": 3, "big": 5, "f": 4, "d": 5, "txt": 0, "dt": 6}
+
+    def test_string_capacity_is_max_gbk_bytes_plus_one(self) -> None:
+        df = pd.DataFrame({"txt": ["中文", "abcd", None]})
+        (spec,) = _fields_from_dataframe(df)
+        assert spec.declared == 4  # "中文" and "abcd" are both 4 GBK bytes
+        assert spec.storage == 5
+
+    def test_offsets_are_compact_after_flag_byte(self) -> None:
+        df = pd.DataFrame({"a": pd.array([1], dtype="int32"), "b": pd.array([2], dtype="int16")})
+        specs = _fields_from_dataframe(df)
+        assert specs[0].offset == 1
+        assert specs[1].offset == 5
+
+    def test_unsupported_dtype_raises(self) -> None:
+        df = pd.DataFrame({"bad": [[1, 2], [3]]})
+        with pytest.raises(WriterError):
+            _fields_from_dataframe(df)
+
+
+class TestFieldDescriptorPacking:
+    def test_reader_struct_recovers_fields(self) -> None:
+        from pymapgis.writer import _FieldSpec
+
+        spec = _FieldSpec("长度", 5, 9, 8, 15, 6, "长度")
+        buf = _pack_field_descriptor(3, spec)
+        assert len(buf) == 39
+        name, type_code, offset, length, decimals = _FIELD_DESCRIPTOR_STRUCT.unpack(buf)
+        assert _decode_gbk(name) == "长度"
+        assert type_code == 5
+        assert offset == 9
+        assert length == 15
+        # Writer stores the 0-based field index where the reader expects decimals.
+        assert decimals == 3
+
+
+class TestPolygonArcDecomposer:
+    def test_shared_boundary_stored_once(self) -> None:
+        p1 = shapely.geometry.box(0, 0, 1, 1)
+        p2 = shapely.geometry.box(1, 0, 2, 1)
+        arcs, topo = _PolygonArcDecomposer([p1, p2]).build()
+        pairs = sorted(topo)
+        assert pairs == [(0, 1), (0, 2), (1, 0), (1, 2), (2, 0)]
+        shared = [t for t in topo if t == (1, 2)]
+        assert len(shared) == 1  # the common edge x=1 is a single arc
+
+    def test_rebuild_with_reader_builder(self) -> None:
+        p1 = shapely.geometry.box(0, 0, 1, 1)
+        p2 = shapely.geometry.box(1, 0, 2, 1)
+        arcs, topo = _PolygonArcDecomposer([p1, p2]).build()
+        lines = [shapely.geometry.LineString(a) for a in arcs]
+        table = np.array([[0, 0, left, right] for left, right in topo])
+        builder = _PolygonTopologyBuilder(lines, table)
+        g1, g2 = builder.build(1), builder.build(2)
+        assert g1.area == pytest.approx(1.0)
+        assert g2.area == pytest.approx(1.0)
+        assert g1.union(g2).area == pytest.approx(2.0)
+
+    def test_hole_rebuild_excludes_void(self) -> None:
+        shell = [(0, 0), (4, 0), (4, 4), (0, 4), (0, 0)]
+        hole = [(2, 2), (3, 2), (3, 3), (2, 3), (2, 2)]
+        poly = shapely.geometry.Polygon(shell, [hole])
+        arcs, topo = _PolygonArcDecomposer([poly]).build()
+        # No segment borders another polygon: every arc has one zero side.
+        assert all(0 in pair for pair in topo)
+        table = np.array([[0, 0, left, right] for left, right in topo])
+        lines = [shapely.geometry.LineString(a) for a in arcs]
+        rebuilt = _PolygonTopologyBuilder(lines, table).build(1)
+        assert rebuilt.area == pytest.approx(15.0)
+        assert len(rebuilt.geoms[0].interiors) == 1
+
+    def test_island_in_hole_rebuild(self) -> None:
+        shell = [(0, 0), (6, 0), (6, 6), (0, 6), (0, 0)]
+        hole = [(1, 1), (5, 1), (5, 5), (1, 5), (1, 1)]
+        outer = shapely.geometry.Polygon(shell, [hole])
+        island = shapely.geometry.box(2, 2, 4, 4)
+        arcs, topo = _PolygonArcDecomposer([outer, island]).build()
+        table = np.array([[0, 0, left, right] for left, right in topo])
+        lines = [shapely.geometry.LineString(a) for a in arcs]
+        builder = _PolygonTopologyBuilder(lines, table)
+        assert builder.build(1).area == pytest.approx(20.0)
+        assert builder.build(2).area == pytest.approx(4.0)
+
+    def test_closed_isolated_ring_rebuild(self) -> None:
+        poly = shapely.geometry.box(0, 0, 1, 1)
+        arcs, topo = _PolygonArcDecomposer([poly]).build()
+        assert all(pair in ((1, 0), (0, 1)) for pair in topo)
+        table = np.array([[0, 0, left, right] for left, right in topo])
+        lines = [shapely.geometry.LineString(a) for a in arcs]
+        rebuilt = _PolygonTopologyBuilder(lines, table).build(1)
+        assert rebuilt.area == pytest.approx(1.0)
+        # Topological (point-set) equality: the junction vertex where the two
+        # arcs meet appears twice, matching the reader's native merge output.
+        assert rebuilt.equals(poly)
+
+    def test_snap_tolerance_merges_noisy_shared_edge(self) -> None:
+        p1 = shapely.geometry.box(0, 0, 1, 1)
+        # p2 shares x=1 but with a 1e-4 offset: needs snapping to share.
+        p2 = shapely.geometry.Polygon(
+            [(1 + 1e-4, 0), (2, 0), (2, 1), (1 + 1e-4, 1), (1 + 1e-4, 0)]
+        )
+        _, topo_exact = _PolygonArcDecomposer([p1, p2], snap_tolerance=0.0).build()
+        assert (1, 2) not in topo_exact
+        _, topo_snap = _PolygonArcDecomposer([p1, p2], snap_tolerance=0.01).build()
+        assert (1, 2) in topo_snap
+
+
+class TestAssembleFile:
+    def test_index_layout(self) -> None:
+        sections = {0: b"A" * 10, 2: b"B" * 20}
+        data = _assemble_file("LINE", {109: ("B", 0)}, sections)
+        # Header: magic + file id + data_start=657.
+        assert data[:8] == b"WMAP`D21"
+        assert struct.unpack_from("<i", data, 8)[0] == 0
+        assert struct.unpack_from("<i", data, 12)[0] == 657
+        # 16 index entries of 10 bytes, each ending with 0xFFFF.
+        for i in range(16):
+            entry = data[657 + i * 10 : 657 + (i + 1) * 10]
+            assert entry[8:] == b"\xff\xff"
+        # First section at 817, second section's entry records 827.
+        start0, vol0 = struct.unpack_from("<2i", data, 657)
+        start2, vol2 = struct.unpack_from("<2i", data, 657 + 20)
+        assert (start0, vol0) == (817, 10)
+        assert (start2, vol2) == (827, 20)
+        # Unused entries are zeroed.
+        start1, vol1 = struct.unpack_from("<2i", data, 657 + 10)
+        assert (start1, vol1) == (0, 0)
+        assert data[817:827] == b"A" * 10
+        assert data[827:847] == b"B" * 20
+
+
+class TestCrsHeaderFields:
+    def test_none_crs(self) -> None:
+        fields = _crs_header_fields(None, 1000.0)
+        assert fields[109] == ("B", 0)
+        assert fields[110] == ("B", 0)
+        assert fields[143] == ("d", 1.0)
+
+    def test_geographic_wgs84(self) -> None:
+        fields = _crs_header_fields("EPSG:4326", 1000.0)
+        assert fields[109] == ("B", 0)
+        assert fields[110] == ("B", 7)
+        assert fields[143] == ("d", 1.0)
+
+    def test_unsupported_projection_raises(self) -> None:
+        crs = "+proj=merc +datum=WGS84 +units=m +no_defs"
+        with pytest.raises(WriterError):
+            _crs_header_fields(crs, 1000.0)
+
+    def test_tmerc_central_meridian(self) -> None:
+        crs = (
+            "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 "
+            "+ellps=krass +units=m +no_defs"
+        )
+        fields = _crs_header_fields(crs, 250000.0)
+        assert fields[109] == ("B", 5)
+        assert fields[110] == ("B", 16)
+        assert fields[143] == ("d", 250000.0)
+        assert _raw_dms_to_degrees(fields[151][1]) == pytest.approx(75.0)
