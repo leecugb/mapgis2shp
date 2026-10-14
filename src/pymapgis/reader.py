@@ -61,22 +61,28 @@ POINT_TYPE_SYMBOL = 1
 
 # Line-record graphic parameter offsets (reverse-engineered 2026-09; see
 # docs/MapGIS_Vector_Format.md).  The 39 bytes after the coordinate offset in
-# each 57-byte line record hold the line display parameters.  Note the
+# each 57-byte line record hold the line display parameters in the official
+# MapGIS order (线型号/辅助线型号/线颜色/线宽度/X系数/Y系数).  Note the
 # coefficient floats are NOT 4-byte aligned.
 _LINE_LINETYPE_OFFSET = 22  # int16 line-style number (style-library index)
 _LINE_AUX_LINETYPE_OFFSET = 24  # int16 auxiliary line-style number
+_LINE_COLOR_OFFSET = 26  # int16 line colour index (Colorlib, 1-based)
 _LINE_WIDTH_OFFSET = 30  # float32 line width, millimetres
 _LINE_X_COEF_OFFSET = 35  # float32 pattern X coefficient (unaligned)
 _LINE_Y_COEF_OFFSET = 39  # float32 pattern Y coefficient (unaligned)
 
 # Polygon graphic parameters live in the dedicated header section head_9
 # (index 8): one 40-byte record per polygon, first record empty, record i+1
-# corresponding to polygon ID i+1 (reverse-engineered 2026-09).
+# corresponding to polygon ID i+1.  Byte-level layout pinned 2026-10-14 on
+# three sheets (Kurgan / Yingjisha / Xinjiang-115) plus all 13 Kurgan polygon
+# layers: @4 and @8 are 0 for 100% of records and @7 is a per-layer flag,
+# so the colour/pattern fields are single bytes (an earlier int16 @4/@6/@8
+# read was a misalignment that produced true-value<<8 garbage).
 _POLYGON_PARAM_SECTION = 8
 _POLYGON_PARAM_RECORD_SIZE = 40
-_POLY_FILL_COLOR_OFFSET = 4  # int16 fill colour index (assignment candidate)
-_POLY_PATTERN_OFFSET = 6  # int16 fill-pattern number (pattern-library index)
-_POLY_PATTERN_COLOR_OFFSET = 8  # int16 pattern colour index (candidate)
+_POLY_FILL_COLOR_OFFSET = 5  # uint8 fill colour index
+_POLY_PATTERN_OFFSET = 6  # uint8 fill-pattern number (pattern-library index)
+_POLY_PATTERN_COLOR_OFFSET = 9  # uint8 pattern colour index
 
 # MapGIS stores geometry type codes in the attribute table.
 _ATTR_TYPE_STRING = 0
@@ -497,6 +503,13 @@ def _read_point_params(
     library, and what a rotation of zero means depends on the glyph design.
     Interpret the values only in the context of the symbol library (and
     library version) that produced the data.
+
+    The official point-parameter set also includes the subgraph colour
+    (子图颜色 / 可变颜色), but that field is not located yet: the 2026-10-14
+    anchor probe (library symbols 7/15/27/30/43/56 with user-adjudicated
+    colours 3/4/2/2/4/2) found zero usage of any anchor symbol across the
+    project's nine data roots, so no offset could be pinned.  Kept as an
+    explicit open item rather than guessed.
     """
     file_obj.seek(start)
     buf = file_obj.read(section_size)
@@ -604,7 +617,7 @@ def _read_lines(
     return geoms
 
 
-_LINE_PARAM_COLUMNS = ["linetype", "aux_linetype", "width", "x_coef", "y_coef"]
+_LINE_PARAM_COLUMNS = ["linetype", "aux_linetype", "color", "width", "x_coef", "y_coef"]
 
 
 def _read_line_params(
@@ -613,11 +626,19 @@ def _read_line_params(
     """Decode the graphic-parameter area of line records.
 
     Each 57-byte line index record carries the line display parameters after
-    the coordinate offset: the int16 style number at 22 (index into the
-    MapGIS line-style library, e.g. 1 = plain solid line), the int16
-    auxiliary style number at 24, the float32 width in millimetres at 30,
-    and the float32 pattern coefficients at 35 (X) and 39 (Y) -- note the
-    latter two are deliberately unaligned in the record.
+    the coordinate offset, in the official MapGIS order: the int16 style
+    number at 22 (index into the MapGIS line-style library, e.g. 1 = plain
+    solid line), the int16 auxiliary style number at 24 (辅助线型号, the
+    second record overlaid per the "线型号-辅助线型号" pair), the int16
+    colour index at 26 (Colorlib, 1-based; pinned 2026-10-14: every feature
+    of LYGREBA001 carries the constant 194 = RGB(0,255,175), matching the
+    user-adjudicated 青绿 of pair ("211","0"); across all 18 Kurgan line
+    layers every @26 value lies in [1, 546], i.e. inside the 870-entry
+    Colorlib), the float32 width in
+    millimetres at 30, and the float32 pattern coefficients at 35 (X) and
+    39 (Y) -- note the latter two are deliberately unaligned in the record.
+    Across all 18 Kurgan line layers every @26 value lies in [1, 546], i.e.
+    inside the 870-entry Colorlib.
 
     Like point parameters, the style numbers reference the external MapGIS
     line-style library and are not self-contained.
@@ -629,11 +650,12 @@ def _read_line_params(
         return pd.DataFrame(columns=_LINE_PARAM_COLUMNS)
 
     dtype = np.dtype({
-        "names": ["linetype", "aux_linetype", "width", "x_coef", "y_coef"],
-        "formats": ["<i2", "<i2", "<f4", "<f4", "<f4"],
+        "names": ["linetype", "aux_linetype", "color", "width", "x_coef", "y_coef"],
+        "formats": ["<i2", "<i2", "<i2", "<f4", "<f4", "<f4"],
         "offsets": [
             _LINE_LINETYPE_OFFSET,
             _LINE_AUX_LINETYPE_OFFSET,
+            _LINE_COLOR_OFFSET,
             _LINE_WIDTH_OFFSET,
             _LINE_X_COEF_OFFSET,
             _LINE_Y_COEF_OFFSET,
@@ -645,6 +667,7 @@ def _read_line_params(
         {
             "linetype": records["linetype"].astype(np.int64),
             "aux_linetype": records["aux_linetype"].astype(np.int64),
+            "color": records["color"].astype(np.int64),
             "width": records["width"].astype(np.float64),
             "x_coef": records["x_coef"].astype(np.float64),
             "y_coef": records["y_coef"].astype(np.float64),
@@ -663,13 +686,21 @@ def _read_polygon_params(
 
     The section holds one 40-byte record per polygon (first record empty);
     record *i* (0-based after the empty record) belongs to polygon ID *i + 1*.
-    Best-supported interpretation of the leading bytes, validated by 100%
-    within-class consistency on J43C001002 polygon layers:
+    Layout pinned at byte level 2026-10-14 (three sheets — Kurgan, Yingjisha,
+    Xinjiang-115 — plus all 13 Kurgan polygon layers, where bytes @4 and @8
+    are 0 for 100% of records and @7 is constant within each layer):
 
-    - int16 @4: fill colour index (candidate)
-    - int16 @6: fill-pattern number -- sedimentary units cluster around
-      3866-3928, intrusive rocks 384-388, metamorphic rocks 751-754
-    - int16 @8: pattern colour index (candidate)
+    - uint8 @5: fill colour index (1-based into Colorlib; 0 = default)
+    - uint8 @6: fill-pattern number -- sedimentary units cluster around
+      26-91, intrusive rocks 128-132, metamorphic rocks 239-246
+    - uint8 @7: per-layer flag (0/1/2/3/15; role not adjudicated)
+    - uint8 @9: pattern colour index
+
+    An earlier int16 @4/@6/@8 read (2026-09) was a misalignment: with the
+    high byte of each int16 coming from a zero neighbour it produced
+    true-value<<8 garbage (e.g. 3584, -15616).  The pattern clusters above
+    also re-validate the lithology grouping reported in the 2026-09 doc,
+    which under the int16 misread appeared as 3866-3931 etc.
 
     The remaining bytes carry further pattern sub-parameters whose layout is
     not yet pinned down; colour and pattern numbers reference the external
@@ -683,7 +714,7 @@ def _read_polygon_params(
 
     dtype = np.dtype({
         "names": ["fill_color", "pattern", "pattern_color"],
-        "formats": ["<i2", "<i2", "<i2"],
+        "formats": ["<u1", "<u1", "<u1"],
         "offsets": [
             _POLY_FILL_COLOR_OFFSET,
             _POLY_PATTERN_OFFSET,
@@ -1040,12 +1071,12 @@ class Reader:
     read_graphic_params : bool, optional
         Decode graphic parameters for any file type: point parameters for
         ``.wt`` (as above), line parameters for ``.wl`` (columns ``linetype``,
-        ``aux_linetype``, ``width``, ``x_coef``, ``y_coef``, exposed as
-        :attr:`line_params`), and polygon parameters for ``.wp`` (columns
-        ``fill_color``, ``pattern``, ``pattern_color`` from the head_9
-        section, exposed as :attr:`polygon_params`). Style and colour numbers
-        reference the external MapGIS symbol/line-style/pattern libraries and
-        are not self-contained. Default False.
+        ``aux_linetype``, ``color``, ``width``, ``x_coef``, ``y_coef``,
+        exposed as :attr:`line_params`), and polygon parameters for ``.wp``
+        (columns ``fill_color``, ``pattern``, ``pattern_color`` from the
+        head_9 section, exposed as :attr:`polygon_params`). Style and colour
+        numbers reference the external MapGIS symbol/line-style/pattern
+        libraries and are not self-contained. Default False.
 
     Examples
     --------

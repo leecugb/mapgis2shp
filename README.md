@@ -5,23 +5,28 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21487339-blue.svg)](https://doi.org/10.5281/zenodo.21487339)
 
-Read MapGIS 6.x/67 vector files (`.wt`, `.wl`, `.wp`) into [GeoPandas](https://geopandas.org/) GeoDataFrames.
+Read **and write** MapGIS 6.x/67 vector files (`.wt`, `.wl`, `.wp`) with [GeoPandas](https://geopandas.org/) GeoDataFrames.
 
-MapGIS is a widely used closed-source GIS platform in China, especially in geological surveying, engineering, and scientific research. `pymapgis` provides a lightweight, open-source reader for its native point, line, and polygon vector formats.
+MapGIS is a widely used closed-source GIS platform in China, especially in geological surveying, engineering, and scientific research. `pymapgis` provides a lightweight, open-source reader **and writer** for its native point, line, and polygon vector formats.
 
 > **Relationship to prior work:** This package (`mapgis2shp`, import name `pymapgis`) is the matured, validated successor to the first author's earlier [`pymapgis`](https://github.com/leecugb/pymapgis) (2022) single-file reader — both developed by **Shijie Li** (leecugb). The present version adds coordinate-reference inference, vectorised parsing, polygon-topology reconstruction, and independent validation against the official MapGIS export.
 
 ## Features
 
 - Read **point** (`.wt`), **line** (`.wl`), and **polygon** (`.wp`) files
+- **Write** GeoDataFrames back to native `.wt` / `.wl` / `.wp` binaries (round-trip lossless)
 - Decode GBK-encoded attribute fields and field names
 - Decode point graphic parameters (text/symbol kind, subgraph number, glyph size, rotation angle)
-- Decode line graphic parameters (style number, width in mm, pattern coefficients)
+- Decode line graphic parameters (style and auxiliary style numbers, colour index, width in mm, pattern coefficients)
 - Decode polygon graphic parameters (fill colour / pattern numbers from the head_9 section)
-- Reconstruct polygon topology from arc records
+- Parse the MapGIS 6.x graphic libraries themselves — `SubgraphLib` for
+  `Subgraph.lib` point-symbol definitions (including chained records past
+  the index table) and `LinestyLib` for `LINESTY.lib` line-style definitions
+  (sublines, element templates, dot/dash rhythm, pen tables)
+- Reconstruct polygon topology from arc records — and regenerate it on write (shared boundaries stored as single arcs)
 - Preserve or repair invalid polygon geometries with `shapely.make_valid`
 - Export to any format supported by GeoPandas / Fiona (Shapefile, GeoJSON, GeoPackage, etc.)
-- Simple command-line interface for quick conversions
+- Simple command-line interface for quick conversions in both directions
 
 ## Installation
 
@@ -59,9 +64,23 @@ pymapgis input.wl output.geojson --driver GeoJSON
 
 # Keep raw (possibly invalid) polygon geometries
 pymapgis input.wp output.shp --no-make-valid
+
+# Convert a Shapefile (or GeoJSON/GeoPackage) back to MapGIS
+pymapgis input.shp output.wp
+pymapgis input.geojson output.wl --encoding GBK
+
+# Also decode graphic parameters (style/colour numbers, width, symbol
+# number, angle, ...) into extra attribute columns
+pymapgis input.wp output.gpkg --graphic-params
+
+# Inspect a MapGIS graphic library (symbol / line-style definitions)
+pymapgis lib Subgraph.lib                     # symbol counts (indexed + tail chain)
+pymapgis lib Subgraph.lib --symbol 1960       # decode one symbol's geometry
+pymapgis lib LINESTY.lib                      # whole-library census
+pymapgis lib LINESTY.lib --style 211 --aux 0  # decode one line style
 ```
 
-The same interface is available as `python -m pymapgis input.wp output.shp`.
+The direction is chosen from the **input** extension: `.wt`/`.wl`/`.wp` input reads MapGIS; any other input writes MapGIS. The same interface is available as `python -m pymapgis input.wp output.shp`.
 
 ## API
 
@@ -111,6 +130,52 @@ file type — point parameters for `.wt` (as above), line parameters for
 - `InvalidFileError` — unsupported or unrecognized file
 - `TopoError` — polygon topology reconstruction error
 - `InvalidDirectoryError` — reserved for project/directory errors
+- `WriterError` — a GeoDataFrame cannot be encoded as a MapGIS file
+
+### `Writer(geodataframe, *, make_valid=True, map_scale=1000.0, snap_tolerance=0.0, graphic_params=True, geometry_type=None)`
+
+Encode a GeoDataFrame as a MapGIS binary file. One geometry type per file:
+Point/MultiPoint for `.wt` (MultiPoint is exploded with a warning),
+LineString/MultiLineString for `.wl` (exploded likewise), and
+Polygon/MultiPolygon for `.wp` (a MultiPolygon stays one polygon feature,
+matching the reader).
+
+```python
+from pymapgis import Writer, write
+
+Writer(gdf).to_file("out.wp")   # or the shortcut: write(gdf, "out.wp")
+```
+
+- `make_valid` — repair invalid polygons before arc decomposition (.wp only)
+- `map_scale` — map-scale denominator for projected CRS (coordinates are
+  stored as `value * 1000 / map_scale`); ignored for longitude/latitude data
+- `snap_tolerance` — coordinate quantisation step applied before topology
+  construction so that shared boundaries coincide byte-exactly (0 = exact)
+- `graphic_params` — when the frame carries the reader's graphic-parameter
+  columns (`point_type`/`symbol_no`/..., `linetype`/...,
+  `fill_color`/`pattern`/`pattern_color`), write them back into the
+  graphic-parameter areas instead of the attribute table, giving
+  mapgis → shp → mapgis parameter fidelity
+- `geometry_type` — explicit `"POINT"`/`"LINE"`/`"POLYGON"` for empty frames
+
+Writing regenerates polygon topology: adjacent polygons share single arcs,
+with left/right polygon IDs derived from ring orientation, so the output
+re-reads losslessly with `Reader`. Attributes are encoded with MapGIS field
+types inferred from pandas dtypes (GBK strings, dates, times, numbers);
+unsupported columns raise `WriterError`.
+
+**Write-side limitations**
+
+- `.wt` label text stored in auxiliary annotation sections is not produced;
+  written `.wt` files carry geometry, attributes, and symbol points only
+- Shapefile's 10-character field-name limit truncates long parameter columns
+  (e.g. `pattern_color` → `pattern_col`) when passing through `.shp`, which
+  disables the matching parameter group on write; GeoJSON/GeoPackage or a
+  direct GeoDataFrame hand-off is unaffected
+- Longitude/latitude, Transverse Mercator, Albers, and Lambert CRS are
+  written; other projections raise `WriterError`
+- CGCS2000 has no MapGIS ellipsoid code and is written as WGS84 with a
+  warning (they agree to better than 0.1 mm)
 
 ## Reading graphic parameters
 
@@ -126,9 +191,11 @@ with Reader("points.wt", read_graphic_params=True) as r:
     symbols = r.geodataframe[r.geodataframe.point_type == POINT_TYPE_SYMBOL]
     print(symbols[["symbol_no", "height", "width", "angle"]].head())
 
-# Line files: style number, width in millimetres, pattern coefficients
+# Line files: style and auxiliary style numbers, colour index, width in
+# millimetres, pattern coefficients
 with Reader("lines.wl", read_graphic_params=True) as r:
-    print(r.geodataframe[["linetype", "width", "x_coef", "y_coef"]].head())
+    print(r.geodataframe[["linetype", "aux_linetype", "color",
+                          "width", "x_coef", "y_coef"]].head())
 
 # Polygon files: fill colour / pattern numbers (head_9 section)
 with Reader("polygons.wp", read_graphic_params=True) as r:
@@ -142,6 +209,32 @@ with Reader("polygons.wp", read_graphic_params=True) as r:
 > mean different things under a different or customised library. Field
 > layouts were reverse-engineered and validated on the layers of map sheet
 > J43C001002 — verify against your own data before relying on them.
+
+## Parsing the graphic libraries
+
+The library files referenced by the graphic parameters can be parsed
+directly (the same parsers back the `pymapgis lib` subcommand):
+
+```python
+from pymapgis import LinestyLib, SubgraphLib, classify_form, compose_feature_style
+
+# Subgraph.lib: point-symbol geometry (mm coordinates, subpaths, fitted circles)
+lib = SubgraphLib("Subgraph.lib")
+print(lib.n_indexed, "indexed +", lib.n_tail, "tail-chain symbols")
+sym = lib.decode(1960)          # None when out of range
+for sp in sym.subpaths:
+    print(len(sp.points), "points", sp.circle)   # circle = (cx, cy, r) fit
+
+# LINESTY.lib: line styles (1-based, as stored in .wl linetype fields)
+styles = LinestyLib("LINESTY.lib")
+style = styles.decode(211)
+print(classify_form(style))                        # form label + evidence
+main, aux = compose_feature_style(styles, 211, 0)  # (style, aux) pair rule
+```
+
+Line-style style numbers and symbol numbers are *library-local*: they
+resolve only against the same (or a byte-identical) library that produced
+the data.
 
 ## Supported formats
 
@@ -511,6 +604,12 @@ String fields are read up to the first `\x00`. Date fields are year (int16) + mo
 5. **Graphic parameters are library-dependent**: symbol, line-style, colour and pattern numbers reference the MapGIS system libraries (Slib, line-style and pattern libraries) of the originating installation, which are not embedded in the file. They are only meaningful together with those libraries (and their versions); some field assignments are validated candidates rather than certainties (see the per-section notes).
 
 ## Changelog
+
+### Unreleased
+- **Writer**: encode GeoDataFrames back to native MapGIS `.wt` / `.wl` / `.wp` binaries — attribute table (GBK strings, dates, times, typed numerics), graphic parameters (with mapgis → shp → mapgis fidelity when the reader's parameter columns are present), CRS (longitude/latitude, Transverse Mercator, Albers, Lambert), and regenerated polygon topology (shared boundaries stored as single arcs with left/right polygon IDs). New public API: `Writer`, `write()`, and `WriterError`
+- CLI converts in both directions based on the input extension (`.shp`, `.geojson`, `.gpkg`, ... → `.wt`/`.wl`/`.wp`); new `--encoding` option
+- New runtime dependency: `pyogrio>=0.8` (reading shapefiles is now a runtime feature)
+- `verify_pymapgis.py --roundtrip`: Reader → Writer → Reader regression over all local MapGIS files (not recorded in the baseline)
 
 ### 2.2.1
 - Packaging fix: `pymapgis.rendering` is under active development and is not yet ready for distribution (it is also undocumented and requires matplotlib, which is not a declared dependency). It is now excluded from the wheel and sdist; the published package again focuses on reading/conversion. The module remains in the source repository and will be published as a separate package or extra once it stabilises

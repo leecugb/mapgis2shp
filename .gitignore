@@ -39,6 +39,12 @@ Thumbs.db
 *.tmp
 /tmp/
 
+# JWD pipeline code — not part of the published package (hatch-excluded from
+# sdist/wheel; geological semantics is out of mapgis2shp scope) and not
+# version-controlled here
+src/pymapgis/rendering/
+src/pymapgis/semantics/
+
 # MapGIS sample/test vector data (real geological survey data, not for distribution)
 *.WT
 *.WL
