@@ -54,6 +54,20 @@ _POINT_TEXT_HEIGHT_OFFSET = 33  # float32 text height (text points only)
 _POINT_SIZE2_OFFSET = 37  # float32: symbol height / text width
 _POINT_SIZE3_OFFSET = 41  # float32: symbol width / text spacing
 _POINT_ANGLE_OFFSET = 45  # float32 rotation angle, degrees (CCW from east)
+# 2026-10-15 wat 明码补齐（LDZOFBB099.WT + 456.wat，1861 点逐字段等值
+# 定位；官方 WMAP9022 参数序 21/21 字段两型全对齐）：
+#   字符串点(0): ...角度@45, 中文字体u8@49, 西文字体u8@51, 字形u8@53,
+#                排列(u8@55 候选——wap 值恒 0 水平，未能从常零区细分),
+#                颜色u8@75, 图层u8@83, 透明输出(恒 0 未定位)
+#   子图点(1):   ...角度@45, 辅色(恒 0 未定位), 颜色u8@75, 线宽f32@49,
+#                图层u8@83, 透明输出(恒 0 未定位)
+# @49 按 kind 分读：字符串点=u8 中文字体 / 子图点=f32 子图笔宽。
+_POINT_FONT_ZH_OFFSET = 49   # uint8 中文字体（字符串点；子图点同址为笔宽 f32）
+_POINT_FONT_EN_OFFSET = 51   # uint8 西文字体（字符串点）
+_POINT_FONT_STYLE_OFFSET = 53  # uint8 字形（字符串点）
+_POINT_PEN_WIDTH_OFFSET = 49   # float32 子图笔宽/线宽，mm（子图点）
+_POINT_COLOR_OFFSET = 75    # uint8 颜色（两类点共用）
+_POINT_LAYER_OFFSET = 83    # uint8 图层（两类点共用）
 
 # Values of the point-kind byte at _POINT_TYPE_OFFSET.
 POINT_TYPE_TEXT = 0
@@ -62,14 +76,26 @@ POINT_TYPE_SYMBOL = 1
 # Line-record graphic parameter offsets (reverse-engineered 2026-09; see
 # docs/MapGIS_Vector_Format.md).  The 39 bytes after the coordinate offset in
 # each 57-byte line record hold the line display parameters in the official
-# MapGIS order (线型号/辅助线型号/线颜色/线宽度/X系数/Y系数).  Note the
-# coefficient floats are NOT 4-byte aligned.
+# MapGIS order (线型号/辅助线型号/线颜色/线宽度/X系数/Y系数/辅助色/图层/
+# 透明输出 -- the trailing trio pinned 2026-10-15 against the official .wal
+# plain-text export).  Note the coefficient floats are NOT 4-byte aligned.
 _LINE_LINETYPE_OFFSET = 22  # int16 line-style number (style-library index)
-_LINE_AUX_LINETYPE_OFFSET = 24  # int16 auxiliary line-style number
+# 2026-10-15 修复：aux 实为 u8@24 + 独立标志字节 @25（原 int16 读法把
+# @25=1 并进高字节得 256，凭空造出幻影线型 (1,256)）。判别规则：
+# @25=0 → aux 有效（真双参数，如 (2,11)/(38,2)）；@25=1 → aux=0 即 (1,0)。
+_LINE_AUX_LINETYPE_OFFSET = 24  # uint8 auxiliary line-style number (低字节)
+_LINE_AUX_FLAG_OFFSET = 25     # uint8 aux 标志字节（0=正常，1=特殊/残留）
 _LINE_COLOR_OFFSET = 26  # int16 line colour index (Colorlib, 1-based)
 _LINE_WIDTH_OFFSET = 30  # float32 line width, millimetres
 _LINE_X_COEF_OFFSET = 35  # float32 pattern X coefficient (unaligned)
 _LINE_Y_COEF_OFFSET = 39  # float32 pattern Y coefficient (unaligned)
+# 2026-10-15 明码补齐：官方 wal 9 参数（线型号/辅助线型号/线色/线宽/
+# X系数/Y系数/辅助色/图层/透明输出）1538 样本逐字段等值定位 + 多幅
+# 7675 记录值域复核——@43=辅助色（0=无，色域 ⊂ Colorlib 870）、
+# @47=图层（按文件成组，0/2/3/5/10/20…）、@48=透明输出（库内全 0=否）。
+_LINE_AUX_COLOR_OFFSET = 43  # int16 auxiliary colour index (Colorlib, 0=无)
+_LINE_LAYER_OFFSET = 47      # uint8 图层号
+_LINE_TRANSPARENT_OFFSET = 48  # uint8 透明输出（0=否，1=白色填充透明）
 
 # Polygon graphic parameters live in the dedicated header section head_9
 # (index 8): one 40-byte record per polygon, first record empty, record i+1
@@ -82,7 +108,11 @@ _POLYGON_PARAM_SECTION = 8
 _POLYGON_PARAM_RECORD_SIZE = 40
 _POLY_FILL_COLOR_OFFSET = 5  # uint8 fill colour index
 _POLY_PATTERN_OFFSET = 6  # uint8 fill-pattern number (pattern-library index)
-_POLY_PATTERN_COLOR_OFFSET = 9  # uint8 pattern colour index
+# 2026-10-15 明码修正：@9 实为 u16（@9 低字节 + @10 高字节）——库尔干幅
+# 全层 @10=0 故 u8 读法侥幸全对；奥依亚依拉克幅 wap 官方导出实证
+# 372/417 区 >255（值域 13..948），u8 读法丢高字节。wap f0 与 u16@9
+# 417/417 全等。
+_POLY_PATTERN_COLOR_OFFSET = 9  # uint16 pattern colour index (低字节@9)
 
 # MapGIS stores geometry type codes in the attribute table.
 _ATTR_TYPE_STRING = 0
@@ -469,7 +499,9 @@ def _read_points(
     return [shapely.geometry.Point(xy) for xy in coords]
 
 
-_POINT_PARAM_COLUMNS = ["point_type", "symbol_no", "height", "width", "spacing", "angle"]
+_POINT_PARAM_COLUMNS = ["point_type", "symbol_no", "height", "width", "spacing",
+                       "angle", "color", "layer", "pen_width",
+                       "font_zh", "font_en", "font_style"]
 
 
 def _read_point_params(
@@ -504,12 +536,22 @@ def _read_point_params(
     Interpret the values only in the context of the symbol library (and
     library version) that produced the data.
 
-    The official point-parameter set also includes the subgraph colour
-    (子图颜色 / 可变颜色), but that field is not located yet: the 2026-10-14
-    anchor probe (library symbols 7/15/27/30/43/56 with user-adjudicated
-    colours 3/4/2/2/4/2) found zero usage of any anchor symbol across the
-    project's nine data roots, so no offset could be pinned.  Kept as an
-    explicit open item rather than guessed.
+    The remaining parameters were pinned 2026-10-15 against the official
+    .wat plain-text export (LDZOFBB099.WT + 456.wat, 1861 points with
+    per-field exact equality; official WMAP9022 parameter order aligned
+    field-by-field for both point kinds): the shared tail ``color``
+    (uint8 @75) and ``layer`` (uint8 @83), plus the kind-dependent
+    ``font_zh``/``font_en``/``font_style`` (text points, uint8 @49/@51/@53)
+    and ``pen_width`` (symbol points, float32 @49, mm).  This resolves the
+    former open item on the subgraph colour field.  Caveat registered
+    honestly: the stored colour is the native MapGIS display value and may
+    differ from the colours a rendering pipeline adjudicates for itself
+    (the cross-sheet sample shows e.g. attitude symbols stored
+    yellow/violet where the renderer draws black) -- read it as data, not
+    as a style decree.  The 辅色 (symbol aux colour), 排列 (text
+    arrangement) and 透明输出 offsets stay unpinned: their .wat values
+    are constant zero in every sample, so no offset could be separated
+    from the all-zero tail bytes.
     """
     file_obj.seek(start)
     buf = file_obj.read(section_size)
@@ -519,10 +561,17 @@ def _read_point_params(
 
     # Overlapping views of the kind-dependent fields: symbol_no (int16 @33)
     # overlaps the text height (float32 @33), so both are decoded for every
-    # record and selected per record afterwards.
+    # record and selected per record afterwards.  The same applies to the
+    # @49 pair (text 中文字体 u8 / symbol 子图笔宽 f32) and to the tail
+    # fields colour @75 / layer @83, which are shared by both kinds (pinned
+    # 2026-10-15 against the official .wat plain-text export; see the
+    # offset constants above for the full field order).
     dtype = np.dtype({
-        "names": ["point_type", "symbol_no", "f33", "f37", "f41", "angle"],
-        "formats": ["u1", "<i2", "<f4", "<f4", "<f4", "<f4"],
+        "names": ["point_type", "symbol_no", "f33", "f37", "f41", "angle",
+                  "pen49", "font_zh", "font_en", "font_style",
+                  "color", "layer"],
+        "formats": ["u1", "<i2", "<f4", "<f4", "<f4", "<f4",
+                    "<f4", "u1", "u1", "u1", "u1", "u1"],
         "offsets": [
             _POINT_TYPE_OFFSET,
             _POINT_SYMBOL_NO_OFFSET,
@@ -530,6 +579,12 @@ def _read_point_params(
             _POINT_SIZE2_OFFSET,
             _POINT_SIZE3_OFFSET,
             _POINT_ANGLE_OFFSET,
+            _POINT_PEN_WIDTH_OFFSET,
+            _POINT_FONT_ZH_OFFSET,
+            _POINT_FONT_EN_OFFSET,
+            _POINT_FONT_STYLE_OFFSET,
+            _POINT_COLOR_OFFSET,
+            _POINT_LAYER_OFFSET,
         ],
         "itemsize": _POINT_RECORD_SIZE,
     })
@@ -544,6 +599,12 @@ def _read_point_params(
             "width": np.where(is_symbol, records["f41"], records["f37"]),
             "spacing": np.where(is_symbol, np.nan, records["f41"]),
             "angle": records["angle"].astype(np.float64),
+            "color": records["color"].astype(np.int64),
+            "layer": records["layer"].astype(np.int64),
+            "pen_width": np.where(is_symbol, records["pen49"], np.nan),
+            "font_zh": np.where(is_symbol, np.nan, records["font_zh"]),
+            "font_en": np.where(is_symbol, np.nan, records["font_en"]),
+            "font_style": np.where(is_symbol, np.nan, records["font_style"]),
         },
         columns=_POINT_PARAM_COLUMNS,
     )
@@ -617,7 +678,8 @@ def _read_lines(
     return geoms
 
 
-_LINE_PARAM_COLUMNS = ["linetype", "aux_linetype", "color", "width", "x_coef", "y_coef"]
+_LINE_PARAM_COLUMNS = ["linetype", "aux_linetype", "aux_flag", "color", "width",
+                       "x_coef", "y_coef", "aux_color", "layer", "transparent"]
 
 
 def _read_line_params(
@@ -637,6 +699,11 @@ def _read_line_params(
     Colorlib), the float32 width in
     millimetres at 30, and the float32 pattern coefficients at 35 (X) and
     39 (Y) -- note the latter two are deliberately unaligned in the record.
+    The trailing three parameters were pinned 2026-10-15 against the
+    official .wal plain-text export (9-parameter line, ground-truth values
+    for every feature): the int16 auxiliary colour at 43 (辅助色,
+    Colorlib index, 0 = 无), the uint8 layer number at 47 (图层), and the
+    uint8 transparent-output flag at 48 (透明输出, 0 = 否).
     Across all 18 Kurgan line layers every @26 value lies in [1, 546], i.e.
     inside the 870-entry Colorlib.
 
@@ -650,15 +717,21 @@ def _read_line_params(
         return pd.DataFrame(columns=_LINE_PARAM_COLUMNS)
 
     dtype = np.dtype({
-        "names": ["linetype", "aux_linetype", "color", "width", "x_coef", "y_coef"],
-        "formats": ["<i2", "<i2", "<i2", "<f4", "<f4", "<f4"],
+        "names": ["linetype", "aux_linetype", "aux_flag", "color", "width",
+                  "x_coef", "y_coef", "aux_color", "layer", "transparent"],
+        "formats": ["<i2", "<u1", "<u1", "<i2", "<f4", "<f4", "<f4",
+                    "<i2", "<u1", "<u1"],
         "offsets": [
             _LINE_LINETYPE_OFFSET,
             _LINE_AUX_LINETYPE_OFFSET,
+            _LINE_AUX_FLAG_OFFSET,
             _LINE_COLOR_OFFSET,
             _LINE_WIDTH_OFFSET,
             _LINE_X_COEF_OFFSET,
             _LINE_Y_COEF_OFFSET,
+            _LINE_AUX_COLOR_OFFSET,
+            _LINE_LAYER_OFFSET,
+            _LINE_TRANSPARENT_OFFSET,
         ],
         "itemsize": _LINE_RECORD_SIZE,
     })
@@ -667,10 +740,14 @@ def _read_line_params(
         {
             "linetype": records["linetype"].astype(np.int64),
             "aux_linetype": records["aux_linetype"].astype(np.int64),
+            "aux_flag": records["aux_flag"].astype(np.int64),
             "color": records["color"].astype(np.int64),
             "width": records["width"].astype(np.float64),
             "x_coef": records["x_coef"].astype(np.float64),
             "y_coef": records["y_coef"].astype(np.float64),
+            "aux_color": records["aux_color"].astype(np.int64),
+            "layer": records["layer"].astype(np.int64),
+            "transparent": records["transparent"].astype(np.int64),
         },
         columns=_LINE_PARAM_COLUMNS,
     )
@@ -694,7 +771,14 @@ def _read_polygon_params(
     - uint8 @6: fill-pattern number -- sedimentary units cluster around
       26-91, intrusive rocks 128-132, metamorphic rocks 239-246
     - uint8 @7: per-layer flag (0/1/2/3/15; role not adjudicated)
-    - uint8 @9: pattern colour index
+    - uint16 @9: pattern colour index (@9 low + @10 high).  Pinned as u16
+      2026-10-15 against the official .wap plain-text export (奥依亚依拉克
+      J45C004001, LDZOFBB001.WP + 234.wap): wap field 0 == u16@9 for all
+      417/417 regions, with 372 regions above 255 (range 13..948).  The
+      earlier u8 read (valid on Kurgan where @10 is 0 for every layer)
+      silently dropped the high byte cross-sheet.  Values above the 870-
+      entry Colorlib exist (max 948); the reference palette for those is
+      not adjudicated.
 
     An earlier int16 @4/@6/@8 read (2026-09) was a misalignment: with the
     high byte of each int16 coming from a zero neighbour it produced
@@ -714,7 +798,7 @@ def _read_polygon_params(
 
     dtype = np.dtype({
         "names": ["fill_color", "pattern", "pattern_color"],
-        "formats": ["<u1", "<u1", "<u1"],
+        "formats": ["<u1", "<u1", "<u2"],
         "offsets": [
             _POLY_FILL_COLOR_OFFSET,
             _POLY_PATTERN_OFFSET,

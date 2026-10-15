@@ -48,7 +48,9 @@ f32 载荷区三型：
 挂账（如实）：
   - 颜色归属半闭环：.WL @26=线颜色已定位并入 reader.py（2026-10-14，
     211 号 202 图元恒值 194 锚定；全 18 层值域 [1,546] 无越界）；
-    @43/@47（辅助色/覆盖方式候选，官方 DLL 字段序）待扫
+    **@43=辅助色/@47=图层/@48=透明输出已消挂**（2026-10-15 官方明码
+    9 参数 1538 样本逐字段等值定位 + 多幅 7675 记录值域复核，并入
+    reader.py 图形参数列）
   - 点在线侧的侧别规则未定
   - 大载荷子线（n≥15，含点列三联组）语义未定
   - 记录内子线渲染选择规则（线型 2 的 4 条 24B 子线段角色）未破
@@ -83,6 +85,8 @@ import struct
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+import numpy as np
 
 _U16 = struct.Struct("<H")
 _U32 = struct.Struct("<I")
@@ -382,12 +386,18 @@ class LinestyLib:
         ]
         self._nonempty = [(i, off) for i, (off, fl) in enumerate(self.entries)
                           if off > 0]
+        # 记录号 → _nonempty 位置映射（2026-10-15 优化：record_bounds 每次
+        # decode 都 O(N) 线性扫 _nonempty，渲染管线逐图元 decode 时退化为
+        # O(N²)；映射后 O(1)）
+        self._pos: Dict[int, int] = {ri: k for k, (ri, _) in enumerate(self._nonempty)}
 
     def record_bounds(self, no: int) -> Tuple[int, int]:
         """no = 1-based 线型号。返回记录字节区间。"""
         i = no - 1
         off = self.entries[i][0]
-        k = next(k for k, (ri, _) in enumerate(self._nonempty) if ri == i)
+        k = self._pos.get(i)
+        if k is None:
+            raise IndexError(f"line style {no} is an empty slot")
         end = (self._nonempty[k + 1][1] if k + 1 < len(self._nonempty)
                else len(self.data))
         return off, end
@@ -421,13 +431,16 @@ class LinestyLib:
             u, m, o = struct.unpack_from("<3H", self.data, base)
             sub.elements.append(Element(unit=u, marker=m, offset=o))
         # f32 载荷区（起点 = 2 + 6n；长度律允许 ±8B 变体，故按区扫）
+        # 2026-10-15 优化：np.frombuffer 向量化（原逐 f32 struct 解包循环，
+        # 大载荷子线 n≥15 时逐点开销显著）；|v|>1e8 → NaN 语义不变——
+        # 先转 float64 再比较，严格复刻原 Python 浮点比较（f32 直接比
+        # 1e8 会在边界因 f32(1e8) 舍入产生语义差）。
         sub.f32_start = 2 + n * 6
-        for j in range(sub.f32_start, ln - 3, 4):
-            v = _F32.unpack_from(self.data, ptr + j)[0]
-            if abs(v) <= 1e8:
-                sub.f32_zone.append(v)
-            else:
-                sub.f32_zone.append(float("nan"))
+        n_f32 = (ln - sub.f32_start) // 4
+        if n_f32 > 0:
+            arr = np.frombuffer(self.data, dtype="<f4", count=n_f32,
+                                offset=ptr + sub.f32_start).astype(np.float64)
+            sub.f32_zone = np.where(np.abs(arr) <= 1e8, arr, np.nan).tolist()
         # 实线型字段（n=1 且 24B）
         if sub.is_solid:
             sub.color = _U16.unpack_from(self.data, ptr + 2)[0]
@@ -510,6 +523,190 @@ def census(lib: LinestyLib) -> dict:
             "subline_law_ok": law_ok, "coord_list_sublines": coord_n,
             "inline_pattern_sublines": inline_n, "rhythm_styles": rhythm_n,
             "forms": forms, "bad": bad}
+
+
+# ---------------------------------------------------------------------------
+# 裁定渲染操作码（2026-10-15）：按用户裁定的形状生成结构化渲染指令，
+# 目标是"与用户裁定形状相似"。已裁定线型走锚定规格；未裁定线型
+# 尽力从库内结构推导，不足则如实标注"待裁定"——不冒充。
+# ---------------------------------------------------------------------------
+
+# 已裁定线型的结构规格（用户 2026-10-15 裁定形状固化）
+ADJUDICATED_STRUCTS = {
+    "1|0": "单实线（通用载体）",
+    "2|0": "纯虚线（实0.35/空0.30/实0.35，周期1.0mm）",
+    "16|0": "纯圆点串（点径=图元线宽，点距0.3×x，无基线）",
+    "16|1": "纯圆点串（同16|0）",
+    "17|0": "直线+正圆点串在线侧，点线保持间距（侧偏移=(线宽/2)×y）",
+    "3|0": "短线与点相间（划-点交替，周期1.2mm）",
+    "4|0": "短线+双点相互间隔（线占比长，周期8mm：线4.5/点组2.5）",
+    "4|1": "同 (4,0)",
+    "48|0": "平行断线+实线双线（平行不整合界线）",
+    "18|0": "实线+单侧短刺（超动界线，参照复活断层样式）",
+    "38|2": "实线+右侧等腰三角齿底边贴实线（参照推覆体界线样式）",
+    "110|0": "实线+右侧等边三角齿底边贴实线（同38|2 等边变体）",
+    "148|0": "平行双实线",
+    "50|0": "实线+平行双点线（双点基本单元，单元间距>点间距）",
+    "211|0": "青绿矩形节骑线+矩形填充+单元间空白（周期1.0mm）",
+}
+
+
+def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
+               feature_width: float = 0.15, x_coef: float = 1.0,
+               y_coef: float = 1.0) -> dict:
+    """生成结构化渲染操作码列表，与用户裁定形状相似。
+
+    返回 {"ops": [...], "verdict_match": 是否命中裁定规格, "spec": 说明}。
+    ops 元素为 (操作, 参数) 元组，操作 ∈
+      solid / dashed / dotline / dash_dot / solid_side_ticks /
+      solid_teeth / parallel_solid / parallel_solid_dashed /
+      solid_parallel_pairdots / rect_chain / cell_pattern
+    """
+    key = f"{linetype}|{aux}"
+    spec = ADJUDICATED_STRUCTS.get(key)
+    if spec is None and aux == 0:
+        spec = ADJUDICATED_STRUCTS.get(str(linetype))
+    r = feature_width / 2.0  # 可变线宽 → 点径/半宽
+    W = feature_width
+
+    def T(op, **kw):
+        return (op, kw)
+
+    ops: List[tuple] = []
+    # —— 已裁定线型：锚定规格（注意 dict 身份比较，勿用 == 字符串）——
+    if key == "1|0" or (linetype == 1 and aux == 0 and style is None):
+        ops = [T("solid", width_mm=W)]
+        spec = ADJUDICATED_STRUCTS.get("1|0", "单实线")
+    elif key == "2|0":
+        ops = [T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef)]
+    elif key in ("16|0", "16|1") or (linetype == 16 and aux in (0, 1)):
+        ops = [T("dotline", radius_mm=r, spacing_mm=0.3 * x_coef, baseline=False)]
+    elif key == "17|0" or (linetype == 17 and aux == 0):
+        ops = [T("solid", width_mm=W),
+               T("dotline", radius_mm=r, spacing_mm=0.3 * x_coef,
+                 side_offset_mm=(W / 2.0) * y_coef)]
+    elif key == "3|0" or (linetype == 3 and aux == 0):
+        ops = [T("dash_dot", dash_mm=0.9 * x_coef, gap_mm=0.9 * x_coef)]
+    elif key in ("4|0", "4|1") or (linetype == 4 and aux in (0, 1)):
+        ops = [T("dash_dotdot", dash_mm=4.5, dot_gap_mm=1.4, period_mm=8.0)]
+    elif key == "48|0" or (linetype == 48 and aux == 0):
+        ops = [T("solid", width_mm=W, y_mm=0.11),
+               T("dashed", on_mm=0.55 * x_coef, off_mm=0.35 * x_coef, y_mm=-0.11)]
+    elif key == "18|0" or (linetype == 18 and aux == 0):
+        ops = [T("solid", width_mm=W),
+               T("solid_side_ticks", spacing_mm=0.55 * x_coef,
+                 tick_mm=0.16 * y_coef, side="left")]
+    elif key == "38|2" or (linetype == 38 and aux == 2):
+        ops = [T("solid", width_mm=W),
+               T("solid_teeth", spacing_mm=0.55 * x_coef,
+                 tooth_mm=0.16 * y_coef, side="right", shape="isosceles")]
+    elif key == "110|0" or (linetype == 110 and aux == 0):
+        ops = [T("solid", width_mm=W),
+               T("solid_teeth", spacing_mm=0.55 * x_coef,
+                 tooth_mm=0.16 * y_coef, side="right", shape="equilateral")]
+    elif key == "148|0" or (linetype == 148 and aux == 0):
+        ops = [T("parallel_solid", gap_mm=0.18, width_mm=W)]
+    elif key == "50|0" or (linetype == 50 and aux == 0):
+        ops = [T("solid", width_mm=W, y_mm=0.10),
+               T("dotline", radius_mm=r, y_mm=-0.10, pair=True,
+                 pair_gap_mm=0.30 * x_coef, unit_gap_mm=1.0 * x_coef)]
+    elif key == "211|0" or (linetype == 211 and aux == 0):
+        ops = [T("rect_chain", color_no=194, period_mm=1.0 * x_coef)]
+    elif style is not None:
+        # —— 未裁定线型：按结构优先级推导（优先级=结构特异性，借鉴裁定图分类）——
+        # ① 节奏型（linesty 节奏+笔结构，最特异）→ 虚线
+        rhy = style.rhythm()
+        # ② 坐标列型（unit=1 填充多边形 → 矩形节骑线/齿链等）
+        cells = []
+        for sub in style.sublines:
+            c = sub.cell()
+            if c:
+                cells.extend(c)
+        # ③ 复合结构判别（修正 10-15）：
+        #    unit=2 仅在同一子线内与 unit=3 点配对出现时才为"真短线"，
+        #    否则为随动/占位标记（点线族的 16/17 因此误判）；
+        #    sym 分点类(258/259)与齿/刺类(其它)——18/38 的嵌入子图属齿/刺。
+        has_dot = any(e.is_dot for s in style.sublines for e in s.elements)
+        has_seg = any(
+            e.unit == 2 and any(e2.is_dot for e2 in s.elements)
+            for s in style.sublines for e in s.elements)
+        has_sym_dot = any(e.is_symbol and e.unit in (258, 259)
+                          for s in style.sublines for e in s.elements)
+        # unit=5=竖短线嵌入子图（子图5=3点折线 0~0.71mm，10-15 裁定补）
+        has_sym_tick = any(e.is_symbol and e.unit == 5
+                           for s in style.sublines for e in s.elements)
+        has_sym_tooth = any(e.is_symbol and e.unit not in (258, 259, 5)
+                            for s in style.sublines for e in s.elements)
+
+        if rhy and not cells:
+            ons = [(b - a) for a, b, _y in rhy["segments"]]
+            offs = [rhy["segments"][k + 1][0] - rhy["segments"][k][1]
+                    for k in range(len(rhy["segments"]) - 1)]
+            on = min(ons) * x_coef if ons else 0.5
+            off = min(offs) * x_coef if offs else 0.3
+            ops = [T("dashed", on_mm=on, off_mm=off)]
+            spec = spec or "虚线（节奏推导）"
+        elif cells:
+            ops = [T("cell_pattern", cells=cells)]
+            spec = spec or "坐标列花样（推导）"
+        elif has_dot and has_seg:
+            # 短线+点复合（3|0 短线与点相间 / 4|0 短线+双点）
+            offs = sorted({e.offset for s in style.sublines for e in s.elements})
+            gaps = [b - a for a, b in zip(offs, offs[1:])] if len(offs) > 1 else [3]
+            step = max(set(gaps), key=gaps.count) if gaps else 3
+            spacing = step * OFFSET_UNIT_MM * x_coef
+            nseg = sum(1 for s in style.sublines for e in s.elements if e.unit == 2)
+            ops = [T("dash_dot", dash_mm=spacing * 0.5, gap_mm=spacing,
+                     pair=(nseg >= 2))]
+            spec = spec or "短线与点相间（推导）"
+        elif has_sym_tick:
+            # 实线+竖短线（7|0 型：基线+unit5 竖短刺串）
+            offs = sorted({e.offset for s in style.sublines for e in s.elements
+                           if e.is_symbol and e.unit == 5})
+            gaps = [b - a for a, b in zip(offs, offs[1:])] if len(offs) > 1 else [6]
+            step = max(set(gaps), key=gaps.count) if gaps else 6
+            ops = [T("solid", width_mm=W),
+                   T("solid_side_ticks", spacing_mm=step * OFFSET_UNIT_MM * x_coef,
+                     tick_mm=0.4, side="cross")]
+            spec = spec or "实线+竖短线（unit=5 子图推导）"
+        elif has_dot and has_sym_dot:
+            # 线+点串复合（17|0 型：基线+点串线侧）
+            offs = sorted({e.offset for s in style.sublines for e in s.elements
+                           if e.is_symbol})
+            gaps = [b - a for a, b in zip(offs, offs[1:])] if len(offs) > 1 else [3]
+            step = max(set(gaps), key=gaps.count) if gaps else 3
+            ops = [T("solid", width_mm=W),
+                   T("dotline", radius_mm=r,
+                     spacing_mm=step * OFFSET_UNIT_MM * x_coef,
+                     side_offset_mm=(W / 2.0) * y_coef)]
+            spec = spec or "线+点串复合（推导）"
+        elif has_dot:
+            dp = dotline_params(style, feature_width, x_coef)
+            if dp:
+                ops = [T("dotline", **dp, baseline=False)]
+                spec = spec or "点线（推导）"
+            else:
+                offs = sorted({e.offset for s in style.sublines for e in s.elements})
+                gaps = [b - a for a, b in zip(offs, offs[1:])] if len(offs) > 1 else [3]
+                step = max(set(gaps), key=gaps.count) if gaps else 3
+                ops = [T("dotline", radius_mm=r,
+                         spacing_mm=step * OFFSET_UNIT_MM * x_coef, baseline=False)]
+                spec = spec or "点线（推导）"
+        else:
+            pens = [s for s in style.sublines if s.is_solid]
+            if pens:
+                ops = [T("solid", width_mm=pens[0].width or W)]
+                spec = spec or "实线（笔推导）"
+            else:
+                ops = [T("solid", width_mm=W)]
+                spec = spec or "实线（缺省——结构待裁定）"
+    else:
+        ops = [T("solid", width_mm=W)]
+        spec = spec or "实线（缺省）"
+
+    verdict_match = (f"{linetype}|{aux}" in ADJUDICATED_STRUCTS
+                     or (aux == 0 and str(linetype) in ADJUDICATED_STRUCTS))
+    return {"ops": ops, "verdict_match": verdict_match, "spec": spec}
 
 
 if __name__ == "__main__":

@@ -610,6 +610,26 @@ def _encode_points(gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame], factor
             struct.pack_into("<f", record, 41, spacing)
         angle = float(row["angle"]) if row is not None else 0.0
         struct.pack_into("<f", record, 45, angle)
+        # 2026-10-15 wat 明码补齐（reader.py 对称）：颜色@75/图层@83 两类点
+        # 共用；@49 按 kind 分写——字符串点=中文字体 u8(+西文字体@51/字形@53)，
+        # 子图点=笔宽 f32。
+        color = int(row["color"]) if (row is not None and "color" in row.index) else 1
+        layer = int(row["layer"]) if (row is not None and "layer" in row.index) else 0
+        struct.pack_into("<B", record, 75, color & 0xFF)
+        struct.pack_into("<B", record, 83, layer & 0xFF)
+        if point_type == POINT_TYPE_SYMBOL:
+            pen = (float(row["pen_width"])
+                   if (row is not None and "pen_width" in row.index
+                       and np.isfinite(row["pen_width"]))
+                   else 0.05)
+            struct.pack_into("<f", record, 49, pen)
+        else:
+            fzh = int(row["font_zh"]) if (row is not None and "font_zh" in row.index) else 1
+            fen = int(row["font_en"]) if (row is not None and "font_en" in row.index) else 0
+            fst = int(row["font_style"]) if (row is not None and "font_style" in row.index) else 0
+            struct.pack_into("<B", record, 49, fzh & 0xFF)
+            struct.pack_into("<B", record, 51, fen & 0xFF)
+            struct.pack_into("<B", record, 53, fst & 0xFF)
         buf += record
     return bytes(buf)
 
@@ -640,11 +660,23 @@ def _encode_lines(
         x_coef = float(row["x_coef"]) if row is not None else _DEFAULT_LINE_COEF
         y_coef = float(row["y_coef"]) if row is not None else _DEFAULT_LINE_COEF
         struct.pack_into("<h", record, 22, linetype)
-        struct.pack_into("<h", record, 24, aux)
+        # 2026-10-15 修复：aux 写 u8@24 + 标志字节 @25（原 int16 写两字节，
+        # 会把 0 写进 @25 覆盖标志位；现按 reader 对称拆 u8 对）。
+        aux_flag = int(row["aux_flag"]) if (row is not None and "aux_flag" in row.index) else 0
+        struct.pack_into("<B", record, 24, aux & 0xFF)
+        struct.pack_into("<B", record, 25, aux_flag & 0xFF)
         struct.pack_into("<h", record, 26, color)
         struct.pack_into("<f", record, 30, width)
         struct.pack_into("<f", record, 35, x_coef)
         struct.pack_into("<f", record, 39, y_coef)
+        # 2026-10-15 明码补齐三字段（reader.py 对称，官方 wal 9 参数定位）：
+        # @43 u16 辅助色（0=无）、@47 u8 图层、@48 u8 透明输出。
+        aux_color = int(row["aux_color"]) if (row is not None and "aux_color" in row.index) else 0
+        layer = int(row["layer"]) if (row is not None and "layer" in row.index) else 0
+        transparent = int(row["transparent"]) if (row is not None and "transparent" in row.index) else 0
+        struct.pack_into("<h", record, 43, aux_color)
+        struct.pack_into("<B", record, 47, layer & 0xFF)
+        struct.pack_into("<B", record, 48, transparent & 0xFF)
         index += record
     return bytes(index), bytes(coords)
 
@@ -819,10 +851,11 @@ def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
     """Encode the head_9 polygon-parameter section (40 bytes, first record
     mirrors the native 0x04 marker).
 
-    Colour/pattern fields are single bytes at @5/@6/@9 (layout pinned
-    2026-10-14; the earlier int16 @4/@6/@8 write matched a reader
-    misalignment, not the native layout).  Records carry no @7 flag, which
-    native files hold per-layer (0/1/2/3/15) -- left zero here.
+    Colour/pattern fields are single bytes at @5/@6 and a uint16 LE at @9
+    (layout pinned 2026-10-14, pattern_color widened to u16 2026-10-15 on
+    the official .wap export evidence -- see reader._read_polygon_params).
+    Records carry no @7 flag, which native files hold per-layer
+    (0/1/2/3/15) -- left zero here.
     """
     buf = bytearray(_POLYGON_PARAM_RECORD_SIZE)
     buf[0] = 0x04
@@ -833,7 +866,7 @@ def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
             row = params.iloc[i]
             record[5] = int(row["fill_color"]) & 0xFF
             record[6] = int(row["pattern"]) & 0xFF
-            record[9] = int(row["pattern_color"]) & 0xFF
+            struct.pack_into("<H", record, 9, int(row["pattern_color"]) & 0xFFFF)
         buf += record
     return bytes(buf)
 
@@ -1011,6 +1044,49 @@ class Writer:
         attr = gdf.drop(columns=[gdf.geometry.name])
         if not self._graphic_params:
             return attr
+        if self.shapeType == "LINE" and "linetype" in attr.columns:
+            # 宽松吸收（2026-10-15）：以 linetype 为图形参数主键——旧版
+            # 全列齐备才吸收，列集扩充（aux_flag/aux_color/layer/
+            # transparent）后旧 6 列 gdf 会被整体静默丢弃退回默认。
+            # 现 reindex 补缺失列 + 按列默认值填充，部分给出的参数不再丢失。
+            present = [c for c in _LINE_PARAM_COLUMNS if c in attr.columns]
+            params = attr[present].reindex(columns=_LINE_PARAM_COLUMNS)
+            self._params = params.fillna(
+                {
+                    "linetype": _DEFAULT_LINETYPE,
+                    "aux_linetype": _DEFAULT_AUX_LINETYPE,
+                    "aux_flag": 0,
+                    "color": _DEFAULT_LINE_COLOR,
+                    "width": _DEFAULT_LINE_WIDTH,
+                    "x_coef": _DEFAULT_LINE_COEF,
+                    "y_coef": _DEFAULT_LINE_COEF,
+                    "aux_color": 0,
+                    "layer": 0,
+                    "transparent": 0,
+                }
+            )
+            return attr.drop(columns=present)
+        if self.shapeType == "POINT" and "point_type" in attr.columns:
+            # 同 LINE 宽松吸收（2026-10-15 wat 补齐后列集 6→12）。
+            present = [c for c in _POINT_PARAM_COLUMNS if c in attr.columns]
+            params = attr[present].reindex(columns=_POINT_PARAM_COLUMNS)
+            self._params = params.fillna(
+                {
+                    "point_type": _DEFAULT_POINT_TYPE,
+                    "symbol_no": _DEFAULT_SYMBOL_NO,
+                    "height": _DEFAULT_POINT_SIZE,
+                    "width": _DEFAULT_POINT_SIZE,
+                    "spacing": 0.0,
+                    "angle": 0.0,
+                    "color": 1,
+                    "layer": 0,
+                    "pen_width": 0.05,
+                    "font_zh": 1,
+                    "font_en": 0,
+                    "font_style": 0,
+                }
+            )
+            return attr.drop(columns=present)
         want = {
             "POINT": _POINT_PARAM_COLUMNS,
             "LINE": _LINE_PARAM_COLUMNS,

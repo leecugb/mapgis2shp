@@ -6,6 +6,7 @@ import datetime
 import io
 import struct
 
+import numpy as np
 import pytest
 
 from pymapgis.reader import (
@@ -16,6 +17,7 @@ from pymapgis.reader import (
     _raw_dms_to_degrees,
     _read_arc_index,
     _read_line_params,
+    _read_point_params,
     _read_points,
     _read_polygon_params,
     _read_struct,
@@ -282,20 +284,29 @@ class TestLineParams:
         struct.pack_into("<f", record, 30, 0.7)
         struct.pack_into("<f", record, 35, 10.0)
         struct.pack_into("<f", record, 39, 2.5)
+        # 明码补齐三字段（2026-10-15）：辅助色@43/图层@47/透明@48
+        struct.pack_into("<h", record, 43, 12)
+        struct.pack_into("<B", record, 47, 5)
+        struct.pack_into("<B", record, 48, 1)
         buf = empty + bytes(record)
 
         f = io.BytesIO(buf)
         params = _read_line_params(f, 0, len(buf))
         assert list(params.columns) == [
-            "linetype", "aux_linetype", "color", "width", "x_coef", "y_coef",
+            "linetype", "aux_linetype", "aux_flag", "color", "width",
+            "x_coef", "y_coef", "aux_color", "layer", "transparent",
         ]
         row = params.iloc[0]
         assert row["linetype"] == 211
         assert row["aux_linetype"] == 0
+        assert row["aux_flag"] == 0
         assert row["color"] == 194
         assert row["width"] == pytest.approx(0.7)
         assert row["x_coef"] == pytest.approx(10.0)
         assert row["y_coef"] == pytest.approx(2.5)
+        assert row["aux_color"] == 12
+        assert row["layer"] == 5
+        assert row["transparent"] == 1
 
 
 class TestPolygonParams:
@@ -324,6 +335,95 @@ class TestPolygonParams:
         assert row["fill_color"] == 70
         assert row["pattern"] == 26
         assert row["pattern_color"] == 9
+
+    def test_pattern_color_is_uint16(self) -> None:
+        """图案色 @9 为 u16（低@9 高@10）——u8 读法跨幅丢高字节。
+
+        回归锚（2026-10-15 官方 wap 明码实证，奥依亚依拉克 J45C004001
+        LDZOFBB001.WP + 234.wap）：wap f0 == u16@9 417/417，372 区
+        >255（值域 13..948）；库尔干幅全层 @10=0，u8 读法侥幸全对。
+        """
+        empty = b"\x00" * 40
+        record = bytearray(40)
+        record[0] = 1
+        record[5] = 146
+        record[6] = 16
+        record[9] = 0x5B   # 低字节
+        record[10] = 0x02  # 高字节 → 0x025B = 603
+        buf = empty + bytes(record)
+
+        f = io.BytesIO(buf)
+        params = _read_polygon_params(f, 0, len(buf))
+        row = params.iloc[0]
+        assert row["fill_color"] == 146
+        assert row["pattern"] == 16
+        assert row["pattern_color"] == 603
+
+
+class TestPointParams:
+    """点图形参数：wat 明码补齐字段（2026-10-15 官方 WMAP9022 序实证）。
+
+    字符串点(0): 高@33f32 宽@37 间隔@41 角度@45 中文字体u8@49
+                 西文字体u8@51 字形u8@53 颜色u8@75 图层u8@83
+    子图点(1):   号u16@33 高@37 宽@41 角度@45 笔宽f32@49
+                 颜色u8@75 图层u8@83（@49 按 kind 分读）
+    """
+
+    def test_text_point_tail(self) -> None:
+        empty = b"\x00" * 93
+        record = bytearray(93)
+        struct.pack_into("<f", record, 33, 2.5)   # 字高
+        struct.pack_into("<f", record, 37, 2.5)   # 字宽
+        struct.pack_into("<f", record, 41, 0.2)   # 间隔
+        struct.pack_into("<f", record, 45, 12.0)  # 角度
+        record[49] = 4    # 中文字体
+        record[51] = 1    # 西文字体
+        record[53] = 2    # 字形
+        record[75] = 6    # 颜色
+        record[83] = 2    # 图层
+        buf = empty + bytes(record)
+
+        f = io.BytesIO(buf)
+        params = _read_point_params(f, 0, len(buf))
+        assert list(params.columns) == [
+            "point_type", "symbol_no", "height", "width", "spacing", "angle",
+            "color", "layer", "pen_width", "font_zh", "font_en", "font_style",
+        ]
+        row = params.iloc[0]
+        assert row["point_type"] == 0
+        assert row["height"] == pytest.approx(2.5)
+        assert row["spacing"] == pytest.approx(0.2)
+        assert row["angle"] == pytest.approx(12.0)
+        assert row["font_zh"] == 4
+        assert row["font_en"] == 1
+        assert row["font_style"] == 2
+        assert row["color"] == 6
+        assert row["layer"] == 2
+        assert np.isnan(row["pen_width"])
+
+    def test_symbol_point_tail(self) -> None:
+        empty = b"\x00" * 93
+        record = bytearray(93)
+        record[31] = 1                             # 子图点
+        struct.pack_into("<h", record, 33, 1281)   # 子图号
+        struct.pack_into("<f", record, 37, 1.0)    # 高
+        struct.pack_into("<f", record, 41, 1.0)    # 宽
+        struct.pack_into("<f", record, 45, 231.55)  # 角度
+        struct.pack_into("<f", record, 49, 0.05)   # 笔宽（与字体区同址）
+        record[75] = 6    # 颜色
+        record[83] = 4    # 图层
+        buf = empty + bytes(record)
+
+        f = io.BytesIO(buf)
+        params = _read_point_params(f, 0, len(buf))
+        row = params.iloc[0]
+        assert row["point_type"] == 1
+        assert row["symbol_no"] == 1281
+        assert row["pen_width"] == pytest.approx(0.05, abs=1e-6)
+        assert row["color"] == 6
+        assert row["layer"] == 4
+        assert np.isnan(row["spacing"])
+        assert np.isnan(row["font_zh"])
 
 
 class TestSlibTailChain:
@@ -371,11 +471,66 @@ class TestSlibTailChain:
         assert lib.decode(3) is None
 
 
+class TestSlibCenterRefCircle:
+    """type=6 中心三点组整圆判读（[圆心, 半径参考点, 圆心回点]）。
+
+    回归锚（2026-10-15 全库扫描 + 符号 7 用户裁定 r≈0.315）：判圆仅当
+    首尾≈同点（≤0.01mm）、参考点双侧等距（±2%）、r∈[0.005,1.0]；
+    不满足维持点序直连（不产生新 artifact）。
+    """
+
+    @staticmethod
+    def _record(t: int, pts: list) -> bytes:
+        n = 2 * len(pts)
+        header = struct.pack("<4H", t, n, 0, len(pts))
+        payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
+        return header + payload
+
+    def _lib_with(self, tmp_path, rec: bytes) -> "SubgraphLib":
+        # 与 TestSlibTailChain 同构：双槽索引（首 u32 兼作表末标记，
+        # 故至少 2 槽），被测记录居槽 0，槽 1 占位 + 全零尾使走查诚实停止。
+        rec_b = self._record(1, [(0.4, 0.4), (0.3, 0.3)])
+        data = (struct.pack("<2I", 8, 8 + len(rec))
+                + rec + rec_b + b"\x00" * 32)
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+        return SubgraphLib(str(path))
+
+    def test_center_ref_circle_detected(self, tmp_path) -> None:
+        # 符号 7 子路径 0 实测结构：圆心≈原点、参考点 (0.316, 0)
+        rec = self._record(6, [(-0.004, 0.004), (0.316, 0.0), (0.0, 0.0)])
+        lib = self._lib_with(tmp_path, rec)
+        s = lib.decode(0)
+        assert s is not None and s.type == 6
+        sp = s.subpaths[0]
+        assert sp.closed
+        cx, cy, r = sp.circle
+        assert cx == pytest.approx(-0.002, abs=1e-6)
+        assert cy == pytest.approx(0.002, abs=1e-6)
+        assert r == pytest.approx(0.3180125, abs=1e-6)  # ≈ 裁定 0.315
+
+    def test_non_equidistant_rejected(self, tmp_path) -> None:
+        # 符号 7 子路径 1 实测结构：参考点双侧不等距 → 维持直连不判圆
+        rec = self._record(6, [(-0.003, 0.004), (0.009, 0.0), (0.0, 0.0)])
+        lib = self._lib_with(tmp_path, rec)
+        s = lib.decode(0)
+        sp = s.subpaths[0]
+        assert sp.circle is None
+        assert not sp.closed
+
+    def test_type_gate(self, tmp_path) -> None:
+        # 同构三点组在 type≠6 记录中不判读（#56 内圆扩展挂账的边界门）
+        rec = self._record(2, [(0.0, 0.0), (0.32, 0.0), (0.0, 0.0)])
+        lib = self._lib_with(tmp_path, rec)
+        s = lib.decode(0)
+        sp = s.subpaths[0]
+        assert sp.circle is None
+
+
 # ---------------------------------------------------------------------------
 # Writer helpers
 # ---------------------------------------------------------------------------
 
-import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 import shapely.geometry  # noqa: E402
 
