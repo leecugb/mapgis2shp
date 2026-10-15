@@ -59,6 +59,9 @@ class TestPointWriter:
                 "width": [1.5, 2.0],
                 "spacing": [np.nan, np.nan],
                 "angle": [45.0, 90.0],
+                "color": [6, 1],
+                "layer": [4, 12],
+                "pen_width": [0.05, 0.0],
             },
             geometry=[shapely.geometry.Point(0, 0), shapely.geometry.Point(1, 1)],
             crs="EPSG:4326",
@@ -68,6 +71,10 @@ class TestPointWriter:
         assert params["symbol_no"].tolist() == [1281, 1894]
         assert params["height"].tolist() == pytest.approx([2.0, 2.5], abs=1e-4)
         assert params["angle"].tolist() == pytest.approx([45.0, 90.0], abs=1e-4)
+        # wat 明码补齐字段（2026-10-15）往返保真。
+        assert params["color"].tolist() == [6, 1]
+        assert params["layer"].tolist() == [4, 12]
+        assert params["pen_width"].tolist() == pytest.approx([0.05, 0.0], abs=1e-6)
         # Consumed param columns must not leak into the attribute table.
         assert "symbol_no" not in reader.data.columns
 
@@ -80,6 +87,11 @@ class TestPointWriter:
                 "width": [2.0],
                 "spacing": [0.5],
                 "angle": [10.0],
+                "color": [1],
+                "layer": [2],
+                "font_zh": [4],
+                "font_en": [1],
+                "font_style": [2],
             },
             geometry=[shapely.geometry.Point(0, 0)],
             crs="EPSG:4326",
@@ -90,6 +102,11 @@ class TestPointWriter:
         assert params["height"] == pytest.approx(3.0, abs=1e-4)
         assert params["width"] == pytest.approx(2.0, abs=1e-4)
         assert params["spacing"] == pytest.approx(0.5, abs=1e-4)
+        assert params["color"] == 1
+        assert params["layer"] == 2
+        assert params["font_zh"] == 4
+        assert params["font_en"] == 1
+        assert params["font_style"] == 2
 
     def test_multipoint_explodes(self, tmp_path) -> None:
         gdf = gpd.GeoDataFrame(
@@ -127,6 +144,9 @@ class TestLineWriter:
                 "width": [0.35],
                 "x_coef": [5.0],
                 "y_coef": [4.0],
+                "aux_color": [12],
+                "layer": [5],
+                "transparent": [1],
             },
             geometry=[shapely.geometry.LineString([(0, 0), (1, 1)])],
             crs="EPSG:4326",
@@ -138,7 +158,38 @@ class TestLineWriter:
         assert params["color"] == 5
         assert params["width"] == pytest.approx(0.35, abs=1e-4)
         assert params["y_coef"] == pytest.approx(4.0, abs=1e-4)
+        assert params["aux_color"] == 12
+        assert params["layer"] == 5
+        assert params["transparent"] == 1
         assert "linetype" not in reader.data.columns
+
+    def test_line_params_partial_columns(self, tmp_path) -> None:
+        """旧版 6 列 gdf（无 aux_flag 及明码补齐三列）不得整体静默丢弃。
+
+        回归锚：列集扩充后旧 all-or-nothing 守卫会把整个 params 判为
+        不齐 → 全部退回默认（linetype 变 1）；现以 linetype 为主键宽松
+        吸收，缺失列填默认值，给出的列必须保住。
+        """
+        gdf = gpd.GeoDataFrame(
+            {
+                "linetype": [7],
+                "color": [3],
+                "width": [0.2],
+                "x_coef": [2.0],
+                "y_coef": [2.0],
+            },
+            geometry=[shapely.geometry.LineString([(0, 0), (1, 1)])],
+            crs="EPSG:4326",
+        )
+        reader = _write_and_read(gdf, tmp_path / "out.wl", {"read_graphic_params": True})
+        params = reader.line_params.iloc[0]
+        assert params["linetype"] == 7
+        assert params["color"] == 3
+        assert params["width"] == pytest.approx(0.2, abs=1e-4)
+        assert params["aux_linetype"] == 0
+        assert params["aux_color"] == 0
+        assert params["layer"] == 0
+        assert params["transparent"] == 0
 
     def test_multilinestring_explodes(self, tmp_path) -> None:
         gdf = gpd.GeoDataFrame(
@@ -219,10 +270,11 @@ class TestPolygonWriter:
         assert reader.geom[0].area == pytest.approx(2.0)
 
     def test_polygon_params_fidelity(self, tmp_path) -> None:
-        # Native head_9 stores fill/pattern/pattern colour as single bytes
-        # at @5/@6/@9, so all values must fit in 0..255.
+        # Native head_9 stores fill/pattern as single bytes at @5/@6 and the
+        # pattern colour as uint16 LE at @9 (widened 2026-10-15 on official
+        # .wap evidence; aoy sheet reaches 948).  Exercise the >255 path.
         gdf = gpd.GeoDataFrame(
-            {"fill_color": [35], "pattern": [26], "pattern_color": [6]},
+            {"fill_color": [35], "pattern": [26], "pattern_color": [603]},
             geometry=[shapely.geometry.box(0, 0, 1, 1)],
             crs="EPSG:4326",
         )
@@ -230,7 +282,7 @@ class TestPolygonWriter:
         params = reader.polygon_params.iloc[0]
         assert params["fill_color"] == 35
         assert params["pattern"] == 26
-        assert params["pattern_color"] == 6
+        assert params["pattern_color"] == 603
         assert "fill_color" not in reader.data.columns
 
     def test_polygon_area_conservation_real(self, tmp_path, sample_wp) -> None:
