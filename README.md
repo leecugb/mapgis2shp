@@ -16,8 +16,8 @@ MapGIS is a widely used closed-source GIS platform in China, especially in geolo
 - Read **point** (`.wt`), **line** (`.wl`), and **polygon** (`.wp`) files
 - **Write** GeoDataFrames back to native `.wt` / `.wl` / `.wp` binaries (round-trip lossless)
 - Decode GBK-encoded attribute fields and field names
-- Decode point graphic parameters (text/symbol kind, subgraph number, glyph size, rotation angle)
-- Decode line graphic parameters (style and auxiliary style numbers, colour index, width in mm, pattern coefficients)
+- Decode point graphic parameters (text/symbol kind, subgraph number, glyph size, rotation angle, colour, layer, pen width / fonts)
+- Decode line graphic parameters (style and auxiliary style numbers, line/auxiliary colour, width in mm, pattern coefficients, layer, transparent output)
 - Decode polygon graphic parameters (fill colour / pattern numbers from the head_9 section)
 - Parse the MapGIS 6.x graphic libraries themselves — `SubgraphLib` for
   `Subgraph.lib` point-symbol definitions (including chained records past
@@ -89,13 +89,16 @@ The direction is chosen from the **input** extension: `.wt`/`.wl`/`.wp` input re
 Main entry point for reading a MapGIS file. With `read_point_params=True`
 (point files only), the per-point graphic parameter area is decoded as well:
 the columns `point_type` (0 = text, 1 = symbol), `symbol_no`, `height`,
-`width`, `spacing` and `angle` (degrees, counter-clockwise from east) are
+`width`, `spacing` and `angle` (degrees, counter-clockwise from east), plus
+the shared tail `color` and `layer` and the kind-dependent `pen_width`
+(symbol points) / `font_zh`, `font_en`, `font_style` (text points), are
 appended to the GeoDataFrame and exposed separately as `point_params`.
 With `read_graphic_params=True`, graphic parameters are decoded for any
 file type — point parameters for `.wt` (as above), line parameters for
-`.wl` (`linetype`, `aux_linetype`, `width`, `x_coef`, `y_coef`, exposed as
-`line_params`), and polygon parameters for `.wp` (`fill_color`, `pattern`,
-`pattern_color` from the head_9 section, exposed as `polygon_params`).
+`.wl` (`linetype`, `aux_linetype`, `aux_flag`, `color`, `width`, `x_coef`,
+`y_coef`, `aux_color`, `layer`, `transparent`, exposed as `line_params`),
+and polygon parameters for `.wp` (`fill_color`, `pattern`, `pattern_color`
+as a full uint16 from the head_9 section, exposed as `polygon_params`).
 
 **Attributes**
 
