@@ -15,14 +15,16 @@
         致天文坐标，教训在案），按**头尾 u16 序列 = 子路径点数**
         分段连线（总和 = 点数；抬笔规则）
   类型语义：1=折线  2=线+填  3=多子路径复合  6=曲线（圆）
-  圆表示：三点弧（圆心≈首点，弧点 2/3 定义弧）或密集弧列（189 点/圈）
-  断线圆 = 弧段分组天然缝隙（无专用线型参数）
+  圆表示：中心三点组 [圆心, 半径参考点, 圆心回点]（type=6 三点子路径，
+        2026-10-15 定案；符号 7 锚 r=0.318≈裁定 0.315）或密集弧列
+        （189 点/圈）；断线圆 = 弧段分组天然缝隙（无专用线型参数）
 
 挂账（未定案，如实标注）：各符号的颜色（笔/填充）由**图元数据层**指定，
 色号引用 Colorlib.lib（YMCK 4B/条色库）；库内头不含颜色参数。图元层定位：
-.WL 线颜色@26 已定位（211 号全图元恒 194 锚定）；.WT 点图元颜色字段
-未定位——2026-10-14 锚探针（符号 7/15/27/30/43/56 → 裁定色号）在本项目
-9 个数据根中零使用，锚定失败，待实际在用符号的裁定色。
+.WL 线颜色@26 已定位（211 号全图元恒 194 锚定），辅助色@43/图层@47/
+透明输出@48 亦已定位（2026-10-15 官方明码 9 参数补齐）；.WT 点图元
+颜色@75/图层@83/笔宽@49/字体@49-53 已定位（2026-10-15 wat 明码补齐，
+见 reader._read_point_params 文档串）。
 
 官方语义锚（MapGIS 官方点参数文档审计 2026-10-14，smaryun）：
   - 子图按 **1×1 正方形格网**构建（与本库 ±0.5mm 符号空间互证 ✓）
@@ -40,6 +42,8 @@ import struct
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional, Tuple
+
+import numpy as np
 
 _U16 = struct.Struct("<H")
 _U32 = struct.Struct("<I")
@@ -87,7 +91,10 @@ class SubgraphLib:
 
     def __init__(self, path: str):
         self.data = Path(path).read_bytes()
-        self.offsets = [self._u32(i * 4) for i in range(self._u32(0) // 4)]
+        # 2026-10-15 优化：np.frombuffer 向量化（原逐 u32 struct 解包）
+        n_idx = self._u32(0) // 4
+        self.offsets = np.frombuffer(self.data, dtype="<u4",
+                                     count=n_idx).tolist()
         # 末条索引记录的真实终点 = 未索引尾段链起点：头长走查定界
         last = self._scan_record(self.offsets[-1]) if self.offsets else None
         self._indexed_end = last[3] if last else len(self.data)
@@ -227,8 +234,10 @@ class SubgraphLib:
         if hl < 4:
             return None
         header_u16 = [self._u16(o + j) for j in range(0, hl, 2)]
-        pts = [(self._f32(o + hl + 8 * j), self._f32(o + hl + 8 * j + 4))
-               for j in range(n // 2)]
+        # 载荷 = n×f32 的 (x,y) 点对（2026-10-15 优化：向量化，原逐点
+        # struct 解包）；n 为奇数时末值丢弃，与原 range(n//2) 一致。
+        arr = np.frombuffer(self.data, dtype="<f4", count=n, offset=o + hl)
+        pts = list(zip(arr[0::2].tolist(), arr[1::2].tolist()))
         sym = Symbol(no=no, type=t, n=n, header_len=hl, header_u16=header_u16)
         counts = self._subpath_counts(header_u16, len(pts))
         if not counts:
@@ -242,7 +251,15 @@ class SubgraphLib:
         return sym
 
     def _classify(self, sym: Symbol) -> None:
-        """子路径几何分类：密集弧列→圆拟合；短点组（三点弧等）跳过拟合。"""
+        """子路径几何分类：密集弧列→圆拟合；type=6 三点子路径→中心三点
+        组整圆（[圆心, 半径参考点, 圆心回点]，符号 7 锚定）；短点组跳过拟合。"""
+        if sym.type == 6:
+            for sp in sym.subpaths:
+                c = _center_ref_circle(sp.points)
+                if c is not None:
+                    sp.circle = c
+                    sp.closed = True
+                    continue
         for sp in sym.subpaths:
             if len(sp.points) < 8:
                 continue
@@ -254,6 +271,34 @@ class SubgraphLib:
                                sp.points[0][1] - sp.points[-1][1])
                 if len(sp.points) >= 16 and d < 0.01:
                     sp.closed = True
+
+
+def _center_ref_circle(pts: List[Tuple[float, float]]) -> Optional[Tuple[float, float, float]]:
+    """type=6 三点整圆组判读：[圆心, 半径参考点, 圆心回点]。
+
+    实证链：符号 7（type=6，用户裁定空心圆 r≈0.315mm）的两条三点子路径
+    实为该结构——首尾点相距 ≤0.01mm（≈同一圆心），参考点与之等距；
+    与符号 56 内圆"中心 3 点 (0,0)→(0.32,0)→(0,0) 半径参考"裁定同构。
+    四门全过才判圆，否则返回 None（维持点序直连，不产生新 artifact）：
+      ① 恰好 3 点；② 首尾距 ≤0.01mm；③ r=|参考点−圆心| 双侧等距
+      （±2%）；④ 0.005 ≤ r ≤ 1.0mm（符号空间 ±0.5 的合理上限）。
+    全库扫描（1996 符号）：68 条 type=6 记录 70 条三点子路径，判圆 33
+    （半径聚类 0.32/0.36/0.5/0.51，全为可信符号圆），拒绝 37（如 #112
+    竖直径线、#116/#117 原点引线——直连无伪迹）。残留挂账：type≠6
+    记录中的同构三点组（如 #56 内圆，type=2）尚未扩展判读。
+    """
+    if len(pts) != 3:
+        return None
+    (x0, y0), (x1, y1), (x2, y2) = pts
+    if math.hypot(x0 - x2, y0 - y2) > 0.01:
+        return None
+    r1 = math.hypot(x1 - x0, y1 - y0)
+    r2 = math.hypot(x1 - x2, y1 - y2)
+    if r1 < 0.005 or max(r1, r2) > 1.0:
+        return None
+    if abs(r1 - r2) > 0.02 * max(r1, r2):
+        return None
+    return ((x0 + x2) / 2.0, (y0 + y2) / 2.0, (r1 + r2) / 2.0)
 
 
 def fit_circle(pts: List[Tuple[float, float]]) -> Optional[Tuple[float, float, float]]:
@@ -289,7 +334,9 @@ def symbol_geometries(lib: SubgraphLib, no: int) -> dict:
     if sym is None:
         return {"no": no, "error": "decode failed"}
     out = {"no": no, "type": sym.type, "subpaths": [],
-           "circles": [], "bbox": None}
+           "circles": [[round(v, 6) for v in sp.circle] for sp in sym.subpaths
+                       if sp.circle],
+           "bbox": None}
     xs, ys = [], []
     for sp in sym.subpaths:
         out["subpaths"].append({

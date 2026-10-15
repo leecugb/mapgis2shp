@@ -170,7 +170,9 @@ class TestPointParams:
         with Reader(path, read_point_params=True) as reader:
             pp = reader.point_params
             assert list(pp.columns) == [
-                "point_type", "symbol_no", "height", "width", "spacing", "angle"
+                "point_type", "symbol_no", "height", "width", "spacing",
+                "angle", "color", "layer", "pen_width",
+                "font_zh", "font_en", "font_style",
             ]
             assert len(pp) == 2024
             # 276 symbol points (220 fault-aux + 27 fossil + 21 mud-volcano
@@ -189,6 +191,12 @@ class TestPointParams:
             assert row0["width"] == pytest.approx(2.5, abs=0.01)
             assert row0["spacing"] == pytest.approx(0.2, abs=0.01)
             assert 0.0 <= row0["angle"] < 1.0  # near-horizontal text
+            # wat 明码补齐字段锚（2026-10-15）：文字点颜色/图层/字体。
+            assert row0["color"] == 1
+            assert row0["layer"] == 1
+            assert row0["font_zh"] == 1
+            assert row0["font_en"] == 0
+            assert row0["font_style"] == 0
 
             # Row 1669 is a fault-auxiliary symbol point: subgraph 1281,
             # ~1 x 1 mm, rotated parallel to the fault strike.
@@ -199,6 +207,10 @@ class TestPointParams:
             assert row["width"] == pytest.approx(1.0, abs=0.01)
             assert np.isnan(row["spacing"])
             assert row["angle"] == pytest.approx(231.55, abs=0.01)
+            # 子图点颜色@75=6（黑）/图层@83=4/笔宽@49=0（本层存 0）。
+            assert row["color"] == 6
+            assert row["layer"] == 4
+            assert row["pen_width"] == pytest.approx(0.0, abs=1e-6)
 
     @pytest.mark.integration
     def test_all_text_layer(self) -> None:
@@ -257,7 +269,8 @@ class TestLineParams:
         with Reader(path, read_graphic_params=True) as reader:
             lp = reader.line_params
             assert list(lp.columns) == [
-                "linetype", "aux_linetype", "color", "width", "x_coef", "y_coef"
+                "linetype", "aux_linetype", "aux_flag", "color", "width",
+                "x_coef", "y_coef", "aux_color", "layer", "transparent",
             ]
             assert len(lp) == 310
             assert "width" in reader.geodataframe.columns
@@ -269,6 +282,11 @@ class TestLineParams:
             assert gdf.loc[gz == "28", "width"].round(2).eq(0.5).all()
             # The whole fault layer is drawn in colour 6 (black family).
             assert (lp["color"] == 6).all()
+            # 明码补齐字段锚（2026-10-15 官方 wal 9 参数定位）：整层在
+            # 图层 5 上，透明输出全 0（否），9 条记录带辅助色 1。
+            assert (lp["layer"] == 5).all()
+            assert (lp["transparent"] == 0).all()
+            assert (lp["aux_color"] == 1).sum() == 9
             # Inferred faults (04) use dashed style 2; revived faults (31)
             # style 18; nappe boundaries (07) style 38.
             assert (gdf.loc[gz == "04", "linetype"] == 2).all()
