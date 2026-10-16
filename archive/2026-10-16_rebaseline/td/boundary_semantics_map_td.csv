@@ -1,0 +1,9 @@
+﻿GZBD,segs,semantic,source,confidence,national_label,contactType_term,label_distribution,divergent_segs,user_semantic,user_note
+01,7,整合接触,MLE精化,中证(7段·100%),实测地质界线,,整合接触×7,0,,
+02,106,第四系界线,MLE精化,强证(106段·90%),第四系松散沉积物界线,depositional_contact,第四系×95；角度不整合×6；整合接触×5,11,,
+04,3,角度不整合,MLE精化,薄证(3段·100%),角度不整合界线,,角度不整合×3,0,,
+10,104,断层接触（断裂界线）,MLE精化,强证(104段·100%),断层,,断层接触（断裂界线）×104,0,,
+11,21,侵入接触,MLE精化,强证(21段·100%),侵入接触界线,,侵入接触×21,0,,
+24,4,,未解析,未解析（无判定证据）,平行不整合界线,disconformable_contact,不整合或平行不整合×4,0,,
+60,2,脉动接触界线,MLE精化,薄证(2段·100%),脉动接触界线,igneous_phase_contact,脉动接触×2,0,,
+81,100,冰雪区界线,MLE精化,强证(100段·100%),冰雪区界线,,冰雪区×100,0,,

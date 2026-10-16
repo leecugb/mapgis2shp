@@ -1,0 +1,442 @@
+{
+ "codebook_confidence": "geosciml4china/codebook-confidence/v1",
+ "sheet": "td",
+ "generated": "2026-10-16T22:19:00",
+ "readonly": true,
+ "note": "只读标定统计档案——机械汇总既有标定 CSV（不重算）；人工裁定请编辑 codebook_<key>.json",
+ "domains": {
+  "boundaries": {
+   "total": 347,
+   "verdicts": {
+    "标定通过": 336,
+    "分歧未裁定": 11
+   },
+   "conf_bands": {
+    "suspect": 336,
+    "conflict": 11
+   },
+   "established": 336,
+   "unsettled": 11,
+   "fallback": 0,
+   "pending": 11,
+   "coverage_pct": 96.8,
+   "band_consistent_pct": 0.0
+  },
+  "faults": {
+   "total": 52,
+   "verdicts": {
+    "consistent": 37,
+    "兜底（一般断层）": 8,
+    "verified": 7
+   },
+   "conf_bands": {
+    "unassessed": 37,
+    "consistent": 8,
+    "suspect": 7
+   },
+   "structural_types": {
+    "断层泛称": 39,
+    "推测断层": 7,
+    "逆断层": 5,
+    "活动断层": 1
+   },
+   "established": 44,
+   "pending": 0,
+   "fallback": 8,
+   "coverage_pct": 84.6,
+   "band_consistent_pct": 15.4,
+   "conflict_register": "_gzeeb_conflicts_td.csv"
+  },
+  "attitudes": {
+   "total": 23,
+   "verdicts": {
+    "通过": 23
+   },
+   "conf_bands": {
+    "consistent": 21,
+    "suspect": 2
+   },
+   "established": 23,
+   "pending": 0,
+   "fallback": 0,
+   "coverage_pct": 100.0,
+   "band_consistent_pct": 91.3,
+   "GZBBGA_codes": {
+    "202001": {
+     "segments": 20,
+     "code_sem": "地层产状",
+     "by_source": {
+      "registry": 20
+     }
+    },
+    "202004": {
+     "segments": 1,
+     "code_sem": "倒转层理",
+     "by_source": {
+      "registry": 1
+     }
+    },
+    "202005": {
+     "segments": 2,
+     "code_sem": "片理产状",
+     "by_source": {
+      "registry": 2
+     }
+    }
+   }
+  },
+  "fossils": {
+   "total": 3,
+   "verdicts": {
+    "verified": 2,
+    "违反（待裁定）": 1
+   },
+   "conf_bands": {
+    "consistent": 2,
+    "conflict": 1
+   },
+   "established": 2,
+   "pending": 1,
+   "fallback": 0,
+   "coverage_pct": 66.7,
+   "band_consistent_pct": 66.7
+  },
+  "folds": {
+   "total": 2,
+   "verdicts": {
+    "decided": 2
+   },
+   "mode": "vocabulary_only",
+   "note": "词表码义标定域（无段级证据通道，置信带按设计缺席）"
+  },
+  "aux_points": {
+   "total": 17,
+   "kinds": {
+    "symbol": 17
+   },
+   "anomaly_register": "_fault_aux_anomalies_td.csv",
+   "editing_noise": {
+    "total": 3,
+    "note": "编图噪声（孤立脱线点，超 500m 测量带上限）——允许极少数存在——已出辅助点池",
+    "items": [
+     {
+      "aux_idx": "198",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 1089m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "199",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 772m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "203",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 648m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     }
+    ]
+   },
+   "triplets": {
+    "total": 2,
+    "verdicts": {
+     "逆断层产状点": 1,
+     "正断层产状点": 1
+    },
+    "forms": {
+     "a-b-a": 2
+    },
+    "established": 2,
+    "pending": 0
+   }
+  },
+  "polygons": {
+   "total": 108,
+   "blank_code": 1,
+   "units": 20
+  }
+ },
+ "conflicts": {
+  "boundaries": [
+   {
+    "idx": 0,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 9,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 12,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 19,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 44,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "帕卡布拉克组|阿图什组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 49,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 112,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "(整合反向判别:断层重合54%<90%；冰川水体重合0%<90%；覆盖0%<80%；年龄差0；无岩浆岩；无Q；无不整合先验) 期望 01",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 313,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "克孜勒陶组|克孜勒陶组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 324,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "克孜勒陶组|克孜勒陶组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 328,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "克孜勒陶组|克孜勒陶组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   }
+  ],
+  "fossils": [
+   {
+    "idx": 205,
+    "category": "化石",
+    "sem_type": "植物化石",
+    "segment_semantic": "植物化石",
+    "host_code": "→γπT↓3",
+    "verdict": "违反（待裁定）"
+   }
+  ]
+ },
+ "measurement_error": {
+  "boundary_deviation": {
+   "total": 347,
+   "match": 332,
+   "deviation": 4,
+   "contradiction": 11,
+   "uncovered": 0,
+   "segments": [
+    {
+     "idx": 0,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 9,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 12,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 19,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 44,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 49,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 86,
+     "segment_semantic": "不整合或平行不整合",
+     "codebook_semantic": "nan",
+     "class": "deviation"
+    },
+    {
+     "idx": 100,
+     "segment_semantic": "不整合或平行不整合",
+     "codebook_semantic": "nan",
+     "class": "deviation"
+    },
+    {
+     "idx": 102,
+     "segment_semantic": "不整合或平行不整合",
+     "codebook_semantic": "nan",
+     "class": "deviation"
+    },
+    {
+     "idx": 112,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 125,
+     "segment_semantic": "不整合或平行不整合",
+     "codebook_semantic": "nan",
+     "class": "deviation"
+    },
+    {
+     "idx": 313,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 324,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 328,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    }
+   ]
+  },
+  "fault_kinematic_deviation": {
+   "total": 52,
+   "consistent": 0,
+   "violation": 0,
+   "neutral": 52,
+   "segments": [],
+   "evidence_conflicts": [],
+   "evidence_conflict_count": 0
+  }
+ },
+ "codebook_quality": {
+  "GZEEB": {
+   "codes": 7,
+   "by_source": {
+    "MLE无族义(泛称)": 4,
+    "签名": 1,
+    "MLE逻辑判断": 2
+   },
+   "user_edits": 0
+  },
+  "GZBD": {
+   "codes": 8,
+   "by_source": {
+    "MLE精化": 7,
+    "未解析": 1
+   },
+   "user_edits": 0
+  },
+  "GZELD": {
+   "codes": 5,
+   "by_source": {
+    "全局先验": 1,
+    "统计推导": 1,
+    "global_prior": 3
+   },
+   "user_edits": 0
+  },
+  "GZBBGA": {
+   "codes": 3,
+   "by_source": {
+    "registry": 3
+   },
+   "user_edits": 0
+  },
+  "GZCE": {
+   "codes": 2,
+   "by_source": {
+    "registry": 2
+   },
+   "user_edits": 0
+  }
+ },
+ "provenance": {
+  "generator": "geosciml4china prepare",
+  "codebook_generated": "2026-10-16T22:19:00",
+  "registries": []
+ }
+}
