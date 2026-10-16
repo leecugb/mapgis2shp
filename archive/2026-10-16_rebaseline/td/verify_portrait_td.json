@@ -1,0 +1,43 @@
+{
+  "units": 20,
+  "poly_mfs": 107,
+  "contacts": 143,
+  "contact_nil": 0,
+  "sds": 52,
+  "sds_nil_faulttype": 0,
+  "planes": 8,
+  "polarity": 1,
+  "folds": 2,
+  "fold_nil": 0,
+  "members": 575,
+  "compositions": 2,
+  "six_mode": [
+    1,
+    1,
+    0,
+    0,
+    6,
+    0
+  ],
+  "orphan_tolerance": true,
+  "fossil_violations": 1,
+  "banners": 0,
+  "dv_blocks": 8,
+  "ms_dist": {
+    "normal": 1,
+    "no_movement_sense": 6,
+    "reverse": 1
+  },
+  "hwd": 8,
+  "relations": 10,
+  "measure_points": 8,
+  "char_dist_b": 0.0,
+  "lite_counts": {
+    "geologic_unit_view": 107,
+    "contact_view": 143,
+    "shear_displacement_structure_view": 52,
+    "site_observation_view": 23,
+    "fault_attitude_point_view": 8,
+    "fossil_specimen_view": 3
+  }
+}

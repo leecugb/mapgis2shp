@@ -1,0 +1,3811 @@
+{
+ "codebook_confidence": "geosciml4china/codebook-confidence/v1",
+ "sheet": "y2",
+ "generated": "2026-10-16T22:17:07",
+ "readonly": true,
+ "note": "只读标定统计档案——机械汇总既有标定 CSV（不重算）；人工裁定请编辑 codebook_<key>.json",
+ "domains": {
+  "boundaries": {
+   "total": 2541,
+   "verdicts": {
+    "标定通过": 2417,
+    "分歧未裁定": 124
+   },
+   "conf_bands": {
+    "suspect": 2406,
+    "conflict": 124,
+    "verified": 11
+   },
+   "established": 2417,
+   "unsettled": 124,
+   "fallback": 0,
+   "pending": 124,
+   "coverage_pct": 95.1,
+   "band_consistent_pct": 0.4,
+   "conflict_register": "_gzbd_conflicts_y2.csv"
+  },
+  "faults": {
+   "total": 289,
+   "verdicts": {
+    "consistent": 117,
+    "标定（矛盾保留）": 85,
+    "兜底（一般断层）": 46,
+    "标定（活动先验）": 21,
+    "verified": 20
+   },
+   "conf_bands": {
+    "suspect": 119,
+    "unassessed": 110,
+    "consistent": 60
+   },
+   "structural_types": {
+    "断层泛称": 131,
+    "逆断层": 72,
+    "正断层": 38,
+    "活动断层": 26,
+    "推覆体边界": 13,
+    "推测断层": 6,
+    "左型走滑断层": 3
+   },
+   "established": 158,
+   "pending": 85,
+   "fallback": 46,
+   "coverage_pct": 54.7,
+   "band_consistent_pct": 20.8,
+   "conflict_register": "_gzeeb_conflicts_y2.csv"
+  },
+  "attitudes": {
+   "total": 165,
+   "verdicts": {
+    "通过": 155,
+    "裁定（Pt1 时代规则）": 10
+   },
+   "conf_bands": {
+    "consistent": 151,
+    "verified": 10,
+    "suspect": 4
+   },
+   "established": 165,
+   "pending": 0,
+   "fallback": 0,
+   "coverage_pct": 100.0,
+   "band_consistent_pct": 97.6,
+   "GZBBGA_codes": {
+    "202001": {
+     "segments": 122,
+     "code_sem": "地层产状",
+     "by_source": {
+      "registry": 122
+     }
+    },
+    "202005": {
+     "segments": 23,
+     "code_sem": "片理产状",
+     "by_source": {
+      "registry": 23
+     }
+    },
+    "202007": {
+     "segments": 20,
+     "code_sem": "面理产状",
+     "by_source": {
+      "registry": 20
+     }
+    }
+   },
+   "semantic_tensions": 10
+  },
+  "fossils": {
+   "total": 40,
+   "verdicts": {
+    "verified": 40
+   },
+   "conf_bands": {
+    "consistent": 35,
+    "suspect": 5
+   },
+   "established": 40,
+   "pending": 0,
+   "fallback": 0,
+   "coverage_pct": 100.0,
+   "band_consistent_pct": 87.5
+  },
+  "folds": {
+   "total": 7,
+   "verdicts": {
+    "decided": 7
+   },
+   "mode": "vocabulary_only",
+   "note": "词表码义标定域（无段级证据通道，置信带按设计缺席）"
+  },
+  "aux_points": {
+   "total": 383,
+   "kinds": {
+    "symbol": 383
+   },
+   "anomaly_register": "_fault_aux_anomalies_y2.csv",
+   "editing_noise": {
+    "total": 54,
+    "note": "编图噪声（孤立脱线点，超 500m 测量带上限）——允许极少数存在——已出辅助点池",
+    "items": [
+     {
+      "aux_idx": "56",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 900m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "64",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 525m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "250",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 578m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "358",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 1125m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "360",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 588m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "363",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 722m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "365",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 612m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "366",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 736m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "368",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 695m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "369",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 1022m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "370",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 801m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "371",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 1075m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "372",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 897m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "373",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 847m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "374",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 784m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "375",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 862m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "378",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 612m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "380",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 517m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "381",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 709m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "384",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 830m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "387",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 784m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "388",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 823m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "392",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 675m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "396",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 753m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "397",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 651m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "399",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 946m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "400",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 622m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "401",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 689m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "403",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 960m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "404",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 799m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "406",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 513m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "408",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 824m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "409",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 774m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "411",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 665m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "413",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 699m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "414",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 764m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "417",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 996m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "419",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 795m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "422",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 506m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "423",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 616m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "424",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 591m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "428",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 704m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "433",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 720m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "435",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 775m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "437",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 519m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "442",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 797m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "451",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 586m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "455",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 710m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "456",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 850m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "459",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 804m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "461",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 889m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "470",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 1152m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "478",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 712m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     },
+     {
+      "aux_idx": "481",
+      "kind": "symbol",
+      "reason": "编图噪声：孤立脱线点（距归属断层 632m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "editing_noise"
+     }
+    ]
+   },
+   "systematic_deviation": {
+    "total": 1,
+    "note": "系统性编图偏差（码群主体离散脱线，不属断层辅助点/性质点）——已出辅助点池",
+    "items": [
+     {
+      "aux_idx": "154",
+      "kind": "symbol",
+      "reason": "系统性编图偏差：1415 码点群主体脱线（距归属断层 1636m 超 500m 绝对测量带上限，不属断层辅助点/性质点——距离约束规则）",
+      "status": "systematic_deviation"
+     }
+    ]
+   },
+   "nonstandard_five_class": {
+    "total": 7,
+    "note": "超出五类合法集（上盘运动方向/倾向指示/走滑钩·左行/走滑钩·右行/倾角注记）——未遵循国标、超出解析能力",
+    "items": [
+     {
+      "aux_idx": "140",
+      "sub_no": "175",
+      "reason": "判别角色超出五类合法集（非上盘运动方向/倾向指示/走滑钩·左行/走滑钩·右行/倾角注记）——未遵循国标、超出解析能力（2026-10-11 用户裁定）"
+     },
+     {
+      "aux_idx": "149",
+      "sub_no": "175",
+      "reason": "判别角色超出五类合法集（非上盘运动方向/倾向指示/走滑钩·左行/走滑钩·右行/倾角注记）——未遵循国标、超出解析能力（2026-10-11 用户裁定）"
+     },
+     {
+      "aux_idx": "150",
+      "sub_no": "175",
+      "reason": "判别角色超出五类合法集（非上盘运动方向/倾向指示/走滑钩·左行/走滑钩·右行/倾角注记）——未遵循国标、超出解析能力（2026-10-11 用户裁定）"
+     },
+     {
+      "aux_idx": "151",
+      "sub_no": "175",
+      "reason": "判别角色超出五类合法集（非上盘运动方向/倾向指示/走滑钩·左行/走滑钩·右行/倾角注记）——未遵循国标、超出解析能力（2026-10-11 用户裁定）"
+     },
+     {
+      "aux_idx": "152",
+      "sub_no": "175",
+      "reason": "判别角色超出五类合法集（非上盘运动方向/倾向指示/走滑钩·左行/走滑钩·右行/倾角注记）——未遵循国标、超出解析能力（2026-10-11 用户裁定）"
+     },
+     {
+      "aux_idx": "153",
+      "sub_no": "175",
+      "reason": "判别角色超出五类合法集（非上盘运动方向/倾向指示/走滑钩·左行/走滑钩·右行/倾角注记）——未遵循国标、超出解析能力（2026-10-11 用户裁定）"
+     },
+     {
+      "aux_idx": "287",
+      "sub_no": "1415",
+      "reason": "判别角色超出五类合法集（非上盘运动方向/倾向指示/走滑钩·左行/走滑钩·右行/倾角注记）——未遵循国标、超出解析能力（2026-10-11 用户裁定）"
+     }
+    ]
+   },
+   "triplets": {
+    "total": 83,
+    "verdicts": {
+     "存疑（角色歧义：无法解析）": 83
+    },
+    "forms": {
+     "a-b-a": 67,
+     "a-b": 16
+    },
+    "established": 0,
+    "pending": 83
+   }
+  },
+  "polygons": {
+   "total": 808,
+   "blank_code": 0,
+   "units": 95
+  }
+ },
+ "conflicts": {
+  "boundaries": [
+   {
+    "idx": 1,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=02（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 15,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 16,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 23,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 49,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 55,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 63,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 64,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 99,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 113,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 115,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 123,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 124,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(侵入通用规则-覆盖) 期望 04",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 127,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 139,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 198,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "乌鲁阿特组下段|乌鲁阿特组上段 期望 10",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 206,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 223,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 256,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=02（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合91%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 276,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 299,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=02（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 333,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 335,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 342,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 345,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 355,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 372,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 381,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(侵入通用规则-覆盖) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 388,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 416,
+    "code": "24",
+    "code_semantic": "平行不整合界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "塔尔尕组|库孜贡苏组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 424,
+    "code": "24",
+    "code_semantic": "平行不整合界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "塔尔尕组|库孜贡苏组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 431,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 441,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=02（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 447,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 450,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:时代不一致)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 451,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(侵入通用规则-覆盖) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 458,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 467,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:时代不一致)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 468,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(侵入通用规则-覆盖) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 507,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 509,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=02（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 558,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 561,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 571,
+    "code": "24",
+    "code_semantic": "平行不整合界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "塔尔尕组|库孜贡苏组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 581,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "角度不整合（先验建议→04）",
+    "evidence": "(西域组通用规则) 期望 04",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 607,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 608,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 618,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=02（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 627,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=02（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 681,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "克孜勒陶组|克孜勒陶组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 701,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 702,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=11（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 709,
+    "code": "24",
+    "code_semantic": "平行不整合界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "克孜勒陶组|克孜勒陶组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 753,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 765,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=02（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 860,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合97%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 961,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 987,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 993,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=02（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1020,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1041,
+    "code": "24",
+    "code_semantic": "平行不整合界线",
+    "segment_semantic": "整合接触（先验建议→01）",
+    "evidence": "塔尔尕组|库孜贡苏组 期望 01",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1062,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1077,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1094,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1116,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1123,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1127,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1133,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1275,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1287,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1292,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=02（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1357,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=01（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1380,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1416,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1448,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1455,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "侵入接触（先验建议→11）",
+    "evidence": "(侵入通用规则) 期望 11",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1476,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1488,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=02（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1491,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "侵入接触（先验建议→11）",
+    "evidence": "(侵入通用规则) 期望 11",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1500,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=11（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1505,
+    "code": "04",
+    "code_semantic": "角度不整合界线",
+    "segment_semantic": "侵入接触（先验建议→11）",
+    "evidence": "(侵入通用规则) 期望 11",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1517,
+    "code": "04",
+    "code_semantic": "角度不整合界线",
+    "segment_semantic": "侵入接触（先验建议→11）",
+    "evidence": "(侵入通用规则) 期望 11",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1535,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1547,
+    "code": "04",
+    "code_semantic": "角度不整合界线",
+    "segment_semantic": "侵入接触（先验建议→11）",
+    "evidence": "(侵入通用规则) 期望 11",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1564,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=02（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合97%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1567,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=43（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1570,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=02（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1585,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:时代不一致)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1593,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1598,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1627,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1662,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1678,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1792,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1823,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1851,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1860,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=02（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1865,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1870,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1883,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1890,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1907,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1911,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1920,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1942,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 1945,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2011,
+    "code": "02",
+    "code_semantic": "第四系松散沉积物界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=02（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2015,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "冰雪区界线（先验建议→81）",
+    "evidence": "界线与LDLYAAE002 冰川面元高重合而图面码=11（非 81）——候选冰雪区界线登记（(冰雪重合规则:重合99%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2060,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2170,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2198,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2249,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "断层接触（先验建议→10）",
+    "evidence": "库尔良群下段|库尔良群上段 期望 10",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2277,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "第四系界线（先验建议→02）",
+    "evidence": "(第四系通用规则) 期望 02",
+    "younger_side": "right",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2286,
+    "code": "43",
+    "code_semantic": "岩性过渡渐变界线",
+    "segment_semantic": "岩性渐变嫌疑未通过（两侧时代/岩性不一致或非岩浆岩）",
+    "evidence": "43 判定逻辑未通过(43判定未通过:岩性不一致)——不赋渐变语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2300,
+    "code": "01",
+    "code_semantic": "实测地质界线",
+    "segment_semantic": "不整合接触（先验建议→04/24）",
+    "evidence": "(间断通则) 期望 04/24",
+    "younger_side": "left",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2342,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2395,
+    "code": "04",
+    "code_semantic": "角度不整合界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=04（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合95%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2397,
+    "code": "04",
+    "code_semantic": "角度不整合界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=04（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合91%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2411,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2430,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2439,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2474,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2493,
+    "code": "60",
+    "code_semantic": "脉动接触界线",
+    "segment_semantic": "脉动接触嫌疑未通过（时代不一致/非岩浆岩/岩性一致）",
+    "evidence": "60 判定逻辑未通过(60判定未通过:岩性一致（脉动须异岩性，同岩性属 43 渐变域）)——不赋脉动语义，交裁定",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   },
+   {
+    "idx": 2504,
+    "code": "11",
+    "code_semantic": "侵入接触界线",
+    "segment_semantic": "断层接触（断裂界线）（先验建议→10）",
+    "evidence": "界线与LDZOFBA003 实测断层线高重合而图面码=11（非 10）——候选断层接触（断裂界线）登记（(断层重合规则:重合100%)）",
+    "younger_side": "nan",
+    "conf_band": "conflict",
+    "confidence": 0.0
+   }
+  ],
+  "faults": [
+   {
+    "idx": 14,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 18,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 21,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 28,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 31,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 33,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 49,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 60,
+    "structural_type": "左型走滑断层",
+    "segment_semantic": "左型走滑断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 66,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 69,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 72,
+    "structural_type": "左型走滑断层",
+    "segment_semantic": "左型走滑断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 74,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 76,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 77,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 78,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 79,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 89,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 93,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 94,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 100,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 117,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 123,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 124,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 130,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 131,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 139,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 149,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 151,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 154,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 156,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 157,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 159,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 164,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 165,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 166,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 167,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 168,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 171,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 177,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 182,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 186,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 187,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 191,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 192,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 193,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 196,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 201,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 202,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 205,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 206,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 209,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 210,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 213,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 214,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 216,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 219,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 224,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 233,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 234,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 235,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 236,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 240,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 243,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 246,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 247,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 248,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 250,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 255,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 257,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 260,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 263,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 264,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 266,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 267,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 269,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 270,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 271,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 274,
+    "structural_type": "左型走滑断层",
+    "segment_semantic": "左型走滑断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 275,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 276,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 278,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 281,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 282,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 286,
+    "structural_type": "正断层",
+    "segment_semantic": "正断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   },
+   {
+    "idx": 288,
+    "structural_type": "逆断层",
+    "segment_semantic": "逆断层",
+    "verdict": "标定（矛盾保留）",
+    "conf_band": "suspect"
+   }
+  ],
+  "attitudes_semantic_tension": [
+   {
+    "idx": 13,
+    "GZBBGA": "202005",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "片理产状",
+    "host_code": "→Pt↓1→K.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 14,
+    "GZBBGA": "202005",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "片理产状",
+    "host_code": "→Pt↓1→K.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 25,
+    "GZBBGA": "202007",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "面理产状",
+    "host_code": "→Pt↓1→K.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 29,
+    "GZBBGA": "202005",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "片理产状",
+    "host_code": "→HtA.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 125,
+    "GZBBGA": "202007",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "面理产状",
+    "host_code": "→Pt↓1→K.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 126,
+    "GZBBGA": "202007",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "面理产状",
+    "host_code": "→Pt↓1→K.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 131,
+    "GZBBGA": "202007",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "面理产状",
+    "host_code": "→Pt↓1→K.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 133,
+    "GZBBGA": "202007",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "面理产状",
+    "host_code": "→Pt↓1→K.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 135,
+    "GZBBGA": "202007",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "面理产状",
+    "host_code": "→Pt↓1→K.",
+    "verdict": "裁定（Pt1 时代规则）"
+   },
+   {
+    "idx": 161,
+    "GZBBGA": "202001",
+    "segment_semantic": "片麻理产状",
+    "codebook_semantic": "地层产状",
+    "host_code": "→HtA.",
+    "verdict": "裁定（Pt1 时代规则）"
+   }
+  ]
+ },
+ "measurement_error": {
+  "boundary_deviation": {
+   "total": 2541,
+   "match": 2394,
+   "deviation": 23,
+   "contradiction": 124,
+   "uncovered": 0,
+   "segments": [
+    {
+     "idx": 1,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 15,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 16,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 23,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 49,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 55,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 63,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 64,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 99,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 113,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 115,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 123,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 124,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 127,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 139,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 189,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 198,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 202,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 206,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 223,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 256,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 276,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 299,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 333,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 335,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 342,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 345,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 355,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 372,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 381,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 388,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 416,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 424,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 431,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 441,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 447,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 450,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 451,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 458,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 467,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 468,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 507,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 509,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 558,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 561,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 571,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 581,
+     "segment_semantic": "角度不整合",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 607,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 608,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 618,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 627,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 681,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 701,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 702,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 709,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 753,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 755,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 765,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 786,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 843,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 860,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 886,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 898,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 961,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 970,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 987,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 993,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1020,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1041,
+     "segment_semantic": "整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1062,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1077,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1080,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1094,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1116,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1123,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1127,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1133,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1146,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1149,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1180,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1237,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1275,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1287,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1292,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1319,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1351,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1357,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1380,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1388,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1416,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1448,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1455,
+     "segment_semantic": "侵入接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1476,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1488,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1491,
+     "segment_semantic": "侵入接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1500,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1505,
+     "segment_semantic": "侵入接触",
+     "codebook_semantic": "角度不整合",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1517,
+     "segment_semantic": "侵入接触",
+     "codebook_semantic": "角度不整合",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1535,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1547,
+     "segment_semantic": "侵入接触",
+     "codebook_semantic": "角度不整合",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1564,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1567,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1570,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1585,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1593,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1597,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1598,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1627,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1656,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1662,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1678,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1685,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1738,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1770,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1792,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1823,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1845,
+     "segment_semantic": "岩相接触",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "deviation"
+    },
+    {
+     "idx": 1851,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1860,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1865,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1870,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1883,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1890,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1907,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1911,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1920,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1942,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 1945,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2011,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "第四系界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2015,
+     "segment_semantic": "冰雪区界线",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2060,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2170,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2198,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2249,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2277,
+     "segment_semantic": "第四系界线",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2286,
+     "segment_semantic": "岩性渐变嫌疑未通过",
+     "codebook_semantic": "岩性过渡渐变界线",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2300,
+     "segment_semantic": "不整合接触",
+     "codebook_semantic": "整合接触",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2342,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2395,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "角度不整合",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2397,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "角度不整合",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2411,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2430,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2439,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2456,
+     "segment_semantic": "脉动接触界线",
+     "codebook_semantic": "nan",
+     "class": "deviation"
+    },
+    {
+     "idx": 2474,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2493,
+     "segment_semantic": "脉动接触嫌疑未通过",
+     "codebook_semantic": "nan",
+     "class": "contradiction"
+    },
+    {
+     "idx": 2504,
+     "segment_semantic": "断层接触",
+     "codebook_semantic": "侵入接触",
+     "class": "contradiction"
+    }
+   ]
+  },
+  "fault_kinematic_deviation": {
+   "total": 289,
+   "consistent": 123,
+   "violation": 3,
+   "neutral": 163,
+   "segments": [
+    {
+     "idx": 60,
+     "structural_type": "左型走滑断层",
+     "kinematic_semantic": "右行走滑",
+     "class": "violation"
+    },
+    {
+     "idx": 72,
+     "structural_type": "左型走滑断层",
+     "kinematic_semantic": "右行走滑",
+     "class": "violation"
+    },
+    {
+     "idx": 274,
+     "structural_type": "左型走滑断层",
+     "kinematic_semantic": "右行走滑",
+     "class": "violation"
+    }
+   ],
+   "evidence_conflicts": [
+    {
+     "idx": 14,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 21,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 28,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 49,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 69,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 74,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 76,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 77,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 89,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 93,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 94,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 100,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 117,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 123,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 124,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 130,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 131,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 149,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 151,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 157,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 159,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 164,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 165,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 166,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 167,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 168,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 171,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 191,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 192,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 202,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 206,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 209,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 210,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 213,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 214,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 216,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 219,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 224,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 233,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 234,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 235,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 236,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 240,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 243,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 247,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 248,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 250,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 255,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 257,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 260,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 264,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 266,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 269,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 270,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 271,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 275,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 276,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 278,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 281,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 282,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 286,
+     "issue": "GZEEB=03(正断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 正断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 288,
+     "issue": "GZEEB=05(逆断层) 证据冲突",
+     "evidence": "aux=存疑（角色歧义：无法解析） 不符期望 逆断层产状点",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 60,
+     "issue": "GZEEB=16(左型走滑断层) 证据冲突",
+     "evidence": "GZELD=103(右行走滑) 与结构语义 左型走滑断层 不一致",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 72,
+     "issue": "GZEEB=16(左型走滑断层) 证据冲突",
+     "evidence": "GZELD=103(右行走滑) 与结构语义 左型走滑断层 不一致",
+     "class": "evidence_conflict"
+    },
+    {
+     "idx": 274,
+     "issue": "GZEEB=16(左型走滑断层) 证据冲突",
+     "evidence": "GZELD=103(右行走滑) 与结构语义 左型走滑断层 不一致",
+     "class": "evidence_conflict"
+    }
+   ],
+   "evidence_conflict_count": 65
+  }
+ },
+ "codebook_quality": {
+  "GZEEB": {
+   "codes": 7,
+   "by_source": {
+    "MLE无族义(泛称)": 1,
+    "签名": 1,
+    "MLE逻辑判断": 5
+   },
+   "user_edits": 0
+  },
+  "GZBD": {
+   "codes": 9,
+   "by_source": {
+    "MLE精化": 8,
+    "未解析": 1
+   },
+   "user_edits": 0
+  },
+  "GZELD": {
+   "codes": 5,
+   "by_source": {
+    "全局先验": 3,
+    "未标定(默认不明)": 1,
+    "global_prior": 1
+   },
+   "user_edits": 0
+  },
+  "GZBBGA": {
+   "codes": 3,
+   "by_source": {
+    "registry": 3
+   },
+   "user_edits": 0
+  },
+  "GZCE": {
+   "codes": 4,
+   "by_source": {
+    "registry": 4
+   },
+   "user_edits": 0
+  }
+ },
+ "provenance": {
+  "generator": "geosciml4china prepare",
+  "codebook_generated": "2026-10-16T22:17:06",
+  "registries": []
+ }
+}

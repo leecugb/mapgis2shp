@@ -1,0 +1,242 @@
+{
+ "codebook": "geosciml4china/codebook/v1",
+ "sheet": "y2",
+ "generated": "2026-10-16T22:17:06",
+ "authority": "registry > user_semantic > global_prior > calibration > generic fallback",
+ "codes": {
+  "GZEEB": {
+   "01": {
+    "semantic": "断层泛称",
+    "source": "MLE无族义(泛称)",
+    "segs": 131,
+    "confidence": "无族义(兜底)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "02": {
+    "semantic": "推测断层",
+    "source": "签名",
+    "segs": 6,
+    "confidence": "签名码型",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "03": {
+    "semantic": "正断层",
+    "source": "MLE逻辑判断",
+    "segs": 38,
+    "confidence": "强证(38段·100%有效)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "05": {
+    "semantic": "逆断层",
+    "source": "MLE逻辑判断",
+    "segs": 72,
+    "confidence": "强证(72段·89%有效)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "16": {
+    "semantic": "左型走滑断层",
+    "source": "MLE逻辑判断",
+    "segs": 3,
+    "confidence": "薄证(3段·100%有效)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "35": {
+    "semantic": "推覆体边界",
+    "source": "MLE逻辑判断",
+    "segs": 13,
+    "confidence": "中证(13段·69%有效)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "37": {
+    "semantic": "活动断层",
+    "source": "MLE逻辑判断",
+    "segs": 26,
+    "confidence": "强证(26段·81%有效)",
+    "user_semantic": "",
+    "user_note": ""
+   }
+  },
+  "GZBD": {
+   "01": {
+    "semantic": "整合接触",
+    "source": "MLE精化",
+    "segs": 156,
+    "confidence": "强证(156段·83%)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "02": {
+    "semantic": "第四系界线",
+    "source": "MLE精化",
+    "segs": 691,
+    "confidence": "强证(691段·94%)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "04": {
+    "semantic": "角度不整合",
+    "source": "MLE精化",
+    "segs": 63,
+    "confidence": "强证(63段·92%)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "10": {
+    "semantic": "断层接触（断裂界线）",
+    "source": "MLE精化",
+    "segs": 695,
+    "confidence": "强证(695段·100%)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "11": {
+    "semantic": "侵入接触",
+    "source": "MLE精化",
+    "segs": 186,
+    "confidence": "强证(186段·94%)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "24": {
+    "semantic": "整合接触",
+    "source": "MLE精化",
+    "segs": 9,
+    "confidence": "中证(9段·56%)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "43": {
+    "semantic": "岩性过渡渐变界线",
+    "source": "MLE精化",
+    "segs": 47,
+    "confidence": "强证(47段·74%)",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "60": {
+    "semantic": "nan",
+    "source": "未解析",
+    "segs": 25,
+    "confidence": "未解析（无判定证据）",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "81": {
+    "semantic": "冰雪区界线",
+    "source": "MLE精化",
+    "segs": 647,
+    "confidence": "强证(647段·100%)",
+    "user_semantic": "",
+    "user_note": ""
+   }
+  },
+  "GZELD": {
+   "101": {
+    "semantic": "压性",
+    "source": "全局先验",
+    "segs": 92,
+    "confidence": "全局先验（用户裁定）",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "102": {
+    "semantic": "张性",
+    "source": "全局先验",
+    "segs": 38,
+    "confidence": "全局先验（用户裁定）",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "103": {
+    "semantic": "右行走滑",
+    "source": "全局先验",
+    "segs": 3,
+    "confidence": "全局先验（用户裁定）",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "109": {
+    "semantic": "运动性质不明",
+    "source": "未标定(默认不明)",
+    "segs": 156,
+    "confidence": "未标定",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "104": {
+    "semantic": "左行走滑",
+    "source": "global_prior",
+    "segs": 0,
+    "confidence": "",
+    "user_semantic": "",
+    "user_note": ""
+   }
+  },
+  "GZBBGA": {
+   "202001": {
+    "semantic": "地层产状",
+    "source": "registry",
+    "segs": 122,
+    "confidence": "",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "202005": {
+    "semantic": "片理产状",
+    "source": "registry",
+    "segs": 23,
+    "confidence": "",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "202007": {
+    "semantic": "面理产状",
+    "source": "registry",
+    "segs": 20,
+    "confidence": "",
+    "user_semantic": "",
+    "user_note": ""
+   }
+  },
+  "GZCE": {
+   "01": {
+    "semantic": "向斜",
+    "source": "registry",
+    "segs": 2,
+    "confidence": "",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "02": {
+    "semantic": "背斜",
+    "source": "registry",
+    "segs": 1,
+    "confidence": "",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "03": {
+    "semantic": "向斜",
+    "source": "registry",
+    "segs": 1,
+    "confidence": "",
+    "user_semantic": "",
+    "user_note": ""
+   },
+   "04": {
+    "semantic": "背斜",
+    "source": "registry",
+    "segs": 3,
+    "confidence": "",
+    "user_semantic": "",
+    "user_note": ""
+   }
+  }
+ }
+}
