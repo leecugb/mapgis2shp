@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """
 pymapgis.writer
 Provides writing support for MapGIS *.wt, *.wl, *.wp geospatial vector files.
@@ -673,7 +674,11 @@ def _encode_lines(
         # @43 u16 辅助色（0=无）、@47 u8 图层、@48 u8 透明输出。
         aux_color = int(row["aux_color"]) if (row is not None and "aux_color" in row.index) else 0
         layer = int(row["layer"]) if (row is not None and "layer" in row.index) else 0
-        transparent = int(row["transparent"]) if (row is not None and "transparent" in row.index) else 0
+        transparent = (
+            int(row["transparent"])
+            if (row is not None and "transparent" in row.index)
+            else 0
+        )
         struct.pack_into("<h", record, 43, aux_color)
         struct.pack_into("<B", record, 47, layer & 0xFF)
         struct.pack_into("<B", record, 48, transparent & 0xFF)

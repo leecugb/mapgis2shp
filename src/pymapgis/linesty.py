@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: Apache-2.0
 """MapGIS 6.x 线型库（LINESTY.lib）解析器（2026-10-14 逆向定案版 v3）。
 
 格式规格（索引链式结构 8/8 验证；元素模板长度律全库命中）：
@@ -635,8 +636,6 @@ def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
         # unit=5=竖短线嵌入子图（子图5=3点折线 0~0.71mm，10-15 裁定补）
         has_sym_tick = any(e.is_symbol and e.unit == 5
                            for s in style.sublines for e in s.elements)
-        has_sym_tooth = any(e.is_symbol and e.unit not in (258, 259, 5)
-                            for s in style.sublines for e in s.elements)
 
         if rhy and not cells:
             ons = [(b - a) for a, b, _y in rhy["segments"]]
