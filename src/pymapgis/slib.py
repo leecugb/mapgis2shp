@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: Apache-2.0
 """MapGIS 6.x 符号库（Subgraph.lib）解析器（2026-10-14 逆向定案版 v2）。
 
 格式规格（经用户目视核验定案，符号 7/27/30/43/56 实证；含未索引尾段）：

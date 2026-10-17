@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: Apache-2.0
 """Smoke-test / regression script for pymapgis.
 
 Discover all MapGIS vector files in the current directory, load them with

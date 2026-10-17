@@ -651,6 +651,22 @@ Run the smoke-test regression against all local MapGIS files:
 python verify_pymapgis.py
 ```
 
+## Contributing
+
+Contributions are welcome. Read the [contributing guide](CONTRIBUTING.md) for
+project scope, development setup, format-evidence rules, tests, and the
+pull-request checklist. Public issues and pull requests are used to maintain an
+auditable collaboration and decision record.
+
+OSGeo Community Project preparation materials include the
+[project-page draft](docs/osgeo_community_project.md),
+[application checklist](docs/osgeo_application_checklist.md), and
+[licence and provenance review](docs/license_provenance.md).
+
+Participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md), adapted
+from the [Contributor Covenant](https://www.contributor-covenant.org/).
+Contributors to mapgis2shp are expected to act respectfully toward others.
+
 ## License
 
 This project is licensed under the [Apache License 2.0](LICENSE).

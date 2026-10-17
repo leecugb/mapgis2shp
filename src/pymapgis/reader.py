@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """
 pymapgis.reader
 Provides reading support for MapGIS *.wt, *.wl, *.wp geospatial vector files.

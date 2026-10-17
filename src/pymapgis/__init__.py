@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """pymapgis - Read and write MapGIS vector files with GeoPandas GeoDataFrames.
 
 Also provides parsers for the MapGIS 6.x graphic libraries (Subgraph.lib
