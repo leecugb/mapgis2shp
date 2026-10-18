@@ -74,6 +74,18 @@ reporting guidance also apply. The OSGeo reporting channel is
 **[conduct-report@osgeo.org](mailto:conduct-report@osgeo.org)**. Project and
 OSGeo channels have different scopes.
 
+## Reporting expectations
+
+- Reports are acknowledged promptly and handled confidentially; the reporter's
+  identity is shared only with those who need it to resolve the report.
+- Enforcement follows the Community Impact Guidelines below. Decisions and
+  the reasoning behind them are recorded so the community can trust that the
+  code applies equally to everyone, including maintainers.
+- If you believe a report was mishandled, you may escalate to the OSGeo
+  conduct channel at [conduct-report@osgeo.org](mailto:conduct-report@osgeo.org).
+- Reports that are outside this project's scope or that cannot appropriately
+  be handled by the project contact will be referred to the relevant venue.
+
 ## Enforcement Guidelines
 
 Project maintainers will follow these Community Impact Guidelines in
