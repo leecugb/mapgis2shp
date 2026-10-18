@@ -37,6 +37,10 @@ _GEOMETRY_TYPE_MAP = {
 }
 
 _HEADER_COUNT = 10
+# Native files carry a 16-entry index table; entries 11-16 hold auxiliary
+# sections (entry 11 = per-polygon label-box section, the display anchor
+# MapGIS's renderer requires -- 2026-10-18 finding) plus empty slots.
+_HEADER_COUNT_PHYSICAL = 16
 _HEADER_RECORD_SIZE = 10
 
 _POINT_RECORD_SIZE = 93
@@ -461,11 +465,18 @@ def _read_crs(file_obj: BinaryIO) -> Tuple[Any, float]:
 # ---------------------------------------------------------------------------
 
 
-def _read_header_entries(file_obj: BinaryIO, data_start: int) -> List[Tuple[int, int]]:
-    """Read the 10 header section entries and return (start, volume) tuples."""
+def _read_header_entries(
+    file_obj: BinaryIO, data_start: int, count: int = _HEADER_COUNT
+) -> List[Tuple[int, int]]:
+    """Read *count* header section entries and return (start, volume) tuples.
+
+    Callers that only need the ten logical sections use the default; the
+    physical table has 16 entries (entry 11 carries the per-polygon label-box
+    section), so polygon parsing requests all of them.
+    """
     file_obj.seek(data_start)
     entries: List[Tuple[int, int]] = []
-    for _ in range(_HEADER_COUNT):
+    for _ in range(count):
         buf = file_obj.read(_HEADER_RECORD_SIZE)
         if len(buf) < 8:
             raise MapGISError("header entry too short")
@@ -754,7 +765,7 @@ def _read_line_params(
     )
 
 
-_POLYGON_PARAM_COLUMNS = ["fill_color", "pattern", "pattern_color"]
+_POLYGON_PARAM_COLUMNS = ["fill_color", "pattern", "pattern_color", "class"]
 
 
 def _read_polygon_params(
@@ -768,6 +779,10 @@ def _read_polygon_params(
     Xinjiang-115 — plus all 13 Kurgan polygon layers, where bytes @4 and @8
     are 0 for 100% of records and @7 is constant within each layer):
 
+    - uint8 @1: per-polygon class code == the polygon layer (native values
+      2/9/10 observed).  MapGIS's display consults it together with the arc
+      layer byte and the head_8 flags; inconsistent values leave the region
+      undisplayable (2026-10-18 native-acceptance finding).
     - uint8 @5: fill colour index (1-based into Colorlib; 0 = default)
     - uint8 @6: fill-pattern number -- sedimentary units cluster around
       26-91, intrusive rocks 128-132, metamorphic rocks 239-246
@@ -798,9 +813,10 @@ def _read_polygon_params(
         return pd.DataFrame(columns=_POLYGON_PARAM_COLUMNS)
 
     dtype = np.dtype({
-        "names": ["fill_color", "pattern", "pattern_color"],
-        "formats": ["<u1", "<u1", "<u2"],
+        "names": ["class", "fill_color", "pattern", "pattern_color"],
+        "formats": ["<u1", "<u1", "<u1", "<u2"],
         "offsets": [
+            1,
             _POLY_FILL_COLOR_OFFSET,
             _POLY_PATTERN_OFFSET,
             _POLY_PATTERN_COLOR_OFFSET,
@@ -812,6 +828,7 @@ def _read_polygon_params(
     )
     return pd.DataFrame(
         {
+            "class": records["class"].astype(np.int64),
             "fill_color": records["fill_color"].astype(np.int64),
             "pattern": records["pattern"].astype(np.int64),
             "pattern_color": records["pattern_color"].astype(np.int64),
@@ -1207,7 +1224,20 @@ class Reader:
 
         file_obj.read(4)
         data_start = _read_struct(file_obj, "<i")[0]
-        header_entries = _read_header_entries(file_obj, data_start)
+        header_entries = _read_header_entries(
+            file_obj, data_start, _HEADER_COUNT_PHYSICAL
+        )
+        self._raw_sections: Dict[int, bytes] = {}
+        if self.shapeType == "POLYGON":
+            end = max((s + v for s, v in header_entries if v), default=0)
+            for i, (s, v) in enumerate(header_entries):
+                if v:
+                    file_obj.seek(s)
+                    self._raw_sections[i] = file_obj.read(v)
+            file_obj.seek(0, 2)
+            file_size = file_obj.tell()
+            file_obj.seek(end)
+            self._raw_tail = file_obj.read(max(0, file_size - end))
 
         attr_start, _ = header_entries[_ATTR_HEADER_INDEX[self.shapeType]]
         record_count, record_length, fields = _read_attribute_header(
@@ -1216,6 +1246,26 @@ class Reader:
         self.fields = [
             (field.name, field.type_name, field.length) for field in fields
         ]
+        # 保留原始字段元数据供 Writer 往返复用（2026-10-18 原生验收实证：
+        # MapGIS 依赖原始字段声明宽度/描述符，密排压缩会导致区显示被拒）
+        file_obj.seek(attr_start + 348)
+        raw_blocks = [file_obj.read(39) for _ in range(len(fields))]
+        self._field_meta = {
+            "record_length": record_length,
+            "fields": [
+                {
+                    "name": f.name,
+                    "type_code": f.type_code,
+                    "offset": f.offset,
+                    "length": f.length,
+                    "decimals": f.decimals,
+                }
+                for f in fields
+            ],
+            "raw_descriptors": {
+                f.name: raw_blocks[i] for i, f in enumerate(fields)
+            },
+        }
         self.data = _read_attribute_records(
             file_obj, record_count, record_length, fields
         )
@@ -1300,6 +1350,20 @@ class Reader:
                     axis=1,
                 )
         self.geodataframe = gpd.GeoDataFrame(data, crs=self.crs, geometry=self.geom)
+        if getattr(self, "_field_meta", None):
+            self.geodataframe.attrs["mapgis_field_meta"] = self._field_meta
+        if self.shapeType == "POLYGON":
+            # 原始段透传元数据：未修改几何时 Writer 逐字节复用，保证往返件
+            # 与原生同构（2026-10-18 实证：元数据块尺寸/弧段旋转均参与
+            # MapGIS 显示判定，自行重建无法复现其内部期望）
+            self.geodataframe.attrs["mapgis_section_passthrough"] = {
+                "sections": {
+                    str(i): self._raw_sections[i]
+                    for i in (0, 1, 2, 3, 4, 5, 6, 7, 10, 12)
+                    if i in self._raw_sections
+                },
+                "tail": self._raw_tail,
+            }
         if self.geom:
             bounds = self.geodataframe.bounds
             self.bbox = np.array([

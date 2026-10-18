@@ -330,7 +330,7 @@ class TestPolygonParams:
 
         f = io.BytesIO(buf)
         params = _read_polygon_params(f, 0, len(buf))
-        assert list(params.columns) == ["fill_color", "pattern", "pattern_color"]
+        assert list(params.columns) == ["fill_color", "pattern", "pattern_color", "class"]
         row = params.iloc[0]
         assert row["fill_color"] == 70
         assert row["pattern"] == 26
@@ -698,9 +698,10 @@ class TestPolygonArcDecomposer:
         p1 = shapely.geometry.box(0, 0, 1, 1)
         p2 = shapely.geometry.box(1, 0, 2, 1)
         arcs, topo = _PolygonArcDecomposer([p1, p2]).build()
+        assert len(arcs) == 3  # 无向成链：两盒 = 共享边 + 两条开放环链
         pairs = sorted(topo)
-        assert pairs == [(0, 1), (0, 2), (1, 0), (1, 2), (2, 0)]
-        shared = [t for t in topo if t == (1, 2)]
+        assert pairs == [(1, 0), (2, 0), (2, 1)]
+        shared = [t for t in topo if t == (2, 1)]
         assert len(shared) == 1  # the common edge x=1 is a single arc
 
     def test_rebuild_with_reader_builder(self) -> None:
@@ -759,9 +760,9 @@ class TestPolygonArcDecomposer:
             [(1 + 1e-4, 0), (2, 0), (2, 1), (1 + 1e-4, 1), (1 + 1e-4, 0)]
         )
         _, topo_exact = _PolygonArcDecomposer([p1, p2], snap_tolerance=0.0).build()
-        assert (1, 2) not in topo_exact
+        assert (2, 1) not in topo_exact
         _, topo_snap = _PolygonArcDecomposer([p1, p2], snap_tolerance=0.01).build()
-        assert (1, 2) in topo_snap
+        assert (2, 1) in topo_snap
 
 
 class TestAssembleFile:
