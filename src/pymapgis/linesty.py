@@ -532,10 +532,25 @@ def census(lib: LinestyLib) -> dict:
 # 尽力从库内结构推导，不足则如实标注"待裁定"——不冒充。
 # ---------------------------------------------------------------------------
 
-# 已裁定线型的结构规格（用户 2026-10-15 裁定形状固化）
+# 已裁定线型的结构规格（用户 2026-10-15/16 裁定形状固化）
 ADJUDICATED_STRUCTS = {
     "1|0": "单实线（通用载体）",
+    "1|1": "单实线（用户 10-16 裁定，断裂层）",
+    "1|2": "单实线（一般断层；用户 10-16 裁定）",
+    "1|5": "单实线（等价 1|0；用户 10-16 裁定）",
+    "1|7": "单实线（等价 1|0；用户 10-16 裁定）",
+    "1|16": "单实线（等价 1|0；用户 10-16 裁定）",
     "2|0": "纯虚线（实0.35/空0.30/实0.35，周期1.0mm）",
+    "2|1": "虚线（实>空，环状，火山洼地构造；用户 10-16 裁定）",
+    "2|4": "纯虚线（等价 2|0；用户 10-16 裁定）",
+    "2|18": "纯虚线（等价 2|0；用户 10-16 裁定）",
+    "10|0": "平行双实线（区域性复合断层；用户 10-16 裁定）",
+    "12|0": "平行双虚线（主要复合断层；用户 10-16 裁定）",
+    "15|0": "平行双实线·一粗一细（岩石圈断层；用户 10-16 裁定）",
+    "44|0": "推覆体齿线（推覆体界线；同38|2 规格族；用户 10-16 裁定）",
+    "174|0": "断线+双点相间（类(4,0)；遥感解译断层；用户 10-16 裁定）",
+    "204|0": "推覆体齿线（推覆体界线；同38|2 规格族；用户 10-16 裁定）",
+    "595|0": "推覆体齿线（推覆体界线；同38|2 规格族；用户 10-16 裁定）",
     "16|0": "纯圆点串（点径=图元线宽，点距0.3×x，无基线）",
     "16|1": "纯圆点串（同16|0）",
     "17|0": "直线+正圆点串在线侧，点线保持间距（侧偏移=(线宽/2)×y）",
@@ -546,7 +561,7 @@ ADJUDICATED_STRUCTS = {
     "18|0": "实线+单侧短刺（超动界线，参照复活断层样式）",
     "38|2": "实线+右侧等腰三角齿底边贴实线（参照推覆体界线样式）",
     "110|0": "实线+右侧等边三角齿底边贴实线（同38|2 等边变体）",
-    "148|0": "平行双实线",
+    "148|0": "平行双实线·一粗一细（岩石圈断层；用户 10-16 裁定修订原'平行双实线'）",
     "50|0": "实线+平行双点线（双点基本单元，单元间距>点间距）",
     "211|0": "青绿矩形节骑线+矩形填充+单元间空白（周期1.0mm）",
 }
@@ -580,6 +595,42 @@ def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
         spec = ADJUDICATED_STRUCTS.get("1|0", "单实线")
     elif key == "2|0":
         ops = [T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef)]
+    elif key == "1|1" or (linetype == 1 and aux == 1):
+        ops = [T("solid", width_mm=W)]
+    elif key == "1|2" or (linetype == 1 and aux == 2):
+        ops = [T("solid", width_mm=W)]
+    elif key in ("1|5", "1|7", "1|16") or (linetype == 1 and aux in (5, 7, 16)):
+        # 用户 10-16 裁定：aux=5/7/16 等价 (1,0) 单实线
+        ops = [T("solid", width_mm=W)]
+    elif key == "2|1" or (linetype == 2 and aux == 1):
+        # 用户 10-16 裁定：实>空 虚线（环状用法=火山洼地构造）；
+        # 同 (2,0) 节奏规格，aux=1 不改形状（比照 (4,0)/(4,1) 先例）
+        ops = [T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef)]
+    elif key in ("2|4", "2|18") or (linetype == 2 and aux in (4, 18)):
+        # 用户 10-16 裁定：等价 (2,0) 纯虚线
+        ops = [T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef)]
+    elif key == "10|0" or (linetype == 10 and aux == 0):
+        # 用户 10-16 裁定：平行双实线（区域性复合断层）
+        ops = [T("parallel_solid", gap_mm=0.18, width_mm=W)]
+    elif key == "12|0" or (linetype == 12 and aux == 0):
+        # 用户 10-16 裁定：平行双虚线（主要复合断层）
+        ops = [T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef, y_mm=0.09),
+               T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef, y_mm=-0.09)]
+    elif key == "174|0" or (linetype == 174 and aux == 0):
+        # 用户 10-16 裁定：断线+双点相间，类 (4,0) 形态（用户参照
+        # boundary_linetypes_all.png 的 (4,0) 面板比对定案）
+        ops = [T("dash_dotdot", dash_mm=4.5, dot_gap_mm=1.4, period_mm=8.0)]
+    elif key in ("204|0", "595|0", "44|0") or (linetype in (204, 595, 44) and aux == 0):
+        # 用户 10-16 裁定：推覆体齿线（推覆体界线）——与已裁 38|2
+        # 同规格族：实线+右侧等腰三角齿底边贴实线
+        ops = [T("solid", width_mm=W),
+               T("solid_teeth", spacing_mm=0.55 * x_coef,
+                 tooth_mm=0.16 * y_coef, side="right", shape="isosceles")]
+    elif key in ("15|0", "148|0") or (linetype in (15, 148) and aux == 0):
+        # 用户 10-16 裁定：平行双实线一粗一细（岩石圈断层；148|0 修订）。
+        # 粗细比 2:1 为用户规格未给数值的暂定（细=W/2），待目视核。
+        ops = [T("solid", width_mm=W, y_mm=0.09),
+               T("solid", width_mm=W / 2.0, y_mm=-0.09)]
     elif key in ("16|0", "16|1") or (linetype == 16 and aux in (0, 1)):
         ops = [T("dotline", radius_mm=r, spacing_mm=0.3 * x_coef, baseline=False)]
     elif key == "17|0" or (linetype == 17 and aux == 0):
@@ -605,8 +656,6 @@ def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
         ops = [T("solid", width_mm=W),
                T("solid_teeth", spacing_mm=0.55 * x_coef,
                  tooth_mm=0.16 * y_coef, side="right", shape="equilateral")]
-    elif key == "148|0" or (linetype == 148 and aux == 0):
-        ops = [T("parallel_solid", gap_mm=0.18, width_mm=W)]
     elif key == "50|0" or (linetype == 50 and aux == 0):
         ops = [T("solid", width_mm=W, y_mm=0.10),
                T("dotline", radius_mm=r, y_mm=-0.10, pair=True,
