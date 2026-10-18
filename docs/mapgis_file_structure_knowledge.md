@@ -69,8 +69,8 @@ y = map_scale / 经线弧长(mm/度)
 
 - 前缀：@0 FILETIME，@2-3 日期，@12 类型戳（点=621，线=1011，面=972/855 等
   随文件变），@20+ **GBK 路径区**（工作目录，出现两次），@320 `\`D` 签名
-- 描述符 39B：`[20B GBK 名][u8 类型][i32 记录内偏移][i16 存储宽][i16 声明宽]
-  [i16 标志][i16 序号][4B 垫]`
+- 描述符 39B（struct "<20sBihhih4x"）：`[20B GBK 名][u8 类型][i32 记录内偏移][i16 存储宽][i16 声明宽]
+  [i32 标志(串=256,数值=512+小数位)][i16 字段序号][4B 垫]`
 - 类型码：0=串，1=byte，2=short，3=int，4=float，5=double，6=日期(i16年+u8月+u8日)，7=时间(u8时+u8分+f64秒)
 - 记录区：首条空记录（标志字节 0x01），记录数 = 要素数+1；
   记录 = `[0x01 标志][字段按偏移稀疏布局]`，记录长 = 各字段声明宽累计
@@ -81,7 +81,8 @@ y = map_scale / 经线弧长(mm/度)
 
 ```
 索引：0=坐标(93B/条，首条空)  2=属性
-辅段：3=每点 32B 标注框（n 条，无前导）  4=4B 前导+每点 4B 标志
+辅段：3=标注框 (n+1)×32B（原生首条为有效框；Writer 写 32B 零前导，显示验收通过）
+      4=4B 前导+每点 4B 标志
 ```
 
 93B 记录：`[u8 标志=1][6B 保留][f64 X][f64 Y][70B 图形参数区]`
@@ -156,3 +157,30 @@ y = map_scale / 经线弧长(mm/度)
 - head_9 子参数块 @12-23 的字段语义
 - 2.2.1 PyPI 版本 yank 裁定（[[mapgis2shp-package-2-3-0]]）
 - FBA016.WT 被 MapGIS 会话改写，备份 `.WT~` 待恢复裁定
+
+---
+
+## 10. 复审计附录（2026-10-18，三方对表）
+
+代码常量、原生文件字节、明码记录三方互证。关键断言与证据：
+
+| 断言 | 代码位置 | 原生实证 |
+|---|---|---|
+| data_start=657，16 项索引，数据体 817 起 | writer.py `_DATA_START/_HEADER_ENTRY_COUNT/_SECTION_BASE` | 全部原生文件 |
+| 索引项 (start,volume)+0xFFFF 尾 | writer.py `_HEADER_ENTRY_TAIL` | 16 项逐字节 |
+| 点记录 93B（首条空）；X/Y f64@7/@15 | reader.py `_POINT_RECORD_SIZE` | 36 文件 |
+| 点参数偏移族 @31/33/37/41/45/49/51/53/75/83 | reader.py 常量族 | LDLYAAI002 rec1 实测 kind=0/高2.0/色2/层3 ✓；wat 明码 17/14 字段 |
+| 线记录 57B；参数 @22/24/25/26/30/35/39/43/47/48 | reader.py 常量族 | wal 明码 1538 条全字段一致 ✓ |
+| 面拓扑 24B=[结点a,结点b,左区,右区] | reader.py `_TOPO_RECORD_SIZE` | wap 明码 1447 弧段左/右/结点全一致 ✓ |
+| 区参数 40B：类码@1/填充@5/图案@6/图案色u16@9/子块@12-23 | reader.py 常量 | wap 417/417；MapGIS 重存版逐字节一致 ✓ |
+| 描述符 39B "<20sBihhih4x" | writer.py `_FIELD_DESCRIPTOR_WRITE_STRUCT` + assert 39 | 原生描述符逐字节 |
+| 属性前缀：@0 FILETIME、@12 类型戳、@20+ 路径区、@320 签名 | writer.py `_build_attribute_section` | 原生 322B 前缀对比 |
+| 头部系数 @244/@252（锚值 0.002906409/0.002251664） | writer.py `_HEADER_MM_DEG_*` | 5 个原生文件一致 |
+| 头部计数序列 | writer.py `_header_extent_fields` | lee=(9,10,0,1,1,2,10,0,1)、LHCPGDAC05=(2,3,6,7,2,3,3) |
+| 区标注框段 32+32n（u32 3086+28 零+每区框） | writer.py `_encode_polygon_label_boxes` | 5 文件尺寸公式全中 |
+| 文件脚 4+4n（u32 lead+每区(0,1)） | writer.py `_encode_polygon_footer` | 5 文件尺寸公式全中 |
+| 椭球码表（1=克氏/54，2=西安80，7=WGS84，16=克氏） | reader.py `_ELLIPSOID_PROJ4` | 36 文件 ellip=1 |
+| 投影码（0/5/2/3=longlat/tmerc/aea/lcc） | writer.py `_PROJ_CODE_FOR` | 36 文件 proj=0 |
+| 属性段索引（点=2，线=2，面=9） | reader.py `_ATTR_HEADER_INDEX` | 36 文件 |
+
+修正记录（本审计）：①描述符标志字段为 **i32**（串=256，数值=512+小数位），序号 i16；②点文件 head_4 为 (n+1)×32B（原生首条=有效框，Writer 零前导已通过显示验收）。
