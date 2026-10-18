@@ -15,7 +15,7 @@ GeoDataFrames and common GIS formats.
 
 The project addresses a practical geospatial interoperability problem: legacy
 `.wt`, `.wl`, and `.wp` files are not natively supported by the usual
-GDAL/OGR-based vector-I/O path. The current release is **2.4.0**, distributed
+GDAL/OGR-based vector-I/O path. The current release is **2.5.0**, distributed
 through PyPI as `mapgis2shp`.
 
 ## Main capabilities
