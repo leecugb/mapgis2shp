@@ -918,15 +918,17 @@ class _PolygonArcDecomposer:
         self.polygons = polygons
         self.snap_tolerance = snap_tolerance
 
-    def _rings(self) -> List[Tuple[int, List[Tuple[float, float]]]]:
-        rings: List[Tuple[int, List[Tuple[float, float]]]] = []
+    def _rings(self) -> List[Tuple[int, List[Tuple[float, float]], bool]]:
+        rings: List[Tuple[int, List[Tuple[float, float]], bool]] = []
         tol = self.snap_tolerance
         for pid, geom in enumerate(self.polygons, start=1):
             for shell in _iter_shells(geom):
                 shell = orient(shell, sign=1.0)
-                rings.append((pid, self._points(shell.exterior.coords, tol)))
+                rings.append((pid, self._points(shell.exterior.coords, tol), False))
                 for interior in shell.interiors:
-                    rings.append((pid, self._points(interior.coords, tol)))
+                    # shapely 洞环为 CW：内域在行走方向右侧（2026-10-18
+                    # POLY.WP 洞-岛邻接实证：洞环按外壳同向注册会塌缩洞）
+                    rings.append((pid, self._points(interior.coords, tol), True))
         return rings
 
     @staticmethod
@@ -945,7 +947,7 @@ class _PolygonArcDecomposer:
         )
         ring_order: List[Tuple[Tuple[float, float], Tuple[float, float]]] = []
         seen_seg: set = set()
-        for pid, pts in self._rings():
+        for pid, pts, is_hole in self._rings():
             for a, b in zip(pts, pts[1:]):
                 if a == b:
                     continue
@@ -953,10 +955,13 @@ class _PolygonArcDecomposer:
                 if seg not in seen_seg:
                     seen_seg.add(seg)
                     ring_order.append(seg)
-                if a <= b:
-                    sides[seg][0] = pid
+                walked_canonical = a <= b
+                if is_hole:
+                    # 洞环 CW：内域在行走右侧
+                    sides[seg][1 if walked_canonical else 0] = pid
                 else:
-                    sides[seg][1] = pid
+                    # 外壳 CCW：内域在行走左侧
+                    sides[seg][0 if walked_canonical else 1] = pid
 
         adjacency: Dict[Tuple[float, float], List[Any]] = defaultdict(list)
         for seg in sides:
@@ -1027,14 +1032,13 @@ def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
     """
     buf = bytearray(_POLYGON_PARAM_RECORD_SIZE)
     buf[0] = 0x04
-    # 原生数据记录的子参数块 @12-23（2026-10-17 原生 J43C001002 实证；
-    # 内容含义未解码，写零会让区填充不可显示）
-    _NATIVE_PARAM_SUBBLOCK = bytes.fromhex("001b010000c0400000c04001")
+    # 子参数块 @12-23：新建文件原生为零（2026-10-18 POLY.WP 实证）；
+    # 库尔干老文件携带非零值——两种原生形态，往返由透传保真，新数据按
+    # 新建约定写零
     for i in range(count):
         record = bytearray(_POLYGON_PARAM_RECORD_SIZE)
         record[0] = 1
         record[1] = 1
-        record[12:24] = _NATIVE_PARAM_SUBBLOCK
         if params is not None:
             row = params.iloc[i]
             if "class" in row.index:
@@ -1132,10 +1136,11 @@ def _encode_polygons(
         struct.pack_into("<i", record, 10, len(arc))
         struct.pack_into("<i", record, 14, offset)
         struct.pack_into("<h", record, 22, _DEFAULT_LINETYPE)
+        record[25] = 1  # aux_flag：新文件原生约定为 1（2026-10-18 POLY.WP 实证）
         struct.pack_into("<h", record, 26, _DEFAULT_LINE_COLOR)
-        struct.pack_into("<f", record, 30, _DEFAULT_LINE_WIDTH)
-        struct.pack_into("<f", record, 35, _DEFAULT_LINE_COEF)
-        struct.pack_into("<f", record, 39, _DEFAULT_LINE_COEF)
+        struct.pack_into("<f", record, 30, 0.05)  # 线宽：新文件原生 0.05mm
+        struct.pack_into("<f", record, 35, 1.0)   # X 系数：新文件原生 1.0
+        struct.pack_into("<f", record, 39, 1.0)   # Y 系数：新文件原生 1.0
         record[47] = layer
         index += record
 
@@ -1466,19 +1471,28 @@ class Writer:
 
         if self.shapeType == "POINT":
             pool, boxes, flags = _encode_point_aux(self._gdf, self._params)
-            return {
+            secs = {
                 0: _encode_points(self._gdf, self._params, factor),
                 1: pool,
                 2: attr_section,
                 3: boxes,
                 4: flags,
             }
+            passthrough = self._simple_passthrough(
+                ["0", "1", "3", "4"], factor, kind="point"
+            )
+            if passthrough:
+                merged = {int(k): bytes(v) for k, v in passthrough["sections"].items()}
+                merged[2] = attr_section
+                merged["_tail"] = passthrough.get("tail", b"")
+                return merged
+            return secs
         if self.shapeType == "LINE":
             index, coords = _encode_lines(self._gdf, self._params, factor)
             nodes, aux5, meta, boxes, flags = _encode_line_aux(
                 self._gdf, self._params
             )
-            return {
+            secs = {
                 0: index,
                 1: coords,
                 2: attr_section,
@@ -1488,6 +1502,15 @@ class Writer:
                 6: boxes,
                 7: flags,
             }
+            passthrough = self._simple_passthrough(
+                ["0", "1", "3", "4", "5", "6", "7"], factor, kind="line"
+            )
+            if passthrough:
+                merged = {int(k): bytes(v) for k, v in passthrough["sections"].items()}
+                merged[2] = attr_section
+                merged["_tail"] = passthrough.get("tail", b"")
+                return merged
+            return secs
         index, coords, topo_bytes, params, arcs, arc_layers, topo_pairs = _encode_polygons(
             self._gdf, self._params, factor, self._make_valid, self._snap
         )
@@ -1575,6 +1598,73 @@ class Writer:
             }
         )
         return fields
+
+    def _simple_passthrough(
+        self, keys: List[str], factor: float, kind: str
+    ) -> Optional[dict]:
+        """Return the reader-stashed raw sections for point/line round-trips.
+
+        Geometry matching compares the coordinate multiset of our encoding
+        against the source sections decoded by the reader's own helpers.
+        """
+        pt = getattr(self._gdf, "attrs", {}).get("mapgis_section_passthrough")
+        sections = (pt or {}).get("sections", {})
+        # 最小必需 = 几何源段；其余段缺失时由调用方回填重建
+        if not pt or "0" not in sections:
+            return None
+        if kind == "point" and "0" not in sections:
+            return None
+        if kind == "line" and ("0" not in sections or "1" not in sections):
+            return None
+        try:
+            import io as _io
+
+            from pymapgis.reader import _read_lines, _read_points
+
+            if kind == "point":
+                raw_points = bytes(sections["0"])
+                stream = _io.BytesIO(b"\x00" * 16 + raw_points)
+                src = _read_points(
+                    stream, 16, len(raw_points), 1.0
+                )
+                src_pts = sorted(
+                    (round(float(g.x) / factor, 6), round(float(g.y) / factor, 6))
+                    for g in src
+                )
+                our_pts = sorted(
+                    (round(float(g.x), 6), round(float(g.y), 6))
+                    for g in self._gdf.geometry
+                )
+                return pt if src_pts == our_pts and src_pts else None
+            raw_index = bytes(sections["0"])
+            raw_coords = bytes(sections["1"])
+            stream = _io.BytesIO(
+                b"\x00" * 16 + raw_index + b"\x00" * 8 + raw_coords
+            )
+            src = _read_lines(
+                stream,
+                16,
+                len(raw_index),
+                16 + len(raw_index) + 8,
+                len(raw_coords),
+                1.0,
+            )
+            from collections import Counter as _Counter
+
+            def _key(lines, nd=6):
+                pts = []
+                for ln in lines:
+                    pts.extend(
+                        (round(float(x) / factor, nd), round(float(y) / factor, nd))
+                        for x, y in ln.coords
+                    )
+                return pts
+
+            ours = _Counter(_key(self._gdf.geometry))
+            theirs = _Counter(_key(src))
+            return pt if ours == theirs and ours else None
+        except Exception:
+            return None
 
     def _polygon_passthrough(
         self,
