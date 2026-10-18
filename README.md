@@ -14,11 +14,20 @@ MapGIS is a widely used closed-source GIS platform in China, especially in geolo
 ## Features
 
 - Read **point** (`.wt`), **line** (`.wl`), and **polygon** (`.wp`) files
-- **Write** GeoDataFrames back to native `.wt` / `.wl` / `.wp` binaries (round-trip lossless)
+- **Write** GeoDataFrames back to native `.wt` / `.wl` / `.wp` binaries
+- **Byte-preserving round-trips**: files written from a Reader's GeoDataFrame
+  reuse the source sections verbatim (arcs, metadata, label boxes, field
+  widths) whenever the geometry is unchanged, so the result stays isomorphic
+  to the original and opens correctly in MapGIS 6.7 (native-acceptance
+  verified)
+- **Native-display-compatible writing**: written files carry the full 16-entry
+  index table, the polygon label-box section (entry 11) and file footer
+  (entry 12), the mm-to-degree display coefficients, and the header count
+  sequence that MapGIS's renderer requires
 - Decode GBK-encoded attribute fields and field names
 - Decode point graphic parameters (text/symbol kind, subgraph number, glyph size, rotation angle, colour, layer, pen width / fonts)
 - Decode line graphic parameters (style and auxiliary style numbers, line/auxiliary colour, width in mm, pattern coefficients, layer, transparent output)
-- Decode polygon graphic parameters (fill colour / pattern numbers from the head_9 section)
+- Decode polygon graphic parameters (class/layer, fill colour, pattern and pattern-colour numbers from the head_9 section)
 - Parse the MapGIS 6.x graphic libraries themselves — `SubgraphLib` for
   `Subgraph.lib` point-symbol definitions (including chained records past
   the index table) and `LinestyLib` for `LINESTY.lib` line-style definitions
@@ -167,6 +176,12 @@ re-reads losslessly with `Reader`. Attributes are encoded with MapGIS field
 types inferred from pandas dtypes (GBK strings, dates, times, numbers);
 unsupported columns raise `WriterError`.
 
+A GeoDataFrame produced by `Reader` carries the source file's raw section
+bytes and field metadata (in `gdf.attrs`). When the geometry is unchanged,
+`Writer` reuses them byte-for-byte, so round-tripped files keep their native
+record widths, metadata blocks, polygon label-box section, and file footer —
+and open correctly in MapGIS 6.7.
+
 **Write-side limitations**
 
 - `.wt` label text stored in auxiliary annotation sections is not produced;
@@ -179,6 +194,11 @@ unsupported columns raise `WriterError`.
   written; other projections raise `WriterError`
 - CGCS2000 has no MapGIS ellipsoid code and is written as WGS84 with a
   warning (they agree to better than 0.1 mm)
+- Freshly authored polygon files (data that did not come from a `Reader`)
+  use the native structural conventions (16-entry index, label-box and
+  footer sections, closed-ring arcs) but their in-MapGIS rendering for
+  arbitrary new data has limited native verification; round-tripped files
+  are byte-isomorphic and verified
 
 ## Reading graphic parameters
 
@@ -200,9 +220,9 @@ with Reader("lines.wl", read_graphic_params=True) as r:
     print(r.geodataframe[["linetype", "aux_linetype", "color",
                           "width", "x_coef", "y_coef"]].head())
 
-# Polygon files: fill colour / pattern numbers (head_9 section)
+# Polygon files: class/layer, fill colour / pattern numbers (head_9 section)
 with Reader("polygons.wp", read_graphic_params=True) as r:
-    print(r.geodataframe[["fill_color", "pattern", "pattern_color"]].head())
+    print(r.geodataframe[["class", "fill_color", "pattern", "pattern_color"]].head())
 ```
 
 > **Warning — not self-contained.** Style, colour, symbol and pattern
@@ -268,16 +288,19 @@ The three file types share the same top-level organization:
 | Region | Description |
 |--------|-------------|
 | File header | 8-byte magic + 4-byte file ID + 4-byte index-section start offset |
-| Index section | 10 records of 10 bytes each, recording start offsets and sizes of sub-sections |
+| Index section | 16 records of 10 bytes each, recording start offsets and sizes of sub-sections |
 | Sub-sections | Coordinates / arcs / polygons / attributes, etc. |
 
-The index-section start offset is at file bytes **12–15**, denoted as `data_start`. From `data_start` there are 10 consecutive index records:
+The index-section start offset is at file bytes **12–15**, denoted as `data_start`. From `data_start` there are 16 consecutive index records (the first ten hold the regular data sections; entries 11 and 12 hold the polygon label-box section and file footer, which MapGIS’s renderer requires):
 
 ```
-head_1 : offset data_start + 0
-head_2 : offset data_start + 10
+head_1  : offset data_start + 0
+head_2  : offset data_start + 10
 ...
-head_10: offset data_start + 90
+head_10 : offset data_start + 90
+head_11 : offset data_start + 100   (polygon label boxes, 32 + 32n bytes)
+head_12 : offset data_start + 120   (polygon file footer, 4 + 4n bytes)
+head_13..16 : empty
 ```
 
 Each index record begins with 8 bytes `(start, volume)` representing the start offset and size (in bytes) of the corresponding sub-section.
@@ -485,7 +508,7 @@ Index-section meaning:
 |------|-----------------------------------|---------|
 | head_1 | 0 | Arc data section start and size |
 | head_2 | 10 | Coordinate data section start and size |
-| head_3 | 20 | Present in J43C001002; purpose undetermined |
+| head_3 | 20 | Metadata block (Windows FILETIME + source-path area) |
 | head_4 | 30 | Polygon topology data section start and size |
 | head_9 | 80 | Polygon graphic-parameter section (see below) |
 | head_10 | 90 | Attribute data section start and size |
@@ -650,6 +673,14 @@ Run the smoke-test regression against all local MapGIS files:
 ```bash
 python verify_pymapgis.py
 ```
+
+## Further documentation
+
+- [MapGIS file-structure knowledge archive](docs/mapgis_file_structure_knowledge.md) —
+  header fields, section layouts, display gates, and the evidence appendix
+  from the native-format reverse-engineering sessions
+- [Plaintext-pair audit report](docs/plaintext_pairs_audit.md) —
+  field-by-field cross-validation against the official `.wat`/`.wal`/`.wap` exports
 
 ## Contributing
 
