@@ -7,9 +7,12 @@
   文件 = [1840 × u32 偏移表（小端）] + [索引记录区 7360..1330364]
          + [未索引记录链 1330364..——#1840 起链式续号；本库走查定案
             #1840–#1995 共 156 条（155 条"后继记录样+载荷样"双门链证，
-            #1961 为单门）；#1996@1373810 起结构变化（t=62/n=372 但头长
-            ≤4100B 内无链，疑嵌套段或非记录区），其后 7.76MB 专项逆向
-            挂账]；#1960=蚀变符号实证
+            #1961 为单门）]
+         + [尾段区域 #1996 起——2026-10-18 破解定案：根因是记录头超出
+            旧走查 512B 扫描上限；模型 (t,n)+描述区(10B块×L)+点数表
+            (k 项≥2 和==n//2)+n×4 f32，三重验证+前瞻 3 选链；本库
+            5364 条 #1996–#7359 100% 字节覆盖到文件末尾，全链坐标
+            审计 [-1.375,+1.485]mm 零越界；#7331/#7358 图面锚验证]
   记录号 = 符号号（位置映射，0-based；高位号在未索引链中按序续号）
   记录 = [u16 type][u16 n][记录头（长 = 记录总长 − n×4）] + [n × f32 载荷]
   载荷 = mm 坐标点对（符号空间 ±0.5mm，**点距 8B**——f32×2，曾误写 4B
@@ -40,15 +43,18 @@ from __future__ import annotations
 
 import math
 import struct
+from bisect import bisect_left
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
 _U16 = struct.Struct("<H")
 _U32 = struct.Struct("<I")
 _F32 = struct.Struct("<f")
+# 三点参数弧组"空槽"哨兵位型（#23 实证：0xB3000000，f32 负非规格化 ≈ -1.5e-8）
+_ARC_SENTINEL = b"\x00\x00\x00\xb3"
 
 
 @dataclass
@@ -56,6 +62,9 @@ class SubPath:
     points: List[Tuple[float, float]] = field(default_factory=list)
     closed: bool = False
     circle: Optional[Tuple[float, float, float]] = None  # (cx, cy, r) 圆拟合
+    arc: Optional[Tuple[float, float, float, float, float]] = None
+    # (cx, cy, r, a0, a1) 参数弧段——角度为度、自 +x 轴逆时针；
+    # 2026-10-18 子图 23 用户裁定定案（见 _three_point_arc）
 
 
 @dataclass
@@ -90,6 +99,15 @@ class SubgraphLib:
     _TAIL_T_MAX = 255    # 类型上限（0x00 为非法；索引区实证类型 ≤66，留裕量）
     _TAIL_HL_MAX = 512   # 头长扫描上限（#1839 实测 88B，#1982 实测 256B）
 
+    # 尾段区域（#1996 起，2026-10-18 破解——根因：记录头超旧走查 512B
+    # 扫描上限。模型：(u16 type, u16 n) + 描述区（10B 块×L，内容不透明）
+    # + 点数表（k 项 ≥2，总和==n//2）+ n×4 f32 载荷。三重验证+前瞻 3）
+    _REGION_T_MAX = 0x8000   # 挂账待裁定：实测 type 397/413（原裁定 255）
+    _REGION_N_MAX = 16000    # 挂账待裁定：实测 n=4300+（原 4000）
+    _REGION_K_MAX = 4000     # 点数表项数上限（n=16000 全 2 点组时恰 4000）
+    _REGION_SEQ_MAX = 512    # 描述区 10B 块数上限（#1996 实测 62 块）
+    _REGION_WIN = (_REGION_SEQ_MAX * 10 + _REGION_K_MAX * 2) // 2  # 前缀和窗口 u16 数
+
     def __init__(self, path: str):
         self.data = Path(path).read_bytes()
         # 2026-10-15 优化：np.frombuffer 向量化（原逐 u32 struct 解包）
@@ -101,6 +119,9 @@ class SubgraphLib:
         self._indexed_end = last[3] if last else len(self.data)
         # 未索引记录链：每条 (start, end)；符号号 = len(offsets) + j
         self._tail: List[Tuple[int, int]] = self._walk_tail(self._indexed_end)
+        # 尾段区域（#1996 起）走查结果，惰性：首次访问深位符号时执行
+        # 并缓存；每条 (start, end, payload_offset, k)
+        self._region: Optional[List[Tuple[int, int, int, int]]] = None
 
     def _u16(self, o: int) -> int:
         return _U16.unpack_from(self.data, o)[0]
@@ -193,12 +214,110 @@ class SubgraphLib:
         return len(self._tail)
 
     @property
+    def n_region(self) -> int:
+        """尾段区域符号数（#n_indexed+n_tail 起；首次访问触发结构走查）。"""
+        return len(self._walk_region())
+
+    @property
     def symbol_count(self) -> int:
-        """全库符号总数 = 索引数 + 未索引尾段数。"""
-        return len(self.offsets) + len(self._tail)
+        """全库符号总数 = 索引 + 尾段链 + 尾段区域。
+
+        访问本属性会触发尾段区域结构走查（惰性、结果缓存；大库约数秒）。
+        """
+        return len(self.offsets) + len(self._tail) + len(self._walk_region())
+
+    # -- 尾段区域（#1996 起）结构走查 ------------------------------------
+    # 与 _slib_tail7331_probe.py v8 同门同证；2026-10-18 D:/SLIB 实证
+    # 5364 条（#1996–#7359）100% 字节覆盖到文件末尾。
+
+    def _region_sane_tn(self, o: int) -> bool:
+        if o + 4 > len(self.data):
+            return False
+        t, n = struct.unpack_from("<HH", self.data, o)
+        return 0 < t < self._REGION_T_MAX and \
+            4 <= n <= self._REGION_N_MAX and n % 2 == 0
+
+    def _region_payload_ok(self, o: int, n: int) -> bool:
+        vals = np.frombuffer(self.data, dtype="<f4", count=n, offset=o)
+        return int((np.abs(vals) > 3.0).sum() + np.isnan(vals).sum()) * 10 <= n
+
+    def _region_candidates(self, o: int) -> List[Tuple[int, int, int, tuple]]:
+        """@o 处记录的全部有效解析（end, L, k, counts）。
+
+        描述区长度 L（u16 数，步进 5）枚举 + 点数表前缀和二分定位；
+        候选由三重验证（点数表和==n//2 且项≥2、载荷抽查、总数表长）
+        挑出。与 v8 探针逐门一致。
+        """
+        if not self._region_sane_tn(o):
+            return []
+        t, n = struct.unpack_from("<HH", self.data, o)
+        npts = n // 2
+        avail = len(self.data) - o - 4
+        m = min(avail // 2, self._REGION_WIN)
+        if m < npts:
+            return []
+        stream = np.frombuffer(self.data, dtype="<u2", count=m, offset=o + 4)
+        csum = np.cumsum(stream, dtype=np.int64).tolist()
+        ps = [0] + csum
+        out = []
+        for L in range(0, min(self._REGION_SEQ_MAX * 5, m) + 1, 5):
+            target = ps[L] + npts
+            k = bisect_left(ps, target, lo=L + 1)
+            if k > L + self._REGION_K_MAX or k > m:
+                continue
+            if ps[k] != target:
+                continue
+            counts = stream[L:k].tolist()
+            if not counts or min(counts) < 2:
+                continue
+            end = o + 4 + 2 * k + n * 4
+            if end <= len(self.data) and \
+                    self._region_payload_ok(o + 4 + 2 * k, n):
+                out.append((end, L, k - L, tuple(counts)))
+        return out
+
+    def _walk_region(self) -> List[Tuple[int, int, int, int]]:
+        """尾段区域链式走查（惰性 + 缓存；前瞻 3 条选链最长者）。
+
+        每记录缓存 (start, end, payload_offset, k)。验证失败的记录
+        不被解码——诚实停止点即 walk 终点（decode 越界返 None）。
+        """
+        if self._region is not None:
+            return self._region
+        recs: List[Tuple[int, int, int, int]] = []
+        o = self._tail[-1][1] if self._tail else self._indexed_end
+        memo: Dict[int, list] = {}
+
+        def cands(x: int) -> list:
+            if x not in memo:
+                memo[x] = self._region_candidates(x)
+            return memo[x]
+
+        while o < len(self.data):
+            cs = cands(o)
+            if not cs:
+                break
+            best, best_len = None, -1
+            for c in sorted(cs, key=lambda x: (x[1], x[2])):
+                chain, no = 0, c[0]
+                while chain < 3:
+                    nxt = cands(no)
+                    if not nxt:
+                        break
+                    nxt = min(nxt, key=lambda x: (x[1], x[2]))
+                    no = nxt[0]
+                    chain += 1
+                if chain > best_len:
+                    best, best_len = c, chain
+            end, L, k, counts = best
+            poff = o + 4 + 2 * L + 2 * k
+            recs.append((o, end, poff, k))
+            o = end
+        self._region = recs
+        return recs
 
     def record_bounds(self, no: int) -> Tuple[int, int]:
-        """符号 no 的记录字节区间（0-based；含尾段）。"""
+        """符号 no 的记录字节区间（0-based；含尾段与尾段区域）。"""
         n_idx = len(self.offsets)
         if no < 0:
             raise IndexError(no)
@@ -208,6 +327,10 @@ class SubgraphLib:
         j = no - n_idx
         if j < len(self._tail):
             return self._tail[j]
+        region = self._walk_region()
+        j -= len(self._tail)
+        if 0 <= j < len(region):
+            return region[j][0], region[j][1]
         raise IndexError(no)
 
     def _subpath_counts(self, header_u16: List[int], n_points: int) -> List[int]:
@@ -222,9 +345,21 @@ class SubgraphLib:
         return []
 
     def decode(self, no: int) -> Optional[Symbol]:
-        """解码符号 no（0-based，含未索引尾段）；越界返回 None。"""
-        if not (0 <= no < len(self.offsets) + len(self._tail)):
+        """解码符号 no（0-based，含未索引尾段与尾段区域）；越界返回 None。
+
+        尾段区域符号（no ≥ n_indexed + n_tail）首次访问时触发结构
+        走查（惰性、缓存）；走查终点即当前诚实停止点，其后的号返回
+        None——绝不返回臆造几何。
+        """
+        n_old = len(self.offsets) + len(self._tail)
+        if no < 0:
             return None
+        if no >= n_old:
+            region = self._walk_region()
+            j = no - n_old
+            if j >= len(region):
+                return None
+            return self._decode_region_symbol(no, region[j])
         o, e = self.record_bounds(no)
         total = e - o
         if total <= 8:
@@ -251,10 +386,33 @@ class SubgraphLib:
         self._classify(sym)
         return sym
 
+    def _decode_region_symbol(
+        self, no: int, rec: Tuple[int, int, int, int]
+    ) -> Optional[Symbol]:
+        """尾段区域记录解码（rec = (start, end, payload_offset, k)）。"""
+        o, e, poff, k = rec
+        t, n = self._u16(o), self._u16(o + 2)
+        hl = poff - o
+        header_u16 = [self._u16(o + j) for j in range(0, hl, 2)]
+        arr = np.frombuffer(self.data, dtype="<f4", count=n, offset=poff)
+        pts = list(zip(arr[0::2].tolist(), arr[1::2].tolist()))
+        sym = Symbol(no=no, type=t, n=n, header_len=hl, header_u16=header_u16)
+        counts = list(header_u16[-k:]) if k else []
+        if not counts or sum(counts) != len(pts) or min(counts) < 2:
+            return None  # 走查元数据与实际不符 → 诚实拒解
+        i = 0
+        for cnt in counts:
+            sp = SubPath(points=pts[i:i + cnt])
+            sym.subpaths.append(sp)
+            i += cnt
+        self._classify(sym)
+        return sym
+
     def _classify(self, sym: Symbol) -> None:
         """子路径几何分类：三点整圆组→中心参考圆（[圆心, 半径参考点,
         圆心回点]，符号 7 锚定；2026-10-18 用户裁定扩展至全部 type：
         子图 21（type=2）三点组 r≈0.4475 为圆，半径连线不得描边）；
+        三点参数弧组→弧段/整圆（子图 23 裁定，_three_point_arc）；
         密集弧列→圆拟合；短点组跳过拟合。"""
         for sp in sym.subpaths:
             c = _center_ref_circle(sp.points)
@@ -263,16 +421,118 @@ class SubgraphLib:
                 sp.closed = True
                 continue
         for sp in sym.subpaths:
+            if sp.circle is not None or len(sp.points) != 3:
+                continue
+            r = _three_point_arc(sp.points)
+            if r is None:
+                continue
+            if r[0] == "circle":
+                sp.circle = r[1]
+                sp.closed = True
+            else:
+                sp.arc = r[1]
+        for sp in sym.subpaths:
             if len(sp.points) < 8:
                 continue
             c = fit_circle(sp.points)
             if c is not None and 0.005 < c[2] <= 1.0:
-                sp.circle = c
-                # 密集弧列且首尾相接 → 闭合圆
+                # 残差门（2026-10-18）：库内真圆/弧为精确圆（锚 rms=0），
+                # 非圆曲线（#7331 波浪环 rms≈0.09）不得判圆/弧——
+                # 拟合对 partial arc 本身有 0.07–0.13mm 弦偏差，
+                # 故弧段参数仅供语义导出，忠实渲染须描存储点。
+                rms = math.sqrt(sum(
+                    (math.hypot(x - c[0], y - c[1]) - c[2]) ** 2
+                    for x, y in sp.points) / len(sp.points))
+                if rms > 0.01:
+                    continue
+                cov, a0, a1 = _arc_coverage(sp.points, c)
                 d = math.hypot(sp.points[0][0] - sp.points[-1][0],
                                sp.points[0][1] - sp.points[-1][1])
-                if len(sp.points) >= 16 and d < 0.01:
+                if cov >= 300.0 and d < 0.01:
+                    # 全覆盖且首尾相接 → 闭合整圆
+                    sp.circle = c
                     sp.closed = True
+                elif cov >= 5.0:
+                    # 部分弧 → 弧段（2026-10-18 子图 23 图面裁定：
+                    # 密集弧列的角度覆盖必须核验，部分弧不得过绘为整圆；
+                    # #56 外圆"8 弧段拼合"断线效果即依赖此判读）
+                    sp.arc = (c[0], c[1], c[2], a0, a1)
+
+
+def _arc_coverage(
+    pts: List[Tuple[float, float]], center: Tuple[float, float, float]
+) -> Tuple[float, float, float]:
+    """密集采样弧列的角度覆盖度：返回 (coverage_deg, a0, a1)。
+
+    coverage = 360° − 相邻采样角最大间隙（环形）。全覆盖圆 ≈360；
+    部分弧 = 其实际张角。a0/a1 = 弧的逆时针起止角（覆盖区两端，
+    跨 0° 亦正确）。采样间距即最小可辨张角——n 点全覆盖圆的理论
+    coverage = 360 − 360/n，故整圆判定须与首尾距联合使用（见
+    _classify）。
+    """
+    cx, cy, _ = center
+    angs = sorted(math.degrees(math.atan2(y - cy, x - cx)) % 360.0
+                  for x, y in pts)
+    n = len(angs)
+    gaps = [(angs[(i + 1) % n] - angs[i]) % 360.0 for i in range(n)]
+    k = max(range(n), key=lambda i: gaps[i])
+    coverage = 360.0 - gaps[k]
+    a0 = angs[(k + 1) % n]          # 最大间隙之后 = 覆盖起点
+    a1 = angs[k]                    # 最大间隙之前 = 覆盖终点
+    return coverage, a0 % 360.0, a1 % 360.0
+
+
+def _three_point_arc(
+    pts: List[Tuple[float, float]],
+) -> Optional[tuple]:
+    """三点参数弧组判读（2026-10-18 子图 23 用户图面裁定定案）。
+
+    结构 [圆心, (半径, 弧起角), (弧终角, 0)]：
+      - ``p0``  = 弧/圆圆心（符号空间 mm）
+      - ``p1.x`` = 半径（mm）；``p1.y`` = 弧起角（度，自 +x 逆时针）
+      - ``p2.x`` = 弧终角（度）；``p2.y`` = 0（恒零槽）
+    裁定语义（v6 右图定案）：起终角均 ≈0（哨兵 0xB3000000，实测
+    -1.5e-8）→ 画**整圆**（r=p1.x）；否则画**弧段**（逆时针 p1.y→p2.x，
+    同一半径）。子图 23（type=46）44 组实证：22 空槽整圆 r=B.x
+    0.012–0.055mm，22 弧段 r=B.x 自 B.y≈180° 扫至 C.x≈253–284°（左下象限）。
+
+    判定门（防止误吞普通三点折线）：
+      ① 恰 3 点；② |p2.y| ≤ 0.01（恒零槽）；
+      ③ 0.005 ≤ p1.x ≤ 1.0（半径合法域）；
+      ④ 弧段要求 |p1.y| ≥ 5°、|p2.x| ≥ 5° 且
+         5° ≤ (p2.x − p1.y) mod 360 ≤ 355°（非退化）；
+      ⑤ 圆心 |p0| 各分量 ≤ 1.5mm。不满足返回 None（维持点序直连）。
+    与 _center_ref_circle 的区分：后者首末点 ≈ 同点（p0≈p2），
+    本规则 p0 与 p2 无关——_classify 中中心参考圆优先。
+    """
+    if len(pts) != 3:
+        return None
+    (x0, y0), (x1, y1), (x2, y2) = pts
+    if abs(y2) > 0.01:
+        return None
+    if not (0.005 <= x1 <= 1.0):
+        return None
+    if abs(x0) > 1.5 or abs(y0) > 1.5:
+        return None
+    # ⑥ 排除中心参考圆同构组：|p0−p2| ≤0.01 的组走 _center_ref_circle
+    # 通道（其双侧不等距的退化实例是"断笔"不是圆——#7 sp1 实证：尾值
+    # 同样带 0xB3000000 哨兵，但 p0≈p2 且 |p1−p0|≠|p1−p2|，裁定维持直连；
+    # #23 空槽 p0 与 p2 相距 0.4mm+，才是真参数弧组）。
+    if math.hypot(x0 - x2, y0 - y2) <= 0.01:
+        return None
+    # 整圆分支：哨兵须为 0xB3000000 精确位型（#23 空槽实证）。
+    # 普通退化三点组（p1.y/p2.x=0.0，如符号 7 不对称小子路径）不得误判——
+    # 哨兵是特定的负非规格化值而非数学零。
+    if struct.pack("<f", y1) == _ARC_SENTINEL and \
+            struct.pack("<f", x2) == _ARC_SENTINEL:
+        return ("circle", (x0, y0, x1))
+    a0, a1 = y1 % 360.0, x2 % 360.0
+    if abs(y1) < 5.0 or abs(x2) < 5.0:
+        return None
+    sweep = (a1 - a0) % 360.0
+    if not (5.0 <= sweep <= 355.0):
+        return None
+    return ("arc", (x0, y0, x1, a0, a1))
 
 
 def _center_ref_circle(pts: List[Tuple[float, float]]) -> Optional[Tuple[float, float, float]]:
@@ -340,6 +600,8 @@ def symbol_geometries(lib: SubgraphLib, no: int) -> dict:
     out = {"no": no, "type": sym.type, "subpaths": [],
            "circles": [[round(v, 6) for v in sp.circle] for sp in sym.subpaths
                        if sp.circle],
+           "arcs": [[round(v, 6) for v in sp.arc] for sp in sym.subpaths
+                    if sp.arc],
            "bbox": None}
     xs, ys = [], []
     for sp in sym.subpaths:
@@ -347,6 +609,7 @@ def symbol_geometries(lib: SubgraphLib, no: int) -> dict:
             "points": [[round(x, 6), round(y, 6)] for x, y in sp.points],
             "closed": sp.closed,
             "circle": [round(v, 6) for v in sp.circle] if sp.circle else None,
+            "arc": [round(v, 6) for v in sp.arc] if sp.arc else None,
         })
         for x, y in sp.points:
             xs.append(x)

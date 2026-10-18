@@ -531,6 +531,207 @@ class TestSlibCenterRefCircle:
         assert sp.circle[2] == pytest.approx(0.32)
 
 
+class TestSlibThreePointArc:
+    """三点参数弧组判读（2026-10-18 子图 23 用户图面裁定定案）。
+
+    [圆心, (半径, 弧起角), (弧终角, 0)]：哨兵 0xB3000000（双槽）→ 整圆；
+    起终角非零 → 逆时针弧段。门须拒普通三点折线与退化零值组。
+    """
+
+    @staticmethod
+    def _record(t: int, pts: list) -> bytes:
+        n = 2 * len(pts)
+        header = struct.pack("<4H", t, n, 0, len(pts))
+        payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
+        return header + payload
+
+    def _lib_with(self, tmp_path, rec: bytes) -> "SubgraphLib":
+        rec_b = self._record(1, [(0.4, 0.4), (0.3, 0.3)])
+        data = (struct.pack("<2I", 8, 8 + len(rec))
+                + rec + rec_b + b"\x00" * 32)
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+        return SubgraphLib(str(path))
+
+    @staticmethod
+    def _sentinel() -> float:
+        return struct.unpack("<f", b"\x00\x00\x00\xb3")[0]
+
+    def test_arc_detected(self, tmp_path) -> None:
+        # 子图 23 sp30 实测结构：左下弧段 174°→273°（= -87.14 mod 360）
+        rec = self._record(46, [(0.5549, 0.1494), (0.0291, 173.9906),
+                                (-87.1374, 0.0)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        sp = s.subpaths[0]
+        assert sp.arc is not None and sp.circle is None
+        cx, cy, r, a0, a1 = sp.arc
+        assert cx == pytest.approx(0.5549)
+        assert cy == pytest.approx(0.1494)
+        assert r == pytest.approx(0.0291)
+        assert a0 == pytest.approx(173.9906 % 360.0)
+        assert a1 == pytest.approx(272.8626, abs=0.001)
+
+    def test_sentinel_circle(self, tmp_path) -> None:
+        # 子图 23 空槽：双哨兵 → 整圆 r=B.x
+        sen = self._sentinel()
+        rec = self._record(46, [(0.5488, 0.1402), (0.0550, sen), (sen, 0.0)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        sp = s.subpaths[0]
+        assert sp.circle is not None and sp.arc is None
+        assert sp.closed
+        assert sp.circle == pytest.approx((0.5488, 0.1402, 0.0550))
+
+    def test_plain_zero_rejected(self, tmp_path) -> None:
+        # 退化零值组（符号 7 不对称小子路径同构）非哨兵 → 不判圆（回归锚）
+        rec = self._record(6, [(-0.003, 0.004), (0.009, 0.0), (0.0, 0.0)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        sp = s.subpaths[0]
+        assert sp.circle is None and sp.arc is None
+
+    def test_center_ref_shape_rejected(self, tmp_path) -> None:
+        # 符号 7 sp1 实测结构：尾值带 0xB3000000 哨兵但 p0≈p2 且双侧
+        # 不等距（r1≈0.0132 vs r2≈0.0094）→ 中心参考圆通道的"断笔"，
+        # 不得被哨兵整圆分支吞掉（2026-10-18 回归锚）
+        sen = self._sentinel()
+        rec = self._record(6, [(-0.0031, 0.0042), (0.0094, sen), (sen, sen)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        sp = s.subpaths[0]
+        assert sp.circle is None and sp.arc is None
+
+    def test_p2y_nonzero_rejected(self, tmp_path) -> None:
+        rec = self._record(2, [(0.5, 0.5), (0.05, 170.0), (260.0, 0.3)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        assert s.subpaths[0].arc is None
+
+    def test_degenerate_sweep_rejected(self, tmp_path) -> None:
+        rec = self._record(2, [(0.5, 0.5), (0.05, 170.0), (172.0, 0.0)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        assert s.subpaths[0].arc is None
+
+    def test_radius_out_of_range_rejected(self, tmp_path) -> None:
+        rec = self._record(2, [(0.5, 0.5), (3.0, 170.0), (260.0, 0.0)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        assert s.subpaths[0].arc is None
+
+
+class TestSlibRegion:
+    """尾段区域（#1996 起）记录模型与走查（2026-10-18 破解定案）。
+
+    模型：(u16 type, u16 n) + 描述区（10B 块×L，内容不透明）+
+    点数表（k 项 ≥2，总和==n//2）+ n×4 f32 载荷；三重验证 +
+    前瞻 3 选链。D:/SLIB 实证 5364 条 100% 覆盖（不在测试内，
+    测试用合成夹具验证机制与诚实停止）。
+    """
+
+    @staticmethod
+    def _region_record(t: int, descs: list, counts: list,
+                       pts: list) -> bytes:
+        """合成一条尾段区域记录：描述块 + 点数表 + 坐标载荷。"""
+        assert sum(counts) == len(pts)
+        n = 2 * len(pts)
+        blocks = b"".join(struct.pack("<5H", *d) for d in descs)
+        return (struct.pack("<HH", t, n) + blocks
+                + struct.pack(f"<{len(counts)}H", *counts)
+                + b"".join(struct.pack("<2f", x, y) for x, y in pts))
+
+    @staticmethod
+    def _record(t: int, pts: list) -> bytes:
+        n = 2 * len(pts)
+        header = struct.pack("<4H", t, n, 0, len(pts))
+        payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
+        return header + payload
+
+    @staticmethod
+    def _big_header_region_record() -> bytes:
+        """真实 #1996 同型的区域首记录：t=62、n=372、52 描述块（头 648B
+        超出旧走查 512B 扫描上限）+ 62×3 点数表 + 186 坐标。"""
+        pts = [(0.01 * i, 0.01 * i) for i in range(186)]
+        blocks = b"".join(struct.pack("<5H", 6, 0, 0, 0, 1) for _ in range(52))
+        return (struct.pack("<HH", 62, 372) + blocks
+                + struct.pack("<62H", *([3] * 62))
+                + b"".join(struct.pack("<2f", x, y) for x, y in pts))
+
+    def _lib_with_region(self, tmp_path) -> "SubgraphLib":
+        """复刻真实库边界机制：2 索引 + 1 尾链 + 大头区域首记录 +
+        FF00 止链填充（任意字节对齐的 (t,n) 均不过 _rec_like——
+        偶对齐 t=255/n=255 奇，奇对齐 t=65280 超限）。"""
+        rec0 = self._record(1, [(0.1, 0.2), (0.3, 0.4)])
+        rec1 = self._record(2, [(0.2, 0.1), (0.4, 0.3)])
+        recT = self._record(3, [(0.5, 0.5), (0.4, 0.4)])
+        rec3 = self._big_header_region_record()
+        data = (struct.pack("<2I", 8, 8 + len(rec0))
+                + rec0 + rec1 + recT + rec3 + b"\xff\x00" * 32)
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+        return SubgraphLib(str(path))
+
+    def test_region_record_decoded(self, tmp_path) -> None:
+        lib = self._lib_with_region(tmp_path)
+        s = lib.decode(3)  # n_indexed=2 + n_tail=1 → 区域首条 = #3
+        assert s is not None
+        assert s.type == 62
+        assert [len(sp.points) for sp in s.subpaths] == [3] * 62
+
+    def test_region_honest_stop(self, tmp_path) -> None:
+        """区域后的止链填充不得解码：越界返回 None。"""
+        lib = self._lib_with_region(tmp_path)
+        lib._walk_region()
+        assert lib.decode(2 + lib.n_tail + 1) is None
+
+    def test_region_symbol_count_includes_walked(self, tmp_path) -> None:
+        lib = self._lib_with_region(tmp_path)
+        assert lib.symbol_count == 2 + lib.n_tail + 1
+
+
+class TestSlibDenseRmsGate:
+    """密集弧拟合残差门（2026-10-18）：非圆曲线不得判圆/弧。
+
+    库内真圆/弧为精确圆（锚 rms=0.00000）；#7331 波浪闭合环
+    rms≈0.09 被门拒绝维持折线（用户图面锚）。
+    """
+
+    @staticmethod
+    def _wavy_loop() -> list:
+        """r≈0.29 圆上叠 ±0.09 径向正弦扰动的 32 点闭合环。"""
+        import math as _m
+        pts = []
+        for i in range(32):
+            a = 2 * _m.pi * i / 32
+            r = 0.29 + 0.09 * _m.sin(5 * a)
+            pts.append((0.04 + r * _m.cos(a), 0.04 + r * _m.sin(a)))
+        return pts
+
+    def _lib_with_pts(self, tmp_path, pts: list) -> "SubgraphLib":
+        n = 2 * len(pts)
+        header = struct.pack("<4H", 3, n, 0, len(pts))
+        payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
+        rec = header + payload
+        rec_b = struct.pack("<4H", 1, 4, 0, 2) + struct.pack(
+            "<4f", 0.4, 0.4, 0.3, 0.3)
+        data = (struct.pack("<2I", 8, 8 + len(rec))
+                + rec + rec_b + b"\x00" * 32)
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+        return SubgraphLib(str(path))
+
+    def test_wavy_loop_not_circle(self, tmp_path) -> None:
+        lib = self._lib_with_pts(tmp_path, self._wavy_loop())
+        s = lib.decode(0)
+        sp = s.subpaths[0]
+        assert sp.circle is None and sp.arc is None
+
+    def test_exact_circle_still_classified(self, tmp_path) -> None:
+        import math as _m
+        pts = [(0.04 + 0.29 * _m.cos(2 * _m.pi * i / 32),
+                0.04 + 0.29 * _m.sin(2 * _m.pi * i / 32))
+               for i in range(32)]
+        pts.append(pts[0])  # 首尾闭合（库内整圆实证 d<0.01）
+        lib = self._lib_with_pts(tmp_path, pts)
+        s = lib.decode(0)
+        assert s.subpaths[0].circle is not None
+        assert s.subpaths[0].closed
+
+
 # ---------------------------------------------------------------------------
 # Writer helpers
 # ---------------------------------------------------------------------------
