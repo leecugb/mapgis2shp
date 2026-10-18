@@ -21,6 +21,45 @@
 The first six items must be visible in the public repository before they can be
 counted as application evidence. Local, unpushed files are preparation only.
 
+## Verification run (2026-10-18)
+
+- `ruff check` on release modules, tests, and `verify_pymapgis.py`: all checks
+  passed.
+- `pytest`: 141 passed, 1 skipped, 1 failed. The failure is a known data-state
+  issue, not a code regression: during the 2026-10-18 MapGIS 6.7 native
+  acceptance session, MapGIS rewrote `LDZOFBA016.WT` in place (symbol height
+  5.0 -> 0.01), which breaks the `test_all_symbol_layer` expectation of 5 mm
+  glyphs. The untouched backup `LDZOFBA016.WT~` stores height 5.0 for all 305
+  records (verified byte-level on 2026-10-18). Restoration awaits the project
+  owner's decision; see [plaintext_pairs_audit.md](plaintext_pairs_audit.md).
+  Replacing the working file with the backup restores the green suite; do not
+  describe the suite as fully green while the modified file is in place.
+
+## Current official OSGeo process (verified 2026-10-18)
+
+Fetched from the OSGeo Incubation Committee pages on 2026-10-18:
+
+- Website listing (prerequisite for the community initiative) is requested by
+  joining the incubation mailing list **incubator@lists.osgeo.org** and asking
+  permission to create a project page, giving the OSGeo UserID. The concrete
+  sequence published under "Add a project": create an OSGeo UserID, sign in to
+  the OSGeo WordPress site to create a profile, join the incubator mailing
+  list, then use "+ New > Project" with "project author" permission.
+- Website-listing checklist: geospatial (README or project description),
+  OSI-approved licence, and a clear contribution policy.
+- Community-project checklist: geospatial with user documentation, OSI-approved
+  licence with source-code header check and provenance review, accepts
+  contributions (CONTRIBUTING guide plus history of pull requests or patches),
+  and a code of conduct.
+- Full incubation adds: open community with transparent decision making, an
+  active and healthy multi-organisation community, version control and issue
+  tracker, developer documentation, and a release procedure with documented
+  testing.
+
+This matches the six locally prepared items above; the provenance review
+(`license_provenance.md`) additionally satisfies the community-level
+"provenance review" line.
+
 ## Recommended public sequence
 
 1. Run the source and documentation checks after the SPDX and documentation
@@ -30,13 +69,15 @@ counted as application evidence. Local, unpushed files are preparation only.
    of the project's public change process; it should not be described as
    external collaboration.
 3. Update the GitHub repository description so that it describes both reading
-   and writing, matching the 2.4.0 README and PyPI release.
+   and writing, matching the 2.5.0 README and PyPI release.
 4. Open a small number of substantive issues for actual unresolved work. Keep
    them technical and actionable; do not open placeholder issues merely to
    create a numerical collaboration record.
-5. Review and publish the project page through the appropriate OSGeo process,
-   then contact the Incubation Committee for review. Remove the draft-status
-   note from the page only in the approved publishing workflow.
+5. Publish the project page through the official flow: OSGeo UserID, WordPress
+   profile sign-in, incubator mailing list (incubator@lists.osgeo.org) request
+   for "project author" permission, then "+ New > Project" on the OSGeo site.
+   Contact the Incubation Committee for community-project review. Remove the
+   draft-status note from the page only in the approved publishing workflow.
 
 ## Genuine issue candidates
 
@@ -70,20 +111,43 @@ for unsupported records, document where decoding stops, and test that no
 invented glyph geometry is returned. This issue should remain scoped to format
 support, not geological semantic adjudication.
 
-## Draft message to the Incubation Committee
+## Draft messages to the Incubation Committee
 
-**Subject:** OSGeo Community Project review request: mapgis2shp
+**To:** incubator@lists.osgeo.org (mailing-list sign-up required first)
+
+### Stage 1: request a project page on the OSGeo website
+
+**Subject:** Request to list mapgis2shp on the OSGeo website
+
+Incubation committee:
+
+I would like to ask permission to list my project "mapgis2shp" on the OSGeo
+website in order to share my work with more people!
+
+mapgis2shp (`pymapgis` on import) is an Apache-2.0 Python library and CLI for
+reading, writing, and converting MapGIS 6.x/67 binary vector formats. The
+repository is at https://github.com/leecugb/mapgis2shp and the current release
+is 2.5.0 on PyPI.
+
+My OSGeo userid is "**insert OSGeo userid**" and I will need permission to
+create a project page.
+
+Thanks!
+
+### Stage 2: apply for the OSGeo Community Projects initiative
+
+**Subject:** OSGeo Community Project application: mapgis2shp
 
 Dear OSGeo Incubation Committee,
 
-I would like to request guidance and review for mapgis2shp as an OSGeo
-Community Project.
+Following the project page on the OSGeo website, I would like to apply for
+mapgis2shp to join the OSGeo Community Projects initiative.
 
 mapgis2shp (`pymapgis` on import) is an Apache-2.0 Python library and CLI for
 reading, writing, and converting MapGIS 6.x/67 binary vector formats. It
 provides GeoPandas interoperability, CRS inference, polygon-topology
 reconstruction, graphic-parameter decoding, and structural parsers for MapGIS
-symbol and line-style libraries. The current release is 2.4.0 on PyPI.
+symbol and line-style libraries. The current release is 2.5.0 on PyPI.
 
 Project page: **insert the published project-page URL before sending**
 

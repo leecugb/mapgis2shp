@@ -1,8 +1,15 @@
 # License and Provenance Review
 
 - **Project:** mapgis2shp (`pymapgis` import name)
-- **Review date:** 2026-10-17
+- **Review date:** 2026-10-17 (2.4.0); header re-check 2026-10-18 (2.5.0)
 - **Release scope reviewed:** 2.4.0 source and distribution configuration
+
+On 2026-10-18 the 2.5.0 release was published. Its distribution configuration
+differs from 2.4.0 only in the version number; the SPDX header re-check found
+identifiers present in every release module and the release boundaries
+unchanged. The statements below therefore also apply to 2.5.0, with the
+package-boundary and third-party findings re-confirmed against the unchanged
+release configuration.
 
 This document records the project team's licence and provenance review for
 OSGeo Community Project preparation. It is a project-maintained review, not a
