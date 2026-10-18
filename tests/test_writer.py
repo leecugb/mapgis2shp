@@ -221,7 +221,8 @@ class TestPolygonWriter:
         assert total == pytest.approx(2.0)
         assert reader.geom[0].union(reader.geom[1]).area == pytest.approx(2.0)
 
-        # The shared edge must be stored as ONE arc with left/right = (1, 2).
+        # The shared edge must be stored as ONE arc with left/right = (2, 1)
+        # （无向成链约定：存储方向上 right_id 内域在左 → (walkR, walkL)）。
         with open(path, "rb") as f:
             data_start = struct.unpack_from("<i", f.read(16), 12)[0]
             f.seek(data_start)
@@ -234,8 +235,8 @@ class TestPolygonWriter:
             )
             f.seek(0)
             topo = _read_topology_table(f, *entries[3])
-        shared = [t for t in topo if t[2] == 1 and t[3] == 2]
-        assert len(arcs) == 5
+        shared = [t for t in topo if t[2] == 2 and t[3] == 1]
+        assert len(arcs) == 3
         assert len(shared) == 1
 
     def test_hole_and_island(self, tmp_path) -> None:
@@ -300,6 +301,252 @@ class TestPolygonWriter:
                 assert reader.polygon_params["pattern"].tolist() == (
                     gdf["pattern"].tolist()
                 )
+
+
+class TestHeaderExtentFields:
+    """头部图幅范围与记录数字段（2026-10-17 原生 J43C001002 布局定案）。
+
+    @260=记录数（点/线=要素数，面=弧段数）、@264=+1、@292=1、
+    @304..328=存储坐标单位下的边界框。MapGIS 用边界框做复位窗口与
+    符号缩放；全零框会让文件不可显示（原生验收实证）。
+    """
+
+    def _header(self, path) -> bytes:
+        return path.read_bytes()[:400]
+
+    def test_point_counts_and_bbox(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {"n": [1, 2]},
+            geometry=[
+                shapely.geometry.Point(74.0, 39.5),
+                shapely.geometry.Point(74.2, 39.7),
+            ],
+            crs="EPSG:4326",
+        )
+        path = tmp_path / "t.wt"
+        Writer(gdf).to_file(path)
+        b = self._header(path)
+        assert struct.unpack_from("<I", b, 260)[0] == 2
+        assert struct.unpack_from("<I", b, 264)[0] == 3
+        assert struct.unpack_from("<I", b, 292)[0] == 1
+        box = struct.unpack_from("<4d", b, 304)
+        assert box == pytest.approx((74.0, 39.5, 74.2, 39.7))
+
+    def test_line_counts_and_bbox(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {"n": [1]},
+            geometry=[shapely.geometry.LineString([(74.0, 39.5), (74.1, 39.6)])],
+            crs="EPSG:4326",
+        )
+        path = tmp_path / "t.wl"
+        Writer(gdf).to_file(path)
+        b = self._header(path)
+        assert struct.unpack_from("<I", b, 260)[0] == 1
+        assert struct.unpack_from("<I", b, 264)[0] == 2
+        box = struct.unpack_from("<4d", b, 304)
+        assert box == pytest.approx((74.0, 39.5, 74.1, 39.6))
+
+    def test_polygon_counts_arcs_and_bbox(self, tmp_path) -> None:
+        p1 = shapely.geometry.box(0, 0, 1, 1)
+        p2 = shapely.geometry.box(1, 0, 2, 1)
+        gdf = gpd.GeoDataFrame(
+            {"n": [1, 2]}, geometry=[p1, p2], crs="EPSG:4326"
+        )
+        path = tmp_path / "t.wp"
+        Writer(gdf).to_file(path)
+        b = self._header(path)
+        # 两区共享一条边：3 条弧段（共享边 + 两条开放环链；2026-10-17
+        # 无向成链定案，原生同构）
+        assert struct.unpack_from("<I", b, 260)[0] == 3
+        assert struct.unpack_from("<I", b, 264)[0] == 4
+        box = struct.unpack_from("<4d", b, 304)
+        assert box == pytest.approx((0.0, 0.0, 2.0, 1.0))
+
+    def test_projected_bbox_in_stored_units(self, tmp_path) -> None:
+        # 投影坐标：头部框须为存储单位（坐标 × 1000/map_scale）
+        gdf = gpd.GeoDataFrame(
+            {"n": [1]},
+            geometry=[shapely.geometry.Point(500100.0, 4375000.0)],
+            crs="+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 "
+            "+y_0=0 +ellps=krass +units=m +no_defs",
+        )
+        path = tmp_path / "t.wt"
+        Writer(gdf, map_scale=1000.0).to_file(path)
+        b = self._header(path)
+        box = struct.unpack_from("<4d", b, 304)
+        # 存储值 = 米 × 1000/1000 = 米；框即点本身
+        assert box == pytest.approx((500100.0, 4375000.0, 500100.0, 4375000.0))
+        # 非退化框：若回归全零框，此断言失败
+        assert any(box)
+
+
+class TestHeaderCrsBlock:
+    """坐标系区常量块与毫米-度系数（2026-10-17 原生 J43C001002 定案）。
+
+    原生头部 @244/@252 存"每毫米对应度数"（经线/纬线方向），MapGIS
+    用它把毫米级符号尺寸换算成度来显示；零系数会让符号尺寸归零。
+    """
+
+    def _write(self, tmp_path, map_scale=250000.0, crs="EPSG:4326") -> bytes:
+        gdf = gpd.GeoDataFrame(
+            {"n": [1]},
+            geometry=[shapely.geometry.Point(74.0, 39.5)],
+            crs=crs,
+        )
+        path = tmp_path / "t.wt"
+        Writer(gdf, map_scale=map_scale).to_file(path)
+        return path.read_bytes()[:400]
+
+    def test_native_anchor_coefficients(self, tmp_path) -> None:
+        # 1:250000、中心纬度 39.5 → 原生锚值 y≈0.0022517、x≈0.0029064
+        b = self._write(tmp_path)
+        x = struct.unpack_from("<d", b, 244)[0]
+        y = struct.unpack_from("<d", b, 252)[0]
+        assert y == pytest.approx(0.0022517, rel=1e-2)
+        assert x == pytest.approx(0.0029064, rel=1e-2)
+        assert x > y  # 纬线弧长 < 经线弧长
+
+    def test_coefficients_scale_with_map_scale(self, tmp_path) -> None:
+        y_250k = struct.unpack_from("<d", self._write(tmp_path, 250000.0), 252)[0]
+        y_1000 = struct.unpack_from("<d", self._write(tmp_path, 1000.0), 252)[0]
+        assert y_250k == pytest.approx(y_1000 * 250.0, rel=1e-9)
+
+    def test_constant_block_written(self, tmp_path) -> None:
+        b = self._write(tmp_path)
+        assert struct.unpack_from("<f", b, 163)[0] == pytest.approx(11.0014, abs=1e-3)
+        assert struct.unpack_from("<f", b, 171)[0] == pytest.approx(11.0967, abs=1e-3)
+        assert struct.unpack_from("<f", b, 187)[0] == pytest.approx(8.9073, abs=1e-3)
+        assert struct.unpack_from("<f", b, 195)[0] == pytest.approx(9.7929, abs=1e-3)
+        assert struct.unpack_from("<f", b, 220)[0] == 0.0
+        assert struct.unpack_from("<f", b, 220)[0] == -0.0
+        assert struct.unpack_from("<d", b, 232)[0] == 1.0
+        assert b[240] == 4 and b[242] == 1
+
+    def test_projected_crs_leaves_coefficients_zero(self, tmp_path) -> None:
+        b = self._write(
+            tmp_path,
+            crs="+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 "
+            "+y_0=0 +ellps=krass +units=m +no_defs",
+        )
+        assert struct.unpack_from("<d", b, 244)[0] == 0.0
+        assert struct.unpack_from("<d", b, 252)[0] == 0.0
+        assert struct.unpack_from("<d", b, 232)[0] == 1.0
+
+
+class TestLineAuxSections:
+    """线辅助段原生布局（2026-10-17 J43C001002 定案）。
+
+    head_5=55 字节零块；head_6=392 字节元数据块（FILETIME+常量 387+1）；
+    head_7=(n+1)×32B 纯边界框记录（无 PRMH 标签、无前导零框）；
+    head_8=4B 首值 + 每线 int32=0x00010000|图层；线记录头=01 02 常量。
+    """
+
+    def _sections(self, path) -> dict:
+        b = path.read_bytes()
+        ds = struct.unpack_from("<i", b, 12)[0]
+        out = {}
+        for i in range(10):
+            s, v = struct.unpack_from("<2i", b, ds + i * 10)
+            out[i] = b[s : s + v]
+        return out
+
+    def _write(self, tmp_path, layers=(0, 5)) -> None:
+        gdf = gpd.GeoDataFrame(
+            {
+                "linetype": [1, 1],
+                "layer": list(layers),
+            },
+            geometry=[
+                shapely.geometry.LineString([(74.0, 39.5), (74.1, 39.6)]),
+                shapely.geometry.LineString([(74.2, 39.7), (74.3, 39.8)]),
+            ],
+            crs="EPSG:4326",
+        )
+        path = tmp_path / "t.wl"
+        Writer(gdf, map_scale=250000).to_file(path)
+        return path
+
+    def test_aux_section_layout(self, tmp_path) -> None:
+        sec = self._sections(self._write(tmp_path))
+        assert len(sec[4]) == 55 and not any(sec[4])
+        assert len(sec[5]) == 392
+        assert struct.unpack_from("<Q", sec[5], 0)[0] > 0  # FILETIME 非零
+        assert struct.unpack_from("<I", sec[5], 12)[0] == 387
+        assert struct.unpack_from("<I", sec[5], 16)[0] == 1
+        # head_7: (2+1) x 32B，首记录 = 整体框，随后逐线框
+        assert len(sec[6]) == 3 * 32
+        assert struct.unpack_from("<4d", sec[6], 0) == pytest.approx(
+            (74.0, 39.5, 74.3, 39.8)
+        )
+        assert struct.unpack_from("<4d", sec[6], 32) == pytest.approx(
+            (74.0, 39.5, 74.1, 39.6)
+        )
+        # head_8: 4B 首值 + 每线标志 = 0x00010000 | 图层
+        assert len(sec[7]) == 4 + 2 * 4
+        assert struct.unpack_from("<i", sec[7], 4)[0] == 0x00010000
+        assert struct.unpack_from("<i", sec[7], 8)[0] == 0x00010005
+
+    def test_line_record_head_constant(self, tmp_path) -> None:
+        sec = self._sections(self._write(tmp_path))
+        for k in (1, 2):
+            assert sec[0][k * 57 : k * 57 + 7] == b"\x01\x02\x00\x00\x00\x00\x00"
+
+
+class TestPolygonAuxSections:
+    """面辅助段原生布局（2026-10-17 J43C001002 定案）。
+
+    head_3=元数据块（FILETIME+常量 426，645B）；head_5=55 字节零块；
+    head_6=392B 元数据块（387/1）；head_7=(弧段数+1)×32B 边界框；
+    head_8=4B 首值+每弧段 int32=0x00010000；弧段记录头=01 02 常量。
+    """
+
+    def _sections(self, path) -> dict:
+        b = path.read_bytes()
+        ds = struct.unpack_from("<i", b, 12)[0]
+        out = {}
+        for i in range(10):
+            s, v = struct.unpack_from("<2i", b, ds + i * 10)
+            out[i] = b[s : s + v]
+        return out
+
+    def _write(self, tmp_path):
+        p1 = shapely.geometry.box(0, 0, 1, 1)
+        p2 = shapely.geometry.box(1, 0, 2, 1)
+        gdf = gpd.GeoDataFrame(
+            {"n": [1, 2]}, geometry=[p1, p2], crs="EPSG:4326"
+        )
+        path = tmp_path / "t.wp"
+        Writer(gdf, map_scale=250000).to_file(path)
+        return path
+
+    def test_aux_section_layout(self, tmp_path) -> None:
+        sec = self._sections(self._write(tmp_path))
+        # 两区共享边：3 条弧段、2 个端点结点（无向成链定案）
+        assert len(sec[0]) == 4 * 57  # 弧段索引 (n+1)
+        # head_2 前导 = [u16 0] + 每结点 (0, 结点号)；首弧坐标对紧随其后
+        lead = struct.unpack("<5H", sec[1][:10])
+        assert lead[0] == 0
+        pairs = struct.unpack("<8H", sec[1][:16])
+        assert pairs[1:5] == (0, 1, 0, 2)
+        assert len(sec[3]) == 4 * 24  # 拓扑
+        assert len(sec[2]) == 645 and struct.unpack_from("<Q", sec[2], 0)[0] > 0
+        assert struct.unpack_from("<I", sec[2], 12)[0] == 426
+        assert len(sec[4]) == 55 and not any(sec[4])
+        assert len(sec[5]) == 392
+        assert struct.unpack_from("<I", sec[5], 12)[0] == 387
+        assert len(sec[6]) == 4 * 32  # 弧段框 (arcs+1)
+        assert len(sec[7]) == 4 + 3 * 4  # 标志 (lead + arcs)
+        assert struct.unpack_from("<i", sec[7], 4)[0] == 0x00010000  # MapGIS 规范弧图层 0
+        # 弧段框 = 存储单位边界框（首记录零填充；共享边 x=1）
+        assert not any(sec[6][:32])
+        for k in range(1, 4):
+            xmin, ymin, xmax, ymax = struct.unpack_from("<4d", sec[6], k * 32)
+            assert xmin <= xmax and ymin <= ymax
+            assert 0.0 <= xmin and xmax <= 2.0 and 0.0 <= ymin and ymax <= 1.0
+
+    def test_arc_record_head_constant(self, tmp_path) -> None:
+        sec = self._sections(self._write(tmp_path))
+        assert sec[0][57 : 57 + 7] == b"\x01\x02\x00\x00\x00\x00\x00"
 
 
 class TestCrsAndErrors:
