@@ -336,7 +336,7 @@ class TestPolygonParams:
                 pytest.skip(f"{fname} not found")
             with Reader(path, read_graphic_params=True) as reader:
                 pp = reader.polygon_params
-                assert list(pp.columns) == ["fill_color", "pattern", "pattern_color"]
+                assert list(pp.columns) == ["fill_color", "pattern", "pattern_color", "class"]
                 assert len(pp) == len(reader.geodataframe)
                 assert pp["pattern"].between(lo, hi).all(), fname
                 # Colour indices vary between geological units.
