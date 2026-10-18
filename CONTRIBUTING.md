@@ -152,6 +152,49 @@ unclear redistribution rights. Follow the repository's existing notice practice
 when adding files; maintainers may request additional provenance information
 during licence or OSGeo review.
 
+## Format knowledge and verification protocol
+
+The native-format reverse-engineering work has a documented knowledge base and
+a field-tested verification protocol. Contributors changing byte layouts
+should use both:
+
+- [MapGIS file-structure knowledge archive](docs/mapgis_file_structure_knowledge.md) —
+  header fields, section layouts, display gates, and an evidence appendix
+  cross-referencing code constants, native files, and the official plain-text
+  exports
+- [Plaintext-pair audit report](docs/plaintext_pairs_audit.md) and the
+  `_audit_plaintext_pairs.py` tool — field-by-field cross-validation against
+  official `.wat` / `.wal` / `.wap` exports
+
+Native-verification lessons learned the hard way (treat these as protocol):
+
+- **Copy test files before opening them in MapGIS.** MapGIS 6.x rewrites
+  opened files in place (CRS header, point graphic parameters, metadata);
+  never open the only copy of a dataset you need intact.
+- A file that MapGIS parses may still not render. Native display is gated by
+  the polygon label-box section (index entry 11) and file footer (entry 12),
+  the mm-to-degree header coefficients, the header extent box, declared field
+  widths, and the polygon class byte. Test *display*, not just open/parse.
+- Saving a file in MapGIS does not prove the model loaded: if the regions
+  never displayed, MapGIS re-saves an empty model, so its output cannot be
+  used as a format reference.
+- Section-level graft discrimination (inject one section into a known-good
+  native base) is the reliable way to isolate a display regression.
+
+## Releases
+
+Releases are cut from `main` with a version bump in both
+`src/pymapgis/_version.py` and `pyproject.toml`, an annotated tag
+(`vX.Y.Z`), and a `python -m build` of the sdist and wheel. Practical notes:
+
+- `python -m build --no-isolation` may be needed on Windows when the isolated
+  build environment crashes on startup.
+- `PYTHONUTF8=1` is required for `twine upload` on GBK consoles.
+- Verify the wheel contains only the release modules (no `semantics`,
+  `rendering`, or `linesty_adjudicated`) before uploading.
+- Real-data regression files can be modified in place by MapGIS sessions;
+  keep backups and restore them before trusting test results.
+
 ## Questions and conduct
 
 Use a public issue for technical questions so that the answer can help others.
