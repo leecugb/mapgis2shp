@@ -252,15 +252,16 @@ class SubgraphLib:
         return sym
 
     def _classify(self, sym: Symbol) -> None:
-        """子路径几何分类：密集弧列→圆拟合；type=6 三点子路径→中心三点
-        组整圆（[圆心, 半径参考点, 圆心回点]，符号 7 锚定）；短点组跳过拟合。"""
-        if sym.type == 6:
-            for sp in sym.subpaths:
-                c = _center_ref_circle(sp.points)
-                if c is not None:
-                    sp.circle = c
-                    sp.closed = True
-                    continue
+        """子路径几何分类：三点整圆组→中心参考圆（[圆心, 半径参考点,
+        圆心回点]，符号 7 锚定；2026-10-18 用户裁定扩展至全部 type：
+        子图 21（type=2）三点组 r≈0.4475 为圆，半径连线不得描边）；
+        密集弧列→圆拟合；短点组跳过拟合。"""
+        for sp in sym.subpaths:
+            c = _center_ref_circle(sp.points)
+            if c is not None:
+                sp.circle = c
+                sp.closed = True
+                continue
         for sp in sym.subpaths:
             if len(sp.points) < 8:
                 continue
@@ -285,8 +286,10 @@ def _center_ref_circle(pts: List[Tuple[float, float]]) -> Optional[Tuple[float, 
       （±2%）；④ 0.005 ≤ r ≤ 1.0mm（符号空间 ±0.5 的合理上限）。
     全库扫描（1996 符号）：68 条 type=6 记录 70 条三点子路径，判圆 33
     （半径聚类 0.32/0.36/0.5/0.51，全为可信符号圆），拒绝 37（如 #112
-    竖直径线、#116/#117 原点引线——直连无伪迹）。残留挂账：type≠6
-    记录中的同构三点组（如 #56 内圆，type=2）尚未扩展判读。
+    竖直径线、#116/#117 原点引线——直连无伪迹）。2026-10-18 用户裁定
+    扩展至全部 type：子图 21（type=2）三点组 [(0.0056,-0.0056),
+    (0.4503,0), (0,0)] 判圆（r≈0.4475，圆心≈原点），半径连线为编辑
+    表示、不得描边；同构挂账（#56 内圆，type=2）随之解除。
     """
     if len(pts) != 3:
         return None
