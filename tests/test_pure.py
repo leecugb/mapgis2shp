@@ -472,11 +472,12 @@ class TestSlibTailChain:
 
 
 class TestSlibCenterRefCircle:
-    """type=6 中心三点组整圆判读（[圆心, 半径参考点, 圆心回点]）。
+    """中心三点组整圆判读（[圆心, 半径参考点, 圆心回点]，全 type）。
 
-    回归锚（2026-10-15 全库扫描 + 符号 7 用户裁定 r≈0.315）：判圆仅当
-    首尾≈同点（≤0.01mm）、参考点双侧等距（±2%）、r∈[0.005,1.0]；
-    不满足维持点序直连（不产生新 artifact）。
+    回归锚（2026-10-15 全库扫描 + 符号 7 用户裁定 r≈0.315；2026-10-18
+    子图 21 裁定扩展至 type≠6，解除 #56 内圆挂账）：判圆仅当首尾≈同点
+    （≤0.01mm）、参考点双侧等距（±2%）、r∈[0.005,1.0]；不满足维持
+    点序直连（不产生新 artifact）。
     """
 
     @staticmethod
@@ -519,12 +520,15 @@ class TestSlibCenterRefCircle:
         assert not sp.closed
 
     def test_type_gate(self, tmp_path) -> None:
-        # 同构三点组在 type≠6 记录中不判读（#56 内圆扩展挂账的边界门）
+        # 2026-10-18 用户裁定：同构三点组在 type≠6 记录中同样判圆
+        # （子图 21 裁定 + #56 内圆挂账解除；原边界门移除）
         rec = self._record(2, [(0.0, 0.0), (0.32, 0.0), (0.0, 0.0)])
         lib = self._lib_with(tmp_path, rec)
         s = lib.decode(0)
         sp = s.subpaths[0]
-        assert sp.circle is None
+        assert sp.circle is not None
+        assert sp.closed
+        assert sp.circle[2] == pytest.approx(0.32)
 
 
 # ---------------------------------------------------------------------------
