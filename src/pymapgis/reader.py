@@ -1228,16 +1228,16 @@ class Reader:
             file_obj, data_start, _HEADER_COUNT_PHYSICAL
         )
         self._raw_sections: Dict[int, bytes] = {}
-        if self.shapeType == "POLYGON":
-            end = max((s + v for s, v in header_entries if v), default=0)
-            for i, (s, v) in enumerate(header_entries):
-                if v:
-                    file_obj.seek(s)
-                    self._raw_sections[i] = file_obj.read(v)
-            file_obj.seek(0, 2)
-            file_size = file_obj.tell()
-            file_obj.seek(end)
-            self._raw_tail = file_obj.read(max(0, file_size - end))
+        self._raw_tail = b""
+        end = max((s + v for s, v in header_entries if v), default=0)
+        for i, (s, v) in enumerate(header_entries):
+            if v:
+                file_obj.seek(s)
+                self._raw_sections[i] = file_obj.read(v)
+        file_obj.seek(0, 2)
+        file_size = file_obj.tell()
+        file_obj.seek(end)
+        self._raw_tail = file_obj.read(max(0, file_size - end))
 
         attr_start, _ = header_entries[_ATTR_HEADER_INDEX[self.shapeType]]
         record_count, record_length, fields = _read_attribute_header(
@@ -1352,15 +1352,14 @@ class Reader:
         self.geodataframe = gpd.GeoDataFrame(data, crs=self.crs, geometry=self.geom)
         if getattr(self, "_field_meta", None):
             self.geodataframe.attrs["mapgis_field_meta"] = self._field_meta
-        if self.shapeType == "POLYGON":
+        if self.shapeType in ("POINT", "LINE", "POLYGON"):
             # 原始段透传元数据：未修改几何时 Writer 逐字节复用，保证往返件
             # 与原生同构（2026-10-18 实证：元数据块尺寸/弧段旋转均参与
             # MapGIS 显示判定，自行重建无法复现其内部期望）
             self.geodataframe.attrs["mapgis_section_passthrough"] = {
                 "sections": {
-                    str(i): self._raw_sections[i]
-                    for i in (0, 1, 2, 3, 4, 5, 6, 7, 10, 12)
-                    if i in self._raw_sections
+                    str(i): raw
+                    for i, raw in self._raw_sections.items()
                 },
                 "tail": self._raw_tail,
             }
