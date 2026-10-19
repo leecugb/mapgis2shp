@@ -203,7 +203,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     dots 元素：dash 族 (x, r)，tick 族 (x, h, top)。
     非线型 3/4 或越界返回 None（未裁定线型不做臆断）。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 38, 50, 51):
+    if style is None or style.no not in (3, 4, 5, 7, 38, 48, 50, 51):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -321,6 +321,20 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": lines,
                 "teeth": teeth,
                 "period_mm": period}
+    # 线型 48（2026-10-19 用户目视定案）：48|0 = 基线 0→1.0 + 两条
+    # 抬升短线（(x,y) 点对 ×4 = 两线端点：0.1→0.4031 与 0.6→0.9 均
+    # @y=0.1）——lines 为 (x0, x1, y) 三元组
+    if style.no == 48:
+        if aux != 0 or len(f) < 12:
+            return None
+        lines = [(f[0], f[2], 0.0)]
+        for k in range(2):
+            o = 4 + 4 * k
+            lines.append((f[o], f[o + 2], f[o + 1]))
+        return {"kind": "raised_lines",
+                "lines": lines,
+                "dots": [],
+                "period_mm": f[2]}
     # 线型 50（2026-10-19 用户目视定案）：50|0 = 线 0→1.0 + 两个抬升
     # 圆点（(x, y, r) 三元组 ×2：@(0.5,0.0684)/@(0.6992,0.0684) r=0.0312）
     if style.no == 50:
