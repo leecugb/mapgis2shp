@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime
 import io
+import math
 import struct
 
 import numpy as np
@@ -269,6 +270,43 @@ class TestPublicApi:
         finally:
             if real_module is not None:
                 sys.modules["pymapgis.linesty_adjudicated"] = real_module
+
+
+class TestLinestyTruncatedFlag:
+    """F2 审计加固：坏子线指针不再静默截断——truncated 标志如实上报。
+
+    记录 = [n_subs×6B（u32 子线绝对偏移, u16 子线长）] + 子线链。
+    """
+
+    @staticmethod
+    def _lib(tmp_path, record: bytes, n_subs: int = 2):
+        from pymapgis.linesty import LinestyLib
+        data = (struct.pack("<I", 1) + struct.pack("<H", 0)
+                + struct.pack("<IH", 12, n_subs) + record)
+        path = tmp_path / "LINESTY.lib"
+        path.write_bytes(data)
+        return LinestyLib(str(path))
+
+    @staticmethod
+    def _solid_subline() -> bytes:
+        return (struct.pack("<H", 1) + struct.pack("<3H", 0, 2, 0)
+                + struct.pack("<4f", 0.0, 0.0, 0.5, 0.0))
+
+    def test_healthy_record_not_truncated(self, tmp_path) -> None:
+        sub = self._solid_subline()
+        rec = struct.pack("<IH", 24, len(sub)) + struct.pack("<IH", 24, len(sub)) + sub + sub
+        st = self._lib(tmp_path, rec).decode(1)
+        assert st is not None
+        assert len(st.sublines) == 2 and st.truncated is False
+
+    def test_corrupt_pointer_flagged(self, tmp_path) -> None:
+        sub = self._solid_subline()
+        # 第 2 子线指针越界（ptr+ln 超记录尾）→ 截断并上报
+        rec = (struct.pack("<IH", 24, len(sub))
+               + struct.pack("<IH", 24 + len(sub) + 9999, 24) + sub)
+        st = self._lib(tmp_path, rec).decode(1)
+        assert st is not None
+        assert len(st.sublines) == 1 and st.truncated is True
 
 
 class TestLineParams:
@@ -795,36 +833,54 @@ class TestFillgrph:
         pat = lib.decode(220)
         assert pat is not None
         assert pat.grid == 8 and pat.unit == 100
-        assert len(pat.strokes) == 8          # 2 填充 + 4 线 + 2 填充复写
+        assert len(pat.strokes) == 8          # 2 填充 + 4 线 + 2 环轮廓描边
         assert sum(len(s.points) for s in pat.strokes) == 50
         assert len(pat.raw_points) == 50
-        assert len(pat.points) == 18          # 全记录去重后
+        assert len(pat.points) == 23          # 夹具全记录精确去重（实库 24）
 
     def test_220_geometry_rings_and_lines(self, tmp_path) -> None:
         from pymapgis.fillgrph import pattern_geometry
         lib = self._lib_with(tmp_path, self._rec_220())
         geo = pattern_geometry(lib, 220)
         assert geo is not None
-        # 填充区：两个 N 轮廓环（环内连续回描 0.003 容差合并、首尾
-        # 闭合点去除）——环序与目视裁定 0-1-2-3-4-5-6 / 7-8-9-10-
-        # 11-12-13 完全一致
+        # 填充区：两个 N 轮廓环（8 顶点——(0.3935,0.6060) 凹口为文件
+        # 真实几何，F1 审计后按位保留；环序与目视裁定锚一致）
         assert len(geo["fill_polygons"]) == 2
         ring0 = geo["fill_polygons"][0]
-        assert len(ring0) == 7
+        assert len(ring0) == 8
         assert ring0[0] == pytest.approx((0.3943, 0.6548), abs=1e-3)
-        assert ring0[3] == pytest.approx((0.3540, 0.6419), abs=1e-3)
-        assert ring0[6] == pytest.approx((0.3943, 0.8748), abs=1e-3)
-        assert len(geo["fill_polygons"][1]) == 7
-        # 线笔划：两条连线 + 两条环轮廓描边（单点落笔笔划剔除）
-        assert len(geo["polylines"]) == 4
+        assert ring0[2] == pytest.approx((0.3935, 0.6060), abs=1e-3)
+        assert ring0[4] == pytest.approx((0.3540, 0.6419), abs=1e-3)
+        assert ring0[7] == pytest.approx((0.3943, 0.8748), abs=1e-3)
+        assert len(geo["fill_polygons"][1]) == 8
+        # 线笔划：两条连线 + 两条环轮廓描边；两个落笔微段（总长
+        # <0.01mm）剔除并计数
+        assert [len(l) for l in geo["polylines"]] == [3, 3, 9, 9]
         assert geo["polylines"][0][0] == pytest.approx((0.0985, 0.6058), abs=1e-3)
         assert geo["polylines"][0][2] == pytest.approx((0.3916, 0.6082), abs=1e-3)
         assert geo["polylines"][1][0] == pytest.approx((0.6039, 0.1048), abs=1e-3)
-        assert len(geo["polylines"][2]) == 8        # 环轮廓：7 顶点 + 闭合点
         assert geo["polylines"][2][0] == pytest.approx((0.3943, 0.6548), abs=1e-3)
-        assert geo["polylines"][2][7] == pytest.approx((0.3943, 0.6548), abs=1e-3)
-        assert len(geo["polylines"][3]) == 8
+        assert geo["polylines"][2][-1] == pytest.approx((0.3943, 0.6548), abs=1e-3)
+        assert geo["dropped"] == 2
         assert geo["circles"] == [] and geo["arcs"] == []
+
+    def test_dense_curve_not_wiped(self, tmp_path) -> None:
+        """F1 回归锚：0.001 级间距的密集曲线不得被冗余合并摧毁。"""
+        from pymapgis.fillgrph import pattern_geometry
+        # 11 点密集填充环（间距 0.001 级——140 号实证形态）+ 一条密集折线
+        dense = [(0.500 + 0.045 * i, 0.250 + 0.012 * math.sin(i * 0.9))
+                 for i in range(11)]
+        dense.append(dense[0])
+        line = [(0.1 + 0.001 * i, 0.05 + 0.0004 * i) for i in range(20)]
+        spec = [((0, 0, 0, 0, 1), len(dense)), ((2, 0, 0, 4, 1), len(line))]
+        lib = self._lib_with(tmp_path, self._record(4, 24, spec,
+                                                    dense + line), no=260)
+        geo = pattern_geometry(lib, 260)
+        assert geo is not None
+        assert len(geo["fill_polygons"]) == 1
+        assert len(geo["fill_polygons"][0]) == 11    # 密集顶点全保留
+        assert len(geo["polylines"][0]) == 20
+        assert geo["dropped"] == 0
 
     def test_243_252_247_253_polylines(self, tmp_path) -> None:
         from pymapgis.fillgrph import pattern_geometry
