@@ -203,7 +203,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     dots 元素：dash 族 (x, r)，tick 族 (x, h, top)。
     非线型 3/4 或越界返回 None（未裁定线型不做臆断）。
     """
-    if style is None or style.no not in (3, 4, 5, 7):
+    if style is None or style.no not in (3, 4, 5, 7, 38):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -275,19 +275,51 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     # 全裁定（7|0 只渲染 sub0——sub1 的子图 1280 引用不影响节奏）；
     # 基线 (f[0],0)→(f[2],0) + 上下对称竖线对（(x,+y),(x,-y) 成对
     # 编码，半高 = |y|，顶端 = 半高；sub2 两组对 @f[4]/f[8]）
-    if aux not in (0, 1, 2) or len(f) < 8:
-        return None
-    if aux == 2:
-        if len(f) < 12:
+    if style.no == 7:
+        if aux not in (0, 1, 2) or len(f) < 8:
             return None
-        dots = [(f[4], abs(f[5]), abs(f[5])),
-                (f[8], abs(f[9]), abs(f[9]))]
+        if aux == 2:
+            if len(f) < 12:
+                return None
+            dots = [(f[4], abs(f[5]), abs(f[5])),
+                    (f[8], abs(f[9]), abs(f[9]))]
+        else:
+            dots = [(f[4], abs(f[5]), abs(f[5]))]
+        return {"kind": "tick_dash_interleave",
+                "lines": [(f[0], f[2])],
+                "dots": dots,
+                "period_mm": f[2]}
+    # 线型 38（2026-10-19 用户目视定案，推覆体齿线族）：aux 选主记录
+    # 子线索引；sub0/sub1 裁定。unit=1 元素 = 坐标列填充多边形（齿），
+    # unit∈{0,5} 元素 = 线起终点对；**基本单元等间距**——周期 = 相邻
+    # 线起点差的最小正值（38|1 实证：线起点 0/0.5 → 周期 0.5，此前误
+    # 把记录末 x=0.875 当周期的教训）；单线记录（38|0）周期 = 线终点。
+    if aux not in (0, 1):
+        return None
+    lines, teeth = [], []
+    fi = 0
+    for e in sl.elements:
+        if e.unit == 1 and fi + 2 * e.marker <= len(f):
+            pts = list(zip(f[fi:fi + 2 * e.marker:2],
+                           f[fi + 1:fi + 2 * e.marker:2]))
+            teeth.append(pts)
+            fi += 2 * e.marker
+        elif e.unit in (0, 5) and fi + 4 <= len(f):
+            lines.append((f[fi], f[fi + 2]))
+            fi += 4
+        else:
+            break
+    if not lines:
+        return None
+    starts = sorted({x0 for x0, _ in lines})
+    if len(starts) >= 2:
+        period = min(b - a for a, b in zip(starts, starts[1:]) if b > a)
     else:
-        dots = [(f[4], abs(f[5]), abs(f[5]))]
-    return {"kind": "tick_dash_interleave",
-            "lines": [(f[0], f[2])],
-            "dots": dots,
-            "period_mm": f[2]}
+        period = max(x1 for _, x1 in lines)
+    return {"kind": "tooth_dash",
+            "lines": lines,
+            "teeth": teeth,
+            "period_mm": period}
 
 
 def dotline_params(style: Optional[LineStyle], feature_width: float,
