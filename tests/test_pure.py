@@ -1043,6 +1043,26 @@ class TestFeatureRhythm:
         assert r["dots"][0] == pytest.approx((0.0, 0.0, 0.125), abs=1e-6)
         assert r["period_mm"] == 1.0
 
+    def test_58x0_mixed(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 58|0：基线 + 三竖线 + 三圆点（基线下方）
+        f = [0, 0, 1.0, 0, 0, 0, 0, 0.1875, 0.25, 0, 0.25, 0.1875,
+             0.125, 0, 0.125, 0.1875,
+             0.4375, -0.0625, 0.0312, 0, 0, 0,
+             0.8125, -0.0625, 0.0312, 0, 0, 0,
+             0.625, -0.0625, 0.0312, 0, 0, 0]
+        st = self._style(f, n=7, elems=[(0, 2, 0), (0, 2, 4), (0, 2, 8),
+                                        (0, 2, 12), (3, 3, 16), (3, 3, 22),
+                                        (3, 3, 28)], aux=0, no=58)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "mixed_dash"
+        assert r["lines"] == [(0.0, 1.0, 0.0)]
+        assert r["verticals"][0] == pytest.approx((0.0, 0.0, 0.1875), abs=1e-6)
+        assert len(r["verticals"]) == 3
+        assert r["dots"][0] == pytest.approx((0.4375, -0.0625, 0.0312), abs=1e-6)
+        assert len(r["dots"]) == 3
+        assert r["period_mm"] == 1.0
+
     def test_50x_two_raised_dots(self) -> None:
         from pymapgis.linesty import feature_rhythm
         # 50|0：线 0→1.0 + 双抬升圆点
