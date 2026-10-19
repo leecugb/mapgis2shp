@@ -1076,6 +1076,24 @@ class TestFeatureRhythm:
         sublines[aux] = sl
         return LineStyle(no=no, n_subs=6, sublines=sublines)
 
+    def test_14_0_double_line_band(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 实库 14|0：双平行线 + 左 0→0.5469 填充带（用户 2026-10-19 裁定）
+        f32 = [0.0, 0.0, 1.0, 0.0, 0.0, 0.0781, 1.0, 0.0781,
+               0.0, 0.0, 0.5469, 0.0, 0.5469, 0.0781, 0.0, 0.0781, 0.0, 0.0]
+        st = self._style(f32, n=3, elems=((5, 2, 0), (5, 2, 4), (1, 5, 8)),
+                         aux=0, no=14)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "double_line_band"
+        assert r["lines"][0] == pytest.approx((0.0, 1.0, 0.0), abs=1e-4)
+        assert r["lines"][1] == pytest.approx((0.0, 1.0, 0.0781), abs=1e-4)
+        assert len(r["fills"]) == 1
+        assert r["fills"][0][1] == pytest.approx((0.5469, 0.0), abs=1e-4)
+        assert r["fills"][0][2] == pytest.approx((0.5469, 0.0781), abs=1e-4)
+        assert r["period_mm"] == pytest.approx(1.0)
+        # 未裁定 aux 诚实返回 None
+        assert feature_rhythm(st, 1) is None
+
     def test_sub0_dash_dot(self) -> None:
         from pymapgis.linesty import feature_rhythm
         st = self._style([0, 0, 0.625, 0, 0.8203125, 0, 0.03125, 0, 0, 0])
