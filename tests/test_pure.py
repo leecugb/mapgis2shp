@@ -960,6 +960,31 @@ class TestFeatureRhythm:
         # 7|3 未裁定 → None
         assert feature_rhythm(st, 3) is None
 
+    def test_38x_tooth_dash(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 38|0：单线 + 矩形齿（坐标列 unit=1）
+        f0 = [0, 0, 0.6594, 0, 0.2188, 0, 0.2188, 0.1,
+              0.4406, 0.1, 0.4406, 0, 0.2188, 0]
+        st = self._style(f0, n=2, elems=[(0, 2, 0), (1, 5, 4)], aux=0, no=38)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "tooth_dash"
+        assert r["lines"] == [(0.0, 0.6594)]
+        assert r["teeth"][0][0] == pytest.approx((0.2188, 0.0), abs=1e-6)
+        assert r["teeth"][0][2] == pytest.approx((0.4406, 0.1), abs=1e-6)
+        assert r["period_mm"] == pytest.approx(0.6594, abs=1e-6)
+        # 38|1：两段线 + 矩形齿；单元等间距 = 线起点差 0.5
+        f1 = [0, 0, 0.375, 0, 0.5, 0, 0.875, 0, 0.125, 0,
+              0.125, 0.1, 0.25, 0.1, 0.25, 0, 0.125, 0]
+        st = self._style(f1, n=3, elems=[(0, 2, 0), (0, 2, 4), (1, 5, 8)],
+                         aux=1, no=38)
+        r = feature_rhythm(st, 1)
+        assert r["kind"] == "tooth_dash"
+        assert r["lines"][0] == pytest.approx((0.0, 0.375), abs=1e-6)
+        assert r["lines"][1] == pytest.approx((0.5, 0.875), abs=1e-6)
+        assert r["period_mm"] == pytest.approx(0.5, abs=1e-6)
+        # 38|2 未裁定 → None
+        assert feature_rhythm(st, 2) is None
+
 
 # ---------------------------------------------------------------------------
 # Writer helpers
