@@ -858,10 +858,11 @@ class TestFeatureRhythm:
             [(0.069764, 0.279915), (0.413688, 0.627549), (0.763889, 0.964053)])
         # 三档竖短线 = (相邻线间隙中点, 刻度高 |y0|)（2026-10-19 用户裁定：
         # tick 与两侧 dash 等间距；档顺序 档2/档3/档1 按档 x 循环归属）
-        assert r["dots"] == pytest.approx(
-            [(0.34680144488811493, 0.0072672353),
-             (0.6957188546657562, 0.0072672353),
-             (1.0169082954525948, 0.0046241446)], abs=1e-6)
+        # 注意：本环境 pytest.approx 对嵌套 list 的 abs 容差不生效，
+        # 逐元组断言（元组级别 abs 正常）
+        assert r["dots"][0] == pytest.approx((0.34680144488811493, 0.0072672353), abs=1e-6)
+        assert r["dots"][1] == pytest.approx((0.6957188546657562, 0.0072672353), abs=1e-6)
+        assert r["dots"][2] == pytest.approx((1.0169082954525948, 0.0046241446), abs=1e-6)
 
     def test_unadjudicated_none(self) -> None:
         from pymapgis.linesty import feature_rhythm
