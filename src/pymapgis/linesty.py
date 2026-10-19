@@ -203,7 +203,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     dots 元素：dash 族 (x, r)，tick 族 (x, h, top)。
     非线型 3/4 或越界返回 None（未裁定线型不做臆断）。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 38):
+    if style is None or style.no not in (3, 4, 5, 7, 38, 51):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -294,32 +294,43 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     # unit∈{0,5} 元素 = 线起终点对；**基本单元等间距**——周期 = 相邻
     # 线起点差的最小正值（38|1 实证：线起点 0/0.5 → 周期 0.5，此前误
     # 把记录末 x=0.875 当周期的教训）；单线记录（38|0）周期 = 线终点。
-    if aux not in (0, 1):
-        return None
-    lines, teeth = [], []
-    fi = 0
-    for e in sl.elements:
-        if e.unit == 1 and fi + 2 * e.marker <= len(f):
-            pts = list(zip(f[fi:fi + 2 * e.marker:2],
-                           f[fi + 1:fi + 2 * e.marker:2]))
-            teeth.append(pts)
-            fi += 2 * e.marker
-        elif e.unit in (0, 5) and fi + 4 <= len(f):
-            lines.append((f[fi], f[fi + 2]))
-            fi += 4
+    if style.no == 38:
+        if aux not in (0, 1):
+            return None
+        lines, teeth = [], []
+        fi = 0
+        for e in sl.elements:
+            if e.unit == 1 and fi + 2 * e.marker <= len(f):
+                pts = list(zip(f[fi:fi + 2 * e.marker:2],
+                               f[fi + 1:fi + 2 * e.marker:2]))
+                teeth.append(pts)
+                fi += 2 * e.marker
+            elif e.unit in (0, 5) and fi + 4 <= len(f):
+                lines.append((f[fi], f[fi + 2]))
+                fi += 4
+            else:
+                break
+        if not lines:
+            return None
+        starts = sorted({x0 for x0, _ in lines})
+        if len(starts) >= 2:
+            period = min(b - a for a, b in zip(starts, starts[1:]) if b > a)
         else:
-            break
-    if not lines:
-        return None
-    starts = sorted({x0 for x0, _ in lines})
-    if len(starts) >= 2:
-        period = min(b - a for a, b in zip(starts, starts[1:]) if b > a)
-    else:
-        period = max(x1 for _, x1 in lines)
-    return {"kind": "tooth_dash",
-            "lines": lines,
-            "teeth": teeth,
-            "period_mm": period}
+            period = max(x1 for _, x1 in lines)
+        return {"kind": "tooth_dash",
+                "lines": lines,
+                "teeth": teeth,
+                "period_mm": period}
+    # 线型 51（2026-10-19 用户目视定案）：51|0 = 线 0→1.0 + 抬升圆点
+    # @(f[4], f[5]) r=f[6]——点 y 是真实坐标（0.084 在基线上方），
+    # 不是噪声（首版误画 y=0 被用户纠正）
+    if style.no == 51:
+        if aux != 0 or len(f) < 10:
+            return None
+        return {"kind": "dash_dot_raised",
+                "lines": [(f[0], f[2])],
+                "dots": [(f[4], f[5], f[6])],
+                "period_mm": f[2]}
 
 
 def dotline_params(style: Optional[LineStyle], feature_width: float,
