@@ -145,6 +145,57 @@ def compose_feature_style(lib: "LinestyLib", linetype: int, aux: int = 0):
     return main, aux_style
 
 
+def _consume_groups(sl: "SubLine") -> List[Tuple[int, list]]:
+    """通用元素消费器：按元素 (unit, marker) 逐组消费 f32 载荷。
+
+    默认消费律 = marker×2 个 f32（每点 2 值）。**变体线型**（58 的
+    三元组档、127/153 的三点括号）消费律与默认不同——调用方按
+    实测覆盖，逐元素对账是纪律（127|0 漏画尾段教训）。
+    返回 [(unit, 值列表), ...]；越界诚实截断。
+    """
+    f = sl.f32_zone
+    groups: List[Tuple[int, list]] = []
+    fi = 0
+    for e in sl.elements:
+        n = 2 * e.marker
+        if fi + n > len(f):
+            break
+        groups.append((e.unit, f[fi:fi + n]))
+        fi += n
+    return groups
+
+
+def _pairs_to_lines_verticals(
+    pairs: List[Tuple[float, float]],
+) -> Tuple[list, list]:
+    """连续坐标对 → (lines, verticals)：端点 y 相等判水平线
+    (x0,x1,y)，否则判竖线 (x, ymin, ymax)。共享于 48/58/153。"""
+    lines, verticals = [], []
+    for k in range(len(pairs) // 2):
+        x0, y0 = pairs[2 * k]
+        x1, y1 = pairs[2 * k + 1]
+        if abs(y0 - y1) < 1e-9:
+            lines.append((x0, x1, y0))
+        else:
+            verticals.append((x0, min(y0, y1), max(y0, y1)))
+    return lines, verticals
+
+
+def _period_from_lines(lines: List[Tuple[float, ...]]) -> float:
+    """周期规则（38|1/48|1 教训定案）：基本单元等间距族 = 相邻线
+    起点差的最小正值；单线族 = 最大线终点。记录末 x ≠ 周期。
+    兼容 (x0,x1) 与 (x0,x1,y) 两种线元组；**多 y 层级时取最大线
+    终点**（48 抬升线教训：不同层的线起点不得参与等间距计算）。"""
+    if len(lines) > 0 and len(lines[0]) > 2:
+        levels = {round(t[2], 6) for t in lines}
+        if len(levels) > 1:
+            return max(t[1] for t in lines)
+    starts = sorted({t[0] for t in lines})
+    if len(starts) >= 2:
+        return min(b - a for a, b in zip(starts, starts[1:]) if b > a)
+    return max(t[1] for t in lines)
+
+
 def _tick_line_rhythm(
     f: list, period: float, n_ticks: int, repeats: int
 ) -> Tuple[list, list]:
@@ -308,29 +359,17 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
         if aux not in (0, 1):
             return None
         lines, teeth = [], []
-        fi = 0
-        for e in sl.elements:
-            if e.unit == 1 and fi + 2 * e.marker <= len(f):
-                pts = list(zip(f[fi:fi + 2 * e.marker:2],
-                               f[fi + 1:fi + 2 * e.marker:2]))
-                teeth.append(pts)
-                fi += 2 * e.marker
-            elif e.unit in (0, 5) and fi + 4 <= len(f):
-                lines.append((f[fi], f[fi + 2]))
-                fi += 4
-            else:
-                break
+        for unit, vals in _consume_groups(sl):
+            if unit == 1 and len(vals) >= 6:
+                teeth.append(list(zip(vals[0::2], vals[1::2])))
+            elif unit in (0, 5) and len(vals) >= 4:
+                lines.append((vals[0], vals[2]))
         if not lines:
             return None
-        starts = sorted({x0 for x0, _ in lines})
-        if len(starts) >= 2:
-            period = min(b - a for a, b in zip(starts, starts[1:]) if b > a)
-        else:
-            period = max(x1 for _, x1 in lines)
         return {"kind": "tooth_dash",
                 "lines": lines,
                 "teeth": teeth,
-                "period_mm": period}
+                "period_mm": _period_from_lines(lines)}
     # 线型 16（16|0/16|1 走 dotline_params/PAIR_SEMANTICS；16|2 于
     # 2026-10-19 用户目视定案）：16|2 = 两段基线 + 两个抬升圆点
     # （(x,y,r) 三元组各 ×2 冗余：@(0.2541,0.1504)/@(0.7541,0.1504)
@@ -362,28 +401,21 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
         if aux != 0:
             return None
         lines, verticals, dots = [], [], []
-        fi = 0
-        for e in sl.elements:
-            if e.unit == 0 and fi + 4 <= len(f):
-                x0, y0 = f[fi], f[fi + 1]
-                x1, y1 = f[fi + 2], f[fi + 3]
-                if abs(y0 - y1) < 1e-9:
-                    lines.append((x0, x1, y0))
-                else:
-                    verticals.append((x0, min(y0, y1), max(y0, y1)))
-                fi += 4
-            elif e.unit == 3 and fi + 6 <= len(f):
-                dots.append((f[fi], f[fi + 1], f[fi + 2]))
-                fi += 6
-            else:
-                break
+        for unit, vals in _consume_groups(sl):
+            if unit == 0 and len(vals) >= 4:
+                hl, vt = _pairs_to_lines_verticals(
+                    [(vals[0], vals[1]), (vals[2], vals[3])])
+                lines.extend(hl)
+                verticals.extend(vt)
+            elif unit == 3 and len(vals) >= 6:
+                dots.append((vals[0], vals[1], vals[2]))
         if not lines:
             return None
         return {"kind": "mixed_dash",
                 "lines": lines,
                 "verticals": verticals,
                 "dots": dots,
-                "period_mm": max(x1 for _, x1, _ in lines)}
+                "period_mm": _period_from_lines(lines)}
     # 线型 153（2026-10-19 用户目视定案）：153|0 = 两条均匀平行线
     # （y=0 与 y=0.0994，各 0→1.0；重复坐标为冗余不叠画——用户裁定
     # "中段不重笔加粗"）+ 两个下垂方括号（竖下-横-竖上，底 y=-0.067）
@@ -414,12 +446,12 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     if style.no == 48:
         if aux not in (0, 1) or len(f) < 12:
             return None
-        lines = [(f[4 * k], f[4 * k + 2], f[4 * k + 1])
-                 for k in range(len(f) // 4)]
+        lines, _ = _pairs_to_lines_verticals(
+            list(zip(f[0::2], f[1::2])))
         return {"kind": "raised_lines",
                 "lines": lines,
                 "dots": [],
-                "period_mm": max(x1 for _, x1, _ in lines)}
+                "period_mm": _period_from_lines(lines)}
     # 线型 50（2026-10-19 用户目视定案）：50|0 = 线 0→1.0 + 两个抬升
     # 圆点（(x, y, r) 三元组 ×2：@(0.5,0.0684)/@(0.6992,0.0684) r=0.0312）
     if style.no == 50:
