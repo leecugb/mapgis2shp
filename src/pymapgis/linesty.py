@@ -203,7 +203,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     dots 元素：dash 族 (x, r)，tick 族 (x, h, top)。
     非线型 3/4 或越界返回 None（未裁定线型不做臆断）。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 16, 38, 48, 50, 51):
+    if style is None or style.no not in (3, 4, 5, 7, 16, 18, 38, 48, 50, 51):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -334,6 +334,16 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": lines,
                 "dots": dots,
                 "period_mm": 1.0}
+    # 线型 18（2026-10-19 用户目视定案）：18|0 = 基线 0→1.0 + 周期
+    # 起点竖线（(0, 0.125)→(0, 0) 为一竖线——(x,y) 对是线端点不是
+    # 点；竖线从基线向上：dots 编码 (x, 0, top)）
+    if style.no == 18:
+        if aux != 0 or len(f) < 8:
+            return None
+        return {"kind": "tick_dash_interleave",
+                "lines": [(f[4], f[6])],
+                "dots": [(f[0], 0.0, f[1])],
+                "period_mm": f[6]}
     # 线型 48（2026-10-19 用户目视定案）：48|0/48|1 全裁定。连续
     # (x,y) 对 = 线起终点（每对 k：线 = (f[4k], f[4k+2])，y = f[4k+1]）
     # ——(x,y) 点对是线端点不是圆点；lines 为 (x0, x1, y) 三元组
