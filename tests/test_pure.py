@@ -819,6 +819,31 @@ class TestFillgrph:
         assert geo["fill_polygons"] == []
         assert geo["polylines"][1][0] == pytest.approx((0.5925, 0.1725), abs=1e-3)
 
+    def test_pattern_247_polylines(self, tmp_path) -> None:
+        from pymapgis.fillgrph import pattern_geometry
+        # 247：四组折线（不填充）——合成记录（grid=6, unit=28），
+        # 14 点无冗余（实库 D:\SLIB\Fillgrph.lib 解码一致）
+        pts247 = [(0.1322, 0.8067), (0.3805, 0.8067), (0.2563, 0.8067),
+                  (0.2563, 0.6713),
+                  (0.6289, 0.3056), (0.8772, 0.3056), (0.7531, 0.3056),
+                  (0.7531, 0.1702),
+                  (0.8477, 0.8387), (0.6490, 0.8387), (0.6490, 0.6400),
+                  (0.3553, 0.3289), (0.1566, 0.3289), (0.1566, 0.1302)]
+        rec = struct.pack("<HH", 6, 28) + b"\x00" * 96 + b"".join(
+            struct.pack("<2f", x, y) for x, y in pts247)
+        lib = self._lib_with(tmp_path, rec, no=247)
+        geo = pattern_geometry(lib, 247)
+        assert geo is not None
+        assert geo["fill_polygons"] == []
+        assert len(geo["polylines"]) == 4
+        # 组 0：T 形（0-1-2-3），组 1：T 形（4-5-6-7）
+        assert geo["polylines"][0][0] == pytest.approx((0.1322, 0.8067), abs=1e-3)
+        assert geo["polylines"][0][3] == pytest.approx((0.2563, 0.6713), abs=1e-3)
+        assert geo["polylines"][1][0] == pytest.approx((0.6289, 0.3056), abs=1e-3)
+        # 组 2：8-9-10，组 3：11-12-13
+        assert geo["polylines"][2][2] == pytest.approx((0.6490, 0.6400), abs=1e-3)
+        assert geo["polylines"][3][2] == pytest.approx((0.1566, 0.1302), abs=1e-3)
+
 
 class TestSlibDigitTemplate:
     """数字 1 模板槽判定（2026-10-19 用户图面裁定定案）。
