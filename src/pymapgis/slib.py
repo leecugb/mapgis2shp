@@ -65,6 +65,11 @@ class SubPath:
     arc: Optional[Tuple[float, float, float, float, float]] = None
     # (cx, cy, r, a0, a1) 参数弧段——角度为度、自 +x 轴逆时针；
     # 2026-10-18 子图 23 用户裁定定案（见 _three_point_arc）
+    template_digit: Optional[int] = None
+    # 编号模板槽的占位数字（1..9，None=非槽）——2026-10-19 用户裁定：
+    # 符号编辑器存模板数字"1"，实例化时替换为实际编号；存储点是
+    # 15 点描线轮廓，忠实渲染可照画，但不得被几何分类当弧段/圆。
+    # 345 个尾段符号含此占位（见 _digit_one_template）。
 
 
 @dataclass
@@ -431,8 +436,15 @@ class SubgraphLib:
                 sp.closed = True
             else:
                 sp.arc = r[1]
+        # 数字 1 模板槽（2026-10-19 用户图面裁定）：15 点闭合轮廓，
+        # 斜帽+竖干+底座，宽≈0.04 高≈0.10mm——占位符固定为 "1"，
+        # 实例化时替换；存储点是描线不是几何，须排除出弧/圆分类。
         for sp in sym.subpaths:
-            if len(sp.points) < 8:
+            if sp.circle is None and sp.arc is None and \
+                    _digit_one_template(sp.points):
+                sp.template_digit = 1
+        for sp in sym.subpaths:
+            if len(sp.points) < 8 or sp.template_digit is not None:
                 continue
             c = fit_circle(sp.points)
             if c is not None and 0.005 < c[2] <= 1.0:
@@ -480,6 +492,46 @@ def _arc_coverage(
     a0 = angs[(k + 1) % n]          # 最大间隙之后 = 覆盖起点
     a1 = angs[k]                    # 最大间隙之前 = 覆盖终点
     return coverage, a0 % 360.0, a1 % 360.0
+
+
+def _digit_one_template(pts: List[Tuple[float, float]]) -> bool:
+    """数字 1 模板槽判定（2026-10-19 用户图面裁定定案）。
+
+    模板描线结构（#2591/#2600 sp0 实测 + 345 符号普查）：15 点闭合
+    轮廓 = 斜帽（左上折角）+ 竖干 + 底座双线。实例化时该槽位数字
+    被替换为实际编号（1..9）。判定门（防误吞普通 15 点闭合折线）：
+
+      ① 恰 15 点且首尾闭合（|p0−p14| ≤ 0.005mm）
+      ② 整体窄高：宽∈[0.02, 0.06]mm、高∈[0.07, 0.15]mm
+      ③ 竖干居中：主干段 |x| 方差 < 0.0005mm²（竖直）
+      ④ 底座双线：底部两点 y 差 < 0.005 且跨宽 ≥ 0.01mm
+      ⑤ 斜帽在顶：最高点与次高点 x 差 ≥ 0.01mm（斜帽非对称）
+
+    全过返回 True。经 #2591/#2600 锚定；345 族符号以形态普查定位。
+    """
+    if len(pts) != 15:
+        return False
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    if math.hypot(pts[0][0] - pts[-1][0], pts[0][1] - pts[-1][1]) > 0.005:
+        return False
+    w, h = max(xs) - min(xs), max(ys) - min(ys)
+    if not (0.02 < w < 0.06 and 0.07 < h < 0.15):
+        return False
+    mid = xs[3:11]  # 竖干段 x（去帽/底座）
+    mu = sum(mid) / len(mid)
+    if sum((x - mu) ** 2 for x in mid) / len(mid) > 5e-4:
+        return False
+    y_order = sorted(range(15), key=lambda i: ys[i])
+    if abs(ys[y_order[0]] - ys[y_order[1]]) > 0.005 or \
+            abs(xs[y_order[0]] - xs[y_order[1]]) < 0.01:
+        return False
+    # 斜帽：顶部（最高三点）横跨度 ≥0.01mm——#2591 最高两点同 y（帽顶
+    # 水平段），但帽檐整体向一侧伸出；此门仍拒纯矩形竖条。
+    top3 = xs[y_order[-3]:]
+    if max(top3) - min(top3) < 0.01:
+        return False
+    return True
 
 
 def _three_point_arc(
