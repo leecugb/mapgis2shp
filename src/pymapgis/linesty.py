@@ -54,7 +54,9 @@ f32 载荷区三型：
     reader.py 图形参数列）
   - 点在线侧的侧别规则未定
   - 大载荷子线（n≥15，含点列三联组）语义未定
-  - 记录内子线渲染选择规则（线型 2 的 4 条 24B 子线段角色）未破
+  - 记录内子线渲染选择规则——线型 3 已定案（2026-10-19：aux 选择
+    主记录子线索引，见 feature_rhythm）；线型 2 的 4 条 24B 子线段
+    角色仍挂账
 
 官方语义锚（MapGIS 文档审计 2026-10-14，smaryun 官方帮助+map2shp）：
   - **线型号标准格式 = "线型号-辅助线型号"（均为 ≥0 整数）**——
@@ -141,6 +143,65 @@ def compose_feature_style(lib: "LinestyLib", linetype: int, aux: int = 0):
     main = lib.decode(linetype)
     aux_style = lib.decode(aux) if aux else None
     return main, aux_style
+
+
+def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
+    """线型 3 节奏裁定读法（2026-10-19 用户逐行目视定案，3|x 六行全裁定）。
+
+    定案规则（"aux 选择主记录子线索引"——旧挂账"记录内子线渲染选择
+    规则"的首个定案实例）：
+      - (3, aux) 渲染**主记录 sub[aux]**；aux 记录的笔不渲染
+        （3|1 的红色 24B 实线笔已裁定弃画）。
+      - 节奏 f32 = (x, y) 坐标对序列：起点 → 线终点 → 点位置 → 点半径
+        → 结束标记（值 0）；点与线相间，点居中于两端线之间（等距）。
+      - sub0–4 同一结构：线 (0→f32[2])、点@f32[4] 半径 f32[6]、
+        两侧空白对称（f32[4] − f32[6] − f32[2]）、周期 = 线 + 2×空 + 2×r；
+        sub4 记录内第二组 (f32[10], f32[12]) 是下一周期的冗余复写
+        （0.65→1.0 恰为 0→0.35 平移一个单元）。
+      - sub5：点-线-点-线-点-线——三条线由尾部 6 对坐标定义
+        （f32[36:48]，成对为起终点），三点半径 = 档描迹的 |y|
+        （f32[1]/f32[7]/f32[13]），位置 = 相邻线间隙中点；周期 1.0mm
+        （目视裁定"基本正确"值）。
+
+    返回 {"kind", "lines": [(x0,x1)...], "dots": [(x,r)...], "period_mm"}；
+    非线型 3 或越界返回 None（未裁定线型不做臆断）。
+    """
+    if style is None or style.no != 3:
+        return None
+    if not (0 <= aux < len(style.sublines)):
+        return None
+    sl = style.sublines[aux]
+    f = sl.f32_zone
+    if aux <= 4:
+        # 单线+点（sub0–4 同构，参数各异）
+        if len(f) < 8:
+            return None
+        solid, dot_pos, dot_r = f[2], f[4], f[6]
+        gap = dot_pos - dot_r - solid          # 线末端→点边缘（两侧对称）
+        period = solid + 2 * gap + 2 * dot_r
+        return {"kind": "dash_dot",
+                "lines": [(0.0, solid)],
+                "dots": [(dot_pos, dot_r)],
+                "period_mm": period}
+    # aux == 5：点-线-点-线-点-线
+    if len(f) < 48:
+        return None
+    # 尾段 6 对坐标 = 三线（连续两对 = 起终点）：(f[36],f[38])、
+    # (f[40],f[42])、(f[44],f[46])，按起点升序
+    lines = sorted([(f[36], f[38]), (f[40], f[42]), (f[44], f[46])])
+    # 档1/2/3 的首现 |y| = 点半径：档1@f[1]、档2@f[13]（pair6）、
+    # 档3@f[25]（pair12）——每档描迹 3 对，全量含两遍复写
+    radii = [abs(f[1]), abs(f[13]), abs(f[25])]
+    period = 1.0                                # 目视裁定值（"基本正确"）
+    dots = []
+    for k in range(3):
+        x0 = lines[k][1]
+        x1 = lines[(k + 1) % 3][0] + (period if k == 2 else 0.0)
+        dots.append(((x0 + x1) / 2.0, radii[(k + 1) % 3]))
+    return {"kind": "dot_dash_interleave",
+            "lines": lines,
+            "dots": dots,
+            "period_mm": period}
 
 
 def dotline_params(style: Optional[LineStyle], feature_width: float,
