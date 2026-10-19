@@ -794,6 +794,89 @@ class TestSlibDigitTemplate:
         assert s.subpaths[0].template_digit == 1
 
 
+class TestFeatureRhythm:
+    """线型 3 节奏裁定读法（2026-10-19 用户逐行目视定案，3|x 六行）。
+
+    定案规则：aux 选择主记录子线索引（aux 记录笔弃画）；
+    节奏 f32 = (x, y) 坐标对序列（起点/线终点/点位置/点半径/结束）；
+    点与线相间、点居中于两端线之间（等距）。
+    """
+
+    @staticmethod
+    def _style(f32, n=2, elems=((0, 2, 0), (3, 3, 4)), aux=0):
+        from pymapgis.linesty import Element, LineStyle, SubLine
+        sl = SubLine(n=n, length=2 + 6 * n + 4 * len(f32),
+                     elements=[Element(unit=u, marker=m, offset=o)
+                               for u, m, o in elems],
+                     f32_zone=list(f32), f32_start=2 + 6 * n)
+        # 真实线型 3 记录有 6 条子线；feature_rhythm 按 aux 取 sub[aux]
+        dummy = SubLine(n=1, length=24, elements=[Element(unit=0, marker=2, offset=0)],
+                        f32_zone=[0.0, 0.0, 0.0, 0.0], f32_start=8)
+        sublines = [dummy] * 6
+        sublines[aux] = sl
+        return LineStyle(no=3, n_subs=6, sublines=sublines)
+
+    def test_sub0_dash_dot(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        st = self._style([0, 0, 0.625, 0, 0.8203125, 0, 0.03125, 0, 0, 0])
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "dash_dot"
+        assert r["lines"] == [(0.0, 0.625)]
+        assert r["dots"] == [(0.8203125, 0.03125)]
+        assert r["period_mm"] == pytest.approx(1.015625)
+
+    def test_sub4_same_decode(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 记录内第二组 (0.65, 1.0) 为下一周期冗余复写
+        st = self._style([0, 0, 0.35, 0, 0.5, 0, 0.008, 0, 0, 0,
+                          0.65, 0, 1.0, 0],
+                         n=3, elems=((0, 2, 0), (3, 3, 4), (0, 2, 10)), aux=4)
+        r = feature_rhythm(st, 4)
+        assert r["kind"] == "dash_dot"
+        assert r["lines"] == [(0.0, 0.35)]
+        assert r["period_mm"] == pytest.approx(0.65)
+
+    def test_sub5_interleave(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        f32 = [
+            0.005538, -0.004624, 0.0001, 0.005538, -0.004624, 0.0001,
+            0.005538, -0.004624, 0.0001, 0.005538, -0.004624, 0.0001,
+            0.35046, -0.007267, 0.0001, 0.35046, -0.007267, 0.0001,
+            0.35046, -0.007267, 0.0001, 0.35046, -0.007267, 0.0001,
+            0.694061, -0.007267, 0.0001, 0.694061, -0.007267, 0.0001,
+            0.694061, -0.007267, 0.0001, 0.694061, -0.007267, 0.0001,
+            0.069764, -0.005692, 0.279915, -0.004164, 0.763889, -0.006272,
+            0.964053, -0.006128, 0.413688, -0.005692, 0.627549, -0.006128,
+        ]
+        st = self._style(f32, n=15, elems=[(2, 2, 0)] * 15, aux=5)
+        r = feature_rhythm(st, 5)
+        assert r["kind"] == "dot_dash_interleave"
+        assert len(r["lines"]) == 3 and len(r["dots"]) == 3
+        assert r["period_mm"] == 1.0
+        # 三线起止（升序）——逐线锚定，防配对错位
+        assert r["lines"] == pytest.approx(
+            [(0.069764, 0.279915), (0.413688, 0.627549), (0.763889, 0.964053)])
+        # 点居中于两端线之间
+        for k in range(3):
+            x, _ = r["dots"][k]
+            x0 = r["lines"][k][1]
+            x1 = r["lines"][(k + 1) % 3][0] + (1.0 if k == 2 else 0.0)
+            assert x == pytest.approx((x0 + x1) / 2)
+        # 半径顺序 档2/档3/档1
+        assert r["dots"][0][1] == pytest.approx(0.007267, abs=1e-6)
+        assert r["dots"][1][1] == pytest.approx(0.007267, abs=1e-6)
+        assert r["dots"][2][1] == pytest.approx(0.004624, abs=1e-6)
+
+    def test_unadjudicated_none(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        st = self._style([0, 0, 0.5, 0, 0.7, 0, 0.05, 0, 0, 0])
+        st.no = 5
+        assert feature_rhythm(st, 0) is None
+        st.no = 3
+        assert feature_rhythm(st, 9) is None
+        assert feature_rhythm(None, 0) is None
+
+
 # ---------------------------------------------------------------------------
 # Writer helpers
 # ---------------------------------------------------------------------------
