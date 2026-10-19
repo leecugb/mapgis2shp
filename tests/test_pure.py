@@ -949,8 +949,16 @@ class TestFeatureRhythm:
         st = self._style(f7b, n=2, elems=[(5, 2, 0), (1280, 2, 4)], aux=1, no=7)
         r = feature_rhythm(st, 1)
         assert r["dots"][0] == pytest.approx((0.5, 0.1992, 0.1992), abs=1e-6)
-        # 7|2 未裁定 → None
-        assert feature_rhythm(st, 2) is None
+        # 7|2：sub2 —— 两组对称竖线对 @0.1055/0.1992
+        f7c = [0, 0, 1.0, 0, 0.1055, 0.0508, 0.1055, -0.0508,
+               0.1992, 0.0508, 0.1992, -0.0508]
+        st = self._style(f7c, n=3, elems=[(5, 2, 0), (0, 2, 4), (0, 2, 8)],
+                         aux=2, no=7)
+        r = feature_rhythm(st, 2)
+        assert r["dots"][0] == pytest.approx((0.1055, 0.0508, 0.0508), abs=1e-6)
+        assert r["dots"][1] == pytest.approx((0.1992, 0.0508, 0.0508), abs=1e-6)
+        # 7|3 未裁定 → None
+        assert feature_rhythm(st, 3) is None
 
 
 # ---------------------------------------------------------------------------
