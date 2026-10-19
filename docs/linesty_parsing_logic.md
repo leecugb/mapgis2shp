@@ -3,7 +3,8 @@
 > 依据：用户逐行目视裁定（2026-10-13/14 基线 + 2026-10-19 扩展）。
 > 实现：`pymapgis.linesty`（feature_rhythm / dotline_params / linedot_params
 > / compose_feature_style）+ `pymapgis.linesty_adjudicated`（裁定表，
-> 仓内专用不进发布件）。测试 171 绿。
+> 仓内专用不进发布件）。测试全绿（tests/test_pure.py，含
+> TestLinestyTruncatedFlag 截断标志锚）。
 
 ## 一、总架构
 

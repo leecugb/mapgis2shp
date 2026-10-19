@@ -3,12 +3,13 @@
 """MapGIS 6.x 填充图案库（Fillgrph.lib）解析器。
 
 记录结构（2026-10-19 定案——220/243/247/252/253 五锚目视裁定 +
-全库 1075/1337 结构校验通过；旧版"描述区不透明"挂账解除）：
+全库 1280/1337 结构校验通过（95.7%）；旧版"描述区不透明"挂账解除）：
 
   文件   = [u32 count][N×6B 索引（u32 记录偏移 + u16 flag）][记录区]
   记录   = [u16 grid][u16 unit][M×（10B 笔块 + 2B 对数）][坐标区]
   坐标区 = 各笔划 (x, y) 点对按笔划顺序拼接；重复点为冗余
-           （笔划内连续重复=回描/落笔冗余，去重保留首现序）
+           （笔划内 f32 位型相等的连续点=回描/落笔冗余，去重保留首现序；
+           非相等点一律保留——0.003 容差曾摧毁密集曲线，F1 审计废止）
 
 笔块 = (kind, 0, 0, width, 1)：
   kind=0  填充多边形（闭合、填充；width=0）
@@ -20,15 +21,17 @@
 
 渲染逻辑 = 逐笔划消费：0→闭合填充区；1/2→描边折线；3→弧；
 4/5/6→圆。笔划分组由文件自身给出，**不需要逐图案人工裁定**。
+亚可视微段（合并后总长 <0.01mm）剔除并以 "dropped" 计数。
 
 挂账：
   - kind 4/5/6 的角色差异（4 疑与 6 成对出现=重复描画加深，5=独立点圆）
-  - 261/1337 非常规记录（grid=1 旧式、图案 5 类纯块记录等）诚实返回 None
+  - 57/1337 非常规记录（grid=1 旧式等）诚实返回 None
   - 220 线笔划端点 (0.3916,0.6082)≈点1 与目视裁定 3-15-14 的 0.05
     网格差——以文件存储为准（目视裁定为近似连接）
 """
 from __future__ import annotations
 
+import math
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -124,11 +127,12 @@ class FillgrphLib:
                 strokes.append(FillStroke(kind=kind, width=width, points=pts))
                 raw.extend(pts)
                 acc += counts[i]
+            # points = 全记录坐标精确去重（首现序；2026-10-19 F1 审计：
+            # 旧 0.003 容差会摧毁密集曲线——367 图案实证，改逐位精确）
             pts: List[Tuple[float, float]] = []
-            for x, y in raw:
-                if not any(abs(x - ux) < 0.003 and abs(y - uy) < 0.003
-                           for ux, uy in pts):
-                    pts.append((x, y))
+            for p in raw:
+                if p not in pts:
+                    pts.append(p)
             return FillPattern(no=no, grid=grid, unit=unit,
                                strokes=strokes, points=pts, raw_points=raw)
         return None
@@ -136,31 +140,41 @@ class FillgrphLib:
 
 def _merge_close(
         pts: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
-    """合并笔划内与上一保留点间距 <0.003 的连续点（回描/落笔冗余）。
+    """合并笔划内**逐位精确重复**的连续点（存储冗余）。
 
-    实证：220 线笔划落笔点对 (0.3943,0.6059)-(0.3943,0.6058) 与环内
-    0.0008 级冗余点均非精确相等，须容差判定（0.003 与旧全记录去重
-    同源，产出环序与目视裁定 0-1-2-3-4-5-6 完全一致）。
+    2026-10-19 审计定案（F1）：旧版 0.003 距离容差摧毁密集曲线——
+    全库 33397 对真实连续点（367 图案）间距 <0.003，与落笔冗余对
+    （1.6e-5–0.0014）分布重叠、无阈值可分（140 填充环被并没、
+    71 号 56% 点损实证）。故只合并 f32 位型相等的连续点；
+    亚可视微段（总长 <0.01mm，如 220 落笔对 1e-4 间距）由
+    pattern_geometry 按可视性剔除并计数（"dropped"），不在此吞并。
     """
     out: List[Tuple[float, float]] = []
     for x, y in pts:
-        if (not out or abs(x - out[-1][0]) >= 0.003
-                or abs(y - out[-1][1]) >= 0.003):
+        if not out or (x != out[-1][0] or y != out[-1][1]):
             out.append((x, y))
     return out
 
 
 def _close(a: Tuple[float, float], b: Tuple[float, float]) -> bool:
-    """两点是否在 0.003 内（首尾闭合判定）。"""
+    """两点是否在 0.003 内（仅用于填充环首尾闭合判定，非冗余合并）。"""
     return abs(a[0] - b[0]) < 0.003 and abs(a[1] - b[1]) < 0.003
+
+
+def _stroke_len(pts: List[Tuple[float, float]]) -> float:
+    """笔划折线总长（mm）——可视性过滤用（亚可视微段 <0.01mm 剔除）。"""
+    return sum(math.hypot(b[0] - a[0], b[1] - a[1])
+               for a, b in zip(pts, pts[1:]))
 
 
 def pattern_geometry(lib: FillgrphLib, no: int) -> Optional[dict]:
     """图案几何（结构解码，无需人工裁定）。
 
     返回 {"fill_polygons": [[(x,y),...]], "polylines": [[(x,y),...]],
-    "circles": [(cx,cy,r),...], "arcs": [(cx,cy,r,a0,a1),...]}——
-    解析失败或结构不合时返回 None（诚实停止，绝不臆断）。
+    "circles": [(cx,cy,r),...], "arcs": [(cx,cy,r,a0,a1),...],
+    "dropped": int}——dropped = 未进几何输出的笔划数（亚可视微段/
+    退化笔划，如 220 的落笔单点对）；解析失败或结构不合时返回
+    None（诚实停止，绝不臆断）。
     笔宽档见 pat.strokes[].width（发丝线=65535）。
     """
     pat = lib.decode(no)
@@ -170,16 +184,21 @@ def pattern_geometry(lib: FillgrphLib, no: int) -> Optional[dict]:
     polylines: List[List[Tuple[float, float]]] = []
     circles: List[Tuple[float, float, float]] = []
     arcs: List[Tuple[float, float, float, float, float]] = []
+    dropped = 0
     for s in pat.strokes:
         pts = _merge_close(s.points)
         if s.kind == KIND_FILL:
             if len(pts) > 2 and _close(pts[0], pts[-1]):
                 pts = pts[:-1]
-            if len(pts) > 2:
+            if len(pts) > 2 and _stroke_len(pts) >= 0.01:
                 fill_polygons.append(pts)
+            else:
+                dropped += 1
         elif s.kind in (KIND_LINE_HAIR, KIND_LINE):
-            if len(pts) > 1:
+            if len(pts) > 1 and _stroke_len(pts) >= 0.01:
                 polylines.append(pts)
+            else:
+                dropped += 1
         elif s.kind in (KIND_ARC_DEG,) + KIND_CIRCLE_FAMILY and len(pts) == 3:
             cx, cy = pts[0]
             r, a0 = pts[1]
@@ -188,10 +207,13 @@ def pattern_geometry(lib: FillgrphLib, no: int) -> Optional[dict]:
                 circles.append((cx, cy, r))
             else:
                 arcs.append((cx, cy, r, a0, a1))
-        # 其余组合（非常规 kind/载荷）→ 跳过该笔划，其余照常输出
+        else:
+            # 非常规 kind/载荷 → 剔除并计数（不静默）
+            dropped += 1
     return {
         "fill_polygons": fill_polygons,
         "polylines": polylines,
         "circles": circles,
         "arcs": arcs,
+        "dropped": dropped,
     }
