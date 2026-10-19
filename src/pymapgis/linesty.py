@@ -202,7 +202,16 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     返回 {"kind", "lines": [(x0,x1)...], "dots": [...], "period_mm"}；
     dots 元素：dash 族 (x, r)，tick 族 (x, h, top)。
     非线型 3/4 或越界返回 None（未裁定线型不做臆断）。
-    """
+
+    新线型落码三查纪律（2026-10-19 教训制度化，58|0 一次通过实证）：
+      ① elements 结构先行——按 unit/marker 定消费与角色（unit=0/5
+        线对、unit=3 点三元组、unit=1 坐标列多边形）；
+      ② (x,y) 对的 y 是真实坐标、对与对之间可能是线起终点——不得
+        先入为主套已裁定线型的模板（51/48/18 教训）；
+      ③ 周期 = 基本单元间距（相邻线起点差；单线族 = 最大线终点），
+        记录末 x 不是周期（38|1/48|1 教训）。
+      渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
+      （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     if style is None or style.no not in (3, 4, 5, 7, 16, 18, 38, 48, 50, 51, 58):
         return None
     if not (0 <= aux < len(style.sublines)):
