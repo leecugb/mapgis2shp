@@ -451,14 +451,16 @@ class SubgraphLib:
                 continue
             c = fit_circle(sp.points)
             if c is not None and 0.005 < c[2] <= 1.0:
-                # 残差门（2026-10-18）：库内真圆/弧为精确圆（锚 rms=0），
-                # 非圆曲线（#7331 波浪环 rms≈0.09）不得判圆/弧——
-                # 拟合对 partial arc 本身有 0.07–0.13mm 弦偏差，
-                # 故弧段参数仅供语义导出，忠实渲染须描存储点。
+                # 残差门（2026-10-18 初立，2026-10-19 用户图面裁定
+                # 收紧至 0.002）：库内真圆/弧为精确圆（锚 rms=0.00000）；
+                # #4562/#4565 sp0/sp1（rms=0.0043–0.0047）经 MapGIS 核验
+                # 为**高采样弧形描线**而非圆弧分类——Kåsa 端点收敛残差，
+                # 不得判弧（忠实描线才是正解）；#23 拟合偏差在 0.07 以上、
+                # #7331 波浪环 rms≈0.09，均不受影响。
                 rms = math.sqrt(sum(
                     (math.hypot(x - c[0], y - c[1]) - c[2]) ** 2
                     for x, y in sp.points) / len(sp.points))
-                if rms > 0.01:
+                if rms > 0.002:
                     continue
                 cov, a0, a1 = _arc_coverage(sp.points, c)
                 d = math.hypot(sp.points[0][0] - sp.points[-1][0],
