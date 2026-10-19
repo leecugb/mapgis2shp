@@ -674,6 +674,7 @@ class LineStyle:
     no: int
     n_subs: int
     sublines: List[SubLine] = field(default_factory=list)
+    truncated: bool = False   # 子线指针表存在非法项而被截断（F2 审计）
 
     @property
     def adjudicated(self) -> Optional[str]:
@@ -743,10 +744,13 @@ class LinestyLib:
             return None
         _, end = self.record_bounds(no)
         style = LineStyle(no=no, n_subs=n_subs)
-        # 子线指针表 = n_subs × 6B（索引 flag=子线数，8/8 验证）
+        # 子线指针表 = n_subs × 6B（索引 flag=子线数，8/8 验证）；
+        # 非法指针置 truncated（2026-10-19 F2 审计：旧版静默 break，
+        # 调用方无法区分"真空"与"损坏"——真库 859 条无触发，防御加固）
         for s in range(n_subs):
             ptr, ln = struct.unpack_from("<IH", self.data, off + s * 6)
             if ptr <= 0 or ln <= 0 or ptr + ln > end:
+                style.truncated = True
                 break
             style.sublines.append(self._decode_subline(ptr, ln))
         return style
