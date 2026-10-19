@@ -150,11 +150,12 @@ def _tick_line_rhythm(
 ) -> Tuple[list, list]:
     """竖短线-水平线相间节奏解码（3|5 与 4|3 用户裁定同构，2026-10-19）。
 
-    档区 = n_ticks 档 × repeats 遍三元组 (x, y0, y1)：x=水平位置、
-    y0=纵向起点（−h）、y1=顶端（略高于基线）；尾段 6 对 = 三水平线
-    （连续两对 = 起终点，y 为噪声忽略）。渲染规则（用户裁定）：
-    **tick 组与两侧线等间距**——档组按 x 升序循环归属间隙（最小 x
-    组 → 末间隙，跨周期），组中心平移至间隙中心、组内间距保持。
+    档区 = n_ticks 档 × repeats 遍三元组 (x, y0, y1)：x=档值（非渲染
+    位置）、y0=纵向起点（−h）、y1=顶端（略高于基线）；尾段 6 对 =
+    三水平线（连续两对 = 起终点，y 为噪声忽略）。渲染规则（用户裁定，
+    2026-10-19）：**档文件序 = 间隙序**（档1=第1条竖线→第1间隙；
+    4|3 实证，3|5 纠正——档 x 值不作位置用）；**tick 组与两侧线
+    等间距**——组中心平移至间隙中心、组内间距保持；第 3 间隙跨周期。
     返回 (lines, dots)；dots 元素 (x, h, top)。
     """
     ticks = []
@@ -165,16 +166,15 @@ def _tick_line_rhythm(
     lines = sorted([(f[o], f[o + 2]), (f[o + 4], f[o + 6]),
                     (f[o + 8], f[o + 10])])
     per_gap = n_ticks // 3
-    groups = [sorted(ticks)[k * per_gap:(k + 1) * per_gap]
-              for k in range(3)]
     dots = []
     for k in range(3):
         g0 = lines[k][1]
         g1 = lines[(k + 1) % 3][0] + (period if k == 2 else 0.0)
         gc = (g0 + g1) / 2
-        grp = groups[(k + 1) % 3]
+        grp = ticks[k * per_gap:(k + 1) * per_gap]   # 档文件序 = 间隙序
         if k == 2:
             grp = [(x + period, h, top) for (x, h, top) in grp]
+        grp = sorted(grp)                            # 组内按位置排序
         center = sum(t[0] for t in grp) / len(grp)
         shift = gc - center
         for (x, h, top) in grp:
