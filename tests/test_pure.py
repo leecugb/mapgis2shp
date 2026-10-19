@@ -1032,6 +1032,17 @@ class TestFeatureRhythm:
         assert r["dots"][0] == pytest.approx((0.2541, 0.1504, 0.02), abs=1e-6)
         assert r["dots"][1] == pytest.approx((0.7541, 0.1504, 0.02), abs=1e-6)
 
+    def test_18x0_up_tick(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 18|0：基线 + 周期起点竖线（向上 0.125）
+        f = [0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+        st = self._style(f, n=2, elems=[(0, 2, 0), (5, 2, 4)], aux=0, no=18)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "tick_dash_interleave"
+        assert r["lines"] == [(0.0, 1.0)]
+        assert r["dots"][0] == pytest.approx((0.0, 0.0, 0.125), abs=1e-6)
+        assert r["period_mm"] == 1.0
+
     def test_50x_two_raised_dots(self) -> None:
         from pymapgis.linesty import feature_rhythm
         # 50|0：线 0→1.0 + 双抬升圆点
