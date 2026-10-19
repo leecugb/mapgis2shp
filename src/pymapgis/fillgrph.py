@@ -100,30 +100,32 @@ class FillgrphLib:
                            points=pts, raw_points=raw)
 
 
-# 图案笔划裁定表（2026-10-19 用户目视裁定首例）。
-# 点号 = decode() 去重后首现序索引；thick = (点号, 点号) 加粗段。
-ADJUDICATED_STROKES: Dict[int, dict] = {
+# 图案几何裁定表（2026-10-19 用户目视裁定首例，图案 220）。
+# 点号 = decode() 去重后首现序索引；fill_polygons = 闭合填充区点序，
+# polylines = 描边折线点序。220 定案：两组对称结构——N 轮廓区填充
+# （0-1-2-3-4-5-6-0 与 7-8-9-10-11-12-13-7）+ 连接折线
+# （3-15-14 与 10-17-16）。
+ADJUDICATED_PATTERNS: Dict[int, dict] = {
     220: {
-        "strokes": [[14, 15, 3, 2, 1, 0, 6, 5, 4],
-                    [16, 17, 10, 9, 8, 7, 13, 12, 11]],
-        "thick": [(5, 4), (12, 11)],
+        "fill_polygons": [[0, 1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12, 13]],
+        "polylines": [[3, 15, 14], [10, 17, 16]],
     },
 }
 
 
-def pattern_strokes(lib: FillgrphLib, no: int) -> Optional[list]:
-    """图案笔划（裁定解码）：返回 [{"points": [...], "thick_segs": [...]}]
-    ——未裁定图案返回 None（诚实停止，绝不臆断）。"""
-    spec = ADJUDICATED_STROKES.get(no)
+def pattern_geometry(lib: FillgrphLib, no: int) -> Optional[dict]:
+    """图案几何（裁定解码）：返回 {"fill_polygons": [[(x,y),...]],
+    "polylines": [[(x,y),...]]}——未裁定图案返回 None（诚实停止，
+    绝不臆断）。"""
+    spec = ADJUDICATED_PATTERNS.get(no)
     if spec is None:
         return None
     pat = lib.decode(no)
     if pat is None:
         return None
-    out = []
-    for path in spec["strokes"]:
-        thick = [(k, k + 1) for k in range(len(path) - 1)
-                 if (path[k], path[k + 1]) in spec["thick"]]
-        out.append({"points": [pat.points[i] for i in path],
-                    "thick_segs": thick})
-    return out
+    return {
+        "fill_polygons": [[pat.points[i] for i in ring]
+                          for ring in spec["fill_polygons"]],
+        "polylines": [[pat.points[i] for i in chain]
+                      for chain in spec["polylines"]],
+    }

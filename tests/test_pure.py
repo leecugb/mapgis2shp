@@ -773,16 +773,23 @@ class TestFillgrph:
         assert pat.points[0] == pytest.approx((0.394, 0.655), abs=1e-3)
 
     def test_pattern_220_strokes(self, tmp_path) -> None:
-        from pymapgis.fillgrph import pattern_strokes
+        from pymapgis.fillgrph import pattern_geometry
         lib = self._lib_with(tmp_path, self._record_220())
-        strokes = pattern_strokes(lib, 220)
-        assert strokes is not None
-        assert len(strokes) == 2
-        assert len(strokes[0]["points"]) == 9
-        assert strokes[0]["thick_segs"] == [(7, 8)]
-        assert strokes[0]["points"][0] == pytest.approx((0.098, 0.606), abs=1e-3)
+        geo = pattern_geometry(lib, 220)
+        assert geo is not None
+        # 填充区：两组闭合多边形（N 轮廓区）
+        assert len(geo["fill_polygons"]) == 2
+        assert geo["fill_polygons"][0][0] == pytest.approx(
+            (0.3943, 0.6548), abs=1e-3)
+        assert geo["fill_polygons"][0][3] == pytest.approx(
+            (0.3540, 0.6419), abs=1e-3)
+        # 折线：3-15-14 与 10-17-16（嵌套 list approx 陷阱——逐元组）
+        assert len(geo["polylines"]) == 2
+        assert geo["polylines"][0][0] == pytest.approx((0.3540, 0.6419), abs=1e-3)
+        assert geo["polylines"][0][1] == pytest.approx((0.0985, 0.8748), abs=1e-3)
+        assert geo["polylines"][0][2] == pytest.approx((0.0985, 0.6058), abs=1e-3)
         # 未裁定 → None
-        assert pattern_strokes(lib, 221) is None
+        assert pattern_geometry(lib, 221) is None
 
 
 class TestSlibDigitTemplate:
