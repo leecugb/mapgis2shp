@@ -803,7 +803,7 @@ class TestFeatureRhythm:
     """
 
     @staticmethod
-    def _style(f32, n=2, elems=((0, 2, 0), (3, 3, 4)), aux=0):
+    def _style(f32, n=2, elems=((0, 2, 0), (3, 3, 4)), aux=0, no=3):
         from pymapgis.linesty import Element, LineStyle, SubLine
         sl = SubLine(n=n, length=2 + 6 * n + 4 * len(f32),
                      elements=[Element(unit=u, marker=m, offset=o)
@@ -814,7 +814,7 @@ class TestFeatureRhythm:
                         f32_zone=[0.0, 0.0, 0.0, 0.0], f32_start=8)
         sublines = [dummy] * 6
         sublines[aux] = sl
-        return LineStyle(no=3, n_subs=6, sublines=sublines)
+        return LineStyle(no=no, n_subs=6, sublines=sublines)
 
     def test_sub0_dash_dot(self) -> None:
         from pymapgis.linesty import feature_rhythm
@@ -856,13 +856,66 @@ class TestFeatureRhythm:
         # 三线起止（升序）——逐线锚定，防配对错位
         assert r["lines"] == pytest.approx(
             [(0.069764, 0.279915), (0.413688, 0.627549), (0.763889, 0.964053)])
-        # 三档竖短线 = (相邻线间隙中点, 刻度高 |y0|)（2026-10-19 用户裁定：
-        # tick 与两侧 dash 等间距；档顺序 档2/档3/档1 按档 x 循环归属）
+        # 三档竖短线 = (相邻线间隙中点, 刻度高 |y0|, 顶端)（2026-10-19
+        # 用户裁定：tick 与两侧 dash 等间距；档顺序按档 x 循环归属）
         # 注意：本环境 pytest.approx 对嵌套 list 的 abs 容差不生效，
         # 逐元组断言（元组级别 abs 正常）
-        assert r["dots"][0] == pytest.approx((0.34680144488811493, 0.0072672353), abs=1e-6)
-        assert r["dots"][1] == pytest.approx((0.6957188546657562, 0.0072672353), abs=1e-6)
-        assert r["dots"][2] == pytest.approx((1.0169082954525948, 0.0046241446), abs=1e-6)
+        assert r["dots"][0] == pytest.approx(
+            (0.34680144488811493, 0.0072672353, 0.0001), abs=1e-6)
+        assert r["dots"][1] == pytest.approx(
+            (0.6957188546657562, 0.0072672353, 0.0001), abs=1e-6)
+        assert r["dots"][2] == pytest.approx(
+            (1.0169082954525948, 0.0046241446, 0.0001), abs=1e-6)
+
+    def test_4x_family(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 4|0
+        f0 = [0, 0, 0.3008, 0, 0.4492, 0, 0.0081, 0, 0, 0,
+              0.5508, 0, 0.0081, 0, 0, 0, 0.6992, 0, 1.0, 0]
+        st = self._style(f0, n=4, elems=[(0, 2, 0), (3, 3, 4), (3, 3, 10), (0, 2, 16)], aux=0, no=4)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "dash_double_dot"
+        assert r["lines"] == [(0.0, 0.3008)]
+        assert r["dots"][0] == pytest.approx((0.4492, 0.0081), abs=1e-6)
+        assert r["dots"][1] == pytest.approx((0.6992, 0.0081), abs=1e-6)
+        assert r["period_mm"] == 1.0
+        # 4|1
+        f1 = [0, 0, 0.5, 0, 0.65, 0, 0.0469, 0, 0, 0, 0.85, 0, 0.0469, 0, 0, 0]
+        st = self._style(f1, n=3, elems=[(32, 2, 0), (35, 3, 4), (35, 3, 10)], aux=1, no=4)
+        r = feature_rhythm(st, 1)
+        assert r["kind"] == "dash_double_dot"
+        assert r["dots"][0] == pytest.approx((0.65, 0.0469), abs=1e-6)
+        assert r["dots"][1] == pytest.approx((0.85, 0.0469), abs=1e-6)
+        # 4|2
+        f2 = [0, 0, 0.3008, 0, 0.7031, 0, 1.0, 0, 0.4492, 0,
+              0.0117, 0, 0, 0, 0.5508, 0, 0.0124, 0, 0, 0]
+        st = self._style(f2, n=4, elems=[(0, 2, 0), (0, 2, 4), (3, 3, 8), (3, 3, 14)], aux=2, no=4)
+        r = feature_rhythm(st, 2)
+        assert r["kind"] == "dash_double_dot"
+        assert r["lines"][0] == pytest.approx((0.0, 0.3008), abs=1e-6)
+        assert r["lines"][1] == pytest.approx((0.7031, 1.0), abs=1e-6)
+        assert r["dots"][0] == pytest.approx((0.4492, 0.0117), abs=1e-6)
+        assert r["dots"][1] == pytest.approx((0.5508, 0.0124), abs=1e-6)
+        # 4|3：6 档 ×5 遍 + 尾段三线（逐值锚定）
+        tiers = []
+        for x, h in [(0.3512, 0.0041), (0.4094, 0.0048), (0.6913, 0.0041),
+                     (0.7473, 0.0041), (0.0679, 0.0052), (0.0099, 0.0052)]:
+            tiers += [x, -h, 0.001] * 5
+        tail = [0.4623, -0.0036, 0.6368, -0.0032, 0.1203, -0.0045,
+                0.3044, -0.0054, 0.8077, -0.0045, 0.9744, -0.0052]
+        st = self._style(tiers + tail, n=33, elems=[(2, 2, 0)] * 33, aux=3, no=4)
+        r = feature_rhythm(st, 3)
+        assert r["kind"] == "tick_dash_interleave"
+        assert r["lines"][0] == pytest.approx((0.1203, 0.3044), abs=1e-6)
+        assert r["lines"][1] == pytest.approx((0.4623, 0.6368), abs=1e-6)
+        assert r["lines"][2] == pytest.approx((0.8077, 0.9744), abs=1e-6)
+        # 居中组：组1 @0.3542/0.4124（h 0.0041/0.0048）
+        assert r["dots"][0] == pytest.approx((0.35425, 0.0041, 0.001), abs=1e-4)
+        assert r["dots"][1] == pytest.approx((0.41245, 0.0048, 0.001), abs=1e-4)
+        assert r["dots"][2] == pytest.approx((0.69425, 0.0041, 0.001), abs=1e-4)
+        assert r["dots"][3] == pytest.approx((0.75025, 0.0041, 0.001), abs=1e-4)
+        assert r["dots"][4] == pytest.approx((1.01835, 0.0052, 0.001), abs=1e-4)
+        assert r["dots"][5] == pytest.approx((1.07635, 0.0052, 0.001), abs=1e-4)
 
     def test_unadjudicated_none(self) -> None:
         from pymapgis.linesty import feature_rhythm

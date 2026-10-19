@@ -145,67 +145,120 @@ def compose_feature_style(lib: "LinestyLib", linetype: int, aux: int = 0):
     return main, aux_style
 
 
+def _tick_line_rhythm(
+    f: list, period: float, n_ticks: int, repeats: int
+) -> Tuple[list, list]:
+    """竖短线-水平线相间节奏解码（3|5 与 4|3 用户裁定同构，2026-10-19）。
+
+    档区 = n_ticks 档 × repeats 遍三元组 (x, y0, y1)：x=水平位置、
+    y0=纵向起点（−h）、y1=顶端（略高于基线）；尾段 6 对 = 三水平线
+    （连续两对 = 起终点，y 为噪声忽略）。渲染规则（用户裁定）：
+    **tick 组与两侧线等间距**——档组按 x 升序循环归属间隙（最小 x
+    组 → 末间隙，跨周期），组中心平移至间隙中心、组内间距保持。
+    返回 (lines, dots)；dots 元素 (x, h, top)。
+    """
+    ticks = []
+    for k in range(n_ticks):
+        base = 3 * repeats * k
+        ticks.append((f[base], abs(f[base + 1]), f[base + 2]))
+    o = 3 * repeats * n_ticks
+    lines = sorted([(f[o], f[o + 2]), (f[o + 4], f[o + 6]),
+                    (f[o + 8], f[o + 10])])
+    per_gap = n_ticks // 3
+    groups = [sorted(ticks)[k * per_gap:(k + 1) * per_gap]
+              for k in range(3)]
+    dots = []
+    for k in range(3):
+        g0 = lines[k][1]
+        g1 = lines[(k + 1) % 3][0] + (period if k == 2 else 0.0)
+        gc = (g0 + g1) / 2
+        grp = groups[(k + 1) % 3]
+        if k == 2:
+            grp = [(x + period, h, top) for (x, h, top) in grp]
+        center = sum(t[0] for t in grp) / len(grp)
+        shift = gc - center
+        for (x, h, top) in grp:
+            dots.append((x + shift, h, top))
+    return lines, dots
+
+
 def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
-    """线型 3 节奏裁定读法（2026-10-19 用户逐行目视定案，3|x 六行全裁定）。
+    """线型 3/4 节奏裁定读法（2026-10-19 用户逐行目视定案，3|x 六行 +
+    4|x 四行全裁定）。
 
     定案规则（"aux 选择主记录子线索引"——旧挂账"记录内子线渲染选择
-    规则"的首个定案实例）：
-      - (3, aux) 渲染**主记录 sub[aux]**；aux 记录的笔不渲染
+    规则"的定案实例）：
+      - (lt, aux) 渲染**主记录 sub[aux]**；aux 记录的笔不渲染
         （3|1 的红色 24B 实线笔已裁定弃画）。
-      - 节奏 f32 = (x, y) 坐标对序列：起点 → 线终点 → 点位置 → 点半径
-        → 结束标记（值 0）；点与线相间，点居中于两端线之间（等距）。
-      - sub0–4 同一结构：线 (0→f32[2])、点@f32[4] 半径 f32[6]、
-        两侧空白对称（f32[4] − f32[6] − f32[2]）、周期 = 线 + 2×空 + 2×r；
-        sub4 记录内第二组 (f32[10], f32[12]) 是下一周期的冗余复写
-        （0.65→1.0 恰为 0→0.35 平移一个单元）。
-      - sub5：竖短线-线-竖短线-线-竖短线-线——三线由尾部 6 对坐标定义
-        （f32[36:48]，连续对为起终点）；三档竖短线 = (横轴点位, 纵轴
-        起点, 纵轴终点) 三元组（f32[12k..12k+2]），挂在基线下方
-        （|y0| = 刻度高，y1≈0），每档 ×4 遍冗余复写；周期 1.0mm
-        （目视裁定"基本正确"值）。
+      - 节奏 f32 = (x, y) 坐标对序列；点/竖线与线相间、与两侧线等距。
+      - 线型 3：sub0–4 同构 dash_dot（线 0→f[2]、点@f[4] r=f[6]、
+        两侧空白对称、周期 = 线 + 2×空 + 2×r；sub4 记录内第二组为
+        下周期冗余复写）；sub5 = tick_dash_interleave（3 档 ×4 遍 +
+        尾段三线，_tick_line_rhythm）。
+      - 线型 4：sub0–2 = dash_double_dot（短线 + 双点；4|1 双点与
+        两侧线等距裁定）；sub3 = tick_dash_interleave（6 档 ×5 遍 +
+        尾段三线，_tick_line_rhythm）。
 
-    返回 {"kind", "lines": [(x0,x1)...], "dots": [(x,r)...], "period_mm"}；
-    非线型 3 或越界返回 None（未裁定线型不做臆断）。
+    返回 {"kind", "lines": [(x0,x1)...], "dots": [...], "period_mm"}；
+    dots 元素：dash 族 (x, r)，tick 族 (x, h, top)。
+    非线型 3/4 或越界返回 None（未裁定线型不做臆断）。
     """
-    if style is None or style.no != 3:
+    if style is None or style.no not in (3, 4):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
     sl = style.sublines[aux]
     f = sl.f32_zone
-    if aux <= 4:
-        # 单线+点（sub0–4 同构，参数各异）
-        if len(f) < 8:
+    if style.no == 3:
+        if aux <= 4:
+            # 单线+点（sub0–4 同构，参数各异）
+            if len(f) < 8:
+                return None
+            solid, dot_pos, dot_r = f[2], f[4], f[6]
+            gap = dot_pos - dot_r - solid      # 线末端→点边缘（两侧对称）
+            period = solid + 2 * gap + 2 * dot_r
+            return {"kind": "dash_dot",
+                    "lines": [(0.0, solid)],
+                    "dots": [(dot_pos, dot_r)],
+                    "period_mm": period}
+        if len(f) < 48:
             return None
-        solid, dot_pos, dot_r = f[2], f[4], f[6]
-        gap = dot_pos - dot_r - solid          # 线末端→点边缘（两侧对称）
-        period = solid + 2 * gap + 2 * dot_r
-        return {"kind": "dash_dot",
-                "lines": [(0.0, solid)],
-                "dots": [(dot_pos, dot_r)],
-                "period_mm": period}
-    # aux == 5：竖短线-线-竖短线-线-竖短线-线（2026-10-19 用户裁定：
-    # 档 = (横轴点位, 纵轴起点, 纵轴终点) 竖短线，挂在基线下方）
-    if len(f) < 48:
+        lines, dots = _tick_line_rhythm(f, 1.0, 3, 4)
+        return {"kind": "tick_dash_interleave",
+                "lines": lines, "dots": dots, "period_mm": 1.0}
+    # 线型 4
+    if aux == 0:
+        if len(f) < 20:
+            return None
+        # 裁定渲染：线 0→f[2]，点1 (f[4], f[6])，点2 (f[16], f[12])；
+        # f[10]（0.551）在接受版渲染中未消费，如实注释
+        return {"kind": "dash_double_dot",
+                "lines": [(0.0, f[2])],
+                "dots": [(f[4], f[6]), (f[16], f[12])],
+                "period_mm": 1.0}
+    if aux == 1:
+        if len(f) < 14:
+            return None
+        # 双点与两侧线等距（用户裁定）：0.65−0.5 = 1.0−0.85 = 0.15
+        return {"kind": "dash_double_dot",
+                "lines": [(0.0, f[2])],
+                "dots": [(f[4], f[6]), (f[10], f[12])],
+                "period_mm": 1.0}
+    if aux == 2:
+        if len(f) < 18:
+            return None
+        # 前四对 = 两线（(0,0)→(f[2],0)、(f[4],0)→(f[6],0)）、
+        # 5/6 对 = 点1、8/9 对 = 点2（用户 2026-10-19 逐对裁定）
+        return {"kind": "dash_double_dot",
+                "lines": [(0.0, f[2]), (f[4], f[6])],
+                "dots": [(f[8], f[10]), (f[14], f[16])],
+                "period_mm": 1.0}
+    # aux == 3：6 档 ×5 遍 + 尾段三线
+    if len(f) < 102:
         return None
-    # 尾段 6 对坐标 = 三线（连续两对 = 起终点）：(f[36],f[38])、
-    # (f[40],f[42])、(f[44],f[46])，按起点升序
-    lines = sorted([(f[36], f[38]), (f[40], f[42]), (f[44], f[46])])
-    # 三档竖短线：档 k 首现三元组 (x, y0, y1) = (f[12k], f[12k+1],
-    # f[12k+2])——|y0|=刻度高（y1≈0 为基线端）；每档 ×4 遍冗余复写。
-    # 档 x 值仅用于档→间隙的循环归属（档1≈周期起点→末间隙），
-    # 渲染位置按用户裁定"tick 与两侧 dash 等间距"取相邻线间隙中点。
-    heights = [abs(f[1]), abs(f[13]), abs(f[25])]  # 档1/2/3 刻度高
-    period = 1.0                                   # 目视裁定值（"基本正确"）
-    ticks = []
-    for k in range(3):
-        x0 = lines[k][1]
-        x1 = lines[(k + 1) % 3][0] + (period if k == 2 else 0.0)
-        ticks.append(((x0 + x1) / 2.0, heights[(k + 1) % 3]))
+    lines, dots = _tick_line_rhythm(f, 1.0, 6, 5)
     return {"kind": "tick_dash_interleave",
-            "lines": lines,
-            "dots": ticks,                      # (x, h) 竖短线刻度（居中）
-            "period_mm": period}
+            "lines": lines, "dots": dots, "period_mm": 1.0}
 
 
 def dotline_params(style: Optional[LineStyle], feature_width: float,
