@@ -264,7 +264,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 16, 18, 38, 48, 50, 51, 58, 153):
+    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 18, 38, 48, 50, 51, 58, 153):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -370,6 +370,26 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": lines,
                 "teeth": teeth,
                 "period_mm": _period_from_lines(lines)}
+    # 线型 14（2026-10-19 用户目视定案）：14|0 = 双平行线 + 左段填充带
+    # （unit=5 对 = 线起终点，水平 → lines(x0,x1,y)；unit=1 marker=5
+    # = 双线间填充矩形闭合多边形；sub0 唯一，周期 1.0）
+    if style.no == 14:
+        if aux != 0:
+            return None
+        lines, fills = [], []
+        for unit, vals in _consume_groups(sl):
+            if unit in (0, 5) and len(vals) >= 4:
+                hl, _ = _pairs_to_lines_verticals(
+                    [(vals[0], vals[1]), (vals[2], vals[3])])
+                lines.extend(hl)
+            elif unit == 1 and len(vals) >= 6:
+                fills.append(list(zip(vals[0::2], vals[1::2])))
+        if not lines:
+            return None
+        return {"kind": "double_line_band",
+                "lines": lines,
+                "fills": fills,
+                "period_mm": 1.0}
     # 线型 16（16|0/16|1 走 dotline_params/PAIR_SEMANTICS；16|2 于
     # 2026-10-19 用户目视定案）：16|2 = 两段基线 + 两个抬升圆点
     # （(x,y,r) 三元组各 ×2 冗余：@(0.2541,0.1504)/@(0.7541,0.1504)
@@ -880,6 +900,7 @@ ADJUDICATED_STRUCTS = {
     "2|18": "纯虚线（等价 2|0；用户 10-16 裁定）",
     "10|0": "平行双实线（区域性复合断层；用户 10-16 裁定）",
     "12|0": "平行双虚线（主要复合断层；用户 10-16 裁定）",
+    "14|0": "双平行线+左段填充带（左0→0.5469填实，线距0.0781，周期1.0mm；用户 10-19 裁定）",
     "15|0": "平行双实线·一粗一细（岩石圈断层；用户 10-16 裁定）",
     "44|0": "推覆体齿线（推覆体界线；同38|2 规格族；用户 10-16 裁定）",
     "174|0": "断线+双点相间（类(4,0)；遥感解译断层；用户 10-16 裁定）",
