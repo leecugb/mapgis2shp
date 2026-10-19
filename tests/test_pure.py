@@ -1063,6 +1063,27 @@ class TestFeatureRhythm:
         assert len(r["dots"]) == 3
         assert r["period_mm"] == 1.0
 
+    def test_153x0_parallel_brackets(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 153|0：双平行线 + 两个下垂方括号（重复坐标冗余）
+        f = ([0.0, 0.0, 0.3988, 0.0] * 4 + [0.5371, 0.0] * 4 +
+             [1.0, 0.0] +
+             [0.0, 0.0994, 0.3988, 0.0994] * 4 + [0.5371, 0.0994] * 4 +
+             [1.0, 0.0994] +
+             [0.144, -0.0022, 0.144, -0.067, 0.144, -0.067, 0.2649, -0.067,
+              0.2649, -0.067, 0.2649, -0.0022,
+              0.6753, -0.0022, 0.6753, -0.067, 0.6753, -0.067, 0.7963, -0.067,
+              0.7963, -0.067, 0.7963, -0.0022])
+        st = self._style(f, n=16, elems=[(1280, 2, 0)] * 16, aux=0, no=153)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "mixed_dash"
+        assert r["lines"][0] == pytest.approx((0.0, 1.0, 0.0), abs=1e-6)
+        assert r["lines"][1] == pytest.approx((0.0, 1.0, 0.0994), abs=1e-6)
+        assert r["lines"][2] == pytest.approx((0.144, 0.2649, -0.067), abs=1e-6)
+        assert r["lines"][3] == pytest.approx((0.6753, 0.7963, -0.067), abs=1e-6)
+        assert len(r["verticals"]) == 4
+        assert r["verticals"][0] == pytest.approx((0.144, -0.067, -0.0022), abs=1e-6)
+
     def test_50x_two_raised_dots(self) -> None:
         from pymapgis.linesty import feature_rhythm
         # 50|0：线 0→1.0 + 双抬升圆点

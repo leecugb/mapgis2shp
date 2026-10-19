@@ -213,7 +213,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 16, 18, 38, 48, 50, 51, 58):
+    if style is None or style.no not in (3, 4, 5, 7, 16, 18, 38, 48, 50, 51, 58, 153):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -384,6 +384,30 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "verticals": verticals,
                 "dots": dots,
                 "period_mm": max(x1 for _, x1, _ in lines)}
+    # 线型 153（2026-10-19 用户目视定案）：153|0 = 两条均匀平行线
+    # （y=0 与 y=0.0994，各 0→1.0；重复坐标为冗余不叠画——用户裁定
+    # "中段不重笔加粗"）+ 两个下垂方括号（竖下-横-竖上，底 y=-0.067）
+    if style.no == 153:
+        if aux != 0 or len(f) < 64:
+            return None
+        # 两条平行线带（各 20 值：y=0 与 y=0.0994，0→1.0；重复坐标冗余）
+        lines = [(0.0, 1.0, f[1]), (0.0, 1.0, f[21])]
+        # 尾 24 值 = 两个下垂方括号（3 点各、含重复；去重后 4 点/括号）
+        pts = []
+        for k in range(12):
+            p = (f[40 + 2 * k], f[41 + 2 * k])
+            if p not in pts:
+                pts.append(p)
+        verticals = [(pts[2 * k][0], min(pts[2 * k][1], pts[2 * k + 1][1]),
+                      max(pts[2 * k][1], pts[2 * k + 1][1]))
+                     for k in range(4)]
+        lines.append((pts[1][0], pts[2][0], pts[1][1]))
+        lines.append((pts[5][0], pts[6][0], pts[5][1]))
+        return {"kind": "mixed_dash",
+                "lines": lines,
+                "verticals": verticals,
+                "dots": [],
+                "period_mm": 1.0}
     # 线型 48（2026-10-19 用户目视定案）：48|0/48|1 全裁定。连续
     # (x,y) 对 = 线起终点（每对 k：线 = (f[4k], f[4k+2])，y = f[4k+1]）
     # ——(x,y) 点对是线端点不是圆点；lines 为 (x0, x1, y) 三元组
