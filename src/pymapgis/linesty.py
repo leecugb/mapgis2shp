@@ -192,17 +192,19 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     # (f[40],f[42])、(f[44],f[46])，按起点升序
     lines = sorted([(f[36], f[38]), (f[40], f[42]), (f[44], f[46])])
     # 三档竖短线：档 k 首现三元组 (x, y0, y1) = (f[12k], f[12k+1],
-    # f[12k+2])——x=横轴位置，|y0|=刻度高（y1≈0 为基线端）；
-    # 每档 ×4 遍冗余复写（与 sub4 第二组同型）
+    # f[12k+2])——|y0|=刻度高（y1≈0 为基线端）；每档 ×4 遍冗余复写。
+    # 档 x 值仅用于档→间隙的循环归属（档1≈周期起点→末间隙），
+    # 渲染位置按用户裁定"tick 与两侧 dash 等间距"取相邻线间隙中点。
+    heights = [abs(f[1]), abs(f[13]), abs(f[25])]  # 档1/2/3 刻度高
+    period = 1.0                                   # 目视裁定值（"基本正确"）
     ticks = []
     for k in range(3):
-        x = f[12 * k]
-        h = abs(f[12 * k + 1])
-        ticks.append((x, h))
-    period = 1.0                                # 目视裁定值（"基本正确"）
+        x0 = lines[k][1]
+        x1 = lines[(k + 1) % 3][0] + (period if k == 2 else 0.0)
+        ticks.append(((x0 + x1) / 2.0, heights[(k + 1) % 3]))
     return {"kind": "tick_dash_interleave",
             "lines": lines,
-            "dots": ticks,                      # (x, h) 竖短线刻度
+            "dots": ticks,                      # (x, h) 竖短线刻度（居中）
             "period_mm": period}
 
 
