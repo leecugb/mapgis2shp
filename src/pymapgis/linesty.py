@@ -271,16 +271,22 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": lines,
                 "dots": [tick],
                 "period_mm": 1.0}
-    # 线型 7（2026-10-19 用户目视定案）：aux 选主记录子线索引，
-    # 仅 sub0/sub1 裁定（7|0 只渲染 sub0——sub1 的子图 1280、sub2
-    # 双竖线对弃画）；基线 (f[0],0)→(f[2],0) + 上下对称竖线对
-    # @f[4]、半高 |f[5]|（顶端 = 半高，对称）
-    if aux not in (0, 1) or len(f) < 8:
+    # 线型 7（2026-10-19 用户目视定案）：aux 选主记录子线索引，sub0-2
+    # 全裁定（7|0 只渲染 sub0——sub1 的子图 1280 引用不影响节奏）；
+    # 基线 (f[0],0)→(f[2],0) + 上下对称竖线对（(x,+y),(x,-y) 成对
+    # 编码，半高 = |y|，顶端 = 半高；sub2 两组对 @f[4]/f[8]）
+    if aux not in (0, 1, 2) or len(f) < 8:
         return None
-    half = abs(f[5])
+    if aux == 2:
+        if len(f) < 12:
+            return None
+        dots = [(f[4], abs(f[5]), abs(f[5])),
+                (f[8], abs(f[9]), abs(f[9]))]
+    else:
+        dots = [(f[4], abs(f[5]), abs(f[5]))]
     return {"kind": "tick_dash_interleave",
             "lines": [(f[0], f[2])],
-            "dots": [(f[4], half, half)],
+            "dots": dots,
             "period_mm": f[2]}
 
 
