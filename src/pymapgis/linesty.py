@@ -158,9 +158,10 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
         两侧空白对称（f32[4] − f32[6] − f32[2]）、周期 = 线 + 2×空 + 2×r；
         sub4 记录内第二组 (f32[10], f32[12]) 是下一周期的冗余复写
         （0.65→1.0 恰为 0→0.35 平移一个单元）。
-      - sub5：点-线-点-线-点-线——三条线由尾部 6 对坐标定义
-        （f32[36:48]，成对为起终点），三点半径 = 档描迹的 |y|
-        （f32[1]/f32[7]/f32[13]），位置 = 相邻线间隙中点；周期 1.0mm
+      - sub5：竖短线-线-竖短线-线-竖短线-线——三线由尾部 6 对坐标定义
+        （f32[36:48]，连续对为起终点）；三档竖短线 = (横轴点位, 纵轴
+        起点, 纵轴终点) 三元组（f32[12k..12k+2]），挂在基线下方
+        （|y0| = 刻度高，y1≈0），每档 ×4 遍冗余复写；周期 1.0mm
         （目视裁定"基本正确"值）。
 
     返回 {"kind", "lines": [(x0,x1)...], "dots": [(x,r)...], "period_mm"}；
@@ -183,24 +184,25 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": [(0.0, solid)],
                 "dots": [(dot_pos, dot_r)],
                 "period_mm": period}
-    # aux == 5：点-线-点-线-点-线
+    # aux == 5：竖短线-线-竖短线-线-竖短线-线（2026-10-19 用户裁定：
+    # 档 = (横轴点位, 纵轴起点, 纵轴终点) 竖短线，挂在基线下方）
     if len(f) < 48:
         return None
     # 尾段 6 对坐标 = 三线（连续两对 = 起终点）：(f[36],f[38])、
     # (f[40],f[42])、(f[44],f[46])，按起点升序
     lines = sorted([(f[36], f[38]), (f[40], f[42]), (f[44], f[46])])
-    # 档1/2/3 的首现 |y| = 点半径：档1@f[1]、档2@f[13]（pair6）、
-    # 档3@f[25]（pair12）——每档描迹 3 对，全量含两遍复写
-    radii = [abs(f[1]), abs(f[13]), abs(f[25])]
-    period = 1.0                                # 目视裁定值（"基本正确"）
-    dots = []
+    # 三档竖短线：档 k 首现三元组 (x, y0, y1) = (f[12k], f[12k+1],
+    # f[12k+2])——x=横轴位置，|y0|=刻度高（y1≈0 为基线端）；
+    # 每档 ×4 遍冗余复写（与 sub4 第二组同型）
+    ticks = []
     for k in range(3):
-        x0 = lines[k][1]
-        x1 = lines[(k + 1) % 3][0] + (period if k == 2 else 0.0)
-        dots.append(((x0 + x1) / 2.0, radii[(k + 1) % 3]))
-    return {"kind": "dot_dash_interleave",
+        x = f[12 * k]
+        h = abs(f[12 * k + 1])
+        ticks.append((x, h))
+    period = 1.0                                # 目视裁定值（"基本正确"）
+    return {"kind": "tick_dash_interleave",
             "lines": lines,
-            "dots": dots,
+            "dots": ticks,                      # (x, h) 竖短线刻度
             "period_mm": period}
 
 
