@@ -1009,6 +1009,15 @@ class TestFeatureRhythm:
         assert r["lines"][0] == pytest.approx((0.0, 1.0, 0.0), abs=1e-6)
         assert r["lines"][1] == pytest.approx((0.1, 0.4031, 0.1), abs=1e-6)
         assert r["lines"][2] == pytest.approx((0.6, 0.9, 0.1), abs=1e-6)
+        # 48|1：sub1 —— 基线两段 + 双抬升短线
+        f1 = [0, 0, 0.4, 0, 0.1, 0.1, 0.3, 0.1,
+              0.7, 0.1, 0.9, 0.1, 0.6, 0, 1.0, 0]
+        st = self._style(f1, n=4, elems=[(0, 2, 0)] * 4, aux=1, no=48)
+        r = feature_rhythm(st, 1)
+        assert r["lines"][0] == pytest.approx((0.0, 0.4, 0.0), abs=1e-6)
+        assert r["lines"][1] == pytest.approx((0.1, 0.3, 0.1), abs=1e-6)
+        assert r["lines"][2] == pytest.approx((0.7, 0.9, 0.1), abs=1e-6)
+        assert r["lines"][3] == pytest.approx((0.6, 1.0, 0.0), abs=1e-6)
 
     def test_50x_two_raised_dots(self) -> None:
         from pymapgis.linesty import feature_rhythm

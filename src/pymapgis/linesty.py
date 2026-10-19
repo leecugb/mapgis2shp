@@ -321,16 +321,14 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": lines,
                 "teeth": teeth,
                 "period_mm": period}
-    # 线型 48（2026-10-19 用户目视定案）：48|0 = 基线 0→1.0 + 两条
-    # 抬升短线（(x,y) 点对 ×4 = 两线端点：0.1→0.4031 与 0.6→0.9 均
-    # @y=0.1）——lines 为 (x0, x1, y) 三元组
+    # 线型 48（2026-10-19 用户目视定案）：48|0/48|1 全裁定。连续
+    # (x,y) 对 = 线起终点（每对 k：线 = (f[4k], f[4k+2])，y = f[4k+1]）
+    # ——(x,y) 点对是线端点不是圆点；lines 为 (x0, x1, y) 三元组
     if style.no == 48:
-        if aux != 0 or len(f) < 12:
+        if aux not in (0, 1) or len(f) < 12:
             return None
-        lines = [(f[0], f[2], 0.0)]
-        for k in range(2):
-            o = 4 + 4 * k
-            lines.append((f[o], f[o + 2], f[o + 1]))
+        lines = [(f[4 * k], f[4 * k + 2], f[4 * k + 1])
+                 for k in range(len(f) // 4)]
         return {"kind": "raised_lines",
                 "lines": lines,
                 "dots": [],
