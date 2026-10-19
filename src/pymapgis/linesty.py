@@ -203,7 +203,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     dots 元素：dash 族 (x, r)，tick 族 (x, h, top)。
     非线型 3/4 或越界返回 None（未裁定线型不做臆断）。
     """
-    if style is None or style.no not in (3, 4):
+    if style is None or style.no not in (3, 4, 5, 7):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -226,39 +226,62 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
         lines, dots = _tick_line_rhythm(f, 1.0, 3, 4)
         return {"kind": "tick_dash_interleave",
                 "lines": lines, "dots": dots, "period_mm": 1.0}
-    # 线型 4
-    if aux == 0:
-        if len(f) < 20:
+    if style.no == 4:
+        if aux == 0:
+            if len(f) < 20:
+                return None
+            # 裁定渲染：线 0→f[2]，点1 (f[4], f[6])，点2 (f[16], f[12])；
+            # f[10]（0.551）在接受版渲染中未消费，如实注释
+            return {"kind": "dash_double_dot",
+                    "lines": [(0.0, f[2])],
+                    "dots": [(f[4], f[6]), (f[16], f[12])],
+                    "period_mm": 1.0}
+        if aux == 1:
+            if len(f) < 14:
+                return None
+            # 双点与两侧线等距（用户裁定）：0.65−0.5 = 1.0−0.85 = 0.15
+            return {"kind": "dash_double_dot",
+                    "lines": [(0.0, f[2])],
+                    "dots": [(f[4], f[6]), (f[10], f[12])],
+                    "period_mm": 1.0}
+        if aux == 2:
+            if len(f) < 18:
+                return None
+            # 前四对 = 两线（(0,0)→(f[2],0)、(f[4],0)→(f[6],0)）、
+            # 5/6 对 = 点1、8/9 对 = 点2（用户 2026-10-19 逐对裁定）
+            return {"kind": "dash_double_dot",
+                    "lines": [(0.0, f[2]), (f[4], f[6])],
+                    "dots": [(f[8], f[10]), (f[14], f[16])],
+                    "period_mm": 1.0}
+        # aux == 3：6 档 ×5 遍 + 尾段三线
+        if len(f) < 102:
             return None
-        # 裁定渲染：线 0→f[2]，点1 (f[4], f[6])，点2 (f[16], f[12])；
-        # f[10]（0.551）在接受版渲染中未消费，如实注释
-        return {"kind": "dash_double_dot",
-                "lines": [(0.0, f[2])],
-                "dots": [(f[4], f[6]), (f[16], f[12])],
-                "period_mm": 1.0}
-    if aux == 1:
-        if len(f) < 14:
+        lines, dots = _tick_line_rhythm(f, 1.0, 6, 5)
+        return {"kind": "tick_dash_interleave",
+                "lines": lines, "dots": dots, "period_mm": 1.0}
+    # 线型 5（2026-10-19 用户目视定案）：5|0 = 两水平线 + 一竖线，
+    # 档三元组 ×3（x, |y0|=高, y1=顶）+ 尾段 4 对 = 两线（连续对成线）
+    if style.no == 5:
+        if aux != 0 or len(f) < 17:
             return None
-        # 双点与两侧线等距（用户裁定）：0.65−0.5 = 1.0−0.85 = 0.15
-        return {"kind": "dash_double_dot",
-                "lines": [(0.0, f[2])],
-                "dots": [(f[4], f[6]), (f[10], f[12])],
+        tick = (f[0], abs(f[1]), f[2])
+        o = 9
+        lines = sorted([(f[o], f[o + 2]), (f[o + 4], f[o + 6])])
+        return {"kind": "tick_dash_interleave",
+                "lines": lines,
+                "dots": [tick],
                 "period_mm": 1.0}
-    if aux == 2:
-        if len(f) < 18:
-            return None
-        # 前四对 = 两线（(0,0)→(f[2],0)、(f[4],0)→(f[6],0)）、
-        # 5/6 对 = 点1、8/9 对 = 点2（用户 2026-10-19 逐对裁定）
-        return {"kind": "dash_double_dot",
-                "lines": [(0.0, f[2]), (f[4], f[6])],
-                "dots": [(f[8], f[10]), (f[14], f[16])],
-                "period_mm": 1.0}
-    # aux == 3：6 档 ×5 遍 + 尾段三线
-    if len(f) < 102:
+    # 线型 7（2026-10-19 用户目视定案）：aux 选主记录子线索引，
+    # 仅 sub0/sub1 裁定（7|0 只渲染 sub0——sub1 的子图 1280、sub2
+    # 双竖线对弃画）；基线 (f[0],0)→(f[2],0) + 上下对称竖线对
+    # @f[4]、半高 |f[5]|（顶端 = 半高，对称）
+    if aux not in (0, 1) or len(f) < 8:
         return None
-    lines, dots = _tick_line_rhythm(f, 1.0, 6, 5)
+    half = abs(f[5])
     return {"kind": "tick_dash_interleave",
-            "lines": lines, "dots": dots, "period_mm": 1.0}
+            "lines": [(f[0], f[2])],
+            "dots": [(f[4], half, half)],
+            "period_mm": f[2]}
 
 
 def dotline_params(style: Optional[LineStyle], feature_width: float,

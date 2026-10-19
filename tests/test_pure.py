@@ -921,11 +921,36 @@ class TestFeatureRhythm:
     def test_unadjudicated_none(self) -> None:
         from pymapgis.linesty import feature_rhythm
         st = self._style([0, 0, 0.5, 0, 0.7, 0, 0.05, 0, 0, 0])
-        st.no = 5
+        st.no = 2
         assert feature_rhythm(st, 0) is None
         st.no = 3
         assert feature_rhythm(st, 9) is None
         assert feature_rhythm(None, 0) is None
+
+    def test_5x_and_7x(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 5|0：档三元组 ×3 + 尾段两线
+        f5 = [0.8858, 0.0065, 0.0001] * 3 + [
+            0.0, 0.0065, 0.2901, 0.0065, 0.4243, 0.0065, 0.7399, 0.0065]
+        st = self._style(f5, n=5, elems=[(2, 2, 0)] * 5, aux=0, no=5)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "tick_dash_interleave"
+        assert r["lines"][0] == pytest.approx((0.0, 0.2901), abs=1e-6)
+        assert r["lines"][1] == pytest.approx((0.4243, 0.7399), abs=1e-6)
+        assert r["dots"][0] == pytest.approx((0.8858, 0.0065, 0.0001), abs=1e-6)
+        # 7|0：sub0 —— 基线 + 对称竖线对 @0
+        f7a = [0, 0, 1.0, 0, 0.0, 0.125, 0.0, -0.125]
+        st = self._style(f7a, n=2, elems=[(5, 2, 0), (0, 2, 4)], aux=0, no=7)
+        r = feature_rhythm(st, 0)
+        assert r["lines"] == [(0.0, 1.0)]
+        assert r["dots"][0] == pytest.approx((0.0, 0.125, 0.125), abs=1e-6)
+        # 7|1：sub1 —— 基线 + 对称竖线对 @0.5
+        f7b = [0, 0, 1.0, 0, 0.5, 0.1992, 0.5, -0.1992]
+        st = self._style(f7b, n=2, elems=[(5, 2, 0), (1280, 2, 4)], aux=1, no=7)
+        r = feature_rhythm(st, 1)
+        assert r["dots"][0] == pytest.approx((0.5, 0.1992, 0.1992), abs=1e-6)
+        # 7|2 未裁定 → None
+        assert feature_rhythm(st, 2) is None
 
 
 # ---------------------------------------------------------------------------
