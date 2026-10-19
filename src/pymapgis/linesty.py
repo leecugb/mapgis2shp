@@ -332,7 +332,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
         return {"kind": "raised_lines",
                 "lines": lines,
                 "dots": [],
-                "period_mm": f[2]}
+                "period_mm": max(x1 for _, x1, _ in lines)}
     # 线型 50（2026-10-19 用户目视定案）：50|0 = 线 0→1.0 + 两个抬升
     # 圆点（(x, y, r) 三元组 ×2：@(0.5,0.0684)/@(0.6992,0.0684) r=0.0312）
     if style.no == 50:
