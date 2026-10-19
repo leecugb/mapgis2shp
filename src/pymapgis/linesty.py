@@ -212,6 +212,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
         记录末 x 不是周期（38|1/48|1 教训）。
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
+    """
     if style is None or style.no not in (3, 4, 5, 7, 16, 18, 38, 48, 50, 51, 58):
         return None
     if not (0 <= aux < len(style.sublines)):
