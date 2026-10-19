@@ -130,6 +130,22 @@ def pair_semantics(linetype: int, aux: int = 0) -> Optional[str]:
     return pairs.get((str(linetype), str(aux)))
 
 
+def contact_semantics(linetype: int, aux: int = 0) -> Optional[dict]:
+    """(线型, aux) → 地质界线接触类型判定（2026-10-19 用户定案表
+    CONTACT_FORM，仓内裁定表——发布环境缺席返回 None）。
+
+    适用域 = **地质界线层（GZBD 域）**：同线形态在断层域/水系域
+    另有语义（1|9=断层等），调用方必须上下文门控后使用；
+    判定结果含 form/contact 两字段，可作 GZBD 属性交叉核验的
+    样式侧先验（矛盾只登记不裁决）。
+    """
+    try:
+        from pymapgis.linesty_adjudicated import CONTACT_FORM
+    except ImportError:
+        return None
+    return CONTACT_FORM.get((str(linetype), str(aux)))
+
+
 def compose_feature_style(lib: "LinestyLib", linetype: int, aux: int = 0):
     """图元显示样式 = 线型号记录 + 辅助线型号记录叠加（aux=0 不叠加）。
 

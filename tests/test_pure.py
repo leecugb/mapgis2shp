@@ -309,6 +309,41 @@ class TestLinestyTruncatedFlag:
         assert len(st.sublines) == 1 and st.truncated is True
 
 
+class TestContactForm:
+    """地质界线线形→接触类型判定表（2026-10-19 用户定案）。
+
+    适用域 = 地质界线层（GZBD 域）；与 PAIR_SEMANTICS 48|0/17|0/2|0/16|0
+    互证一致；2|1/2|4/2|18/16|1 为已裁定等价族。
+    """
+
+    def test_contact_form_entries(self) -> None:
+        from pymapgis.linesty import contact_semantics
+        assert contact_semantics(1, 0)["contact"] == "整合接触"
+        assert contact_semantics(48, 0)["contact"] == "平行不整合接触"
+        assert contact_semantics(17, 0)["contact"] == "角度不整合接触"
+        assert contact_semantics(2, 0)["contact"] == "推测地质界线"
+        assert contact_semantics(2, 18)["contact"] == "推测地质界线"  # 等价族
+        assert contact_semantics(16, 1)["contact"] == "岩性渐变/岩相接触"
+        assert contact_semantics(3, 0)["contact"] == "脉动接触"
+        assert contact_semantics(3, 0)["form"] == "虚线与点（短线点相间）"
+        assert contact_semantics(999, 0) is None
+
+    def test_degrades_without_module(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        import sys
+
+        import pymapgis.linesty as linesty
+
+        real_module = sys.modules.pop("pymapgis.linesty_adjudicated", None)
+        monkeypatch.setitem(sys.modules, "pymapgis.linesty_adjudicated", None)
+        try:
+            assert linesty.contact_semantics(1, 0) is None
+        finally:
+            if real_module is not None:
+                sys.modules["pymapgis.linesty_adjudicated"] = real_module
+
+
 class TestLineParams:
     """线图形参数：官方字段序 线型号@22/辅助线型号@24/线颜色@26/
     线宽@30/X系数@35/Y系数@39。"""
