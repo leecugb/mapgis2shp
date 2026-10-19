@@ -203,7 +203,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     dots 元素：dash 族 (x, r)，tick 族 (x, h, top)。
     非线型 3/4 或越界返回 None（未裁定线型不做臆断）。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 38, 48, 50, 51):
+    if style is None or style.no not in (3, 4, 5, 7, 16, 38, 48, 50, 51):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -321,6 +321,19 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": lines,
                 "teeth": teeth,
                 "period_mm": period}
+    # 线型 16（16|0/16|1 走 dotline_params/PAIR_SEMANTICS；16|2 于
+    # 2026-10-19 用户目视定案）：16|2 = 两段基线 + 两个抬升圆点
+    # （(x,y,r) 三元组各 ×2 冗余：@(0.2541,0.1504)/@(0.7541,0.1504)
+    # r=0.02）+ 尾段两线（连续对成线），周期 1.0
+    if style.no == 16:
+        if aux != 2 or len(f) < 20:
+            return None
+        dots = [(f[0], f[1], f[2]), (f[6], f[7], f[8])]
+        lines = [(f[12], f[14]), (f[16], f[18])]
+        return {"kind": "dash_dot_raised",
+                "lines": lines,
+                "dots": dots,
+                "period_mm": 1.0}
     # 线型 48（2026-10-19 用户目视定案）：48|0/48|1 全裁定。连续
     # (x,y) 对 = 线起终点（每对 k：线 = (f[4k], f[4k+2])，y = f[4k+1]）
     # ——(x,y) 点对是线端点不是圆点；lines 为 (x0, x1, y) 三元组
