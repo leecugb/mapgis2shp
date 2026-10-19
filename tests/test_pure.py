@@ -985,6 +985,19 @@ class TestFeatureRhythm:
         # 38|2 未裁定 → None
         assert feature_rhythm(st, 2) is None
 
+    def test_51x_raised_dot(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 51|0：线 0→1.0 + 抬升圆点 @(0.5, 0.084) r=0.0371
+        f = [0, 0, 1.0, 0, 0.5, 0.084, 0.0371, 0, 0, 0]
+        st = self._style(f, n=2, elems=[(0, 2, 0), (3, 3, 4)], aux=0, no=51)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "dash_dot_raised"
+        assert r["lines"] == [(0.0, 1.0)]
+        assert r["dots"][0] == pytest.approx((0.5, 0.084, 0.0371), abs=1e-6)
+        assert r["period_mm"] == 1.0
+        # 51|1 未裁定 → None
+        assert feature_rhythm(st, 1) is None
+
 
 # ---------------------------------------------------------------------------
 # Writer helpers
