@@ -752,13 +752,13 @@ class TestFillgrph:
         payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
         return header + payload
 
-    def _lib_with(self, tmp_path, rec: bytes):
+    def _lib_with(self, tmp_path, rec: bytes, no: int = 220):
         from pymapgis.fillgrph import FillgrphLib
-        # 220 槽索引：count=220，第 220 条（index 219）指向记录
-        n = 220
+        # n 槽索引：第 no 条（index no-1）指向记录
+        n = max(no, 220)
         off = 6 + n * 6
         data = (struct.pack("<I", n) + struct.pack("<H", 0)
-                + b"\x00" * (219 * 6) + struct.pack("<IH", off, 1) + rec)
+                + b"\x00" * ((no - 1) * 6) + struct.pack("<IH", off, 1) + rec)
         path = tmp_path / "Fillgrph.lib"
         path.write_bytes(data)
         return FillgrphLib(str(path))
@@ -790,6 +790,34 @@ class TestFillgrph:
         assert geo["polylines"][0][2] == pytest.approx((0.0985, 0.6058), abs=1e-3)
         # 未裁定 → None
         assert pattern_geometry(lib, 221) is None
+
+    def test_patterns_243_252_polylines(self, tmp_path) -> None:
+        from pymapgis.fillgrph import pattern_geometry
+        # 243：两组折线（不填充）——合成记录（grid=4, unit=24）
+        pts243 = [(0.3415, 0.8636), (0.1755, 0.8636), (0.1755, 0.6145),
+                  (0.1755, 0.7391), (0.3083, 0.7391),
+                  (0.8383, 0.3625), (0.6722, 0.3625), (0.6722, 0.1135),
+                  (0.6722, 0.2380), (0.8051, 0.2380)]
+        rec = struct.pack("<HH", 4, 24) + b"\x00" * 96 + b"".join(
+            struct.pack("<2f", x, y) for x, y in pts243)
+        lib = self._lib_with(tmp_path, rec, no=243)
+        geo = pattern_geometry(lib, 243)
+        assert geo is not None
+        assert geo["fill_polygons"] == []
+        assert len(geo["polylines"]) == 2
+        assert geo["polylines"][0][0] == pytest.approx((0.3415, 0.8636), abs=1e-3)
+        # 252：两组折线
+        pts252 = [(0.0928, 0.6722), (0.3918, 0.6722), (0.2423, 0.6722),
+                  (0.2423, 0.8217),
+                  (0.5925, 0.1725), (0.8915, 0.1725), (0.7420, 0.1725),
+                  (0.7420, 0.3220)]
+        rec = struct.pack("<HH", 4, 16) + b"\x00" * 96 + b"".join(
+            struct.pack("<2f", x, y) for x, y in pts252)
+        lib = self._lib_with(tmp_path, rec, no=252)
+        geo = pattern_geometry(lib, 252)
+        assert geo is not None
+        assert geo["fill_polygons"] == []
+        assert geo["polylines"][1][0] == pytest.approx((0.5925, 0.1725), abs=1e-3)
 
 
 class TestSlibDigitTemplate:
