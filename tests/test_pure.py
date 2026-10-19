@@ -732,6 +732,59 @@ class TestSlibDenseRmsGate:
         assert s.subpaths[0].closed
 
 
+class TestFillgrph:
+    """Fillgrph.lib 图案解析（2026-10-19 图案 220 用户目视裁定首锚）。"""
+
+    @staticmethod
+    def _record_220() -> bytes:
+        """图案 220 合成记录：头 (8,100) + 96B 描述区 + 60 对坐标。"""
+        pts = [(0.394, 0.655), (0.394, 0.606), (0.393, 0.606), (0.373, 0.625),
+               (0.354, 0.642), (0.354, 0.654), (0.354, 0.654), (0.354, 0.875),
+               (0.394, 0.875), (0.394, 0.655),
+               (0.900, 0.154), (0.900, 0.105), (0.899, 0.105), (0.878, 0.124),
+               (0.859, 0.141), (0.859, 0.153), (0.859, 0.153), (0.859, 0.374),
+               (0.900, 0.374), (0.900, 0.154),
+               (0.098, 0.606), (0.098, 0.875), (0.392, 0.608), (0.394, 0.606),
+               (0.394, 0.606), (0.604, 0.105), (0.604, 0.374), (0.897, 0.107),
+               (0.900, 0.105), (0.900, 0.105)]
+        pts = pts + pts  # ×2 冗余（220 实证）
+        header = struct.pack("<HH", 8, 100) + b"\x00" * 96
+        payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
+        return header + payload
+
+    def _lib_with(self, tmp_path, rec: bytes):
+        from pymapgis.fillgrph import FillgrphLib
+        # 220 槽索引：count=220，第 220 条（index 219）指向记录
+        n = 220
+        off = 6 + n * 6
+        data = (struct.pack("<I", n) + struct.pack("<H", 0)
+                + b"\x00" * (219 * 6) + struct.pack("<IH", off, 1) + rec)
+        path = tmp_path / "Fillgrph.lib"
+        path.write_bytes(data)
+        return FillgrphLib(str(path))
+
+    def test_decode_220(self, tmp_path) -> None:
+        lib = self._lib_with(tmp_path, self._record_220())
+        pat = lib.decode(220)
+        assert pat is not None
+        assert pat.grid == 8 and pat.unit == 100
+        assert len(pat.points) == 18          # 去重后
+        assert len(pat.raw_points) == 60      # 30 对 ×2 遍冗余
+        assert pat.points[0] == pytest.approx((0.394, 0.655), abs=1e-3)
+
+    def test_pattern_220_strokes(self, tmp_path) -> None:
+        from pymapgis.fillgrph import pattern_strokes
+        lib = self._lib_with(tmp_path, self._record_220())
+        strokes = pattern_strokes(lib, 220)
+        assert strokes is not None
+        assert len(strokes) == 2
+        assert len(strokes[0]["points"]) == 9
+        assert strokes[0]["thick_segs"] == [(7, 8)]
+        assert strokes[0]["points"][0] == pytest.approx((0.098, 0.606), abs=1e-3)
+        # 未裁定 → None
+        assert pattern_strokes(lib, 221) is None
+
+
 class TestSlibDigitTemplate:
     """数字 1 模板槽判定（2026-10-19 用户图面裁定定案）。
 
