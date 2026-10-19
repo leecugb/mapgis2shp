@@ -732,6 +732,68 @@ class TestSlibDenseRmsGate:
         assert s.subpaths[0].closed
 
 
+class TestSlibDigitTemplate:
+    """数字 1 模板槽判定（2026-10-19 用户图面裁定定案）。
+
+    符号编辑器存模板数字 "1"（15 点闭合轮廓：斜帽+竖干+底座），
+    实例化时替换为实际编号；存储点是描线不是几何，须排除出弧/圆
+    分类。锚：#2591/#2600 sp0 实测；345 族符号普查。
+    """
+
+    @staticmethod
+    def _digit1_pts() -> list:
+        """#2591 sp0 实测 15 点轮廓（原位）。"""
+        return [(-0.261, 0.109), (-0.269, 0.109), (-0.291, 0.097),
+                (-0.289, 0.097), (-0.274, 0.101), (-0.274, 0.091),
+                (-0.274, 0.018), (-0.275, 0.014), (-0.285, 0.010),
+                (-0.251, 0.010), (-0.259, 0.014), (-0.261, 0.014),
+                (-0.261, 0.018), (-0.261, 0.109), (-0.261, 0.109)]
+
+    def _lib_with_pts(self, tmp_path, pts: list) -> "SubgraphLib":
+        n = 2 * len(pts)
+        header = struct.pack("<4H", 3, n, 0, len(pts))
+        payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
+        rec = header + payload
+        rec_b = struct.pack("<4H", 1, 4, 0, 2) + struct.pack(
+            "<4f", 0.4, 0.4, 0.3, 0.3)
+        data = (struct.pack("<2I", 8, 8 + len(rec))
+                + rec + rec_b + b"\x00" * 32)
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+        return SubgraphLib(str(path))
+
+    def test_digit_one_detected(self, tmp_path) -> None:
+        lib = self._lib_with_pts(tmp_path, self._digit1_pts())
+        s = lib.decode(0)
+        sp = s.subpaths[0]
+        assert sp.template_digit == 1
+        assert sp.arc is None and sp.circle is None
+
+    def test_plain_closed_polyline_rejected(self, tmp_path) -> None:
+        """纯矩形竖条（无斜帽横伸）不得误判为数字 1。"""
+        cx, cy, w, h = 0.0, 0.0, 0.04, 0.10
+        rect = [(cx - w/2, cy - h/2), (cx + w/2, cy - h/2),
+                (cx + w/2, cy + h/2), (cx - w/2, cy + h/2)]
+        pts = []
+        for i in range(4):
+            a, b = rect[i], rect[(i + 1) % 4]
+            for k in range(3):
+                t = k / 3.0
+                pts.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+        pts = (pts * 2)[:15]
+        pts.append(pts[0])
+        lib = self._lib_with_pts(tmp_path, pts)
+        s = lib.decode(0)
+        assert s.subpaths[0].template_digit is None
+
+    def test_2591_no_false_arc(self, tmp_path) -> None:
+        """#2591 sp0 结构：数字 1 判定优先，密集弧不得误吞为弧段。"""
+        lib = self._lib_with_pts(tmp_path, self._digit1_pts())
+        s = lib.decode(0)
+        assert s.subpaths[0].arc is None
+        assert s.subpaths[0].template_digit == 1
+
+
 # ---------------------------------------------------------------------------
 # Writer helpers
 # ---------------------------------------------------------------------------
