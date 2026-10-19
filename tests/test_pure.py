@@ -733,116 +733,207 @@ class TestSlibDenseRmsGate:
 
 
 class TestFillgrph:
-    """Fillgrph.lib 图案解析（2026-10-19 图案 220 用户目视裁定首锚）。"""
+    """Fillgrph.lib 图案解析（2026-10-19 记录结构定案）。
+
+    记录 = [grid][unit][M×（10B 笔块 + 2B 对数）][坐标区]；笔块
+    kind：0=填充多边形、1/2=折线、3=弧（度）、4/5/6=圆弧族。
+    渲染 = 逐笔划消费，笔划分组由文件自身给出——无需逐图案裁定。
+    """
 
     @staticmethod
-    def _record_220() -> bytes:
-        """图案 220 合成记录：头 (8,100) + 96B 描述区 + 60 对坐标。"""
-        pts = [(0.394, 0.655), (0.394, 0.606), (0.393, 0.606), (0.373, 0.625),
-               (0.354, 0.642), (0.354, 0.654), (0.354, 0.654), (0.354, 0.875),
-               (0.394, 0.875), (0.394, 0.655),
-               (0.900, 0.154), (0.900, 0.105), (0.899, 0.105), (0.878, 0.124),
-               (0.859, 0.141), (0.859, 0.153), (0.859, 0.153), (0.859, 0.374),
-               (0.900, 0.374), (0.900, 0.154),
-               (0.098, 0.606), (0.098, 0.875), (0.392, 0.608), (0.394, 0.606),
-               (0.394, 0.606), (0.604, 0.105), (0.604, 0.374), (0.897, 0.107),
-               (0.900, 0.105), (0.900, 0.105)]
-        pts = pts + pts  # ×2 冗余（220 实证）
-        header = struct.pack("<HH", 8, 100) + b"\x00" * 96
-        payload = b"".join(struct.pack("<2f", x, y) for x, y in pts)
-        return header + payload
+    def _record(grid: int, unit: int, spec, pairs) -> bytes:
+        """合成记录：spec = [(笔块 5 元组, 对数), ...]，pairs = 坐标对。
+
+        布局与实库一致：笔块表在前、计数表随后（非交错）。"""
+        header = struct.pack("<HH", grid, unit)
+        blocks = b"".join(struct.pack("<5H", *b) for b, _ in spec)
+        counts = b"".join(struct.pack("<H", c) for _, c in spec)
+        payload = b"".join(struct.pack("<2f", x, y) for x, y in pairs)
+        return header + blocks + counts + payload
 
     def _lib_with(self, tmp_path, rec: bytes, no: int = 220):
         from pymapgis.fillgrph import FillgrphLib
-        # n 槽索引：第 no 条（index no-1）指向记录
         n = max(no, 220)
         off = 6 + n * 6
+        # 索引区：槽 no-1 指向记录，其余全 0（槽后不得跟记录字节——
+        # 否则 record_bounds 会把记录误读为后续槽的偏移）
         data = (struct.pack("<I", n) + struct.pack("<H", 0)
-                + b"\x00" * ((no - 1) * 6) + struct.pack("<IH", off, 1) + rec)
+                + b"\x00" * ((no - 1) * 6) + struct.pack("<IH", off, 1)
+                + b"\x00" * ((n - no) * 6) + rec)
         path = tmp_path / "Fillgrph.lib"
         path.write_bytes(data)
         return FillgrphLib(str(path))
 
-    def test_decode_220(self, tmp_path) -> None:
-        lib = self._lib_with(tmp_path, self._record_220())
+    # ---- 220：实库结构（8 笔划：双 N 填充环 + 四线笔划 +
+    #      双 N 轮廓描边（kind=2 宽 3 复用环坐标）） ----
+    _P220 = [
+        ((0, 0, 0, 0, 1), 10), ((0, 0, 0, 0, 1), 10),
+        ((2, 0, 0, 4, 1), 3), ((2, 0, 0, 4, 1), 2),
+        ((2, 0, 0, 3, 1), 3), ((2, 0, 0, 3, 1), 2),
+        ((2, 0, 0, 3, 1), 10), ((2, 0, 0, 3, 1), 10),
+    ]
+    _RING1 = [(0.3943, 0.6548), (0.3943, 0.6059), (0.3935, 0.6060),
+              (0.3728, 0.6253), (0.3540, 0.6419), (0.3540, 0.6542),
+              (0.3540, 0.6542), (0.3540, 0.8748), (0.3943, 0.8748),
+              (0.3943, 0.6548)]
+    _RING2 = [(0.8997, 0.1537), (0.8997, 0.1048), (0.8989, 0.1049),
+              (0.8782, 0.1242), (0.8594, 0.1408), (0.8594, 0.1531),
+              (0.8594, 0.1531), (0.8594, 0.3737), (0.8997, 0.3737),
+              (0.8997, 0.1537)]
+    _LINES = [(0.0985, 0.6058), (0.0985, 0.8748), (0.3916, 0.6082),
+              (0.3943, 0.6059), (0.3943, 0.6058), (0.6039, 0.1048),
+              (0.6039, 0.3737), (0.8970, 0.1071), (0.8997, 0.1048),
+              (0.8997, 0.1048)]
+
+    def _rec_220(self) -> bytes:
+        return self._record(8, 100, self._P220,
+                            self._RING1 + self._RING2 + self._LINES
+                            + self._RING1 + self._RING2)
+
+    def test_decode_220_structure(self, tmp_path) -> None:
+        lib = self._lib_with(tmp_path, self._rec_220())
         pat = lib.decode(220)
         assert pat is not None
         assert pat.grid == 8 and pat.unit == 100
-        assert len(pat.points) == 18          # 去重后
-        assert len(pat.raw_points) == 60      # 30 对 ×2 遍冗余
-        assert pat.points[0] == pytest.approx((0.394, 0.655), abs=1e-3)
+        assert len(pat.strokes) == 8          # 2 填充 + 4 线 + 2 填充复写
+        assert sum(len(s.points) for s in pat.strokes) == 50
+        assert len(pat.raw_points) == 50
+        assert len(pat.points) == 18          # 全记录去重后
 
-    def test_pattern_220_strokes(self, tmp_path) -> None:
+    def test_220_geometry_rings_and_lines(self, tmp_path) -> None:
         from pymapgis.fillgrph import pattern_geometry
-        lib = self._lib_with(tmp_path, self._record_220())
+        lib = self._lib_with(tmp_path, self._rec_220())
         geo = pattern_geometry(lib, 220)
         assert geo is not None
-        # 填充区：两组闭合多边形（N 轮廓区）
+        # 填充区：两个 N 轮廓环（环内连续回描 0.003 容差合并、首尾
+        # 闭合点去除）——环序与目视裁定 0-1-2-3-4-5-6 / 7-8-9-10-
+        # 11-12-13 完全一致
         assert len(geo["fill_polygons"]) == 2
-        assert geo["fill_polygons"][0][0] == pytest.approx(
-            (0.3943, 0.6548), abs=1e-3)
-        assert geo["fill_polygons"][0][3] == pytest.approx(
-            (0.3540, 0.6419), abs=1e-3)
-        # 折线：3-15-14 与 10-17-16（嵌套 list approx 陷阱——逐元组）
-        assert len(geo["polylines"]) == 2
-        assert geo["polylines"][0][0] == pytest.approx((0.3540, 0.6419), abs=1e-3)
-        assert geo["polylines"][0][1] == pytest.approx((0.0985, 0.8748), abs=1e-3)
-        assert geo["polylines"][0][2] == pytest.approx((0.0985, 0.6058), abs=1e-3)
-        # 未裁定 → None
-        assert pattern_geometry(lib, 221) is None
+        ring0 = geo["fill_polygons"][0]
+        assert len(ring0) == 7
+        assert ring0[0] == pytest.approx((0.3943, 0.6548), abs=1e-3)
+        assert ring0[3] == pytest.approx((0.3540, 0.6419), abs=1e-3)
+        assert ring0[6] == pytest.approx((0.3943, 0.8748), abs=1e-3)
+        assert len(geo["fill_polygons"][1]) == 7
+        # 线笔划：两条连线 + 两条环轮廓描边（单点落笔笔划剔除）
+        assert len(geo["polylines"]) == 4
+        assert geo["polylines"][0][0] == pytest.approx((0.0985, 0.6058), abs=1e-3)
+        assert geo["polylines"][0][2] == pytest.approx((0.3916, 0.6082), abs=1e-3)
+        assert geo["polylines"][1][0] == pytest.approx((0.6039, 0.1048), abs=1e-3)
+        assert len(geo["polylines"][2]) == 8        # 环轮廓：7 顶点 + 闭合点
+        assert geo["polylines"][2][0] == pytest.approx((0.3943, 0.6548), abs=1e-3)
+        assert geo["polylines"][2][7] == pytest.approx((0.3943, 0.6548), abs=1e-3)
+        assert len(geo["polylines"][3]) == 8
+        assert geo["circles"] == [] and geo["arcs"] == []
 
-    def test_patterns_243_252_polylines(self, tmp_path) -> None:
+    def test_243_252_247_253_polylines(self, tmp_path) -> None:
         from pymapgis.fillgrph import pattern_geometry
-        # 243：两组折线（不填充）——合成记录（grid=4, unit=24）
-        pts243 = [(0.3415, 0.8636), (0.1755, 0.8636), (0.1755, 0.6145),
-                  (0.1755, 0.7391), (0.3083, 0.7391),
-                  (0.8383, 0.3625), (0.6722, 0.3625), (0.6722, 0.1135),
-                  (0.6722, 0.2380), (0.8051, 0.2380)]
-        rec = struct.pack("<HH", 4, 24) + b"\x00" * 96 + b"".join(
-            struct.pack("<2f", x, y) for x, y in pts243)
-        lib = self._lib_with(tmp_path, rec, no=243)
+        # 243：2 用户折线 = 4 文件笔划（回描段省略——视觉等价）
+        spec = [((2, 0, 0, 4, 1), 4), ((2, 0, 0, 4, 1), 2)] * 2
+        pts = [(0.3415, 0.8636), (0.1755, 0.8636), (0.1755, 0.8636),
+               (0.1755, 0.6145), (0.1755, 0.7391), (0.3083, 0.7391),
+               (0.8383, 0.3625), (0.6722, 0.3625), (0.6722, 0.3625),
+               (0.6722, 0.1135), (0.6722, 0.2380), (0.8051, 0.2380)]
+        lib = self._lib_with(tmp_path, self._record(4, 24, spec, pts), no=243)
         geo = pattern_geometry(lib, 243)
         assert geo is not None
         assert geo["fill_polygons"] == []
-        assert len(geo["polylines"]) == 2
-        assert geo["polylines"][0][0] == pytest.approx((0.3415, 0.8636), abs=1e-3)
-        # 252：两组折线
-        pts252 = [(0.0928, 0.6722), (0.3918, 0.6722), (0.2423, 0.6722),
-                  (0.2423, 0.8217),
-                  (0.5925, 0.1725), (0.8915, 0.1725), (0.7420, 0.1725),
-                  (0.7420, 0.3220)]
-        rec = struct.pack("<HH", 4, 16) + b"\x00" * 96 + b"".join(
-            struct.pack("<2f", x, y) for x, y in pts252)
-        lib = self._lib_with(tmp_path, rec, no=252)
-        geo = pattern_geometry(lib, 252)
-        assert geo is not None
-        assert geo["fill_polygons"] == []
-        assert geo["polylines"][1][0] == pytest.approx((0.5925, 0.1725), abs=1e-3)
-
-    def test_pattern_247_polylines(self, tmp_path) -> None:
-        from pymapgis.fillgrph import pattern_geometry
-        # 247：四组折线（不填充）——合成记录（grid=6, unit=28），
-        # 14 点无冗余（实库 D:\SLIB\Fillgrph.lib 解码一致）
-        pts247 = [(0.1322, 0.8067), (0.3805, 0.8067), (0.2563, 0.8067),
-                  (0.2563, 0.6713),
-                  (0.6289, 0.3056), (0.8772, 0.3056), (0.7531, 0.3056),
-                  (0.7531, 0.1702),
-                  (0.8477, 0.8387), (0.6490, 0.8387), (0.6490, 0.6400),
-                  (0.3553, 0.3289), (0.1566, 0.3289), (0.1566, 0.1302)]
-        rec = struct.pack("<HH", 6, 28) + b"\x00" * 96 + b"".join(
-            struct.pack("<2f", x, y) for x, y in pts247)
-        lib = self._lib_with(tmp_path, rec, no=247)
-        geo = pattern_geometry(lib, 247)
-        assert geo is not None
-        assert geo["fill_polygons"] == []
         assert len(geo["polylines"]) == 4
-        # 组 0：T 形（0-1-2-3），组 1：T 形（4-5-6-7）
-        assert geo["polylines"][0][0] == pytest.approx((0.1322, 0.8067), abs=1e-3)
-        assert geo["polylines"][0][3] == pytest.approx((0.2563, 0.6713), abs=1e-3)
-        assert geo["polylines"][1][0] == pytest.approx((0.6289, 0.3056), abs=1e-3)
-        # 组 2：8-9-10，组 3：11-12-13
-        assert geo["polylines"][2][2] == pytest.approx((0.6490, 0.6400), abs=1e-3)
-        assert geo["polylines"][3][2] == pytest.approx((0.1566, 0.1302), abs=1e-3)
+        assert geo["polylines"][0][0] == pytest.approx((0.3415, 0.8636), abs=1e-3)
+        assert geo["polylines"][0][2] == pytest.approx((0.1755, 0.6145), abs=1e-3)
+        assert geo["polylines"][1][0] == pytest.approx((0.1755, 0.7391), abs=1e-3)
+        # 252：2 用户 T 形 = 4 笔划（横杠/竖茎各一）
+        spec = [((2, 0, 0, 4, 1), 2)] * 4
+        pts = [(0.0928, 0.6722), (0.3918, 0.6722), (0.2423, 0.6722),
+               (0.2423, 0.8217),
+               (0.5925, 0.1725), (0.8915, 0.1725), (0.7420, 0.1725),
+               (0.7420, 0.3220)]
+        lib = self._lib_with(tmp_path, self._record(4, 16, spec, pts), no=252)
+        geo = pattern_geometry(lib, 252)
+        assert len(geo["polylines"]) == 4
+        assert geo["polylines"][1][0] == pytest.approx((0.2423, 0.6722), abs=1e-3)
+        # 247：4 用户折线 = 6 笔划（两 T 各 2 + 两 L 各 1）
+        spec = [((2, 0, 0, 4, 1), 2)] * 4 + [((2, 0, 0, 4, 1), 3)] * 2
+        pts = [(0.1322, 0.8067), (0.3805, 0.8067), (0.2563, 0.8067),
+               (0.2563, 0.6713),
+               (0.6289, 0.3056), (0.8772, 0.3056), (0.7531, 0.3056),
+               (0.7531, 0.1702),
+               (0.8477, 0.8387), (0.6490, 0.8387), (0.6490, 0.6400),
+               (0.3553, 0.3289), (0.1566, 0.3289), (0.1566, 0.1302)]
+        lib = self._lib_with(tmp_path, self._record(6, 28, spec, pts), no=247)
+        geo = pattern_geometry(lib, 247)
+        assert len(geo["polylines"]) == 6
+        assert geo["polylines"][4][0] == pytest.approx((0.8477, 0.8387), abs=1e-3)
+        assert geo["polylines"][4][2] == pytest.approx((0.6490, 0.6400), abs=1e-3)
+        assert geo["polylines"][5][0] == pytest.approx((0.3553, 0.3289), abs=1e-3)
+        # 253：四角组 = 两对角线各一（X 形），T 组同 252
+        spec = [((2, 0, 0, 4, 1), 2)] * 8
+        pts = [(0.0928, 0.6722), (0.3918, 0.6722), (0.2423, 0.6722),
+               (0.2423, 0.8217),
+               (0.1479, 0.1072), (0.3350, 0.3567), (0.1479, 0.3567),
+               (0.3350, 0.1072),
+               (0.6452, 0.6293), (0.8323, 0.8788), (0.6452, 0.8788),
+               (0.8323, 0.6293),
+               (0.5925, 0.1725), (0.8915, 0.1725), (0.7420, 0.1725),
+               (0.7420, 0.3220)]
+        lib = self._lib_with(tmp_path, self._record(8, 32, spec, pts), no=253)
+        geo = pattern_geometry(lib, 253)
+        assert len(geo["polylines"]) == 8
+        assert geo["polylines"][2][0] == pytest.approx((0.1479, 0.1072), abs=1e-3)
+        assert geo["polylines"][2][1] == pytest.approx((0.3350, 0.3567), abs=1e-3)
+        assert geo["polylines"][3][0] == pytest.approx((0.1479, 0.3567), abs=1e-3)
+        assert geo["polylines"][3][1] == pytest.approx((0.3350, 0.1072), abs=1e-3)
+
+    def test_circles_pattern_6(self, tmp_path) -> None:
+        from pymapgis.fillgrph import pattern_geometry
+        # 图案 6（实库）：8 个点圆（kind=5 满载整圆）
+        spec = [((5, 0, 0, 1, 1), 3)] * 8
+        pts = [(0.2, 0.8), (0.03125, 0.0), (0.0, 0.0),
+               (0.7, 0.8), (0.03125, 0.0), (0.0, 0.0),
+               (0.45, 0.55), (0.03125, 0.0), (0.0, 0.0),
+               (0.95, 0.55), (0.03125, 0.0), (0.0, 0.0),
+               (0.2, 0.3), (0.03125, 0.0), (0.0, 0.0),
+               (0.7, 0.3), (0.03125, 0.0), (0.0, 0.0),
+               (0.95, 0.05), (0.03125, 0.0), (0.0, 0.0),
+               (0.45, 0.05), (0.03125, 0.0), (0.0, 0.0)]
+        lib = self._lib_with(tmp_path, self._record(1, 10, spec, pts), no=6)
+        geo = pattern_geometry(lib, 6)
+        assert geo is not None
+        assert geo["polylines"] == [] and geo["arcs"] == []
+        assert len(geo["circles"]) == 8
+        assert geo["circles"][0] == pytest.approx((0.2, 0.8, 0.03125), abs=1e-3)
+
+    def test_arcs_pattern_725(self, tmp_path) -> None:
+        from pymapgis.fillgrph import pattern_geometry
+        # 图案 725（实库）：4 段象限弧（kind=3 角度制）
+        spec = [((3, 0, 0, 0, 1), 3)] * 4
+        pts = [(0.25, 0.0), (0.3492, 45.7252), (135.0, 0.0),
+               (0.25, 0.5), (0.3536, 45.0), (135.0, 0.0),
+               (0.75, 1.0), (0.3536, 225.0), (-45.0, 0.0),
+               (0.75, 0.5), (0.3536, 225.0), (-45.0, 0.0)]
+        lib = self._lib_with(tmp_path, self._record(1, 6, spec, pts), no=725)
+        geo = pattern_geometry(lib, 725)
+        assert geo is not None
+        assert geo["polylines"] == [] and geo["circles"] == []
+        assert len(geo["arcs"]) == 4
+        assert geo["arcs"][0] == pytest.approx(
+            (0.25, 0.0, 0.3492, 45.7252, 135.0), abs=1e-3)
+        assert geo["arcs"][2][2:] == pytest.approx((0.3536, 225.0, -45.0), abs=1e-3)
+
+    def test_zero_coordinate_and_nonconforming(self, tmp_path) -> None:
+        from pymapgis.fillgrph import pattern_geometry
+        # 坐标从 (0,0) 起（250/251 教训）：结构定位不依赖坐标值
+        spec = [((2, 0, 0, 4, 1), 2)] * 2
+        pts = [(0.0, 0.0), (0.5, 0.675), (0.7, 0.0), (1.0, 0.675)]
+        lib = self._lib_with(tmp_path, self._record(8, 32, spec, pts), no=250)
+        geo = pattern_geometry(lib, 250)
+        assert geo is not None
+        assert geo["polylines"][0][0] == pytest.approx((0.0, 0.0), abs=1e-6)
+        # 旧式/异型记录（无 12M 描述区）：诚实返回 None
+        rec = struct.pack("<HH", 8, 100) + b"\x00" * 96 + b"\x00" * 64
+        lib = self._lib_with(tmp_path, rec, no=221)
+        assert lib.decode(221) is None
+        assert pattern_geometry(lib, 221) is None
 
 
 class TestSlibDigitTemplate:
