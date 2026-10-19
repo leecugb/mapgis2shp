@@ -998,6 +998,19 @@ class TestFeatureRhythm:
         # 51|1 未裁定 → None
         assert feature_rhythm(st, 1) is None
 
+    def test_50x_two_raised_dots(self) -> None:
+        from pymapgis.linesty import feature_rhythm
+        # 50|0：线 0→1.0 + 双抬升圆点
+        f = [0, 0, 1.0, 0, 0.5, 0.0684, 0.0312, 0, 0, 0,
+             0.6992, 0.0684, 0.0312, 0, 0, 0]
+        st = self._style(f, n=3, elems=[(0, 2, 0), (3, 3, 4), (3, 3, 10)],
+                         aux=0, no=50)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "dash_dot_raised"
+        assert r["lines"] == [(0.0, 1.0)]
+        assert r["dots"][0] == pytest.approx((0.5, 0.0684, 0.0312), abs=1e-6)
+        assert r["dots"][1] == pytest.approx((0.6992, 0.0684, 0.0312), abs=1e-6)
+
 
 # ---------------------------------------------------------------------------
 # Writer helpers
