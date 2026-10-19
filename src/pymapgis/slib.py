@@ -665,6 +665,7 @@ def symbol_geometries(lib: SubgraphLib, no: int) -> dict:
             "closed": sp.closed,
             "circle": [round(v, 6) for v in sp.circle] if sp.circle else None,
             "arc": [round(v, 6) for v in sp.arc] if sp.arc else None,
+            "template_digit": sp.template_digit,
         })
         for x, y in sp.points:
             xs.append(x)
