@@ -1089,6 +1089,69 @@ class TestSlibDigitTemplate:
         assert s.subpaths[0].template_digit == 1
 
 
+class TestConsumptionLaw:
+    """offset 即载荷 f32 索引通用律（2026-10-20 定案，全库 984/984）。
+
+    元素模板 offset = 该元素载荷区起始 f32 索引；默认 2×marker 律
+    只是 offset 与 marker 一致的特例（388/147/16|0 变体实证）。
+    """
+
+    @staticmethod
+    def _style(f32, elems, solid=False):
+        from pymapgis.linesty import Element, LineStyle, SubLine
+        if solid:
+            sl = SubLine(n=1, length=24,
+                         elements=[Element(unit=0, marker=2, offset=0)],
+                         f32_zone=list(f32), f32_start=8)
+            sl.width = f32[2] if len(f32) > 2 else None
+            sl.yoff = f32[1] if len(f32) > 1 else None
+        else:
+            sl = SubLine(n=len(elems), length=2 + 6 * len(elems) + 4 * len(f32),
+                         elements=[Element(unit=u, marker=m, offset=o)
+                                   for u, m, o in elems],
+                         f32_zone=list(f32), f32_start=2 + 6 * len(elems))
+        return LineStyle(no=900, n_subs=1, sublines=[sl])
+
+    def test_default_law_case(self) -> None:
+        # 3|0：(0,2,0),(3,3,4) → 区间 [(0,4),(4,10)]
+        sl = self._style([0.0] * 10, ((0, 2, 0), (3, 3, 4))).sublines[0]
+        assert sl.consumption == [(0, 4), (4, 10)]
+
+    def test_triple_variant_16(self) -> None:
+        # 16|0：4 引用 offset 0/3/6/9 → 三元组区间
+        sl = self._style([0.0] * 12, ((258, 2, 0), (258, 2, 3),
+                                      (258, 2, 6), (259, 2, 9))).sublines[0]
+        assert sl.consumption == [(0, 3), (3, 6), (6, 9), (9, 12)]
+
+    def test_mixed_variant_388(self) -> None:
+        # 388|0：offset 0/12/15/18/21/24/27/30/34 → [12,3,3,3,3,3,3,4,4]
+        elems = ((1, 6, 0), (2, 2, 12), (3, 2, 15), (2, 2, 18), (3, 2, 21),
+                 (2, 2, 24), (3, 2, 27), (0, 2, 30), (0, 2, 34))
+        sl = self._style([0.0] * 38, elems).sublines[0]
+        assert sl.consumption == [(0, 12), (12, 15), (15, 18), (18, 21),
+                                  (21, 24), (24, 27), (27, 30), (30, 34),
+                                  (34, 38)]
+
+    def test_147_refs_variant(self) -> None:
+        # 147|0：12 三元组引用 + 3 线对
+        elems = [(2562, 2, 3 * i) for i in range(12)] + \
+                [(768, 2, 36 + 4 * i) for i in range(3)]
+        sl = self._style([0.0] * 48, elems).sublines[0]
+        iv = sl.consumption
+        assert iv[:12] == [(3 * i, 3 * i + 3) for i in range(12)]
+        assert iv[12:] == [(36, 40), (40, 44), (44, 48)]
+
+    def test_solid_pen(self) -> None:
+        sl = self._style([0.0, -0.0012, 0.635, -0.0012], (), solid=True).sublines[0]
+        assert sl.consumption == [(0, 4)]
+        assert sl.seg == (0.0, -0.0012, 0.635, -0.0012)
+
+    def test_unresolvable_honest_none(self) -> None:
+        # offset 非单调 → None
+        sl = self._style([0.0] * 8, ((0, 2, 4), (0, 2, 0))).sublines[0]
+        assert sl.consumption is None
+
+
 class TestFeatureRhythm:
     """线型 3 节奏裁定读法（2026-10-19 用户逐行目视定案，3|x 六行）。
 

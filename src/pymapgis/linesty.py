@@ -19,8 +19,13 @@
     3    画点（线型 4 裁定回溯）
     ≥5   子图号（258/259=圆点单元，形状实证；32/35 短线段嫌疑待裁定）
   marker = 该元素消费的载荷点数（211：5+2=7 恰合全部载荷点 ✓）
-  offset = 元素在周期内的位置，0.1mm 单位（211：元素 1 @10 → 周期 1.0mm；
-           16/17 的 3/6/9 = 0.3mm 点距同律佐证）
+  offset = **该元素载荷区的起始 f32 索引**（2026-10-20 通用律定案，
+           全库 984/984 子线成立；消费区间 = [offset_i, offset_{i+1})，
+           默认 2×marker 律是 offset 与 marker 一致的特例——388/147/
+           16|0 变体实证 offset 差 3 = (x,y,r) 三元组）；同时保留
+           0.1mm 布局位置语义（211 元素@10 → 周期 1.0mm、16/17 的
+           3/6/9 = 0.3mm 点距同律佐证——双语义并存，见
+           SubLine.consumption）
 
 f32 载荷区三型：
   - 坐标列型：含 unit=1 且 Σmarker×2 == 载荷数 → 载荷 = (x,y) 点列
@@ -746,13 +751,65 @@ class SubLine:
 
     @property
     def is_coord_list(self) -> bool:
-        """坐标列型：含 unit=1（填充多边形）元素 且 Σmarker×2 == 载荷 f32 数
-        （211 锚定；unit=1 为坐标列族的裁定标志——节奏表型载荷长度
-        巧合相等时不得误判，故以 unit=1 为必要条件）。"""
+        """坐标列型：含 unit=1（填充多边形）元素且消费区间铺满载荷
+        （211 锚定；unit=1 为坐标列族的裁定标志。长度律校验改用
+        consumption 通用律——388 的 44≠38 变体在旧 Σmarker×2 校验下
+        漏认 unit=1 填充，interval 律下正确入族）。"""
         if self.is_solid or not self.f32_zone:
             return False
-        return (any(e.is_filled_poly for e in self.elements)
-                and sum(e.marker for e in self.elements) * 2 == len(self.f32_zone))
+        if not any(e.is_filled_poly for e in self.elements):
+            return False
+        iv = self.consumption
+        if iv is None:
+            return sum(e.marker for e in self.elements) * 2 == len(self.f32_zone)
+        return iv[-1][1] == len(self.f32_zone)
+
+    @property
+    def consumption(self) -> Optional[List[Tuple[int, int]]]:
+        """元素载荷消费区间（f32 索引对）——**offset 即载荷索引**通用律。
+
+        2026-10-20 定案：元素模板的 offset 字段 = 该元素载荷区的
+        起始 f32 索引（全库 984/984 子线成立、0 违例）；区间 =
+        [offset_i, offset_{i+1})，末元素到载荷尾。默认 2×marker 律
+        只是 offset 恰好与 marker 一致的**特例**（388/147/16|0 等
+        变体实证：offset 差 3 = (x,y,r) 三元组、4 = 线对……）。
+        区间不可解（offset 非单调或越界）返回 None（诚实拒解）。
+        """
+        if not self.elements:
+            return None
+        n = len(self.f32_zone)
+        if self.is_solid:
+            if n == 4 and self.elements[0].offset == 0:
+                return [(0, 4)]
+            return None
+        starts = [e.offset for e in self.elements]
+        if starts[0] != 0 or any(b < a for a, b in zip(starts, starts[1:])):
+            return None
+        out = [(starts[i], starts[i + 1] if i + 1 < len(starts) else n)
+               for i in range(len(starts))]
+        if any(hi > n or hi <= lo for lo, hi in out):
+            return None
+        return out
+
+    def payload_groups(self) -> List[Tuple["Element", List[float]]]:
+        """按消费区间切片：[(元素, 该元素的 f32 载荷), ...]。
+
+        消费律 = consumption（offset 即载荷索引）；不可解时按默认
+        2×marker 退化（兼容旧行为）并截断。
+        """
+        f = self.f32_zone
+        out: List[Tuple["Element", List[float]]] = []
+        iv = self.consumption
+        if iv is not None:
+            for e, (lo, hi) in zip(self.elements, iv):
+                out.append((e, f[lo:hi]))
+            return out
+        acc = 0
+        for e in self.elements:
+            n = 2 * e.marker
+            out.append((e, f[acc:acc + n]))
+            acc += n
+        return out
 
     @property
     def unit_kinds(self) -> Dict[str, int]:
@@ -965,6 +1022,7 @@ def classify_form(style: LineStyle) -> Tuple[str, str]:
     dots = syms = aux = gaps = filled = 0
     strokes = 0
     stroke_w = 0.0
+    explicit = 0
     coord = inline = False
     for sub in style.sublines:
         kinds = sub.unit_kinds
@@ -976,10 +1034,19 @@ def classify_form(style: LineStyle) -> Tuple[str, str]:
         coord = coord or sub.is_coord_list
         inline = inline or sub.inline_pattern is not None
         if sub.is_solid and (sub.width or 0) >= SUBLINE_VISIBLE_MIN_MM:
+            # 2026-10-20 语义修正：@16 = 笔段终点 x1（575 裁定）——
+            # 可见性门改为"段长 ≥ 0.1mm"（1|0 段长 1.0、16/17 族
+            # 隐匿笔段长 0.078 的判读结论不变，语义重新锚定）
             strokes += 1
             stroke_w = max(stroke_w, sub.width or 0)
+        # 显式线对（unit=0/5 的 2 对载荷）= 线分量（9|0/233|0/334|0/
+        # 455|0 审计：基线被旧 24B-only 判据漏认——只入证据串，
+        # 分类门不变，形态分类学缺口挂账）
+        explicit += sum(1 for e, vals in sub.payload_groups()
+                        if e.unit in (0, 5) and len(vals) >= 4)
     ev = (f"{len(style.sublines)} 子线[点{dots} 子图{syms} 填充多边形{filled} "
-          f"随动{aux} 空{gaps}], 实线分量 {strokes}（w≤{stroke_w:.3g}mm）")
+          f"随动{aux} 空{gaps}], 实线分量 {strokes}（w≤{stroke_w:.3g}mm）, "
+          f"显式线对 {explicit}")
     if style.adjudicated:
         return (style.adjudicated, ev + "；已裁定")
     if filled or coord:
