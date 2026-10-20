@@ -84,6 +84,7 @@ M67 线型保存语义（Mpedit60.hlp"保存线型"节，2026-10-14 提取——
 """
 from __future__ import annotations
 
+import math
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -280,7 +281,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 18, 38, 48, 50, 51, 58, 153):
+    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 18, 38, 48, 50, 51, 58, 153, 223):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -521,6 +522,51 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": [(f[0], f[2])],
                 "dots": [(f[4], f[5], f[6])],
                 "period_mm": f[2]}
+    # 线型 223（2026-10-20 用户图面确认定案）：223|0 = 双正圆
+    # （填充 + 部分周长描边）+ 矩形齿（填充 + 轮廓描边）+ 细竖条 +
+    # 双基线 ±0.25。unit=1 闭合多边形经 Kåsa 拟合 + **角度覆盖门**
+    # 判别：rms≤0.002 且覆盖 ≥300° → 正圆（上圆 r=0.0122/下圆
+    # r=0.0135 实测 rms=0、覆盖 324°）；矩形齿四角近似共圆（近
+    # 正方形）被覆盖门排除（270°）——几何启发式教训。
+    # 分类按 **unit 而非几何**：unit=5 → 基线；unit≥5（768/2560 展平
+    # 链）→ 描边段（连续精确重复段去重——e16/e20/e22 零长段冗余
+    # 实证；链内水平段不冒充基线——e17 教训）。
+    if style.no == 223:
+        if aux != 0:
+            return None
+        from pymapgis.slib import _arc_coverage, fit_circle
+        circles, rects, strokes, lines = [], [], [], []
+        for unit, vals in _consume_groups(sl):
+            if unit == 1 and len(vals) >= 6:
+                pts = list(zip(vals[0::2], vals[1::2]))
+                if len(pts) > 2 and math.hypot(
+                        pts[0][0] - pts[-1][0],
+                        pts[0][1] - pts[-1][1]) < 0.003:
+                    pts = pts[:-1]
+                c = fit_circle(pts)
+                if c is not None and 0.005 < c[2] <= 1.0:
+                    rms = math.sqrt(sum(
+                        (math.hypot(x - c[0], y - c[1]) - c[2]) ** 2
+                        for x, y in pts) / len(pts))
+                    cov, _, _ = _arc_coverage(pts, c)
+                    if rms <= 0.002 and cov >= 300.0:
+                        circles.append(c)
+                        continue
+                rects.append(pts)
+            elif unit == 5 and len(vals) >= 4:
+                lines.append((vals[0], vals[2], vals[1]))
+            elif unit >= 5 and len(vals) >= 4:
+                pairs = ((vals[0], vals[1]), (vals[2], vals[3]))
+                if not strokes or strokes[-1] != pairs:
+                    strokes.append(pairs)
+        if not circles and not rects and not lines:
+            return None
+        return {"kind": "double_circle_tooth",
+                "circles": circles,
+                "rects": rects,
+                "strokes": strokes,
+                "lines": lines,
+                "period_mm": 1.0}
 
 
 def dotline_params(style: Optional[LineStyle], feature_width: float,
