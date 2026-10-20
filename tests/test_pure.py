@@ -1151,6 +1151,42 @@ class TestConsumptionLaw:
         sl = self._style([0.0] * 8, ((0, 2, 4), (0, 2, 0))).sublines[0]
         assert sl.consumption is None
 
+    def test_payload_geometry_fill_by_shape_not_unit(self) -> None:
+        """825|0 根因回归：unit=1/513 同构闭合多边形载荷均判填充。"""
+        fill_pairs = [(0.0975, 0.0739), (0.0975, 0.0729), (0.0975, 0.0739),
+                      (0.2462, -0.0748), (0.2439, -0.0748),
+                      (0.0975, -0.0748), (0.0975, 0.0729), (0.0975, 0.0739)]
+        f32 = [v for p in fill_pairs for v in p]
+        f32 += [0.2462, -0.0748, 0.2439, -0.0748, 0.2439, -0.0748,
+                0.0975, -0.0748]   # 两段描边
+        elems = ((1, 8, 0), (512, 2, 16), (512, 2, 20))
+        sl = self._style(f32, elems).sublines[0]
+        geo = sl.payload_geometry()
+        assert geo[0][0] == "fill"          # unit=1 填充
+        assert geo[1][0] == "segment"
+        # 同构载荷换 unit=513 仍判填充
+        elems2 = ((513, 8, 0), (512, 2, 16), (512, 2, 20))
+        sl2 = self._style(f32, elems2).sublines[0]
+        assert sl2.payload_geometry()[0][0] == "fill"
+
+    def test_payload_geometry_dot_and_segment(self) -> None:
+        # 16|0：三元组 → dot；17|0 混合 → dot+segment
+        sl = self._style([0.5, 0.0, 0.044] * 4,
+                         ((258, 2, 0), (258, 2, 3), (258, 2, 6), (259, 2, 9))).sublines[0]
+        geo = sl.payload_geometry()
+        assert all(k == "dot" for k, _ in geo)
+        assert geo[0][1] == (0.5, 0.0, 0.044)
+        sl = self._style([0.5, 0.1504, 0.04, 0.5, 0.1504, 0.04, 0.0, 0.0, 1.0, 0.0],
+                         ((258, 2, 0), (259, 2, 3), (5, 2, 6))).sublines[0]
+        geo = sl.payload_geometry()
+        assert [k for k, _ in geo] == ["dot", "dot", "segment"]
+        assert geo[2][1] == (0.0, 0.0, 1.0, 0.0)
+
+    def test_payload_geometry_solid_pen(self) -> None:
+        sl = self._style([0.0, -0.0012, 0.635, -0.0012], (), solid=True).sublines[0]
+        geo = sl.payload_geometry()
+        assert geo == [("segment", (0.0, -0.0012, 0.635, -0.0012))]
+
 
 class TestFeatureRhythm:
     """线型 3 节奏裁定读法（2026-10-19 用户逐行目视定案，3|x 六行）。
