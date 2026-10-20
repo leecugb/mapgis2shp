@@ -1183,6 +1183,36 @@ class TestFeatureRhythm:
         # 未裁定 aux 诚实返回 None
         assert feature_rhythm(st, 1) is None
 
+    def test_17_dash_dot_raised_payload_coords(self) -> None:
+        """17|0/17|2：基线+载荷坐标圆点（2026-10-20 用户裁定）。
+
+        (f0,f1)=圆点坐标、(f2)=半径——载荷三元组本体是库内真值；
+        10-14 参数化模型分层为图元层缩放（linedot_params）。"""
+        from pymapgis.linesty import feature_rhythm
+        # 17|0：2 引用三元组（冗余）+ unit=5 基线
+        f32 = [0.5, 0.1504, 0.04, 0.5, 0.1504, 0.04, 0.0, 0.0, 1.0, 0.0]
+        st = self._style(f32, n=3, elems=((258, 2, 0), (259, 2, 3), (5, 2, 6)),
+                         aux=0, no=17)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "dash_dot_raised"
+        assert r["dots"][0] == pytest.approx((0.5, 0.1504, 0.04), abs=1e-4)
+        assert len(r["dots"]) == 2
+        assert r["lines"][0] == pytest.approx((0.0, 1.0, 0.0), abs=1e-4)
+        assert r["period_mm"] == pytest.approx(1.0)
+        # 17|2：4 引用 r=0.012（小点变体）
+        f32 = [0.5, 0.1504, 0.012] * 4 + [0.0, 0.0, 1.0, 0.0]
+        st = self._style(f32, n=5,
+                         elems=((258, 2, 0), (258, 2, 3), (258, 2, 6),
+                                (259, 2, 9), (5, 2, 12)),
+                         aux=2, no=17)
+        r = feature_rhythm(st, 2)
+        assert r["kind"] == "dash_dot_raised"
+        assert len(r["dots"]) == 4
+        assert r["dots"][0][2] == pytest.approx(0.012, abs=1e-4)
+        # 未裁定 aux 诚实 None
+        assert feature_rhythm(st, 1) is None
+        assert feature_rhythm(st, 3) is None
+
     def test_14_0_double_line_band(self) -> None:
         from pymapgis.linesty import feature_rhythm
         # 实库 14|0：双平行线 + 左 0→0.5469 填充带（用户 2026-10-19 裁定）

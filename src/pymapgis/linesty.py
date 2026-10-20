@@ -281,7 +281,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 18, 38, 48, 50, 51, 58, 153, 223):
+    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 17, 18, 38, 48, 50, 51, 58, 153, 223):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -406,6 +406,36 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
         return {"kind": "double_line_band",
                 "lines": lines,
                 "fills": fills,
+                "period_mm": 1.0}
+    # 线型 17（2026-10-20 用户裁定）：17|0/17|2 = 基线 + 载荷坐标圆点
+    # ——(f0,f1)=圆点坐标、(f2)=半径（引用载荷三元组本体是库内真值；
+    # 10-14 参数化模型（点距 0.3/侧偏移 (W/2)×y）分层为**图元层
+    # X/Y 系数缩放**，不在库渲染生效——分层修正）。17|0 点
+    # @(0.5,0.1504) r=0.04（2 引用冗余）；17|2 点 r=0.012（4 引用
+    # 冗余）。17|1/17|3 未裁定诚实 None。
+    if style.no == 17:
+        if aux not in (0, 2):
+            return None
+        dots, lines = [], []
+        fi = 0
+        for e in sl.elements:
+            if e.unit == 5:
+                if fi + 4 > len(f):
+                    return None
+                lines.append((f[fi], f[fi + 2], f[fi + 1]))
+                fi += 4
+            elif e.unit >= UNIT_SYMBOL_MIN:
+                if fi + 3 > len(f):
+                    return None
+                dots.append((f[fi], f[fi + 1], f[fi + 2]))
+                fi += 3
+            else:
+                return None   # 未裁定元素结构 → 诚实拒解
+        if not dots or not lines:
+            return None
+        return {"kind": "dash_dot_raised",
+                "lines": lines,
+                "dots": dots,
                 "period_mm": 1.0}
     # 线型 16（16|0/16|1 走 dotline_params/PAIR_SEMANTICS；16|2 于
     # 2026-10-19 用户目视定案）：16|2 = 两段基线 + 两个抬升圆点
@@ -604,11 +634,14 @@ def dotline_params(style: Optional[LineStyle], feature_width: float,
 
 def linedot_params(style: Optional[LineStyle], feature_width: float,
                    x_coef: float = 1.0, y_coef: float = 1.0) -> Optional[dict]:
-    """线+点串族绘制参数（(17,0) 核验锚 2026-10-14，B/2 定稿）。
+    """线+点串族**图元层**绘制参数（(17,0) 核验锚 2026-10-14，B/2 定稿）。
 
-    线宽 = 点径 = 可变线宽 = 图元线宽 feature_width（不受系数影响）；
-    点距 = 库内间距（元素 offset 差×0.1mm）× X系数；
-    点侧偏移 = (线宽/2) × Y系数（x=1,y=2.5,w=0.15 → 0.1875mm 核验）。
+    分层定案（2026-10-20 用户裁定）：库内基础几何 = 载荷三元组直渲
+    （点坐标 (f0,f1)、半径 f2——见 feature_rhythm 线型 17 分支），
+    本函数是**图元层参数化缩放模型**：点距 = 库内间距（元素 offset
+    差×0.1mm）× X系数；点侧偏移 = (线宽/2) × Y系数（x=1,y=2.5,
+    w=0.15 → 0.1875mm 核验）；点径按可变线宽=图元线宽（M67 规则，
+    对 16/17 族载荷 r 实体化的适用域以 feature_rhythm 为准）。
     返回 {"line_width_mm", "radius_mm", "spacing_mm", "side_offset_mm"}。
     """
     if style is None:
