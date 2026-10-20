@@ -1231,6 +1231,20 @@ class TestFeatureRhythm:
         assert r["period_mm"] == pytest.approx(1.0)
         assert feature_rhythm(st, 1) is None
 
+    def test_575_0_long_dash(self) -> None:
+        """575|0：长划 0→0.635 + 空白 0.365（2026-10-20 用户图面裁定）。
+
+        24B 笔的 @16 f32 = 笔段终点 x1（载荷对本体），非笔宽——
+        1|0 x1=1.0 满周期、575 x1=0.635 长划的双锚。"""
+        from pymapgis.linesty import feature_rhythm, LinestyLib
+        f32 = [0.0, -0.0011692431, 0.6349577904, -0.0011692431]
+        st = self._style(f32, n=1, elems=((0, 2, 0),), aux=0, no=575)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "long_dash"
+        assert r["lines"][0] == pytest.approx((0.0, 0.635), abs=1e-3)
+        assert r["period_mm"] == pytest.approx(1.0)
+        assert feature_rhythm(st, 1) is None
+
     def test_14_0_double_line_band(self) -> None:
         from pymapgis.linesty import feature_rhythm
         # 实库 14|0：双平行线 + 左 0→0.5469 填充带（用户 2026-10-19 裁定）
