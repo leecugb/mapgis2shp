@@ -118,6 +118,16 @@ linedot_params（17 点在线侧）走独立通道。
 - 127|0、208|0 裁定流程中；14|1/14|2（sub1/sub2 变体）未裁定
 - 2|0 四笔段（0.625/0.881/0.716/0.8）在"@16=笔段终点"语义下的角色
 
+**已闭环（2026-10-20 双规消除）**：
+- dot 判定补齐 **6-f32 零尾型** (x,y,r,0,0,0)（3|0/4|0/50|0/51|0 族，
+  全库 217 个零尾元素 vs 22 个真三段折线——与 3-f32 直接型同判）
+- `_consume_groups` 委托 payload_groups（删除第二套切片逻辑）
+- classify_form 的 dot/fill 计数改走 payload_geometry（unit_kinds
+  仅保留 symbols/gap/aux 模板元数据——正交信息非双规）
+- render_ops 2|0 族实/空比由 LineStyle.rhythm() 推导
+  （0.3496/0.3008），删除手写 0.35/0.30 近似值
+- 仓内渲染脚本（boundary_all/boundary_list）全部迁移单源
+
 **已闭环（2026-10-20 优化）**：
 - **render_ops 双轨漂移根治**——入口改 rhythm 单源：feature_rhythm
   命中的 (lt, aux) 直接输出 ("rhythm", 结构体)（verdict_match=True），
