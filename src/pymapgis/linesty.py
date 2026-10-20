@@ -791,6 +791,43 @@ class SubLine:
             return None
         return out
 
+    def payload_geometry(self) -> List[Tuple[str, object]]:
+        """元素载荷几何语义（2026-10-20 定案）。
+
+        **unit 号不是语义分类依据**（825|0 填充漏画根因：unit=1/
+        513/513 同构填充三单元被 unit==1 判据漏画两个）。判据 =
+        载荷形状/尺寸，与 unit 无关：
+          - 消费区间恰 3 f32 → ("dot", (x, y, r)) 圆点三元组
+            （16/17/147/388 族，与 unit 2/3/258/2562 均同律）
+          - ≥3 对且首尾闭合(<0.003) → ("fill", [(x,y),...]) 填充
+            多边形（825 的 unit=1/513 同构、223 的 unit=1 三环）
+          - 恰 2 对 → ("segment", (x0,y0,x1,y1)) 线段
+          - 其他（多对不闭合）→ ("polyline", [(x,y),...]) 折线
+        实线笔 → 载荷对本体 ("segment", seg)。
+        消费区间不可解时按默认律退化（与 payload_groups 同）。
+        """
+        out: List[Tuple[str, object]] = []
+        if self.is_solid:
+            seg = self.seg
+            if seg is not None:
+                out.append(("segment", seg))
+            return out
+        for e, vals in self.payload_groups():
+            if len(vals) == 3:
+                out.append(("dot", (vals[0], vals[1], vals[2])))
+                continue
+            pairs = [(vals[2*j], vals[2*j + 1]) for j in range(len(vals) // 2)]
+            if len(pairs) >= 3 and math.hypot(
+                    pairs[0][0] - pairs[-1][0],
+                    pairs[0][1] - pairs[-1][1]) < 0.003:
+                out.append(("fill", pairs))
+            elif len(pairs) == 2:
+                out.append(("segment", (pairs[0][0], pairs[0][1],
+                                        pairs[1][0], pairs[1][1])))
+            elif len(pairs) >= 3:
+                out.append(("polyline", pairs))
+        return out
+
     def payload_groups(self) -> List[Tuple["Element", List[float]]]:
         """按消费区间切片：[(元素, 该元素的 f32 载荷), ...]。
 
