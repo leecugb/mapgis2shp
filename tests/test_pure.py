@@ -1225,7 +1225,11 @@ class TestFeatureRhythm:
         assert r["kind"] == "dotline_lib_r"
         assert r["dots"][0] == pytest.approx((0.5, 0.0, 0.044), abs=1e-4)
         ops = render_ops(st, 16, 0)
-        assert ops["ops"][0][1]["radius_mm"] == pytest.approx(0.044, abs=1e-4)
+        # rhythm 单源：render_ops 输出 ("rhythm", 结构体)（2026-10-20 优化）
+        assert ops["ops"][0][0] == "rhythm"
+        assert ops["verdict_match"] is True
+        assert ops["ops"][0][1]["dots"][0] == pytest.approx(
+            (0.5, 0.0, 0.044), abs=1e-4)
         # 16|1：unit=3 三元组 r=0.0781（与 16|0 不同——差别实体）
         st = self._style([0.5, 0.0, 0.0781, 0.0, 0.0, 0.0], n=1,
                          elems=((3, 3, 0),), aux=1, no=16)
@@ -1233,7 +1237,8 @@ class TestFeatureRhythm:
         assert r["kind"] == "dotline_lib_r"
         assert r["dots"][0][2] == pytest.approx(0.0781, abs=1e-4)
         ops = render_ops(st, 16, 1)
-        assert ops["ops"][0][1]["radius_mm"] == pytest.approx(0.0781, abs=1e-4)
+        assert ops["ops"][0][0] == "rhythm"
+        assert ops["ops"][0][1]["dots"][0][2] == pytest.approx(0.0781, abs=1e-4)
 
     def test_223_0_double_circle_tooth(self) -> None:
         """223|0：双正圆+矩形齿+双基线（2026-10-20 用户图面确认）。
