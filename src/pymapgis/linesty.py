@@ -281,7 +281,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 17, 18, 38, 48, 50, 51, 58, 153, 223):
+    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 17, 18, 38, 48, 50, 51, 58, 153, 223, 455):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -552,6 +552,18 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": [(f[0], f[2])],
                 "dots": [(f[4], f[5], f[6])],
                 "period_mm": f[2]}
+    # 线型 455（2026-10-20 用户图面确认）：455|0 = 基线 0→0.6504 +
+    # 斜穿短线（跨基线：0.2715,0.0762→0.3516,−0.0781）+ 基线上圆点
+    # @(0.8223,0) r=0.0547。与 57|0 同模板族（(0,2),(0,2),(3,3)——
+    # 基线+穿越记号+圆点，参数各异）；57|0 未裁定（断层域）。
+    if style.no == 455:
+        if aux != 0 or len(f) < 12:
+            return None
+        return {"kind": "line_slash_dot",
+                "lines": [(f[0], f[2])],
+                "slashes": [(f[4], f[5], f[6], f[7])],
+                "dots": [(f[8], f[9], f[10])],
+                "period_mm": 1.0}
     # 线型 223（2026-10-20 用户图面确认定案）：223|0 = 双正圆
     # （填充 + 部分周长描边）+ 矩形齿（填充 + 轮廓描边）+ 细竖条 +
     # 双基线 ±0.25。unit=1 闭合多边形经 Kåsa 拟合 + **角度覆盖门**
