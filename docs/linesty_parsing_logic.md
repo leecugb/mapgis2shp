@@ -66,6 +66,7 @@
 | mixed_dash | 水平线+竖线+圆点三分野 | 58|0、153|0 |
 | double_line_band | 双平行线+线间填充带（unit=1 矩形）| 14|0 |
 | double_circle_tooth | 双正圆（填充+部分周长描边）+矩形齿+双基线 | 223|0 |
+| line_slash_dot | 基线+斜穿短线+基线上圆点 | 455|0 |
 
 另：dotline_params（16|0/17|0 点线族，点径=图元线宽可变线宽模型）、
 linedot_params（17 点在线侧）走独立通道。
