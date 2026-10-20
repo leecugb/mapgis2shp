@@ -1177,10 +1177,25 @@ def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
 
     返回 {"ops": [...], "verdict_match": 是否命中裁定规格, "spec": 说明}。
     ops 元素为 (操作, 参数) 元组，操作 ∈
-      solid / dashed / dotline / dash_dot / solid_side_ticks /
+      rhythm / solid / dashed / dotline / dash_dot / solid_side_ticks /
       solid_teeth / parallel_solid / parallel_solid_dashed /
       solid_parallel_pairdots / rect_chain / cell_pattern
+
+    **rhythm 单源**（2026-10-20 优化）：feature_rhythm 命中的
+    (lt, aux) 直接输出 ("rhythm", 结构体)——手写 ops 参数与 rhythm
+    结构双轨漂移（3|0/4|0 周期两套值、17|0 侧偏移口径、7|0 圆点
+    误判）的结构性根治；未命中者走裁定表/推导链。
     """
+    if style is not None:
+        rhy = feature_rhythm(style, aux)
+        if rhy is not None:
+            key = f"{linetype}|{aux}"
+            spec = ADJUDICATED_STRUCTS.get(key)
+            if spec is None and aux == 0:
+                spec = ADJUDICATED_STRUCTS.get(str(linetype))
+            return {"ops": [("rhythm", rhy)],
+                    "verdict_match": True,
+                    "spec": spec or ("rhythm 单源：" + rhy["kind"])}
     key = f"{linetype}|{aux}"
     spec = ADJUDICATED_STRUCTS.get(key)
     if spec is None and aux == 0:
