@@ -170,21 +170,11 @@ def compose_feature_style(lib: "LinestyLib", linetype: int, aux: int = 0):
 def _consume_groups(sl: "SubLine") -> List[Tuple[int, list]]:
     """通用元素消费器：按元素 (unit, marker) 逐组消费 f32 载荷。
 
-    默认消费律 = marker×2 个 f32（每点 2 值）。**变体线型**（58 的
-    三元组档、127/153 的三点括号）消费律与默认不同——调用方按
-    实测覆盖，逐元素对账是纪律（127|0 漏画尾段教训）。
-    返回 [(unit, 值列表), ...]；越界诚实截断。
+    2026-10-20 双规消除：消费律委托 `SubLine.payload_groups`
+    （offset 即载荷索引通用律，默认 marker×2 只是特例）——不再
+    维护第二套逐元素切片逻辑。返回 [(unit, 值列表), ...]。
     """
-    f = sl.f32_zone
-    groups: List[Tuple[int, list]] = []
-    fi = 0
-    for e in sl.elements:
-        n = 2 * e.marker
-        if fi + n > len(f):
-            break
-        groups.append((e.unit, f[fi:fi + n]))
-        fi += n
-    return groups
+    return [(e.unit, vals) for e, vals in sl.payload_groups()]
 
 
 def _pairs_to_lines_verticals(
@@ -813,7 +803,13 @@ class SubLine:
                 out.append(("segment", seg))
             return out
         for e, vals in self.payload_groups():
-            if len(vals) == 3:
+            if len(vals) == 3 or (len(vals) == 6 and
+                                  abs(vals[3]) < 1e-9 and
+                                  abs(vals[4]) < 1e-9 and
+                                  abs(vals[5]) < 1e-9):
+                # dot 三元组两种存储：3 f32 直接型（16/17/147 族）与
+                # 6 f32 零尾型 (x,y,r,0,0,0)（3|0/4|0/50|0/51|0 族——
+                # 全库 217 个零尾元素 vs 22 个真三段折线，规则安全）
                 out.append(("dot", (vals[0], vals[1], vals[2])))
                 continue
             pairs = [(vals[2*j], vals[2*j + 1]) for j in range(len(vals) // 2)]
@@ -1062,12 +1058,19 @@ def classify_form(style: LineStyle) -> Tuple[str, str]:
     explicit = 0
     coord = inline = False
     for sub in style.sublines:
+        # 2026-10-20 双规消除：dot/fill 计数改走 payload_geometry
+        # （载荷形状单源——unit 号不是语义分类依据；6-f32 零尾点
+        # 与 825 的 unit=513 填充均正确入计）；symbols/gap/aux 是
+        # 模板元数据，保持 unit_kinds（正交信息非双规）
+        for kind, _ in sub.payload_geometry():
+            if kind == "dot":
+                dots += 1
+            elif kind == "fill":
+                filled += 1
         kinds = sub.unit_kinds
-        dots += kinds["dot"]
         syms += kinds["symbol"]
         aux += kinds["aux"]
         gaps += kinds["gap"]
-        filled += kinds["filled"]
         coord = coord or sub.is_coord_list
         inline = inline or sub.inline_pattern is not None
         if sub.is_solid and (sub.width or 0) >= SUBLINE_VISIBLE_MIN_MM:
@@ -1076,11 +1079,11 @@ def classify_form(style: LineStyle) -> Tuple[str, str]:
             # 隐匿笔段长 0.078 的判读结论不变，语义重新锚定）
             strokes += 1
             stroke_w = max(stroke_w, sub.width or 0)
-        # 显式线对（unit=0/5 的 2 对载荷）= 线分量（9|0/233|0/334|0/
+        # 显式线对（segment 类几何）= 线分量（9|0/233|0/334|0/
         # 455|0 审计：基线被旧 24B-only 判据漏认——只入证据串，
         # 分类门不变，形态分类学缺口挂账）
-        explicit += sum(1 for e, vals in sub.payload_groups()
-                        if e.unit in (0, 5) and len(vals) >= 4)
+        explicit += sum(1 for kind, _ in sub.payload_geometry()
+                        if kind == "segment")
     ev = (f"{len(style.sublines)} 子线[点{dots} 子图{syms} 填充多边形{filled} "
           f"随动{aux} 空{gaps}], 实线分量 {strokes}（w≤{stroke_w:.3g}mm）, "
           f"显式线对 {explicit}")
@@ -1211,8 +1214,21 @@ def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
     if key == "1|0" or (linetype == 1 and aux == 0 and style is None):
         ops = [T("solid", width_mm=W)]
         spec = ADJUDICATED_STRUCTS.get("1|0", "单实线")
-    elif key == "2|0":
-        ops = [T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef)]
+    elif linetype == 2:
+        # 2|0/2|1/2|4/2|18 同族（用户 10-16 裁定：等价 2|0 纯虚线；
+        # 2|1 实>空环状——同节奏规格不改形状）。**双规消除**：实/空
+        # 比由 LineStyle.rhythm() 的沿线节奏推导（0.3496/0.3008），
+        # 不再手写 0.35/0.30 近似值。
+        rhy = style.rhythm() if style is not None else None
+        if rhy and rhy["segments"]:
+            ons = [(b - a) for a, b, _ in rhy["segments"]]
+            offs = [rhy["segments"][k + 1][0] - rhy["segments"][k][1]
+                    for k in range(len(rhy["segments"]) - 1)]
+            on = (min(ons) if ons else 0.35) * x_coef
+            off = (min(offs) if offs else 0.30) * x_coef
+        else:
+            on, off = 0.35 * x_coef, 0.30 * x_coef
+        ops = [T("dashed", on_mm=on, off_mm=off)]
     elif key == "1|1" or (linetype == 1 and aux == 1):
         ops = [T("solid", width_mm=W)]
     elif key == "1|2" or (linetype == 1 and aux == 2):
@@ -1220,13 +1236,6 @@ def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
     elif key in ("1|5", "1|7", "1|16") or (linetype == 1 and aux in (5, 7, 16)):
         # 用户 10-16 裁定：aux=5/7/16 等价 (1,0) 单实线
         ops = [T("solid", width_mm=W)]
-    elif key == "2|1" or (linetype == 2 and aux == 1):
-        # 用户 10-16 裁定：实>空 虚线（环状用法=火山洼地构造）；
-        # 同 (2,0) 节奏规格，aux=1 不改形状（比照 (4,0)/(4,1) 先例）
-        ops = [T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef)]
-    elif key in ("2|4", "2|18") or (linetype == 2 and aux in (4, 18)):
-        # 用户 10-16 裁定：等价 (2,0) 纯虚线
-        ops = [T("dashed", on_mm=0.35 * x_coef, off_mm=0.30 * x_coef)]
     elif key == "10|0" or (linetype == 10 and aux == 0):
         # 用户 10-16 裁定：平行双实线（区域性复合断层）
         ops = [T("parallel_solid", gap_mm=0.18, width_mm=W)]
