@@ -1111,6 +1111,31 @@ class TestFeatureRhythm:
         sublines[aux] = sl
         return LineStyle(no=no, n_subs=6, sublines=sublines)
 
+    def test_16_dotline_lib_r(self) -> None:
+        """16|0/16|1 纯圆点串：库内 r 直渲（2026-10-20 用户裁定）。
+
+        载荷 = 三元组 (x,y,r) × 引用数（子图引用与 unit=3 同构消费律）；
+        16|0 r=0.044 与 16|1 r=0.0781 是差别实体，M67 可变线宽替换
+        规则本族限定适用域——render_ops 不得统一替换为图元线宽。"""
+        from pymapgis.linesty import feature_rhythm, render_ops
+        # 16|0：4 引用三元组 r=0.044
+        st = self._style([0.5, 0.0, 0.044] * 4, n=4,
+                         elems=((258, 2, 0), (258, 2, 3), (258, 2, 6), (259, 2, 9)),
+                         aux=0, no=16)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "dotline_lib_r"
+        assert r["dots"][0] == pytest.approx((0.5, 0.0, 0.044), abs=1e-4)
+        ops = render_ops(st, 16, 0)
+        assert ops["ops"][0][1]["radius_mm"] == pytest.approx(0.044, abs=1e-4)
+        # 16|1：unit=3 三元组 r=0.0781（与 16|0 不同——差别实体）
+        st = self._style([0.5, 0.0, 0.0781, 0.0, 0.0, 0.0], n=1,
+                         elems=((3, 3, 0),), aux=1, no=16)
+        r = feature_rhythm(st, 1)
+        assert r["kind"] == "dotline_lib_r"
+        assert r["dots"][0][2] == pytest.approx(0.0781, abs=1e-4)
+        ops = render_ops(st, 16, 1)
+        assert ops["ops"][0][1]["radius_mm"] == pytest.approx(0.0781, abs=1e-4)
+
     def test_14_0_double_line_band(self) -> None:
         from pymapgis.linesty import feature_rhythm
         # 实库 14|0：双平行线 + 左 0→0.5469 填充带（用户 2026-10-19 裁定）

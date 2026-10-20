@@ -411,6 +411,20 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     # （(x,y,r) 三元组各 ×2 冗余：@(0.2541,0.1504)/@(0.7541,0.1504)
     # r=0.02）+ 尾段两线（连续对成线），周期 1.0
     if style.no == 16:
+        if aux in (0, 1):
+            # 2026-10-20 用户裁定：16|0/16|1 = 纯圆点串，**库内 r 直渲**
+            # （16|0 r=0.044 / 16|1 r=0.0781 是差别实体，M67 可变线宽
+            # 替换规则本族限定适用域）；载荷 = 三元组 (x,y,r) × 引用数
+            n_ref = len([e for e in sl.elements
+                         if e.unit >= UNIT_SYMBOL_MIN or e.is_dot])
+            if n_ref < 1 or len(f) < 3:
+                return None
+            dots = [(f[3 * i], f[3 * i + 1], f[3 * i + 2])
+                    for i in range(n_ref)]
+            return {"kind": "dotline_lib_r",
+                    "lines": [],
+                    "dots": dots,
+                    "period_mm": 1.0}
         if aux != 2 or len(f) < 20:
             return None
         dots = [(f[0], f[1], f[2]), (f[6], f[7], f[8])]
@@ -1003,7 +1017,18 @@ def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
         ops = [T("solid", width_mm=W, y_mm=0.09),
                T("solid", width_mm=W / 2.0, y_mm=-0.09)]
     elif key in ("16|0", "16|1") or (linetype == 16 and aux in (0, 1)):
-        ops = [T("dotline", radius_mm=r, spacing_mm=0.3 * x_coef, baseline=False)]
+        # 2026-10-20 用户裁定：16|0/16|1 图面点径**不同**（库内 r=0.044/
+        # 0.0781 是**绝对点径**而非可变标记）——M67"可变线宽替换"规则
+        # 在本族限定适用域，按库内 r 直渲（0.3 点距 × x 系数不变）
+        sub = style.sublines[aux] if (style and aux < len(style.sublines)) else None
+        lib_r = None
+        if sub is not None:
+            for i, e in enumerate(sub.elements):
+                if (e.unit >= UNIT_SYMBOL_MIN or e.is_dot) and 3 * (i + 1) <= len(sub.f32_zone):
+                    lib_r = sub.f32_zone[3 * i + 2]
+                    break
+        r_lib = lib_r if lib_r is not None else r
+        ops = [T("dotline", radius_mm=r_lib, spacing_mm=0.3 * x_coef, baseline=False)]
     elif key == "17|0" or (linetype == 17 and aux == 0):
         ops = [T("solid", width_mm=W),
                T("dotline", radius_mm=r, spacing_mm=0.3 * x_coef,
