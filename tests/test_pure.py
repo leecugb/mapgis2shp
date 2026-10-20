@@ -1213,6 +1213,24 @@ class TestFeatureRhythm:
         assert feature_rhythm(st, 1) is None
         assert feature_rhythm(st, 3) is None
 
+    def test_455_0_line_slash_dot(self) -> None:
+        """455|0：基线+斜穿线+基线上圆点（2026-10-20 用户图面确认）。
+
+        与 57|0 同模板族（(0,2),(0,2),(3,3)），参数各异。"""
+        from pymapgis.linesty import feature_rhythm
+        f32 = [0.0, 0.0, 0.6504, 0.0, 0.2715, 0.0762, 0.3516, -0.0781,
+               0.8223, 0.0, 0.0547, 0.0, 0.0, 0.0]
+        st = self._style(f32, n=3, elems=((0, 2, 0), (0, 2, 4), (3, 3, 8)),
+                         aux=0, no=455)
+        r = feature_rhythm(st, 0)
+        assert r["kind"] == "line_slash_dot"
+        assert r["lines"][0] == pytest.approx((0.0, 0.6504), abs=1e-4)
+        assert r["slashes"][0] == pytest.approx(
+            (0.2715, 0.0762, 0.3516, -0.0781), abs=1e-4)
+        assert r["dots"][0] == pytest.approx((0.8223, 0.0, 0.0547), abs=1e-4)
+        assert r["period_mm"] == pytest.approx(1.0)
+        assert feature_rhythm(st, 1) is None
+
     def test_14_0_double_line_band(self) -> None:
         from pymapgis.linesty import feature_rhythm
         # 实库 14|0：双平行线 + 左 0→0.5469 填充带（用户 2026-10-19 裁定）
