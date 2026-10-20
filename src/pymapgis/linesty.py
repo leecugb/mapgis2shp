@@ -281,7 +281,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 17, 18, 38, 48, 50, 51, 58, 153, 223, 455):
+    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 17, 18, 38, 48, 50, 51, 58, 153, 223, 455, 575):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -552,6 +552,16 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                 "lines": [(f[0], f[2])],
                 "dots": [(f[4], f[5], f[6])],
                 "period_mm": f[2]}
+    # 线型 575（2026-10-20 用户图面裁定）：575|0 = 长划段 0→0.635 +
+    # 空白 0.365（周期 1.0）。24B 笔的 @16 f32 = **笔段终点 x1**
+    # （1|0 实证 x1=1.0 满周期；575 实证 x1=0.635 长划——旧"宽@16"
+    # 标注系早年误读；2|0 四笔段角色挂账）。
+    if style.no == 575:
+        if aux != 0 or len(f) < 4:
+            return None
+        return {"kind": "long_dash",
+                "lines": [(f[0], f[2])],
+                "period_mm": 1.0}
     # 线型 455（2026-10-20 用户图面确认）：455|0 = 基线 0→0.6504 +
     # 斜穿短线（跨基线：0.2715,0.0762→0.3516,−0.0781）+ 基线上圆点
     # @(0.8223,0) r=0.0547。与 57|0 同模板族（(0,2),(0,2),(3,3)——
@@ -714,10 +724,21 @@ class SubLine:
     elements: List[Element] = field(default_factory=list)
     f32_zone: List[float] = field(default_factory=list)  # 载荷区 f32 序列
     f32_start: int = 0                                    # 载荷区在子线内的偏移
-    # 实线型（n=1 且 24B）字段
+    # 实线型（n=1 且 24B）字段。
+    # 2026-10-20 语义修正：@16 f32 = **笔段终点 x1**（载荷对
+    # (0,yoff)→(x1,yoff) 即笔的绘制段——1|0 x1=1.0 满周期、
+    # 575 x1=0.635 长划+空 0.365）；旧"宽@16"标注系早年误读。
+    # 字段名 width 保留兼容，语义见 seg 属性；2|0 四笔段角色挂账。
     color: Optional[int] = None
     width: Optional[float] = None
     yoff: Optional[float] = None
+
+    @property
+    def seg(self) -> Optional[Tuple[float, float, float, float]]:
+        """实线笔的绘制段 (x0,y0,x1,y1)（24B 载荷对本体）。"""
+        if not self.is_solid or len(self.f32_zone) < 4:
+            return None
+        return tuple(self.f32_zone[:4])
 
     @property
     def is_solid(self) -> bool:
@@ -917,7 +938,9 @@ class LinestyLib:
             arr = np.frombuffer(self.data, dtype="<f4", count=n_f32,
                                 offset=ptr + sub.f32_start).astype(np.float64)
             sub.f32_zone = np.where(np.abs(arr) <= 1e8, arr, np.nan).tolist()
-        # 实线型字段（n=1 且 24B）
+        # 实线型字段（n=1 且 24B）：色@2；@16 f32 = 笔段终点 x1
+        # （2026-10-20 语义修正——载荷对 (0,yoff)→(x1,yoff) 即绘制段，
+        # 旧"宽@16"系早年误读；@20 = 纵向偏移 yoff）
         if sub.is_solid:
             sub.color = _U16.unpack_from(self.data, ptr + 2)[0]
             sub.width = _F32.unpack_from(self.data, ptr + 16)[0]
