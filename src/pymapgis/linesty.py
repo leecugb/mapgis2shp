@@ -291,12 +291,19 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                         "lines": [(s.seg[0], s.seg[2])],
                         "period_mm": 1.0}
         return None
+    # 线型 2（2026-10-21 用户裁定细化）：**仅 x>4 时 2|x 等价 2|0**
+    # （暂定）——库变体为 2|0–2|4（5 子线），x>4（2|9/2|18 等）是
+    # 数据字段对，MapGIS 库界面不存在，aux 不渲染。2|0–2|4 属子线
+    # 变体族：2|1/2|4 有 10-16 纯虚线等价裁定，2|2/2|3 未裁定
+    # 诚实 None。**暂定**——若某 2|x 证有形态分化再修订。
+    # 置于 aux 范围守卫之前——2 族 x>4 的 aux 不索引子线。
     if style.no == 2:
-        rhy = style.rhythm()
-        if rhy and rhy["segments"]:
-            return {"kind": "inline_dash",
-                    "lines": [(a, b) for a, b, _y in rhy["segments"]],
-                    "period_mm": rhy["period_mm"]}
+        if aux == 0 or aux in (1, 4) or aux > 4:
+            rhy = style.rhythm()
+            if rhy and rhy["segments"]:
+                return {"kind": "inline_dash",
+                        "lines": [(a, b) for a, b, _y in rhy["segments"]],
+                        "period_mm": rhy["period_mm"]}
         return None
     if not (0 <= aux < len(style.sublines)):
         return None

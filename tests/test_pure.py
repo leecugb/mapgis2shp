@@ -1458,12 +1458,15 @@ class TestFeatureRhythm:
                      f32_zone=[0.0, 0.0, 0.3496, 0.0, 0.6504, 0.0,
                                1.0, 0.0], f32_start=14)
         st = LineStyle(no=2, n_subs=2, sublines=[pen, sl])
-        for aux in (0, 9, 18):
+        for aux in (0, 1, 4, 9, 18):
             r = feature_rhythm(st, aux)
             assert r["kind"] == "inline_dash", aux
             assert r["lines"][0] == pytest.approx((0.0, 0.3496), abs=1e-4)
             assert r["lines"][1] == pytest.approx((0.6504, 1.0), abs=1e-4)
             assert r["period_mm"] == pytest.approx(1.0)
+        # 2|2/2|3 子线变体未裁定 → 诚实 None
+        for aux in (2, 3):
+            assert feature_rhythm(st, aux) is None, aux
 
     def test_575_0_long_dash(self) -> None:
         """575|0：长划 0→0.635 + 空白 0.365（2026-10-20 用户图面裁定）。
