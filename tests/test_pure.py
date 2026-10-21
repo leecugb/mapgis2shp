@@ -1207,6 +1207,29 @@ class TestConsumptionLaw:
         assert geo == [("segment", (0.0, -0.0012, 0.635, -0.0012))]
 
 
+class TestColorLib:
+    """Colorlib.lib 色表（2026-10-21 四锚定案，用户图面核验）。
+
+    offset = 16 + 色号×4；条目 on-disk = (K, C, M, Y)。
+    """
+
+    def test_four_anchors(self) -> None:
+        from pymapgis.colorlib import ColorLib
+        lib = ColorLib(r"D:\SLIB\Colorlib.lib")
+        assert lib.rgb(1) == (0, 0, 0)            # 黑（K=255）
+        assert lib.rgb(9) == (255, 255, 255)      # 白（全零）
+        assert lib.rgb(175) == (255, 0, 0)        # 纯红（M+Y）
+        assert lib.rgb(173) == (255, 163, 163)    # 淡桃红（用户复核锚）
+        assert lib.kcmy(175) == (0, 0, 255, 255)
+
+    def test_out_of_range_none(self) -> None:
+        from pymapgis.colorlib import ColorLib
+        lib = ColorLib(r"D:\SLIB\Colorlib.lib")
+        assert lib.rgb(-1) is None
+        assert lib.rgb(lib.max_no + 1) is None
+        assert lib.rgb01(3) is not None
+
+
 class TestFeatureRhythm:
     """线型 3 节奏裁定读法（2026-10-19 用户逐行目视定案，3|x 六行）。
 
