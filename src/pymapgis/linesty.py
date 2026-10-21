@@ -276,20 +276,27 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (1, 3, 4, 5, 7, 14, 16, 17, 18, 21, 38, 48, 50, 51, 58, 153, 223, 388, 455, 575):
+    if style is None or style.no not in (1, 2, 3, 4, 5, 7, 14, 16, 17, 18, 21, 38, 48, 50, 51, 58, 153, 223, 388, 455, 575):
         return None
-    # 线型 1（2026-10-21 用户**暂定策略**）：1|x 等价 1|0 = 单实线。
-    # 库结构：线型 1 仅 1 条 24B 实线笔子线（MapGIS 库界面无 aux
-    # 变体）；aux 字段 = 用法/编图元数据，不参与渲染。10-16 裁定
-    # 1|1/1|2/1|5/1|7/1|16 等价 1|0；全域 9 万余条 1|x 无形态分化
-    # 证据。**暂定**：若未来某 1|x 证有形态分化，按图面裁定修订。
-    # 置于 aux 范围守卫之前——1 族的 aux 不索引子线。
+    # 线型 1/2（2026-10-21 用户暂定策略）：1|x 等价 1|0、2|x 等价 2|0
+    # ——aux 不渲染。库结构：两记录子线数有限（1 族 1 条、2 族 5 条
+    # → 库变体 1|0 / 2|0–2|4），越界 aux（1|1/1|7/2|9/2|18 等）是
+    # 数据字段对，MapGIS 库界面不存在；10-16 裁定 2|1/2|4/2|18
+    # 等价 2|0 佐证。**暂定**：若某 2|x 证有形态分化再修订。
+    # 置于 aux 范围守卫之前——1/2 族的 aux 不索引子线。
     if style.no == 1:
         for s in style.sublines:
             if s.is_solid and s.seg is not None:
                 return {"kind": "solid_pen",
                         "lines": [(s.seg[0], s.seg[2])],
                         "period_mm": 1.0}
+        return None
+    if style.no == 2:
+        rhy = style.rhythm()
+        if rhy and rhy["segments"]:
+            return {"kind": "inline_dash",
+                    "lines": [(a, b) for a, b, _y in rhy["segments"]],
+                    "period_mm": rhy["period_mm"]}
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
