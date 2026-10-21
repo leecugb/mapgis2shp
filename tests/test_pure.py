@@ -1170,17 +1170,36 @@ class TestConsumptionLaw:
         assert sl2.payload_geometry()[0][0] == "fill"
 
     def test_payload_geometry_dot_and_segment(self) -> None:
-        # 16|0：三元组 → dot；17|0 混合 → dot+segment
+        # 16|0：三元组 → dot（filled=True——r=0.044 中间带 unit=258 引用）
         sl = self._style([0.5, 0.0, 0.044] * 4,
                          ((258, 2, 0), (258, 2, 3), (258, 2, 6), (259, 2, 9))).sublines[0]
         geo = sl.payload_geometry()
         assert all(k == "dot" for k, _ in geo)
-        assert geo[0][1] == (0.5, 0.0, 0.044)
+        assert geo[0][1] == (0.5, 0.0, 0.044, True)
         sl = self._style([0.5, 0.1504, 0.04, 0.5, 0.1504, 0.04, 0.0, 0.0, 1.0, 0.0],
                          ((258, 2, 0), (259, 2, 3), (5, 2, 6))).sublines[0]
         geo = sl.payload_geometry()
         assert [k for k, _ in geo] == ["dot", "dot", "segment"]
         assert geo[2][1] == (0.0, 0.0, 1.0, 0.0)
+
+    def test_payload_geometry_dot_fill_rule(self) -> None:
+        """dot 填充控制逻辑（2026-10-21 用户裁定族）。
+
+        r < 0.02 → 实心（574|0 小点锚）；r ≥ 0.075 → 空圈（379/574/565
+        大点锚）；中间带 0.02–0.075 按 unit 裁定（unit=2 空、unit=3/
+        引用 实——379|0 unit=2 r=0.05 空、16|0 unit=258 r=0.044 实）。
+        """
+        # r=0.01 小点 → 实心
+        sl = self._style([0.5, 0.0, 0.01], ((3, 1, 0),)).sublines[0]
+        assert sl.payload_geometry()[0][1][3] is True
+        # r=0.10 大点 → 空圈
+        sl = self._style([0.5, 0.0, 0.10], ((514, 1, 0),)).sublines[0]
+        assert sl.payload_geometry()[0][1][3] is False
+        # r=0.05 中间带：unit=2 → 空、unit=3 → 实
+        sl = self._style([0.5, 0.0, 0.05], ((2, 1, 0),)).sublines[0]
+        assert sl.payload_geometry()[0][1][3] is False
+        sl = self._style([0.5, 0.0, 0.05], ((3, 1, 0),)).sublines[0]
+        assert sl.payload_geometry()[0][1][3] is True
 
     def test_payload_geometry_solid_pen(self) -> None:
         sl = self._style([0.0, -0.0012, 0.635, -0.0012], (), solid=True).sublines[0]
@@ -1357,7 +1376,8 @@ class TestFeatureRhythm:
         assert len(r["rects"]) == 1
         assert r["rects"][0][0] == pytest.approx((0.0, 0.0508), abs=1e-4)
         assert len(r["dots"]) == 6
-        assert r["dots"][0] == pytest.approx((0.8008, 0.0, 0.0293), abs=1e-4)
+        assert r["dots"][0][:3] == pytest.approx((0.8008, 0.0, 0.0293), abs=1e-4)
+        assert r["dots"][0][3] is False   # r=0.0293 中间带 unit=3 → 实
         assert len(r["bars"]) == 2
         assert r["bars"][0] == pytest.approx((0.0, -0.0996, 0.0996), abs=1e-4)
         # 21|2：unit=32/33/35 引用存储，同形
@@ -1379,7 +1399,8 @@ class TestFeatureRhythm:
         r = feature_rhythm(st21, 2)
         assert r["kind"] == "filled_rect_dot_bars"
         assert len(r["rects"]) == 1
-        assert r["dots"][0] == pytest.approx((0.8008, 0.0, 0.0293), abs=1e-4)
+        assert r["dots"][0][:3] == pytest.approx((0.8008, 0.0, 0.0293), abs=1e-4)
+        assert r["dots"][0][3] is True    # r=0.0293 中间带 unit=35 引用 → 实
         # 未裁定 aux 诚实 None
         assert feature_rhythm(st388, 1) is None
         assert feature_rhythm(st21, 0) is None

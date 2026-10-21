@@ -809,13 +809,18 @@ class SubLine:
         return out
 
     def payload_geometry(self) -> List[Tuple[str, object]]:
-        """元素载荷几何语义（2026-10-20 定案）。
+        """元素载荷几何语义（2026-10-20 定案 + 10-21 填充裁定）。
 
         **unit 号不是语义分类依据**（825|0 填充漏画根因：unit=1/
         513/513 同构填充三单元被 unit==1 判据漏画两个）。判据 =
         载荷形状/尺寸，与 unit 无关：
-          - 消费区间恰 3 f32 → ("dot", (x, y, r)) 圆点三元组
-            （16/17/147/388 族，与 unit 2/3/258/2562 均同律）
+          - 消费区间恰 3 f32 或 6 f32 零尾 → ("dot", (x, y, r,
+            filled)) 圆点三元组——**filled 按半径分派**（2026-10-21
+            用户裁定族：379|0 r=0.05 空、574|0 大点 r=0.01 空小点
+            实、565|0 大点 r=0.10 空小点 r=0.05 实）：
+            r < 0.02 → 实心；r ≥ 0.075 → 空圈；中间带 0.02–0.075
+            按线型裁定（默认 unit=2 → 空、unit=3/引用 → 实——
+            379|0 的 unit=2 空与 16|0/17|0 的引用实同构锚定）
           - ≥3 对且首尾闭合(<0.003) → ("fill", [(x,y),...]) 填充
             多边形（825 的 unit=1/513 同构、223 的 unit=1 三环）
           - 恰 2 对 → ("segment", (x0,y0,x1,y1)) 线段
@@ -837,7 +842,16 @@ class SubLine:
                 # dot 三元组两种存储：3 f32 直接型（16/17/147 族）与
                 # 6 f32 零尾型 (x,y,r,0,0,0)（3|0/4|0/50|0/51|0 族——
                 # 全库 217 个零尾元素 vs 22 个真三段折线，规则安全）
-                out.append(("dot", (vals[0], vals[1], vals[2])))
+                r = vals[2]
+                if r < 0.02:
+                    filled = True          # 小点实心（574|0 锚）
+                elif r >= 0.075:
+                    filled = False         # 大点空圈（379/574/565 锚）
+                else:
+                    filled = (e.unit != 2)  # 中间带：unit=2 空、
+                                            # unit=3/引用 实（379|0/
+                                            # 16|0/17|0 锚）
+                out.append(("dot", (vals[0], vals[1], vals[2], filled)))
                 continue
             pairs = [(vals[2*j], vals[2*j + 1]) for j in range(len(vals) // 2)]
             if len(pairs) >= 3 and math.hypot(
