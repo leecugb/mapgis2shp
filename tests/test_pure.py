@@ -1425,6 +1425,20 @@ class TestFeatureRhythm:
         assert r["period_mm"] == pytest.approx(1.0)
         assert feature_rhythm(st, 3) is None
 
+    def test_1x_solid_pen_provisional(self) -> None:
+        """1|x 等价 1|0 单实线（2026-10-21 用户暂定策略）。
+
+        线型 1 仅 1 条 24B 实线笔子线；aux 不参与渲染（MapGIS 库
+        界面无 aux 变体实证）——1|0/1|7/1|256 全同判 solid_pen。"""
+        from pymapgis.linesty import feature_rhythm
+        f32 = [0.0, 0.0, 1.0, 0.0]
+        for aux in (0, 1, 7, 256):
+            st = self._style(f32, n=1, elems=((0, 2, 0),), aux=0, no=1)
+            r = feature_rhythm(st, aux)
+            assert r["kind"] == "solid_pen", aux
+            assert r["lines"][0] == pytest.approx((0.0, 1.0), abs=1e-6)
+            assert r["period_mm"] == pytest.approx(1.0)
+
     def test_575_0_long_dash(self) -> None:
         """575|0：长划 0→0.635 + 空白 0.365（2026-10-20 用户图面裁定）。
 
