@@ -303,10 +303,12 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
         if aux == 0:
             if len(f) < 20:
                 return None
-            # 裁定渲染：线 0→f[2]，点1 (f[4], f[6])，点2 (f[16], f[12])；
-            # f[10]（0.551）在接受版渲染中未消费，如实注释
+            # 裁定渲染（2026-10-21 用户复核修正）：线1 0→f[2]、
+            # 点1 (f[4], f[6])、点2 (f[16], f[12])、**线2（尾段）
+            # f[16]→1.0**——原读法漏画尾段线，实线占比 60.2% 误显
+            # 30%（比例偏低教训：lines 必须含全部线段）
             return {"kind": "dash_double_dot",
-                    "lines": [(0.0, f[2])],
+                    "lines": [(0.0, f[2]), (f[16], 1.0)],
                     "dots": [(f[4], f[6]), (f[16], f[12])],
                     "period_mm": 1.0}
         if aux == 1:
