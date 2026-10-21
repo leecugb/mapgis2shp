@@ -1335,6 +1335,55 @@ class TestFeatureRhythm:
         assert r["period_mm"] == pytest.approx(1.0)
         assert feature_rhythm(st, 1) is None
 
+    def test_388_21_filled_rect_dot_bars(self) -> None:
+        """388 家族：填充矩形+右端圆点+两端竖线（同形状双存储路径）。
+
+        388|0 = unit=1/2/3 存储；21|2 = unit=32/33/35 引用存储——
+        形状语义与 unit 号解耦的实证（payload_geometry 形状判据）。"""
+        from pymapgis.linesty import feature_rhythm
+        # 388|0：填充(12 f32)+点三元组×6(3 f32 直接型)+两端线对(4+4)
+        # ——真实库消费区间 (0,12),(12,15),...,(27,30),(30,34),(34,38)
+        f388 = ([0.0, 0.0508, 0.0, 0.0488, 0.0, -0.0508, 0.5996, -0.0508,
+                 0.5996, 0.0508, 0.0, 0.0508]
+                + [0.8008, 0.0, 0.0293] * 6
+                + [0.0, 0.0996, 0.0, -0.0996, 0.5996, 0.0996, 0.5996, -0.0996])
+        st388 = self._style(f388, n=9,
+                            elems=((1, 6, 0), (2, 2, 12), (3, 2, 15),
+                                   (2, 2, 18), (3, 2, 21), (2, 2, 24),
+                                   (3, 2, 27), (0, 2, 30), (0, 2, 34)),
+                            aux=0, no=388)
+        r = feature_rhythm(st388, 0)
+        assert r["kind"] == "filled_rect_dot_bars"
+        assert len(r["rects"]) == 1
+        assert r["rects"][0][0] == pytest.approx((0.0, 0.0508), abs=1e-4)
+        assert len(r["dots"]) == 6
+        assert r["dots"][0] == pytest.approx((0.8008, 0.0, 0.0293), abs=1e-4)
+        assert len(r["bars"]) == 2
+        assert r["bars"][0] == pytest.approx((0.0, -0.0996, 0.0996), abs=1e-4)
+        # 21|2：unit=32/33/35 引用存储，同形
+        f21 = ([0.0, 0.0996, 0.0, -0.0996, 0.5996, 0.0996, 0.5996, -0.0996]
+               + [0.0, 0.0508, 0.0, 0.0488, 0.0, -0.0508, 0.5996, -0.0508,
+                  0.5996, 0.0508, 0.0, 0.0508]
+               + [0.8008, 0.0, 0.0293, 0.0, 0.0, 0.0])
+        # 真实 21 记录有 10 子线；feature_rhythm 按 aux 取 sub[2]
+        dummy = self._style([0.0]*4, n=1, elems=((0, 2, 0),), aux=0, no=21).sublines[0]
+        from pymapgis.linesty import Element, LineStyle, SubLine
+        sl2 = SubLine(n=4, length=2 + 24 + 4 * len(f21),
+                      elements=[Element(unit=u, marker=m, offset=o)
+                                for u, m, o in ((32, 2, 0), (32, 2, 4),
+                                                (33, 6, 8), (35, 3, 20))],
+                      f32_zone=list(f21), f32_start=2 + 24)
+        sublines = [dummy] * 10
+        sublines[2] = sl2
+        st21 = LineStyle(no=21, n_subs=10, sublines=sublines)
+        r = feature_rhythm(st21, 2)
+        assert r["kind"] == "filled_rect_dot_bars"
+        assert len(r["rects"]) == 1
+        assert r["dots"][0] == pytest.approx((0.8008, 0.0, 0.0293), abs=1e-4)
+        # 未裁定 aux 诚实 None
+        assert feature_rhythm(st388, 1) is None
+        assert feature_rhythm(st21, 0) is None
+
     def test_575_0_long_dash(self) -> None:
         """575|0：长划 0→0.635 + 空白 0.365（2026-10-20 用户图面裁定）。
 
