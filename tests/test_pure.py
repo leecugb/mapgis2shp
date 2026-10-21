@@ -1517,7 +1517,9 @@ class TestFeatureRhythm:
         st = self._style(f0, n=4, elems=[(0, 2, 0), (3, 3, 4), (3, 3, 10), (0, 2, 16)], aux=0, no=4)
         r = feature_rhythm(st, 0)
         assert r["kind"] == "dash_double_dot"
-        assert r["lines"] == [(0.0, 0.3008)]
+        # 2026-10-21 用户复核修正：lines 含尾段线（f[16]→1.0）——
+        # 原读法漏画致实线占比 60.2% 误显 30%
+        assert r["lines"] == [(0.0, 0.3008), (0.6992, 1.0)]
         assert r["dots"][0] == pytest.approx((0.4492, 0.0081), abs=1e-6)
         assert r["dots"][1] == pytest.approx((0.6992, 0.0081), abs=1e-6)
         assert r["period_mm"] == 1.0
