@@ -276,7 +276,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 17, 18, 38, 48, 50, 51, 58, 153, 223, 455, 575):
+    if style is None or style.no not in (3, 4, 5, 7, 14, 16, 17, 18, 21, 38, 48, 50, 51, 58, 153, 223, 388, 455, 575):
         return None
     if not (0 <= aux < len(style.sublines)):
         return None
@@ -556,6 +556,30 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
             return None
         return {"kind": "long_dash",
                 "lines": [(f[0], f[2])],
+                "period_mm": 1.0}
+    # 388 家族（2026-10-20 用户图面确认，同形状双存储路径族）：
+    # 填充矩形 + 右端圆点 + 两端竖线。388|0 = unit=1/2/3 存储；
+    # 21|2 = unit=32/33/35 引用存储（同形不同 unit——形状语义与
+    # unit 号解耦的实证）。
+    if style.no in (388, 21):
+        if (style.no == 388 and aux != 0) or (style.no == 21 and aux != 2):
+            return None
+        rects, dots, bars = [], [], []
+        for kind, data in sl.payload_geometry():
+            if kind == "fill":
+                rects.append(list(data))
+            elif kind == "dot":
+                dots.append(data)
+            elif kind == "segment":
+                x0, sy0, x1, sy1 = data
+                if abs(x0 - x1) < 1e-9 and abs(sy0 - sy1) > 1e-6:
+                    bars.append((x0, min(sy0, sy1), max(sy0, sy1)))
+        if not rects or not dots:
+            return None
+        return {"kind": "filled_rect_dot_bars",
+                "rects": rects,
+                "dots": dots,
+                "bars": bars,
                 "period_mm": 1.0}
     # 线型 455（2026-10-20 用户图面确认）：455|0 = 基线 0→0.6504 +
     # 斜穿短线（跨基线：0.2715,0.0762→0.3516,−0.0781）+ 基线上圆点
