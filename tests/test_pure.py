@@ -1384,6 +1384,26 @@ class TestFeatureRhythm:
         assert feature_rhythm(st388, 1) is None
         assert feature_rhythm(st21, 0) is None
 
+    def test_38_2_tooth_dash(self) -> None:
+        """38|2：基线+等腰三角齿（2026-10-20 用户图面确认，断层域）。
+
+        sub2：基线 0→1.0（unit=5）+ 填充三角齿（unit=1：底
+        0.4492–0.5508 贴基线、顶点 (0.5,0.1504)）——与 38|0/38|1 的
+        tooth_dash 族同构；aux=子线索引。"""
+        from pymapgis.linesty import feature_rhythm
+        f32 = [0.0, 0.0, 1.0, 0.0,
+               0.5, 0.1504, 0.4492, 0.0, 0.5508, 0.0, 0.5, 0.1504]
+        st = self._style(f32, n=2, elems=((5, 2, 0), (1, 4, 4)),
+                         aux=2, no=38)
+        r = feature_rhythm(st, 2)
+        assert r["kind"] == "tooth_dash"
+        assert r["lines"][0] == pytest.approx((0.0, 1.0), abs=1e-4)
+        assert len(r["teeth"]) == 1
+        assert r["teeth"][0][0] == pytest.approx((0.5, 0.1504), abs=1e-4)
+        assert r["teeth"][0][1] == pytest.approx((0.4492, 0.0), abs=1e-4)
+        assert r["period_mm"] == pytest.approx(1.0)
+        assert feature_rhythm(st, 3) is None
+
     def test_575_0_long_dash(self) -> None:
         """575|0：长划 0→0.635 + 空白 0.365（2026-10-20 用户图面裁定）。
 
@@ -1582,8 +1602,8 @@ class TestFeatureRhythm:
         assert r["lines"][0] == pytest.approx((0.0, 0.375), abs=1e-6)
         assert r["lines"][1] == pytest.approx((0.5, 0.875), abs=1e-6)
         assert r["period_mm"] == pytest.approx(0.5, abs=1e-6)
-        # 38|2 未裁定 → None
-        assert feature_rhythm(st, 2) is None
+        # 38|2 已落码（2026-10-20 用户图面确认：基线+等腰三角齿）——
+        # 本夹具在 aux=2 下同为 tooth_dash（同族同构）
 
     def test_51x_raised_dot(self) -> None:
         from pymapgis.linesty import feature_rhythm
