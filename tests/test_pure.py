@@ -1439,6 +1439,32 @@ class TestFeatureRhythm:
             assert r["lines"][0] == pytest.approx((0.0, 1.0), abs=1e-6)
             assert r["period_mm"] == pytest.approx(1.0)
 
+    def test_2x_inline_dash_provisional(self) -> None:
+        """2|x 等价 2|0 纯虚线（2026-10-21 用户暂定策略，2|9 裁定）。
+
+        线型 2 库变体仅 2|0–2|4；越界 aux（2|9/2|18）为数据字段对，
+        aux 不渲染——2|0/2|9/2|18 全同判 inline_dash（实0.3496/
+        空0.3008，沿线节奏推导）。"""
+        from pymapgis.linesty import feature_rhythm
+        # 合成：实线笔 + 沿线节奏子线（linesty 2 结构）
+        from pymapgis.linesty import Element, LineStyle, SubLine
+        pen = SubLine(n=1, length=24,
+                      elements=[Element(unit=0, marker=2, offset=0)],
+                      f32_zone=[0.0, 0.0, 0.625, 0.0], f32_start=8)
+        pen.width = 0.625
+        sl = SubLine(n=2, length=2 + 12 + 4 * 8,
+                     elements=[Element(unit=0, marker=2, offset=0),
+                               Element(unit=0, marker=2, offset=4)],
+                     f32_zone=[0.0, 0.0, 0.3496, 0.0, 0.6504, 0.0,
+                               1.0, 0.0], f32_start=14)
+        st = LineStyle(no=2, n_subs=2, sublines=[pen, sl])
+        for aux in (0, 9, 18):
+            r = feature_rhythm(st, aux)
+            assert r["kind"] == "inline_dash", aux
+            assert r["lines"][0] == pytest.approx((0.0, 0.3496), abs=1e-4)
+            assert r["lines"][1] == pytest.approx((0.6504, 1.0), abs=1e-4)
+            assert r["period_mm"] == pytest.approx(1.0)
+
     def test_575_0_long_dash(self) -> None:
         """575|0：长划 0→0.635 + 空白 0.365（2026-10-20 用户图面裁定）。
 
