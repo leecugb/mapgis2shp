@@ -2,11 +2,12 @@
 """pymapgis - Read and write MapGIS vector files with GeoPandas GeoDataFrames.
 
 Also provides parsers for the MapGIS 6.x graphic libraries (Subgraph.lib
-symbol library and LINESTY.lib line-style library) that the graphic
-parameters of .wt/.wl features reference.
+symbol library, LINESTY.lib line-style library and Colorlib.lib color
+library) that the graphic parameters of .wt/.wl/.wp features reference.
 """
 
 from pymapgis._version import __version__
+from pymapgis.colorlib import ColorLib
 from pymapgis.linesty import (
     Element,
     LineStyle,
@@ -41,7 +42,7 @@ __all__ = [
     "TopoError",
     "POINT_TYPE_TEXT",
     "POINT_TYPE_SYMBOL",
-    # MapGIS graphic-library parsers (Subgraph.lib / LINESTY.lib)
+    # MapGIS graphic-library parsers (Subgraph.lib / LINESTY.lib / Colorlib.lib)
     "SubgraphLib",
     "SubPath",
     "Symbol",
@@ -56,5 +57,6 @@ __all__ = [
     "compose_feature_style",
     "dotline_params",
     "linedot_params",
+    "ColorLib",
     "__version__",
 ]
