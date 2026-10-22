@@ -383,54 +383,72 @@ class TestLineParams:
 
 
 class TestPolygonParams:
-    """区图形参数：u8 布局 @5 填充色/@6 图案号/@9 图案色（2026-10-14
-    三幅字节级实证定版）。
+    """区图形参数：布局 v2（2026-10-22 用户 MapGIS 区参数对话框四次
+    对账定案，取代旧 2026-10-14 "u8@5=填充色/@6=图案/u16@9=图案色"
+    三处全错的读法）。
 
-    回归锚：旧 int16@4 错位读法把 (byte4=0, byte5=fill) 读成 fill<<8
-    （fill=70 → 17920）；本测试 byte4 恒 0，若回归旧读法 fill_color
-    将不等于 70。
+    布局：u8@1 class；u8@5/6/7 field5/6/7；u16@9 填充颜色；
+    u16@13 图案号；u16@17/@21 图案高/宽（f32 位型高16位）；
+    u8@23 图案色；u8@30 图层。
+    回归锚：BB003 000019 → @9=1226 @13=252 @17=3.0 @21=3.0
+    @23=9 @30=3；000016 → @9=1239 @13=293 @17=4.0。
     """
 
-    def test_decode_u8_layout(self) -> None:
+    def test_decode_layout_v2(self) -> None:
         empty = b"\x00" * 40
         record = bytearray(40)
         record[0] = 1
-        record[5] = 70
-        record[6] = 26
-        record[7] = 15
-        record[9] = 9
+        record[1] = 17          # class
+        record[5] = 74          # field5
+        record[6] = 130         # field6
+        record[7] = 1           # field7
+        struct.pack_into("<H", record, 9, 1226)   # 填充颜色
+        struct.pack_into("<H", record, 13, 252)   # 图案号（@13-14 LE）
+        struct.pack_into("<H", record, 17, 0x4040)  # 图案高度 f32 高16位(3.0)
+        struct.pack_into("<H", record, 21, 0x4040)  # 图案宽度 f32 高16位(3.0)
+        record[23] = 9          # 图案颜色
+        record[30] = 3          # 图层
         buf = empty + bytes(record)
 
         f = io.BytesIO(buf)
         params = _read_polygon_params(f, 0, len(buf))
-        assert list(params.columns) == ["fill_color", "pattern", "pattern_color", "class"]
+        assert list(params.columns) == [
+            "class", "fill_color", "pattern", "pattern_height",
+            "pattern_width", "pattern_color", "layer",
+            "field5", "field6", "field7",
+        ]
         row = params.iloc[0]
-        assert row["fill_color"] == 70
-        assert row["pattern"] == 26
+        assert row["class"] == 17
+        assert row["fill_color"] == 1226
+        assert row["pattern"] == 252
+        assert row["pattern_height"] == pytest.approx(3.0)
+        assert row["pattern_width"] == pytest.approx(3.0)
         assert row["pattern_color"] == 9
+        assert row["layer"] == 3
+        assert row["field5"] == 74
+        assert row["field6"] == 130
+        assert row["field7"] == 1
 
-    def test_pattern_color_is_uint16(self) -> None:
-        """图案色 @9 为 u16（低@9 高@10）——u8 读法跨幅丢高字节。
+    def test_fill_color_is_uint16(self) -> None:
+        """填充色 @9 为 u16（低@9 高@10）——u8 读法把 1226 (0x04CA)
+        截成 202，>870 扩展色域全数丢失。
 
-        回归锚（2026-10-15 官方 wap 明码实证，奥依亚依拉克 J45C004001
-        LDZOFBB001.WP + 234.wap）：wap f0 == u16@9 417/417，372 区
-        >255（值域 13..948）；库尔干幅全层 @10=0，u8 读法侥幸全对。
+        回归锚（2026-10-22 对话框）：BB003 000019 填充色 1226、
+        图案号 293；jws 全域填充色值域 2..1465。
         """
         empty = b"\x00" * 40
         record = bytearray(40)
         record[0] = 1
-        record[5] = 146
-        record[6] = 16
-        record[9] = 0x5B   # 低字节
-        record[10] = 0x02  # 高字节 → 0x025B = 603
+        struct.pack_into("<H", record, 9, 1226)  # 0x04CA
+        struct.pack_into("<H", record, 13, 293)
         buf = empty + bytes(record)
 
         f = io.BytesIO(buf)
         params = _read_polygon_params(f, 0, len(buf))
         row = params.iloc[0]
-        assert row["fill_color"] == 146
-        assert row["pattern"] == 16
-        assert row["pattern_color"] == 603
+        assert row["fill_color"] == 1226
+        assert row["pattern"] == 293
+        assert row["pattern_height"] == pytest.approx(0.0)
 
 
 class TestPointParams:

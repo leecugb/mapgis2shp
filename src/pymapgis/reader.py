@@ -104,20 +104,44 @@ _LINE_TRANSPARENT_OFFSET = 48  # uint8 透明输出（0=否，1=白色填充透�
 
 # Polygon graphic parameters live in the dedicated header section head_9
 # (index 8): one 40-byte record per polygon, first record empty, record i+1
-# corresponding to polygon ID i+1.  Byte-level layout pinned 2026-10-14 on
-# three sheets (Kurgan / Yingjisha / Xinjiang-115) plus all 13 Kurgan polygon
-# layers: @4 and @8 are 0 for 100% of records and @7 is a per-layer flag,
-# so the colour/pattern fields are single bytes (an earlier int16 @4/@6/@8
-# read was a misalignment that produced true-value<<8 garbage).
+# corresponding to polygon ID i+1.
+#
+# 布局 v2（2026-10-22 用户 MapGIS 区参数对话框四次对账定案，取代旧
+# 2026-10-14 "u8@5=填充色/@6=图案/u16@9=图案色" 读法——后者三处全错）：
+#   u8  @1   class（区图层类码；0 令填充不可显示）
+#   u8  @5/@6/@7  field5/field6/field7（语义未裁定挂账；@7 为按层标志
+#                0/1/2/3/15；@6 呈岩性分带：沉积 26-91/侵入 128-132/
+#                变质 239-246）
+#   u16 @9   填充颜色（色号，值域 2..1465；>870 为用户扩展色域）
+#   u16 @13  填充图案号（Fillgrph 图案库索引；@12 恒 0）
+#   u16 @17/@21  图案高度/宽度（mm）= f32 位型高16位（值<<16 还原；
+#                低16位字节实测恒 0）
+#   u8  @23  图案颜色         u8  @30  图层
+# 对话框锚（CHFCAC→MapGIS 读数→字节）：
+#   BB001 000433: 填充色1046、其他0 → @9=1046 且 @11-39 全零 ✓
+#   BB001 000447: 填充色914、其他0 → @9=914 ✓
+#   BB003 000019: 填充1226/图案252/高3宽3/图案色9/图层3
+#                 → @9=1226 @13=252 @17=3.0 @21=3.0 @23=9 @30=3 全中 ✓
+#   BB003 000016: 填充1239/图案293/高4宽4/图案色9/图层3
+#                 → @9=1239 @13=293 @17=4.0 @21=4.0 @23=9 @30=3 全中 ✓
+# 旧 2026-10-15 wap 证据曾把 u16@9 标为图案色——wap f0 实为填充色字段。
+# 数据丢失教训：2026-03-12 重写的 jws 三幅（LDLYAAE002/BB003/BB009）
+# 因旧 writer 只回写 @5/@6/@9、@12-39 清零，图案层全部丢失；原文件为
+# 2019-10-31 的 .WP~ 备份。
 _POLYGON_PARAM_SECTION = 8
 _POLYGON_PARAM_RECORD_SIZE = 40
-_POLY_FILL_COLOR_OFFSET = 5  # uint8 fill colour index
-_POLY_PATTERN_OFFSET = 6  # uint8 fill-pattern number (pattern-library index)
-# 2026-10-15 明码修正：@9 实为 u16（@9 低字节 + @10 高字节）——库尔干幅
-# 全层 @10=0 故 u8 读法侥幸全对；奥依亚依拉克幅 wap 官方导出实证
-# 372/417 区 >255（值域 13..948），u8 读法丢高字节。wap f0 与 u16@9
-# 417/417 全等。
-_POLY_PATTERN_COLOR_OFFSET = 9  # uint16 pattern colour index (低字节@9)
+_POLY_CLASS_OFFSET = 1        # uint8 class code（0=显示闸门）
+_POLY_FIELD5_OFFSET = 5       # uint8 语义未裁定（挂账）
+_POLY_FIELD6_OFFSET = 6       # uint8 语义未裁定（岩性分带特征）
+_POLY_FIELD7_OFFSET = 7       # uint8 按层标志（0/1/2/3/15）
+_POLY_FILL_COLOR_OFFSET = 9   # uint16 fill colour index（低字节@9）
+_POLY_PATTERN_OFFSET = 13     # uint16 fill-pattern number（Fillgrph 索引；
+                              # @12 恒 0——面16=293(25 01)/面19=252(fc 00)
+                              # 两锚定位 @13-14 LE）
+_POLY_PATTERN_HEIGHT_OFFSET = 17  # uint16 = f32 位型高16位（图案高度 mm）
+_POLY_PATTERN_WIDTH_OFFSET = 21   # uint16 = f32 位型高16位（图案宽度 mm）
+_POLY_PATTERN_COLOR_OFFSET = 23   # uint8 pattern colour index
+_POLY_LAYER_OFFSET = 30       # uint8 layer number
 
 # MapGIS stores geometry type codes in the attribute table.
 _ATTR_TYPE_STRING = 0
@@ -765,7 +789,18 @@ def _read_line_params(
     )
 
 
-_POLYGON_PARAM_COLUMNS = ["fill_color", "pattern", "pattern_color", "class"]
+_POLYGON_PARAM_COLUMNS = [
+    "class",
+    "fill_color",
+    "pattern",
+    "pattern_height",
+    "pattern_width",
+    "pattern_color",
+    "layer",
+    "field5",
+    "field6",
+    "field7",
+]
 
 
 def _read_polygon_params(
@@ -775,36 +810,26 @@ def _read_polygon_params(
 
     The section holds one 40-byte record per polygon (first record empty);
     record *i* (0-based after the empty record) belongs to polygon ID *i + 1*.
-    Layout pinned at byte level 2026-10-14 (three sheets — Kurgan, Yingjisha,
-    Xinjiang-115 — plus all 13 Kurgan polygon layers, where bytes @4 and @8
-    are 0 for 100% of records and @7 is constant within each layer):
+    布局 v2（2026-10-22 用户 MapGIS 区参数对话框四次对账定案）：
 
-    - uint8 @1: per-polygon class code == the polygon layer (native values
-      2/9/10 observed).  MapGIS's display consults it together with the arc
-      layer byte and the head_8 flags; inconsistent values leave the region
-      undisplayable (2026-10-18 native-acceptance finding).
-    - uint8 @5: fill colour index (1-based into Colorlib; 0 = default)
-    - uint8 @6: fill-pattern number -- sedimentary units cluster around
-      26-91, intrusive rocks 128-132, metamorphic rocks 239-246
-    - uint8 @7: per-layer flag (0/1/2/3/15; role not adjudicated)
-    - uint16 @9: pattern colour index (@9 low + @10 high).  Pinned as u16
-      2026-10-15 against the official .wap plain-text export (奥依亚依拉克
-      J45C004001, LDZOFBB001.WP + 234.wap): wap field 0 == u16@9 for all
-      417/417 regions, with 372 regions above 255 (range 13..948).  The
-      earlier u8 read (valid on Kurgan where @10 is 0 for every layer)
-      silently dropped the high byte cross-sheet.  Values above the 870-
-      entry Colorlib exist (max 948); the reference palette for those is
-      not adjudicated.
+    - uint8  @1: class（区图层类码；0 令填充不可显示）
+    - uint8  @5/@6/@7: field5/field6/field7（语义未裁定挂账；@7 按层标志
+      0/1/2/3/15；@6 呈岩性分带：沉积 26-91/侵入 128-132/变质 239-246）
+    - uint16 @9: 填充颜色（值域 2..1465；>870 为用户扩展色域）
+    - uint16 @12: 填充图案号（Fillgrph 图案库索引）
+    - float32 @17/@21: 图案高度/宽度（mm）
+    - uint8  @23: 图案颜色
+    - uint8  @30: 图层
 
-    An earlier int16 @4/@6/@8 read (2026-09) was a misalignment: with the
-    high byte of each int16 coming from a zero neighbour it produced
-    true-value<<8 garbage (e.g. 3584, -15616).  The pattern clusters above
-    also re-validate the lithology grouping reported in the 2026-09 doc,
-    which under the int16 misread appeared as 3866-3931 etc.
-
-    The remaining bytes carry further pattern sub-parameters whose layout is
-    not yet pinned down; colour and pattern numbers reference the external
-    MapGIS colour/pattern libraries and are not self-contained.
+    对话框锚（CHFCAC→MapGIS 读数→字节全中）：
+    BB001 000433→填充1046/@9=1046、000447→914/@9=914；
+    BB003 000019→填充1226/图案252/高3宽3/图案色9/图层3→
+    @9=1226 @13=252 @17=3.0 @21=3.0 @23=9 @30=3；
+    000016→填充1239/图案293/高4宽4→@9=1239 @13=293 @17=4.0。
+    旧 2026-10-14 u8 读法（@5=填充色/@6=图案/@9=图案色）三处全错；
+    2026-09 int16 错位读法更是 <<8 垃圾。图案高宽为零时 MapGIS 不显示
+    花纹（"其他图形参数为0" 对话框实态）。colour/pattern 号引用外部
+    MapGIS 库（Colorlib/Fillgrph），非自包含。
     """
     file_obj.seek(start)
     buf = file_obj.read(section_size)
@@ -813,25 +838,49 @@ def _read_polygon_params(
         return pd.DataFrame(columns=_POLYGON_PARAM_COLUMNS)
 
     dtype = np.dtype({
-        "names": ["class", "fill_color", "pattern", "pattern_color"],
-        "formats": ["<u1", "<u1", "<u1", "<u2"],
+        "names": [
+            "class", "fill_color", "pattern", "pattern_height",
+            "pattern_width", "pattern_color", "layer",
+            "field5", "field6", "field7",
+        ],
+        "formats": ["<u1", "<u2", "<u2", "<u2", "<u2", "<u1", "<u1",
+                    "<u1", "<u1", "<u1"],
         "offsets": [
-            1,
+            _POLY_CLASS_OFFSET,
             _POLY_FILL_COLOR_OFFSET,
             _POLY_PATTERN_OFFSET,
+            _POLY_PATTERN_HEIGHT_OFFSET,
+            _POLY_PATTERN_WIDTH_OFFSET,
             _POLY_PATTERN_COLOR_OFFSET,
+            _POLY_LAYER_OFFSET,
+            _POLY_FIELD5_OFFSET,
+            _POLY_FIELD6_OFFSET,
+            _POLY_FIELD7_OFFSET,
         ],
         "itemsize": _POLYGON_PARAM_RECORD_SIZE,
     })
     records = np.frombuffer(
         buf, dtype=dtype, offset=_POLYGON_PARAM_RECORD_SIZE, count=count
     )
+    # 图案高/宽：u16 存 f32 位型高 16 位（值<<16 还原；如 0x4040→3.0mm）。
+    # 低 16 位字节实测恒 0；@23 图案色独立成字节（若按整 f32 读 @21-24
+    # 会把图案色字节并进尾数得 2.140625——对话框锚排斥该读法）。
     return pd.DataFrame(
         {
             "class": records["class"].astype(np.int64),
             "fill_color": records["fill_color"].astype(np.int64),
             "pattern": records["pattern"].astype(np.int64),
+            "pattern_height": (
+                records["pattern_height"].astype(np.uint32) << 16
+            ).view(np.float32),
+            "pattern_width": (
+                records["pattern_width"].astype(np.uint32) << 16
+            ).view(np.float32),
             "pattern_color": records["pattern_color"].astype(np.int64),
+            "layer": records["layer"].astype(np.int64),
+            "field5": records["field5"].astype(np.int64),
+            "field6": records["field6"].astype(np.int64),
+            "field7": records["field7"].astype(np.int64),
         },
         columns=_POLYGON_PARAM_COLUMNS,
     )
