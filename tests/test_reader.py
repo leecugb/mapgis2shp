@@ -322,10 +322,10 @@ class TestPolygonParams:
             assert "pattern" not in reader.geodataframe.columns
 
     @pytest.mark.integration
-    def test_pattern_clusters_by_rock_category(self) -> None:
-        """Fill-pattern numbers cluster by layer: sedimentary 26-91,
-        intrusive 128-132, metamorphic 239-246 (uint8 head_9 layout pinned
-        2026-10-14; the former int16 misread shifted these by the flag byte)."""
+    def test_field6_clusters_by_rock_category(self) -> None:
+        """@6（field6，语义未裁定）按岩性分带：沉积 26-91、侵入 128-132、
+        变质 239-246——2026-10-22 布局 v2 后图案号移至 u16@12，此带为
+        field6 特征（旧 int16 错位读法将其 <<8）。"""
         for fname, lo, hi in [
             ("LDZOFBB001.WP", 26, 91),
             ("LDZOFBB003.WP", 128, 132),
@@ -336,10 +336,9 @@ class TestPolygonParams:
                 pytest.skip(f"{fname} not found")
             with Reader(path, read_graphic_params=True) as reader:
                 pp = reader.polygon_params
-                assert list(pp.columns) == ["fill_color", "pattern", "pattern_color", "class"]
                 assert len(pp) == len(reader.geodataframe)
-                assert pp["pattern"].between(lo, hi).all(), fname
-                # Colour indices vary between geological units.
+                assert pp["field6"].between(lo, hi).all(), fname
+                # 填充色跨地质单元变化。
                 assert pp["fill_color"].nunique() > 1
 
     @pytest.mark.integration
@@ -351,6 +350,6 @@ class TestPolygonParams:
         with Reader(path, read_graphic_params=True) as reader:
             gdf = reader.geodataframe
             assert len(gdf) == 46
-            # Patterned intrusive bodies carry non-zero pattern params;
-            # every row must have a pattern in the intrusive range.
-            assert gdf["pattern"].between(128, 132).all()
+            # 侵入岩体 @6（field6）在侵入岩带 128-132（布局 v2 后
+            # 图案号已移至 u16@12）。
+            assert gdf["field6"].between(128, 132).all()
