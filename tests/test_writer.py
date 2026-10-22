@@ -271,19 +271,36 @@ class TestPolygonWriter:
         assert reader.geom[0].area == pytest.approx(2.0)
 
     def test_polygon_params_fidelity(self, tmp_path) -> None:
-        # Native head_9 stores fill/pattern as single bytes at @5/@6 and the
-        # pattern colour as uint16 LE at @9 (widened 2026-10-15 on official
-        # .wap evidence; aoy sheet reaches 948).  Exercise the >255 path.
+        # head_9 布局 v2（2026-10-22 对话框锚定）：u16@9 填充色（>255
+        # 路径 1226）、u16@13 图案号、u16@17/@21 图案高宽（f32 高16位）、
+        # u8@23 图案色、u8@30 图层；@5/@6/@7 往返透传（旧版清零致
+        # 2026-03-12 jws 三幅图案层数据丢失的回归锚）。
         gdf = gpd.GeoDataFrame(
-            {"fill_color": [35], "pattern": [26], "pattern_color": [603]},
+            {
+                "fill_color": [1226],
+                "pattern": [252],
+                "pattern_height": [3.0],
+                "pattern_width": [3.0],
+                "pattern_color": [9],
+                "layer": [3],
+                "field5": [74],
+                "field6": [130],
+                "field7": [1],
+            },
             geometry=[shapely.geometry.box(0, 0, 1, 1)],
             crs="EPSG:4326",
         )
         reader = _write_and_read(gdf, tmp_path / "out.wp", {"read_graphic_params": True})
         params = reader.polygon_params.iloc[0]
-        assert params["fill_color"] == 35
-        assert params["pattern"] == 26
-        assert params["pattern_color"] == 603
+        assert params["fill_color"] == 1226
+        assert params["pattern"] == 252
+        assert params["pattern_height"] == pytest.approx(3.0)
+        assert params["pattern_width"] == pytest.approx(3.0)
+        assert params["pattern_color"] == 9
+        assert params["layer"] == 3
+        assert params["field5"] == 74
+        assert params["field6"] == 130
+        assert params["field7"] == 1
         assert "fill_color" not in reader.data.columns
 
     def test_polygon_area_conservation_real(self, tmp_path, sample_wp) -> None:

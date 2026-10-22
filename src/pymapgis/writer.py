@@ -68,6 +68,13 @@ _MAGIC_FOR = {"POINT": _MAGIC_POINT, "LINE": _MAGIC_LINE, "POLYGON": _MAGIC_POLY
 _FILE_ID_FOR = {"POINT": 1, "LINE": 0, "POLYGON": 2}
 _EXT_FOR = {"POINT": ".wt", "LINE": ".wl", "POLYGON": ".wp"}
 
+# 区图形参数列（布局 v2，2026-10-22 对话框锚定；与 reader._read_polygon_params
+# 同源——不含 class，class 由 _split_param_columns 单独吸收）
+_POLYGON_PARAM_COLUMNS = [
+    "fill_color", "pattern", "pattern_height", "pattern_width",
+    "pattern_color", "layer", "field5", "field6", "field7",
+]
+
 # ``data_start`` is 657 in every native 6x file inspected; the section index
 # area holds 16 entries (10 used + 6 zero-filled), so the first section begins
 # at 657 + 160 = 817.
@@ -1023,18 +1030,15 @@ def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
     """Encode the head_9 polygon-parameter section (40 bytes, first record
     mirrors the native 0x04 marker).
 
-    Colour/pattern fields are single bytes at @5/@6 and a uint16 LE at @9
-    (layout pinned 2026-10-14, pattern_color widened to u16 2026-10-15 on
-    the official .wap export evidence -- see reader._read_polygon_params).
-    Byte @1 is the per-polygon class code (native values 2/9/10 observed;
-    zero leaves the fill undisplayable -- 2026-10-17 native-acceptance
-    finding), taken from the optional ``layer`` column with default 1.
+    布局 v2（2026-10-22 对话框锚定，与 reader._read_polygon_params 同源）：
+    u8@1 class；u8@5/6/7 field5/6/7（语义未裁定，往返透传）；u16@9
+    填充颜色；u16@13 填充图案号；u16@17/@21 图案高/宽（f32 位型高16位）；
+    u8@23 图案颜色；u8@30 图层。缺失列按默认 0（class 默认 1）。
+    数据丢失教训（2026-03-12 jws 三幅）：旧版只写 @5/@6/@9、@12-39
+    清零 → 图案层全部丢失；本轮起全字段回写，往返保真。
     """
     buf = bytearray(_POLYGON_PARAM_RECORD_SIZE)
     buf[0] = 0x04
-    # 子参数块 @12-23：新建文件原生为零（2026-10-18 POLY.WP 实证）；
-    # 库尔干老文件携带非零值——两种原生形态，往返由透传保真，新数据按
-    # 新建约定写零
     for i in range(count):
         record = bytearray(_POLYGON_PARAM_RECORD_SIZE)
         record[0] = 1
@@ -1045,9 +1049,29 @@ def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
                 record[1] = int(row["class"]) & 0xFF
             elif "layer" in row.index:
                 record[1] = int(row["layer"]) & 0xFF
-            record[5] = int(row["fill_color"]) & 0xFF
-            record[6] = int(row["pattern"]) & 0xFF
-            struct.pack_into("<H", record, 9, int(row["pattern_color"]) & 0xFFFF)
+            for col, off in (("field5", 5), ("field6", 6), ("field7", 7)):
+                if col in row.index:
+                    record[off] = int(row[col]) & 0xFF
+            if "fill_color" in row.index:
+                struct.pack_into("<H", record, 9,
+                                 int(row["fill_color"]) & 0xFFFF)
+            if "pattern" in row.index:
+                struct.pack_into("<H", record, 13,
+                                 int(row["pattern"]) & 0xFFFF)
+            if "pattern_height" in row.index:
+                _hi = struct.unpack(
+                    "<I", struct.pack("<f", float(row["pattern_height"]))
+                )[0] >> 16
+                struct.pack_into("<H", record, 17, _hi)
+            if "pattern_width" in row.index:
+                _hi = struct.unpack(
+                    "<I", struct.pack("<f", float(row["pattern_width"]))
+                )[0] >> 16
+                struct.pack_into("<H", record, 21, _hi)
+            if "pattern_color" in row.index:
+                record[23] = int(row["pattern_color"]) & 0xFF
+            if "layer" in row.index:
+                record[30] = int(row["layer"]) & 0xFF
         buf += record
     return bytes(buf)
 
@@ -1432,19 +1456,37 @@ class Writer:
         want = {
             "POINT": _POINT_PARAM_COLUMNS,
             "LINE": _LINE_PARAM_COLUMNS,
-            "POLYGON": ["fill_color", "pattern", "pattern_color"],
+            "POLYGON": _POLYGON_PARAM_COLUMNS,
         }[self.shapeType]
+        if self.shapeType == "POLYGON":
+            # 宽松吸收（2026-10-22 布局 v2）：与 LINE 同律——主键列在即
+            # 吸收，缺失列按默认填充；field5/6/7 透传保真
+            present = [c for c in want if c in attr.columns]
+            if present or "class" in attr.columns or "layer" in attr.columns:
+                params = attr[present].reindex(columns=want)
+                self._params = params.fillna({
+                    "fill_color": 0,
+                    "pattern": 0,
+                    "pattern_height": 0.0,
+                    "pattern_width": 0.0,
+                    "pattern_color": 0,
+                    "layer": 0,
+                    "field5": 0,
+                    "field6": 0,
+                    "field7": 0,
+                })
+                attr = attr.drop(columns=present)
+                # 区参数类码 @1（=区图层，须与弧记录/head_8 标志一致）：
+                # 取可选 class 列（往返来源）或 layer 列，默认 1
+                for key in ("class", "layer"):
+                    if key in attr.columns:
+                        self._params["class"] = attr[key].reset_index(drop=True)
+                        attr = attr.drop(columns=key)
+                        break
+            return attr
         if all(c in attr.columns for c in want):
             self._params = attr[want].reset_index(drop=True)
-            attr = attr.drop(columns=want)
-            # 区参数类码 @1（=区图层，须与弧记录/head_8 标志一致）：
-            # 取可选 class 列（往返来源）或 layer 列，默认 1
-            for key in ("class", "layer"):
-                if self.shapeType == "POLYGON" and key in attr.columns:
-                    self._params["class"] = attr[key].reset_index(drop=True)
-                    attr = attr.drop(columns=key)
-                    break
-            return attr
+            return attr.drop(columns=want)
         return attr
 
     def _scale_factor(self) -> float:
