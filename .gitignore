@@ -53,6 +53,15 @@ src/pymapgis/semantics/
 *.WL~
 *.WP~
 
+# Public synthetic regression fixtures are the only MapGIS binaries intended
+# for distribution. Root-level and other real survey files remain ignored.
+!tests/fixtures/mapgis/*.wt
+!tests/fixtures/mapgis/*.wl
+!tests/fixtures/mapgis/*.wp
+!tests/fixtures/mapgis/*.WT
+!tests/fixtures/mapgis/*.WL
+!tests/fixtures/mapgis/*.WP
+
 # MapGIS project / raster overlay files
 *.MPJ
 *.TIF.ovr

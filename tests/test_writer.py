@@ -253,6 +253,28 @@ class TestPolygonWriter:
         areas = sorted(g.area for g in reader.geom)
         assert areas == pytest.approx([4.0, 20.0])
 
+    def test_coincident_hole_and_island(self, tmp_path) -> None:
+        """A hole boundary shared with an island must not become positive overlap."""
+        outer = shapely.geometry.Polygon(
+            [(0, 0), (6, 0), (6, 6), (0, 6), (0, 0)],
+            [[(2, 2), (4, 2), (4, 4), (2, 4), (2, 2)]],
+        )
+        island = shapely.geometry.box(2, 2, 4, 4)
+        gdf = gpd.GeoDataFrame(
+            {"n": [1, 2]}, geometry=[outer, island], crs="EPSG:4326"
+        )
+        reader = _write_and_read(gdf, tmp_path / "out.wp")
+        assert len(reader) == 2
+        assert reader.geom[0].area == pytest.approx(32.0)
+        assert reader.geom[1].area == pytest.approx(4.0)
+        assert reader.geom[0].intersection(reader.geom[1]).area == pytest.approx(0.0)
+        outer_parts = (
+            list(reader.geom[0].geoms)
+            if hasattr(reader.geom[0], "geoms")
+            else [reader.geom[0]]
+        )
+        assert sum(len(part.interiors) for part in outer_parts) == 1
+
     def test_multipolygon_stays_single_feature(self, tmp_path) -> None:
         mp = shapely.geometry.MultiPolygon(
             [shapely.geometry.box(0, 0, 1, 1), shapely.geometry.box(2, 2, 3, 3)]

@@ -1,14 +1,18 @@
 include README.md
 include LICENSE
+include CITATION.cff
 include verify_pymapgis.py
 include pymapgis_baseline.json
-recursive-include docs *.md
+recursive-include docs *.md *.json
 recursive-include src pymapgis *.py
+recursive-include tests *.py *.json *.md *.WT *.WL *.WP
+recursive-include examples *.py *.md
 
-# MapGIS binary data files are kept in the repository for integration tests
-# but are not shipped in the PyPI distribution.
-global-exclude *.WT
-global-exclude *.WL
-global-exclude *.WP
-global-exclude *.MPJ
-global-exclude *.TIF.ovr
+# Root-level real survey files stay out of distributions. Public synthetic
+# binaries under tests/fixtures are intentionally included by the rules above.
+exclude *.WT
+exclude *.WL
+exclude *.WP
+exclude *.MPJ
+exclude *.TIF.ovr
+global-exclude *.pyc
