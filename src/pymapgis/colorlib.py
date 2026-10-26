@@ -34,6 +34,14 @@ class ColorLib:
 
     def __init__(self, path: str):
         self.data = Path(path).read_bytes()
+        # 魔数校验（2026-10-26 审计）：Colorlib.lib 头 13B = "C.U.G  Colorg"。
+        # 旧实现无校验——Pcolor.lib 等异型文件会静默产出"看似合理"的
+        # 垃圾色（docstring 破译教训：表首错位 1 字节仍看似合理）
+        if not self.data.startswith(b"C.U.G  Colorg"):
+            from pymapgis.reader import MapGISError
+            raise MapGISError(
+                f"{path}: not a Colorlib.lib (missing 'C.U.G  Colorg' header)"
+            )
         # 可容纳的最大色号（0 基）
         self.max_no = (len(self.data) - _TABLE_START) // _ENTRY - 1
 

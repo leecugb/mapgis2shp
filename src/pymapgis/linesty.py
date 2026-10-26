@@ -198,6 +198,8 @@ def _period_from_lines(lines: List[Tuple[float, ...]]) -> float:
     起点差的最小正值；单线族 = 最大线终点。记录末 x ≠ 周期。
     兼容 (x0,x1) 与 (x0,x1,y) 两种线元组；**多 y 层级时取最大线
     终点**（48 抬升线教训：不同层的线起点不得参与等间距计算）。"""
+    if not lines:
+        return 0.0   # 2026-10-26 审计：空列表原抛 ValueError
     if len(lines) > 0 and len(lines[0]) > 2:
         levels = {round(t[2], 6) for t in lines}
         if len(levels) > 1:
@@ -325,8 +327,8 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                     "lines": [(0.0, solid)],
                     "dots": [(dot_pos, dot_r)],
                     "period_mm": period}
-        if len(f) < 48:
-            return None
+        if aux != 5 or len(f) < 48:
+            return None   # 2026-10-26 审计：tick 读法仅裁定 aux=5，收口防变体静默误读
         lines, dots = _tick_line_rhythm(f, 1.0, 3, 4)
         return {"kind": "tick_dash_interleave",
                 "lines": lines, "dots": dots, "period_mm": 1.0}
@@ -362,8 +364,8 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                     "dots": [(f[8], f[10]), (f[14], f[16])],
                     "period_mm": 1.0}
         # aux == 3：6 档 ×5 遍 + 尾段三线
-        if len(f) < 102:
-            return None
+        if aux != 3 or len(f) < 102:
+            return None   # 2026-10-26 审计：tick 读法仅裁定 aux=3，收口防变体静默误读
         lines, dots = _tick_line_rhythm(f, 1.0, 6, 5)
         return {"kind": "tick_dash_interleave",
                 "lines": lines, "dots": dots, "period_mm": 1.0}
@@ -483,6 +485,8 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                          if e.unit >= UNIT_SYMBOL_MIN or e.is_dot])
             if n_ref < 1 or len(f) < 3:
                 return None
+            if len(f) < 3 * n_ref:
+                return None   # 2026-10-26 审计：截断载荷守卫（原会 IndexError）
             dots = [(f[3 * i], f[3 * i + 1], f[3 * i + 2])
                     for i in range(n_ref)]
             return {"kind": "dotline_lib_r",
@@ -544,6 +548,8 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
             p = (f[40 + 2 * k], f[41 + 2 * k])
             if p not in pts:
                 pts.append(p)
+        if len(pts) < 8:
+            return None   # 2026-10-26 审计：结构假设"去重后 8 点"无守卫，补上
         verticals = [(pts[2 * k][0], min(pts[2 * k][1], pts[2 * k + 1][1]),
                       max(pts[2 * k][1], pts[2 * k + 1][1]))
                      for k in range(4)]
@@ -562,6 +568,8 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
             return None
         lines, _ = _pairs_to_lines_verticals(
             list(zip(f[0::2], f[1::2])))
+        if not lines:
+            return None   # 2026-10-26 审计：全竖线载荷原会空表崩溃
         return {"kind": "raised_lines",
                 "lines": lines,
                 "dots": [],
@@ -1038,7 +1046,14 @@ class LinestyLib:
 
     def __init__(self, path: str):
         self.data = Path(path).read_bytes()
+        if len(self.data) < 4:
+            from pymapgis.reader import MapGISError
+            raise MapGISError(f"{path}: file too short for a LINESTY.lib")
         self.count = _U32.unpack_from(self.data, 0)[0]
+        if len(self.data) < 6 + self.count * 6:
+            # 2026-10-26 审计：索引区越界守卫（原裸抛 struct.error）
+            from pymapgis.reader import MapGISError
+            raise MapGISError(f"{path}: LINESTY.lib index table exceeds file size")
         # 索引项：(u32 记录偏移, u16 子线数)；偏移 0 = 空槽
         self.entries: List[Tuple[int, int]] = [
             struct.unpack_from("<IH", self.data, 6 + i * 6)
@@ -1054,6 +1069,8 @@ class LinestyLib:
     def record_bounds(self, no: int) -> Tuple[int, int]:
         """no = 1-based 线型号。返回记录字节区间。"""
         i = no - 1
+        if not (0 <= i < self.count):
+            raise IndexError(f"line style {no} out of range (1..{self.count})")
         off = self.entries[i][0]
         k = self._pos.get(i)
         if k is None:
@@ -1076,6 +1093,10 @@ class LinestyLib:
         # 非法指针置 truncated（2026-10-19 F2 审计：旧版静默 break，
         # 调用方无法区分"真空"与"损坏"——真库 859 条无触发，防御加固）
         for s in range(n_subs):
+            if off + s * 6 + 6 > len(self.data):
+                # 2026-10-26 审计：指针表越过文件末尾（原裸抛 struct.error）
+                style.truncated = True
+                break
             ptr, ln = struct.unpack_from("<IH", self.data, off + s * 6)
             if ptr <= 0 or ln <= 0 or ptr + ln > end:
                 style.truncated = True
@@ -1286,15 +1307,19 @@ def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
         return (op, kw)
 
     ops: List[tuple] = []
-    # —— 已裁定线型：锚定规格（注意 dict 身份比较，勿用 == 字符串）——
+    # —— 已裁定线型：锚定规格（key 为 f"{linetype}|{aux}" 字符串）——
     if key == "1|0" or (linetype == 1 and aux == 0 and style is None):
         ops = [T("solid", width_mm=W)]
         spec = ADJUDICATED_STRUCTS.get("1|0", "单实线")
-    elif linetype == 2:
+    elif linetype == 2 and (style is None or aux == 0 or aux in (1, 4)
+                            or aux > 4):
         # 2|0/2|1/2|4/2|18 同族（用户 10-16 裁定：等价 2|0 纯虚线；
         # 2|1 实>空环状——同节奏规格不改形状）。**双规消除**：实/空
         # 比由 LineStyle.rhythm() 的沿线节奏推导（0.3496/0.3008），
         # 不再手写 0.35/0.30 近似值。
+        # 2026-10-26 审计：aux 门与 feature_rhythm 对齐——2|2/2|3
+        # 未裁定，库在时不臆断为虚线；style=None（无库退化路径）
+        # 维持原近似。
         rhy = style.rhythm() if style is not None else None
         if rhy and rhy["segments"]:
             ons = [(b - a) for a, b, _ in rhy["segments"]]

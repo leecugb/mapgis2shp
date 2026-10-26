@@ -35,7 +35,7 @@ import math
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 _U16 = struct.Struct("<H")
 _U32 = struct.Struct("<I")
@@ -80,6 +80,14 @@ class FillgrphLib:
             struct.unpack_from("<IH", self.data, 6 + i * 6)
             for i in range(self.count)
         ]
+        # 2026-10-26 审计：record_bounds 原每次线性扫描后继偏移，全库
+        # decode 退化为 O(N²)；预计算非空后继映射（与 linesty 同律）
+        occupied = [(i, off) for i, (off, _fl) in enumerate(self.entries)
+                    if off > 0]
+        self._next: Dict[int, int] = {
+            idx: (occupied[k + 1][1] if k + 1 < len(occupied) else len(self.data))
+            for k, (idx, _off) in enumerate(occupied)
+        }
 
     def record_bounds(self, no: int) -> Tuple[int, int]:
         """no = 1-based 图案号；返回记录字节区间。"""
@@ -89,10 +97,7 @@ class FillgrphLib:
         off = self.entries[i][0]
         if off == 0:
             raise IndexError(f"pattern {no} is an empty slot")
-        for k in range(i + 1, self.count):
-            if self.entries[k][0] > off:
-                return off, self.entries[k][0]
-        return off, len(self.data)
+        return off, self._next[i]
 
     def decode(self, no: int) -> Optional[FillPattern]:
         """解码图案 no（1-based）。
@@ -129,9 +134,12 @@ class FillgrphLib:
                 acc += counts[i]
             # points = 全记录坐标精确去重（首现序；2026-10-19 F1 审计：
             # 旧 0.003 容差会摧毁密集曲线——367 图案实证，改逐位精确）
+            # 2026-10-26 审计：seen 集替代 O(n²) 线性查找（语义不变）
+            seen: set = set()
             pts: List[Tuple[float, float]] = []
             for p in raw:
-                if p not in pts:
+                if p not in seen:
+                    seen.add(p)
                     pts.append(p)
             return FillPattern(no=no, grid=grid, unit=unit,
                                strokes=strokes, points=pts, raw_points=raw)

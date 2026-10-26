@@ -1412,6 +1412,16 @@ class Reader:
                 },
                 "tail": self._raw_tail,
             }
+            # 图形参数快照（2026-10-26 审计）：Writer 透传原生段前与此比对——
+            # 参数未变则逐字节复用保持往返同构，被修改则整体重建，
+            # 防止参数编辑被复用的源段静默吞掉
+            snapshot = {
+                "POINT": self.point_params,
+                "LINE": self.line_params,
+                "POLYGON": self.polygon_params,
+            }[self.shapeType]
+            if not snapshot.empty:
+                self.geodataframe.attrs["mapgis_param_snapshot"] = snapshot.copy()
         if self.geom:
             bounds = self.geodataframe.bounds
             self.bbox = np.array([

@@ -105,11 +105,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 def _sniff_lib_kind(path: Path) -> str:
     """Identify a MapGIS graphic library by name, then by magic.
 
-    LINESTY.lib / Fillgrph.lib start with ``[u32 count][u16 reserved=0]``;
+    LINESTY.lib / Fillgrph.lib start with ``[u32 count][u16 reserved=0]``
+    (indistinguishable by magic — Fillgrph.lib is identified by name only);
     Subgraph.lib starts with ``[u32 index_bytes][u32 first_offset>0]``.
     """
     name = path.name.lower()
-    if "linesty" in name or "fillgrph" in name:
+    if "fillgrph" in name:
+        # 2026-10-26 审计：Fillgrph.lib 与 LINESTY.lib 索引区同构、
+        # 魔数不可分，按名路由到 FillgrphLib，避免被当线型库解析出
+        # "看似合理"的垃圾结果
+        return "fillgrph"
+    if "linesty" in name:
         return "linesty"
     if "subgraph" in name:
         return "subgraph"
@@ -132,7 +138,7 @@ def _lib_main(argv: Sequence[str]) -> int:
     parser.add_argument("library", type=Path, help="Path to the library file")
     parser.add_argument(
         "--kind",
-        choices=["auto", "subgraph", "linesty"],
+        choices=["auto", "subgraph", "linesty", "fillgrph"],
         default="auto",
         help="Library kind (default: auto-detect from name/magic)",
     )
@@ -172,6 +178,8 @@ def _lib_main(argv: Sequence[str]) -> int:
     try:
         if kind == "subgraph":
             return _lib_subgraph(args)
+        if kind == "fillgrph":
+            return _lib_fillgrph(args)
         return _lib_linesty(args)
     except MapGISError as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -179,6 +187,28 @@ def _lib_main(argv: Sequence[str]) -> int:
     except Exception as exc:
         print(f"error: failed to decode library: {exc}", file=sys.stderr)
         return 1
+
+
+def _lib_fillgrph(args: argparse.Namespace) -> int:
+    """Inspect a Fillgrph.lib fill-pattern library (2026-10-26 audit)."""
+    from pymapgis.fillgrph import FillgrphLib, pattern_geometry
+
+    lib = FillgrphLib(str(args.library))
+    decoded = sum(1 for no in range(1, lib.count + 1)
+                  if lib.decode(no) is not None)
+    print(f"{args.library.name}: {lib.count} slots, {decoded} decoded")
+    if args.style is None:
+        return 0
+
+    pat = pattern_geometry(lib, args.style)
+    if pat is None:
+        print(f"error: pattern {args.style} out of range or unsupported",
+              file=sys.stderr)
+        return 1
+    print(f"pattern {args.style}: fills={len(pat['fill_polygons'])} "
+          f"polylines={len(pat['polylines'])} circles={len(pat['circles'])} "
+          f"arcs={len(pat['arcs'])} dropped={pat['dropped']}")
+    return 0
 
 
 def _lib_subgraph(args: argparse.Namespace) -> int:
@@ -235,6 +265,12 @@ def _lib_linesty(args: argparse.Namespace) -> int:
     style = lib.decode(args.style)
     if style is None:
         print(f"error: style {args.style} empty or out of range",
+              file=sys.stderr)
+        return 1
+    if style.truncated:
+        # 2026-10-26 审计：截断/非法子线指针表应报告失败而不是
+        # 展示部分解码结果（对异型文件会产生误导性输出）
+        print(f"error: style {args.style} record is truncated or invalid",
               file=sys.stderr)
         return 1
     main_style, aux_style = compose_feature_style(lib, args.style, args.aux)

@@ -678,3 +678,100 @@ class TestShpIntermediary:
         out = tmp_path / "out.geojson"
         assert cli_main([str(sample_wl), str(out)]) == 0
         assert out.exists()
+
+class TestPassthroughAuditFixes:
+    """Regressions for the 2026-10-26 writer passthrough audit.
+
+    Projected CRS (factor != 1) must hit the source-section passthrough, and
+    graphic-parameter edits must not be silently swallowed by reused raw
+    sections.
+    """
+
+    # WGS84 横轴墨卡托（+proj=tmerc 是 Writer 支持的投影族之一；
+    # EPSG:32643 的 +proj=utm 不在支持范围内，不能用于此测试）
+    _PROJECTED_CRS = (
+        "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 "
+        "+datum=WGS84 +units=m +no_defs"
+    )
+
+    @staticmethod
+    def _utm_points():
+        return gpd.GeoDataFrame(
+            {"ID": pd.array([1, 2], dtype="int32")},
+            geometry=[
+                shapely.geometry.Point(500000.0, 4400000.0),
+                shapely.geometry.Point(500100.0, 4400100.0),
+            ],
+            crs=TestPassthroughAuditFixes._PROJECTED_CRS,
+        )
+
+    @staticmethod
+    def _utm_lines():
+        return gpd.GeoDataFrame(
+            {"ID": pd.array([1, 2], dtype="int32")},
+            geometry=[
+                shapely.geometry.LineString([(500000, 4400000), (500100, 4400000)]),
+                shapely.geometry.LineString([(500000, 4400100), (500100, 4400100)]),
+            ],
+            crs=TestPassthroughAuditFixes._PROJECTED_CRS,
+        )
+
+    def test_projected_point_passthrough_keeps_tail(self, tmp_path) -> None:
+        src = tmp_path / "src.wt"
+        Writer(self._utm_points(), map_scale=250000).to_file(src)
+        with open(src, "ab") as handle:
+            handle.write(b"EXTRA_TAIL_BYTES")
+        with Reader(src) as reader:
+            frame = reader.geodataframe
+        out = tmp_path / "out.wt"
+        Writer(frame, map_scale=250000).to_file(out)
+        assert out.read_bytes().endswith(b"EXTRA_TAIL_BYTES")
+
+    def test_projected_line_passthrough_keeps_tail(self, tmp_path) -> None:
+        src = tmp_path / "src.wl"
+        Writer(self._utm_lines(), map_scale=250000).to_file(src)
+        with open(src, "ab") as handle:
+            handle.write(b"EXTRA_TAIL_BYTES")
+        with Reader(src) as reader:
+            frame = reader.geodataframe
+        out = tmp_path / "out.wl"
+        Writer(frame, map_scale=250000).to_file(out)
+        assert out.read_bytes().endswith(b"EXTRA_TAIL_BYTES")
+
+    def test_projected_polygon_passthrough_keeps_tail(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {"ID": pd.array([1], dtype="int32")},
+            geometry=[shapely.geometry.box(500000, 4400000, 500100, 4400100)],
+            crs=self._PROJECTED_CRS,
+        )
+        src = tmp_path / "src.wp"
+        Writer(gdf, map_scale=250000).to_file(src)
+        with open(src, "ab") as handle:
+            handle.write(b"EXTRA_TAIL_BYTES")
+        with Reader(src) as reader:
+            frame = reader.geodataframe
+        out = tmp_path / "out.wp"
+        Writer(frame, map_scale=250000).to_file(out)
+        assert out.read_bytes().endswith(b"EXTRA_TAIL_BYTES")
+
+    def test_point_param_edit_survives_roundtrip(self, tmp_path, sample_wt) -> None:
+        with Reader(sample_wt, read_graphic_params=True) as source:
+            gdf = source.geodataframe
+        gdf = gdf.copy()
+        gdf["angle"] = 45.0
+        out = tmp_path / "out.wt"
+        Writer(gdf).to_file(out)
+        with Reader(out, read_graphic_params=True) as rebuilt:
+            assert rebuilt.geodataframe["angle"].tolist() == [45.0] * len(gdf)
+
+    def test_line_param_edit_survives_roundtrip(self, tmp_path, sample_wl) -> None:
+        with Reader(sample_wl, read_graphic_params=True) as source:
+            gdf = source.geodataframe
+        gdf = gdf.copy()
+        gdf["width"] = 0.9
+        out = tmp_path / "out.wl"
+        Writer(gdf).to_file(out)
+        with Reader(out, read_graphic_params=True) as rebuilt:
+            assert rebuilt.geodataframe["width"].tolist() == pytest.approx(
+                [0.9] * len(gdf)
+            )

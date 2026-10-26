@@ -120,6 +120,50 @@ _DEFAULT_LINE_COLOR = 1  # int16 @26 (Colorlib 1-based); 1 in all inspected nati
 _DEFAULT_LINE_WIDTH = 0.1  # mm
 _DEFAULT_LINE_COEF = 5.0  # x/y pattern coefficient (MapGIS 重存规范值)
 
+# Per-column graphic-parameter defaults, shared by the column absorber
+# (_split_param_columns) and the source-snapshot comparison
+# (_params_match_source): a NaN in the snapshot means "field not provided
+# by the source record" and is equivalent to the default (2026-10-26 audit).
+_PARAM_DEFAULTS: Dict[str, Dict[str, Any]] = {
+    "POINT": {
+        "point_type": _DEFAULT_POINT_TYPE,
+        "symbol_no": _DEFAULT_SYMBOL_NO,
+        "height": _DEFAULT_POINT_SIZE,
+        "width": _DEFAULT_POINT_SIZE,
+        "spacing": 0.0,
+        "angle": 0.0,
+        "color": 1,
+        "layer": 0,
+        "pen_width": 0.05,
+        "font_zh": 1,
+        "font_en": 0,
+        "font_style": 0,
+    },
+    "LINE": {
+        "linetype": _DEFAULT_LINETYPE,
+        "aux_linetype": _DEFAULT_AUX_LINETYPE,
+        "aux_flag": 0,
+        "color": _DEFAULT_LINE_COLOR,
+        "width": _DEFAULT_LINE_WIDTH,
+        "x_coef": _DEFAULT_LINE_COEF,
+        "y_coef": _DEFAULT_LINE_COEF,
+        "aux_color": 0,
+        "layer": 0,
+        "transparent": 0,
+    },
+    "POLYGON": {
+        "fill_color": 0,
+        "pattern": 0,
+        "pattern_height": 0.0,
+        "pattern_width": 0.0,
+        "pattern_color": 0,
+        "layer": 0,
+        "field5": 0,
+        "field6": 0,
+        "field7": 0,
+    },
+}
+
 
 # ---------------------------------------------------------------------------
 # Exceptions
@@ -1417,41 +1461,13 @@ class Writer:
             # 现 reindex 补缺失列 + 按列默认值填充，部分给出的参数不再丢失。
             present = [c for c in _LINE_PARAM_COLUMNS if c in attr.columns]
             params = attr[present].reindex(columns=_LINE_PARAM_COLUMNS)
-            self._params = params.fillna(
-                {
-                    "linetype": _DEFAULT_LINETYPE,
-                    "aux_linetype": _DEFAULT_AUX_LINETYPE,
-                    "aux_flag": 0,
-                    "color": _DEFAULT_LINE_COLOR,
-                    "width": _DEFAULT_LINE_WIDTH,
-                    "x_coef": _DEFAULT_LINE_COEF,
-                    "y_coef": _DEFAULT_LINE_COEF,
-                    "aux_color": 0,
-                    "layer": 0,
-                    "transparent": 0,
-                }
-            )
+            self._params = params.fillna(_PARAM_DEFAULTS["LINE"])
             return attr.drop(columns=present)
         if self.shapeType == "POINT" and "point_type" in attr.columns:
             # 同 LINE 宽松吸收（2026-10-15 wat 补齐后列集 6→12）。
             present = [c for c in _POINT_PARAM_COLUMNS if c in attr.columns]
             params = attr[present].reindex(columns=_POINT_PARAM_COLUMNS)
-            self._params = params.fillna(
-                {
-                    "point_type": _DEFAULT_POINT_TYPE,
-                    "symbol_no": _DEFAULT_SYMBOL_NO,
-                    "height": _DEFAULT_POINT_SIZE,
-                    "width": _DEFAULT_POINT_SIZE,
-                    "spacing": 0.0,
-                    "angle": 0.0,
-                    "color": 1,
-                    "layer": 0,
-                    "pen_width": 0.05,
-                    "font_zh": 1,
-                    "font_en": 0,
-                    "font_style": 0,
-                }
-            )
+            self._params = params.fillna(_PARAM_DEFAULTS["POINT"])
             return attr.drop(columns=present)
         want = {
             "POINT": _POINT_PARAM_COLUMNS,
@@ -1464,17 +1480,7 @@ class Writer:
             present = [c for c in want if c in attr.columns]
             if present or "class" in attr.columns or "layer" in attr.columns:
                 params = attr[present].reindex(columns=want)
-                self._params = params.fillna({
-                    "fill_color": 0,
-                    "pattern": 0,
-                    "pattern_height": 0.0,
-                    "pattern_width": 0.0,
-                    "pattern_color": 0,
-                    "layer": 0,
-                    "field5": 0,
-                    "field6": 0,
-                    "field7": 0,
-                })
+                self._params = params.fillna(_PARAM_DEFAULTS["POLYGON"])
                 attr = attr.drop(columns=present)
                 # 区参数类码 @1（=区图层，须与弧记录/head_8 标志一致）：
                 # 取可选 class 列（往返来源）或 layer 列，默认 1
@@ -1488,6 +1494,33 @@ class Writer:
             self._params = attr[want].reset_index(drop=True)
             return attr.drop(columns=want)
         return attr
+
+    def _params_match_source(self) -> bool:
+        """Compare absorbed graphic params against the reader's snapshot.
+
+        Gates the raw-section passthrough for point/line files: unchanged
+        params keep the byte-isomorphic reuse of source sections, edited
+        params force a full rebuild so the edits take effect instead of
+        being silently swallowed by the reused raw section 0
+        (2026-10-26 audit regression).
+        """
+        if self._params is None:
+            return True
+        snap = getattr(self._gdf, "attrs", {}).get("mapgis_param_snapshot")
+        if snap is None or len(snap) != len(self._params):
+            return False
+        cols = list(self._params.columns)
+        if any(c not in snap.columns for c in cols):
+            return False
+        # 快照中的 NaN = 源记录未提供该字段，等价于写入侧默认值
+        # （与 _split_param_columns 的 fillna 语义一致）
+        defaults = {k: v for k, v in _PARAM_DEFAULTS[self.shapeType].items()
+                    if k in cols}
+        a = np.asarray(self._params[cols].to_numpy(dtype="float64"))
+        b = np.asarray(snap[cols].fillna(defaults).to_numpy(dtype="float64"))
+        return a.shape == b.shape and bool(
+            np.allclose(a, b, rtol=1e-9, atol=1e-9, equal_nan=True)
+        )
 
     def _scale_factor(self) -> float:
         """Multiplier from map units to stored coordinate values."""
@@ -1523,7 +1556,9 @@ class Writer:
             passthrough = self._simple_passthrough(
                 ["0", "1", "3", "4"], factor, kind="point"
             )
-            if passthrough:
+            # 图形参数与源快照一致才透传原始段；被修改则整体重建，
+            # 防止参数编辑被复用的源 section 0 静默吞掉（2026-10-26 审计）
+            if passthrough and self._params_match_source():
                 merged = {int(k): bytes(v) for k, v in passthrough["sections"].items()}
                 merged[2] = attr_section
                 merged["_tail"] = passthrough.get("tail", b"")
@@ -1547,7 +1582,8 @@ class Writer:
             passthrough = self._simple_passthrough(
                 ["0", "1", "3", "4", "5", "6", "7"], factor, kind="line"
             )
-            if passthrough:
+            # 同点文件：参数快照一致才透传，否则整体重建（2026-10-26 审计）
+            if passthrough and self._params_match_source():
                 merged = {int(k): bytes(v) for k, v in passthrough["sections"].items()}
                 merged[2] = attr_section
                 merged["_tail"] = passthrough.get("tail", b"")
@@ -1604,10 +1640,14 @@ class Writer:
         (window reset and symbol scaling).
         """
         factor = self._scale_factor()
-        minx, miny, maxx, maxy = self._gdf.total_bounds * factor
         features = len(self._gdf)
+        if features:
+            minx, miny, maxx, maxy = self._gdf.total_bounds * factor
+        else:
+            # 空帧：total_bounds 为 NaN，头部范围写零（空文件头计数为 0）
+            minx, miny, maxx, maxy = 0.0, 0.0, 0.0, 0.0
         if self.shapeType == "POLYGON":
-            count = len(sections[0]) // _LINE_RECORD_SIZE - 1
+            count = max(0, len(sections[0]) // _LINE_RECORD_SIZE - 1)
             fields: Dict[int, Tuple[str, Any]] = {
                 260: ("I", count),
                 264: ("I", count + 1),
@@ -1693,17 +1733,19 @@ class Writer:
             )
             from collections import Counter as _Counter
 
-            def _key(lines, nd=6):
+            def _key(lines, div, nd=6):
                 pts = []
                 for ln in lines:
                     pts.extend(
-                        (round(float(x) / factor, nd), round(float(y) / factor, nd))
+                        (round(float(x) / div, nd), round(float(y) / div, nd))
                         for x, y in ln.coords
                     )
                 return pts
 
-            ours = _Counter(_key(self._gdf.geometry))
-            theirs = _Counter(_key(src))
+            # 源坐标按 factor 折算回地图单位后与本侧比较（2026-10-26 审计：
+            # 旧实现两侧同除 factor，投影坐标系下永远失配、透传静默失效）
+            ours = _Counter(_key(self._gdf.geometry, 1.0))
+            theirs = _Counter(_key(src, factor))
             return pt if ours == theirs and ours else None
         except Exception:
             return None
@@ -1750,7 +1792,7 @@ class Writer:
                 len(raw_index),
                 16 + len(raw_index) + 8,
                 len(raw_coords),
-                1.0,
+                1.0 / factor,
             )
             src_topo = _read_topology_table(_io.BytesIO(raw_topo), 0, len(raw_topo))
         except Exception:

@@ -112,14 +112,25 @@ class SubgraphLib:
     # [-1.375,+1.485]mm 零越界——以 u16 硬界为准，不再按旧 255/4000 收窄。
     _REGION_T_MAX = 0x8000   # 实测 type 397/413/416…（type==子路径数族）
     _REGION_N_MAX = 16000    # 实测 n=4300/6128…（千点级密集弧列）
+    # 2026-10-26 审计注记：_REGION_WIN=6560 是前缀和窗口（u16 数），
+    # 点数表项数 n//2 必须 ≤ 窗口，故实际可解析上限 n = 13120；
+    # _REGION_N_MAX 与窗口不自洽，超窗记录会令走查诚实停止并截断
+    # 其后整个尾段区（当前库 n≤6128 不触发）
     _REGION_K_MAX = 4000     # 点数表项数上限（n=16000 全 2 点组时恰 4000）
     _REGION_SEQ_MAX = 512    # 描述区 10B 块数上限（#1996 实测 62 块）
     _REGION_WIN = (_REGION_SEQ_MAX * 10 + _REGION_K_MAX * 2) // 2  # 前缀和窗口 u16 数
 
     def __init__(self, path: str):
         self.data = Path(path).read_bytes()
+        if len(self.data) < 4:
+            from pymapgis.reader import MapGISError
+            raise MapGISError(f"{path}: file too short for a Subgraph.lib")
         # 2026-10-15 优化：np.frombuffer 向量化（原逐 u32 struct 解包）
         n_idx = self._u32(0) // 4
+        if n_idx < 1 or n_idx * 4 > len(self.data):
+            # 2026-10-26 审计：畸形索引表守卫（原裸抛 ValueError）
+            from pymapgis.reader import MapGISError
+            raise MapGISError(f"{path}: invalid Subgraph.lib index size")
         self.offsets = np.frombuffer(self.data, dtype="<u4",
                                      count=n_idx).tolist()
         # 末条索引记录的真实终点 = 未索引尾段链起点：头长走查定界
