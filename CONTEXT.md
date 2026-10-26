@@ -1,6 +1,6 @@
 # mapgis2shp 项目上下文（历史记录，状态注记更新于 2026-10-26）
 
-> **当前状态注记：** 最新正式 release 为 v2.5.0；GitHub `main` 为 v2.5.0 后 74 个提交的开发状态。本文大部分内容是 2026-07 至 2026-09 的历史记录，不应据此判断当前版本。GitHub `main` 未跟踪 `src/pymapgis/rendering/` 和 `src/pymapgis/semantics/`，它们被 `.gitignore` 排除；本地工作树中的同名目录不属于 Git HEAD，也不进入发行包。最新验证和发布状态应以正式 release、CI 结果及版本化验收记录为准。
+> **当前状态注记：** 最新正式 release 为 **v2.6.0**（2026-10-26，含双向 Writer、ColorLib/FillgrphLib 解析器、洞-岛回归修复、公开合成夹具、可执行示例与 CI）；GitHub `main` 与 v2.6.0 一致。本文大部分内容是 2026-07 至 2026-09 的历史记录，不应据此判断当前版本。GitHub `main` 未跟踪 `src/pymapgis/rendering/` 和 `src/pymapgis/semantics/`，它们被 `.gitignore` 排除；本地工作树中的同名目录不属于 Git HEAD，也不进入发行包。最新验证和发布状态应以正式 release、CI 结果及版本化验收记录为准。
 
 ## 项目状态总览
 

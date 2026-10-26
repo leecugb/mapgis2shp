@@ -633,11 +633,15 @@ String fields are read up to the first `\x00`. Date fields are year (int16) + mo
 
 ## Changelog
 
-### Unreleased
+### 2.6.0
 - **Writer**: encode GeoDataFrames back to native MapGIS `.wt` / `.wl` / `.wp` binaries — attribute table (GBK strings, dates, times, typed numerics), graphic parameters (with mapgis → shp → mapgis fidelity when the reader's parameter columns are present), CRS (longitude/latitude, Transverse Mercator, Albers, Lambert), and regenerated polygon topology (shared boundaries stored as single arcs with left/right polygon IDs). New public API: `Writer`, `write()`, and `WriterError`
 - CLI converts in both directions based on the input extension (`.shp`, `.geojson`, `.gpkg`, ... → `.wt`/`.wl`/`.wp`); new `--encoding` option
 - New runtime dependency: `pyogrio>=0.8` (reading shapefiles is now a runtime feature)
 - `verify_pymapgis.py --roundtrip`: Reader → Writer → Reader regression over all local MapGIS files (not recorded in the baseline)
+- New graphic-library parsers: `ColorLib` (Colorlib.lib CMYK → RGB) and `FillgrphLib` (fill-pattern records; unsupported structures return `None` rather than inferred geometry)
+- Fix the coincident hole–island polygon regression (area over-count when a hole boundary exactly coincides with an independent island polygon); covered by `test_coincident_hole_and_island` and the public fixtures
+- Public synthetic MapGIS fixtures (`tests/fixtures/mapgis/`, with generator, provenance manifest and SHA-256 checksums), clean-checkout test fallbacks, executable example (`examples/geological_workflow.py`), CI workflow (`.github/workflows/test-and-build.yml`) and release-archive inspection (`tests/inspect_dist.py`)
+- Release notes for 2.3.0–2.5.0 remain to be backfilled into this changelog
 
 ### 2.2.1
 - Packaging fix: `pymapgis.rendering` is under active development and is not yet ready for distribution (it is also undocumented and requires matplotlib, which is not a declared runtime dependency). It is excluded from the wheel and sdist; the published package again focuses on reading/conversion. Optional development copies are not required by the core package and may remain outside the tracked repository. A separate package or extra can be considered once the module stabilises
