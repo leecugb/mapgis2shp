@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import io
 import math
+import os
 import struct
 
 import numpy as np
@@ -908,7 +909,7 @@ class TestFillgrph:
         assert len(geo["fill_polygons"][1]) == 8
         # 线笔划：两条连线 + 两条环轮廓描边；两个落笔微段（总长
         # <0.01mm）剔除并计数
-        assert [len(l) for l in geo["polylines"]] == [3, 3, 9, 9]
+        assert [len(line) for line in geo["polylines"]] == [3, 3, 9, 9]
         assert geo["polylines"][0][0] == pytest.approx((0.0985, 0.6058), abs=1e-3)
         assert geo["polylines"][0][2] == pytest.approx((0.3916, 0.6082), abs=1e-3)
         assert geo["polylines"][1][0] == pytest.approx((0.6039, 0.1048), abs=1e-3)
@@ -1231,9 +1232,17 @@ class TestColorLib:
     offset = 16 + 色号×4；条目 on-disk = (K, C, M, Y)。
     """
 
-    def test_four_anchors(self) -> None:
+    @staticmethod
+    def _lib():
         from pymapgis.colorlib import ColorLib
-        lib = ColorLib(r"D:\SLIB\Colorlib.lib")
+
+        path = os.environ.get("PYMAPGIS_COLORLIB")
+        if not path:
+            pytest.skip("Set PYMAPGIS_COLORLIB to a readable Colorlib.lib for this test")
+        return ColorLib(path)
+
+    def test_four_anchors(self) -> None:
+        lib = self._lib()
         assert lib.rgb(1) == (0, 0, 0)            # 黑（K=255）
         assert lib.rgb(9) == (255, 255, 255)      # 白（全零）
         assert lib.rgb(175) == (255, 0, 0)        # 纯红（M+Y）
@@ -1241,8 +1250,7 @@ class TestColorLib:
         assert lib.kcmy(175) == (0, 0, 255, 255)
 
     def test_out_of_range_none(self) -> None:
-        from pymapgis.colorlib import ColorLib
-        lib = ColorLib(r"D:\SLIB\Colorlib.lib")
+        lib = self._lib()
         assert lib.rgb(-1) is None
         assert lib.rgb(lib.max_no + 1) is None
         assert lib.rgb01(3) is not None
@@ -1486,9 +1494,7 @@ class TestFeatureRhythm:
         线型 2 库变体仅 2|0–2|4；越界 aux（2|9/2|18）为数据字段对，
         aux 不渲染——2|0/2|9/2|18 全同判 inline_dash（实0.3496/
         空0.3008，沿线节奏推导）。"""
-        from pymapgis.linesty import feature_rhythm
-        # 合成：实线笔 + 沿线节奏子线（linesty 2 结构）
-        from pymapgis.linesty import Element, LineStyle, SubLine
+        from pymapgis.linesty import Element, LineStyle, SubLine, feature_rhythm
         pen = SubLine(n=1, length=24,
                       elements=[Element(unit=0, marker=2, offset=0)],
                       f32_zone=[0.0, 0.0, 0.625, 0.0], f32_start=8)
@@ -1514,7 +1520,7 @@ class TestFeatureRhythm:
 
         24B 笔的 @16 f32 = 笔段终点 x1（载荷对本体），非笔宽——
         1|0 x1=1.0 满周期、575 x1=0.635 长划的双锚。"""
-        from pymapgis.linesty import feature_rhythm, LinestyLib
+        from pymapgis.linesty import feature_rhythm
         f32 = [0.0, -0.0011692431, 0.6349577904, -0.0011692431]
         st = self._style(f32, n=1, elems=((0, 2, 0),), aux=0, no=575)
         r = feature_rhythm(st, 0)

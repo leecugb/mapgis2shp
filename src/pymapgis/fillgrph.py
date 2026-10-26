@@ -35,7 +35,7 @@ import math
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 _U16 = struct.Struct("<H")
 _U32 = struct.Struct("<I")

@@ -42,8 +42,20 @@ fi
 # Sanity checks
 # ---------------------------------------------------------------------------
 
+echo "==> Running lint..."
+python -m ruff check src tests examples verify_pymapgis.py
+
+echo "==> Running tests without private-data requirements..."
+python -m pytest -q
+
+echo "==> Building release archives..."
+python -m build
+
+echo "==> Inspecting release contents..."
+python tests/inspect_dist.py "${DIST_DIR}"
+
 echo "==> Running twine check..."
-twine check "${DIST_DIR}"/*
+python -m twine check "${DIST_DIR}"/*
 
 echo "==> Built artifacts:"
 ls -1 "${DIST_DIR}"/*

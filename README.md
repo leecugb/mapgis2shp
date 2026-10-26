@@ -30,8 +30,10 @@ MapGIS is a widely used closed-source GIS platform in China, especially in geolo
 - Decode polygon graphic parameters (class/layer, fill colour, pattern and pattern-colour numbers from the head_9 section)
 - Parse the MapGIS 6.x graphic libraries themselves — `SubgraphLib` for
   `Subgraph.lib` point-symbol definitions (including chained records past
-  the index table) and `LinestyLib` for `LINESTY.lib` line-style definitions
-  (sublines, element templates, dot/dash rhythm, pen tables)
+  the index table), `LinestyLib` for `LINESTY.lib` line-style definitions
+  (sublines, element templates, dot/dash rhythm, pen tables), `ColorLib` for
+  `Colorlib.lib` colour tables, and `FillgrphLib` for supported `Fillgrph.lib`
+  fill-pattern records with explicit handling of unsupported structures
 - Reconstruct polygon topology from arc records — and regenerate it on write (shared boundaries stored as single arcs)
 - Preserve or repair invalid polygon geometries with `shapely.make_valid`
 - Export to any format supported by GeoPandas / Fiona (Shapefile, GeoJSON, GeoPackage, etc.)
@@ -638,7 +640,7 @@ String fields are read up to the first `\x00`. Date fields are year (int16) + mo
 - `verify_pymapgis.py --roundtrip`: Reader → Writer → Reader regression over all local MapGIS files (not recorded in the baseline)
 
 ### 2.2.1
-- Packaging fix: `pymapgis.rendering` is under active development and is not yet ready for distribution (it is also undocumented and requires matplotlib, which is not a declared dependency). It is now excluded from the wheel and sdist; the published package again focuses on reading/conversion. The module remains in the source repository and will be published as a separate package or extra once it stabilises
+- Packaging fix: `pymapgis.rendering` is under active development and is not yet ready for distribution (it is also undocumented and requires matplotlib, which is not a declared runtime dependency). It is excluded from the wheel and sdist; the published package again focuses on reading/conversion. Optional development copies are not required by the core package and may remain outside the tracked repository. A separate package or extra can be considered once the module stabilises
 
 ### 2.2.0
 - `read_graphic_params=True`: decode line graphic parameters (`.wl`: `linetype`, `aux_linetype`, `width`, `x_coef`, `y_coef`) and polygon graphic parameters (`.wp` head_9 section: `fill_color`, `pattern`, `pattern_color`), exposed as `line_params` / `polygon_params` and joined into the GeoDataFrame
@@ -673,6 +675,39 @@ Run the smoke-test regression against all local MapGIS files:
 ```bash
 python verify_pymapgis.py
 ```
+
+### Public test fixtures and executable example
+
+Small synthetic MapGIS binaries are included under `tests/fixtures/mapgis/` so
+that a fresh checkout can test actual `.wt`, `.wl`, and `.wp` input without
+restricted survey data. Run their dedicated tests with:
+
+```bash
+python -m pytest -q tests/test_public_fixtures.py
+```
+
+The generic Reader, Writer, and CLI tests fall back to these public fixtures
+when local real-data files are unavailable. See `tests/fixtures/README.md` for
+provenance, regeneration, and the Apache-2.0 fixture licence. These
+Writer-generated fixtures support internal regression only;
+they are not official MapGIS exports or independent native-export validation.
+
+An executable geological-data migration example is provided in
+`examples/geological_workflow.py`. It reads the public binaries, reprojects the
+layers to EPSG:32643, and reports attribute-grouped lengths and areas:
+
+```bash
+PYTHONPATH=src python3 examples/geological_workflow.py
+```
+
+The optional ColorLib tests use a caller-supplied proprietary library and skip
+when `PYMAPGIS_COLORLIB` is not set. No MapGIS graphic library is bundled.
+
+The workflow in `.github/workflows/test-and-build.yml` is configured to run
+lint, tests without private data or proprietary libraries, and the public
+example on Linux, Windows, and macOS. Its build job additionally checks wheel and source-archive
+contents with `tests/inspect_dist.py` and retains the artifacts for review.
+Optional rendering tests skip when the ignored development module is absent.
 
 ## Further documentation
 

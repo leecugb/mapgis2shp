@@ -13,9 +13,8 @@ The published package covers:
 - Attribute and coordinate-reference-system decoding
 - Polygon-topology reconstruction and regeneration
 - Point, line, and polygon graphic-parameter decoding
-- Structural parsers for `Subgraph.lib` and `LINESTY.lib`
-- Documentation, tests, validation tools, and interoperability fixes for these
-  capabilities
+- Structural parsers for `Subgraph.lib`, `LINESTY.lib`, `Colorlib.lib`, and `Fillgrph.lib`
+- Public synthetic fixtures, executable examples, documentation, tests, validation tools, and interoperability fixes for these capabilities
 
 Geological semantic calibration, map-specific adjudication, and cartographic
 rendering are outside the published package. Do not make release modules or the
@@ -191,7 +190,13 @@ Releases are cut from `main` with a version bump in both
   build environment crashes on startup.
 - `PYTHONUTF8=1` is required for `twine upload` on GBK consoles.
 - Verify the wheel contains only the release modules (no `semantics`,
-  `rendering`, or `linesty_adjudicated`) before uploading.
+  `rendering`, or `linesty_adjudicated`) before uploading. After running
+  `python -m build`, use `python tests/inspect_dist.py dist` to check this
+  boundary, required public fixtures and examples, and the absence of
+  proprietary graphic libraries and Python cache files.
+- The CI workflow is configured to run lint, tests without private data, the
+  public example, and the same archive inspection. Optional ColorLib and
+  rendering tests may skip when their external inputs are absent.
 - Real-data regression files can be modified in place by MapGIS sessions;
   keep backups and restore them before trusting test results.
 
