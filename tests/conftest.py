@@ -9,29 +9,33 @@ from typing import Any, Dict
 import pytest
 
 DATA_DIR = Path(__file__).parent.parent
+PUBLIC_FIXTURE_DIR = Path(__file__).parent / "fixtures" / "mapgis"
 
 
-def _glob_first(pattern: str) -> Path:
-    """Return the first file matching a glob pattern, or skip the test."""
+def _glob_first(pattern: str, public_name: str) -> Path:
+    """Return a local real-data match, or fall back to a public fixture."""
     matches = sorted(DATA_DIR.glob(pattern))
-    if not matches:
-        pytest.skip(f"No test data matching {pattern!r}")
-    return matches[0]
+    if matches:
+        return matches[0]
+    public = PUBLIC_FIXTURE_DIR / public_name
+    if public.is_file():
+        return public
+    pytest.skip(f"No test data matching {pattern!r} or public fixture {public_name!r}")
 
 
 @pytest.fixture
 def sample_wt() -> Path:
-    return _glob_first("*.WT")
+    return _glob_first("*.WT", "synthetic_points.wt")
 
 
 @pytest.fixture
 def sample_wl() -> Path:
-    return _glob_first("*.WL")
+    return _glob_first("*.WL", "synthetic_lines.wl")
 
 
 @pytest.fixture
 def sample_wp() -> Path:
-    return _glob_first("*.WP")
+    return _glob_first("*.WP", "synthetic_polygons.wp")
 
 
 @pytest.fixture

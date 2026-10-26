@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "mapgis2shp"
 version = "2.5.0"
-description = "MapGIS is a widely used closed-source GIS platform in China, especially in geological surveying, engineering, and scientific research. pymapgis provides a lightweight, open-source reader for its native point, line, and polygon vector formats."
+description = "Open-source bidirectional interoperability for MapGIS 6.x/67 binary vector formats with GeoPandas."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
@@ -42,6 +42,7 @@ dev = [
     "pytest-cov>=4.0",
     "ruff>=0.1.0",
     "twine>=4.0",
+    "matplotlib>=3.5",
 ]
 [project.scripts]
 pymapgis = "pymapgis.cli:main"
@@ -54,6 +55,8 @@ Issues = "https://github.com/leecugb/mapgis2shp/issues"
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
+    "/tests",
+    "/examples",
     "/README.md",
     "/LICENSE",
     "/CITATION.cff",
