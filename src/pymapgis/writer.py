@@ -903,11 +903,13 @@ def _filetime_block(total_size: int, len_const: int, path_len: int) -> bytes:
 class _PolygonArcDecomposer:
     """Split Polygon/MultiPolygon rings into shared arcs with left/right IDs.
 
-    Rings are oriented (exterior CCW, holes CW) so the polygon interior is
-    always on the left while walking.  Each canonical (unordered) segment is
-    labelled with the polygon IDs found on its two sides; segments whose
-    unordered side-pair matches are greedily chained into arcs, breaking at
-    junctions (vertices where more than one candidate segment continues).
+    Rings are normalised with ``orient`` before canonical segment registration.
+    The registration convention is pinned by Reader-Writer-Reader cases,
+    including shared boundaries and coincident hole/island pairs. Each
+    canonical (unordered) segment is labelled with the polygon IDs found on
+    its two sides; segments whose unordered side-pair matches are greedily
+    chained into arcs, breaking at junctions (vertices where more than one
+    candidate segment continues).
     A ring with no shared boundary therefore stays ONE closed arc (native
     convention, 2026-10-17: splitting each ring at the canonical-direction
     flip leaves the file undisplayable in MapGIS).  Shared boundaries are
@@ -925,17 +927,15 @@ class _PolygonArcDecomposer:
         self.polygons = polygons
         self.snap_tolerance = snap_tolerance
 
-    def _rings(self) -> List[Tuple[int, List[Tuple[float, float]], bool]]:
-        rings: List[Tuple[int, List[Tuple[float, float]], bool]] = []
+    def _rings(self) -> List[Tuple[int, List[Tuple[float, float]]]]:
+        rings: List[Tuple[int, List[Tuple[float, float]]]] = []
         tol = self.snap_tolerance
         for pid, geom in enumerate(self.polygons, start=1):
             for shell in _iter_shells(geom):
                 shell = orient(shell, sign=1.0)
-                rings.append((pid, self._points(shell.exterior.coords, tol), False))
+                rings.append((pid, self._points(shell.exterior.coords, tol)))
                 for interior in shell.interiors:
-                    # shapely 洞环为 CW：内域在行走方向右侧（2026-10-18
-                    # POLY.WP 洞-岛邻接实证：洞环按外壳同向注册会塌缩洞）
-                    rings.append((pid, self._points(interior.coords, tol), True))
+                    rings.append((pid, self._points(interior.coords, tol)))
         return rings
 
     @staticmethod
@@ -954,7 +954,7 @@ class _PolygonArcDecomposer:
         )
         ring_order: List[Tuple[Tuple[float, float], Tuple[float, float]]] = []
         seen_seg: set = set()
-        for pid, pts, is_hole in self._rings():
+        for pid, pts in self._rings():
             for a, b in zip(pts, pts[1:]):
                 if a == b:
                     continue
@@ -962,13 +962,13 @@ class _PolygonArcDecomposer:
                 if seg not in seen_seg:
                     seen_seg.add(seg)
                     ring_order.append(seg)
-                walked_canonical = a <= b
-                if is_hole:
-                    # 洞环 CW：内域在行走右侧
-                    sides[seg][1 if walked_canonical else 0] = pid
+                # Shells and interiors use the same registration convention.
+                # Reversing only a hole makes a coincident hole and island both
+                # reappear as positive area after a Reader-Writer-Reader cycle.
+                if a <= b:
+                    sides[seg][0] = pid
                 else:
-                    # 外壳 CCW：内域在行走左侧
-                    sides[seg][0 if walked_canonical else 1] = pid
+                    sides[seg][1] = pid
 
         adjacency: Dict[Tuple[float, float], List[Any]] = defaultdict(list)
         for seg in sides:
