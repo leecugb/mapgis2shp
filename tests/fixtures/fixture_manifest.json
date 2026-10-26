@@ -30,7 +30,7 @@
         "x_coef",
         "y_coef"
       ],
-      "sha256": "0b937946805955a3e56414f8ab8daf0acaf7fc3c10528fd72ac1c4c8893c5c88"
+      "sha256": "67ab8ae921887e031ef65feb097d95d375a5d75ea743454f5f12b0213369d082"
     },
     "synthetic_points.wt": {
       "attribute_fields": [
@@ -67,7 +67,7 @@
         "symbol_no",
         "width"
       ],
-      "sha256": "23eeff27f76f3d541e158572e614871e1edca583800b9f6168dd94dbdd63ee1b"
+      "sha256": "3b987412699231628310f654bf7d204d8489f6391d6423398cbfee3b653d617a"
     },
     "synthetic_polygons.wp": {
       "attribute_fields": [
@@ -102,12 +102,12 @@
         "pattern_height",
         "pattern_width"
       ],
-      "sha256": "7b26935700df19b7cb060b7a032f0fcec980a7c14125470bdd072585f839de36"
+      "sha256": "20d5ddca713615719d9743d5395f6869cf841ef954ba7e7e442f34e29a074a26"
     }
   },
   "generator": "tests/fixtures/build_mapgis_fixtures.py",
   "generator_software_version": "2.5.0",
-  "generator_source_description": "v2.5.0-74-g82dfe3a-dirty",
+  "generator_source_description": "v2.5.0-75-gef3bdb7-dirty",
   "provenance": "Synthetic geometries generated with pymapgis Writer. These are public regression fixtures, not official MapGIS exports and not independent native-export validation.",
   "schema_version": 1
 }
