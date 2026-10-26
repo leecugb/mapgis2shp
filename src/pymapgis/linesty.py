@@ -276,7 +276,11 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    if style is None or style.no not in (1, 2, 3, 4, 5, 7, 14, 16, 17, 18, 21, 38, 48, 50, 51, 58, 153, 223, 388, 455, 575):
+    supported = {
+        1, 2, 3, 4, 5, 7, 14, 16, 17, 18, 21, 38,
+        48, 50, 51, 58, 153, 223, 388, 455, 575,
+    }
+    if style is None or style.no not in supported:
         return None
     # 线型 1/2（2026-10-21 用户暂定策略）：1|x 等价 1|0、2|x 等价 2|0
     # ——aux 不渲染。库结构：两记录子线数有限（1 族 1 条、2 族 5 条
