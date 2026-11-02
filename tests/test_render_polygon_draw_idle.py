@@ -6,19 +6,22 @@
 geopandas 的地理 CRS 纬度纵横比与即时 autoscale 语义。
 """
 import geopandas as gpd
-import matplotlib
 import numpy as np
 import pytest
-from matplotlib.backends.backend_agg import FigureCanvasAgg
 from shapely.geometry import MultiPolygon, Polygon
 
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-
+# 渲染模块不进发布件；matplotlib 仅为 dev extra——两者都缺失时必须
+# skip 而非在收集期报错（2026-10-26 修复：matplotlib 原先在 importorskip
+# 之前无条件导入，wheel 安装环境收集即 ModuleNotFoundError）。
 pdf_writer = pytest.importorskip(
     "pymapgis.rendering.pdf_writer",
     reason="optional rendering module is not present in the public source archive",
 )
+matplotlib = pytest.importorskip("matplotlib", reason="matplotlib is a dev-only extra")
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: E402
+
 _rgb = pdf_writer._rgb
 render_polygon_layer = pdf_writer.render_polygon_layer
 

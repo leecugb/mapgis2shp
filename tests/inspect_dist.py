@@ -47,6 +47,9 @@ def _check_sdist(path: Path) -> None:
         "/CITATION.cff",
         "/examples/geological_workflow.py",
         "/tests/fixtures/build_mapgis_fixtures.py",
+        # test_public_fixtures.py reads the manifest at module scope; an sdist
+        # without it passes inspection but crashes the shipped tests.
+        "/tests/fixtures/fixture_manifest.json",
         "/tests/fixtures/mapgis/synthetic_points.wt",
         "/tests/fixtures/mapgis/synthetic_lines.wl",
         "/tests/fixtures/mapgis/synthetic_polygons.wp",
