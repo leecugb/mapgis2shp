@@ -108,7 +108,6 @@ _ATTR_TYPE_STAMP = {"POINT": 621, "LINE": 1011, "POLYGON": 972}
 
 # Per-point auxiliary constants (native values observed in J43C001002).
 _POINT_FLAG_INT = 65539  # head5 4-byte record value
-_WL_NODE_TABLE_PAD = b"\x00" * 16
 
 # Graphic-parameter defaults (validated against native J43C001002 files).
 _DEFAULT_POINT_TYPE = POINT_TYPE_SYMBOL
@@ -393,6 +392,7 @@ def _pack_field_descriptor(index: int, spec: _FieldSpec) -> bytes:
     flags = (
         _ATTR_FLAG_STRING
         if spec.type_code == _ATTR_TYPE_STRING
+        or (spec.name == "ID" and spec.type_code == _ATTR_TYPE_INT)
         else _ATTR_FLAG_NUMERIC_BASE + spec.decimals
     )
     return _FIELD_DESCRIPTOR_WRITE_STRUCT.pack(
@@ -411,6 +411,7 @@ def _build_attribute_section(
     specs: List[_FieldSpec],
     type_stamp: int,
     record_length: Optional[int] = None,
+    prefix_count: Optional[int] = None,
 ) -> bytes:
     """Build the complete attribute section (322-byte prefix + records).
 
@@ -423,6 +424,8 @@ def _build_attribute_section(
     today = datetime.date.today()
     struct.pack_into("<hBB", prefix, 2, today.year, today.month, today.day)
     struct.pack_into("<i", prefix, 12, type_stamp)
+    if prefix_count is not None:
+        struct.pack_into("<i", prefix, 16, prefix_count)
     prefix[320:322] = _ATTR_PREFIX_SIGNATURE
 
     if record_length is None:
@@ -580,15 +583,21 @@ def _mm_to_degree_coefs(crs: Any, map_scale: float, bbox) -> Tuple[float, float]
 def _header_crs_block_fields(
     crs: Any, map_scale: float, bbox
 ) -> Dict[int, Tuple[str, Any]]:
-    """Fixed CRS-block stamps plus millimetre-to-degree coefficients.
+    """CRS-block stamps plus millimetre-to-degree coefficients.
 
-    The constant block is written for every file type; the coefficients only
-    make sense for geographic CRSes and are left at zero otherwise (the
-    native projected layout is not yet pinned).
+    The constant block is written when a CRS is present; official no-CRS
+    files leave the entire block zeroed.  The coefficients only make sense
+    for geographic CRSes and are left at zero otherwise (the native projected
+    layout is not yet pinned).
     """
-    fields: Dict[int, Tuple[str, Any]] = {
+    fields: Dict[int, Tuple[str, Any]] = {}
+    if crs in (None, ""):
+        # All official no-CRS SHP->MapGIS files leave the complete CRS block
+        # zeroed.  Geographic constants are meaningful only with a real CRS.
+        return fields
+    fields.update({
         off: ("B", val) for off, val in _HEADER_CRS_BLOCK_BYTES.items()
-    }
+    })
     for off, raw in _HEADER_CRS_BLOCK_F32_BYTES.items():
         fields.update({off + i: ("B", byte) for i, byte in enumerate(raw)})
     fields[_HEADER_CRS_NEG_ZERO_OFFSET] = ("f", -0.0)
@@ -607,7 +616,7 @@ def _crs_header_fields(crs: Any, map_scale: float) -> Dict[int, Tuple[str, Any]]
         return {
             _CRS_PROJECTION_OFFSET: ("B", 0),
             _CRS_ELLIPSOID_OFFSET: ("B", 0),
-            _CRS_SCALE_OFFSET: ("d", 1.0),
+            _CRS_SCALE_OFFSET: ("d", 0.0),
         }
     crs = pyproj.CRS(crs)
     fields: Dict[int, Tuple[str, Any]] = {
@@ -817,7 +826,7 @@ def _encode_point_aux(
     point (native value 65539).
     """
     n = len(gdf)
-    pool = b"\x00" * 4
+    pool = b"\x00" * 2
     boxes = bytearray(32)
     for i, geom in enumerate(gdf.geometry):
         row = params.iloc[i] if params is not None else None
@@ -840,8 +849,7 @@ _LINE_AUX5_SIZE = 55
 _LINE_META_SIZE = 392
 _LINE_META_LENGTH_CONST = 387
 _LINE_FLAG_BASE = 0x00010000
-_POLY_META3_SIZE = 645  # 最小观测原生值（LHCPGDAC05.WP）
-_POLY_META3_LEN_CONST = 426
+_POLY_ARC_ATTR_TYPE_STAMP = 426
 
 
 def _filetime_now() -> int:
@@ -854,19 +862,21 @@ def _encode_line_aux(
 ) -> Tuple[bytes, bytes, bytes, bytes, bytes]:
     """Encode the native .wl auxiliary sections.
 
-    head4 (index 3): per-line node-id records, 24 bytes = two int32 (native
-    assigns sequential fresh node IDs per line).  head5 (index 4): 55-byte
+    head4 (index 3): empty node section in six official SHP->MapGIS files
+    (native re-saved node tables are retained through passthrough).  head5 (index 4): 55-byte
     zero block (native minimal form).  head6 (index 5): 392-byte metadata
     block (FILETIME + constants + empty path area).  head7 (index 6): n+1
     32-byte records of four-double bounding boxes (record 0 = file extent).
     head8 (index 7): 4-byte lead plus one int32 per line, 0x00010000 ORed
     with the line layer (layer 100 -> 0x64, layer 5 -> 0x05, native-verified).
     """
-    nodes = bytearray(24)
+    # Six official SHP->MapGIS line files carry an empty node section; the
+    # re-saved native node table is optional and remains available through
+    # source-section passthrough.
+    nodes = b""
     boxes = struct.pack("<4d", *gdf.total_bounds)
     flags = struct.pack("<i", _LINE_FLAG_BASE)
     for i, geom in enumerate(gdf.geometry):
-        nodes += struct.pack("<2i", 2 * i + 1, 2 * i + 2) + _WL_NODE_TABLE_PAD
         minx, miny, maxx, maxy = geom.bounds
         boxes += struct.pack("<4d", minx, miny, maxx, maxy)
         row = params.iloc[i] if params is not None else None
@@ -926,12 +936,23 @@ class _PolygonArcDecomposer:
     def __init__(self, polygons: List[Any], snap_tolerance: float = 0.0) -> None:
         self.polygons = polygons
         self.snap_tolerance = snap_tolerance
+        # Decomposition is also used to fingerprint source-derived passthrough
+        # files.  Record unsafe topology here and let Writer reject it only
+        # when it would actually be written instead of reusing native bytes.
+        self.errors: List[str] = []
+        self.independent_safe = True
 
     def _rings(self) -> List[Tuple[int, List[Tuple[float, float]]]]:
         rings: List[Tuple[int, List[Tuple[float, float]]]] = []
         tol = self.snap_tolerance
         for pid, geom in enumerate(self.polygons, start=1):
-            for shell in _iter_shells(geom):
+            shells = _iter_shells(geom)
+            if not shells:
+                self.independent_safe = False
+                self.errors.append(
+                    f"polygon {pid}: no polygonal geometry remains after validation"
+                )
+            for shell in shells:
                 shell = orient(shell, sign=1.0)
                 rings.append((pid, self._points(shell.exterior.coords, tol)))
                 for interior in shell.interiors:
@@ -948,6 +969,16 @@ class _PolygonArcDecomposer:
                 out.append(pt)
         return out
 
+    @staticmethod
+    def _points_preserving_duplicates(
+        coords: Any, tol: float
+    ) -> List[Tuple[float, float]]:
+        """Quantize coordinates without dropping native consecutive repeats."""
+        return [
+            (_quantize(float(c[0]), tol), _quantize(float(c[1]), tol))
+            for c in coords
+        ]
+
     def build(self) -> Tuple[List[List[Tuple[float, float]]], List[Tuple[int, int]]]:
         sides: Dict[Tuple[Tuple[float, float], Tuple[float, float]], List[int]] = (
             defaultdict(lambda: [0, 0])
@@ -955,6 +986,17 @@ class _PolygonArcDecomposer:
         ring_order: List[Tuple[Tuple[float, float], Tuple[float, float]]] = []
         seen_seg: set = set()
         for pid, pts in self._rings():
+            if (
+                len(pts) < 4
+                or pts[0] != pts[-1]
+                or len(set(pts[:-1])) < 3
+            ):
+                self.independent_safe = False
+                self.errors.append(
+                    f"polygon {pid}: ring collapsed to fewer than three "
+                    "distinct vertices after snapping"
+                )
+                continue
             for a, b in zip(pts, pts[1:]):
                 if a == b:
                     continue
@@ -965,10 +1007,15 @@ class _PolygonArcDecomposer:
                 # Shells and interiors use the same registration convention.
                 # Reversing only a hole makes a coincident hole and island both
                 # reappear as positive area after a Reader-Writer-Reader cycle.
-                if a <= b:
-                    sides[seg][0] = pid
-                else:
-                    sides[seg][1] = pid
+                slot = 0 if a <= b else 1
+                previous = sides[seg][slot]
+                if previous != 0:
+                    self.errors.append(
+                        f"polygon topology: segment {seg} side {slot} already "
+                        f"claims polygon {previous}; polygon {pid} also claims "
+                        "the same side"
+                    )
+                sides[seg][slot] = pid
 
         adjacency: Dict[Tuple[float, float], List[Any]] = defaultdict(list)
         for seg in sides:
@@ -1017,13 +1064,80 @@ class _PolygonArcDecomposer:
                 walk_left, walk_right = side_l, side_r
             else:
                 walk_left, walk_right = side_r, side_l
-            # 单多边形弧归一化为原生 (pid, 0) 形态（多边形内域在行走右侧）
-            if walk_left != 0 and walk_right == 0:
-                coords = coords[::-1]
-                walk_left, walk_right = walk_right, walk_left
-            arcs.append(coords)
-            topo.append((walk_right, walk_left))
+            # 单多边形弧归一化为原生 (pid, 0) 形态（2026-10-17/18 原生实证）。
+            # 闭合环一律顺时针存储：旧"pid 在行走右侧"归一化在几何一致的
+            # 注册约定下会把孤立洞环存成逆时针（2026-10-26 实证），与文档
+            # 约定相悖且原生显示未验证。开放弧（环在结点处被打断）保持
+            # "pid 在行走右侧"的源环序——弧旋转/顶点序是原生显示闸门
+            # （2026-10-18 实证），main 行为已获原生验收，不改变。
+            if (walk_left != 0) != (walk_right != 0):
+                pid = walk_left if walk_left != 0 else walk_right
+                if coords[0] == coords[-1]:
+                    ring_area2 = sum(
+                        coords[k][0] * coords[k + 1][1]
+                        - coords[k + 1][0] * coords[k][1]
+                        for k in range(len(coords) - 1)
+                    )
+                    if ring_area2 > 0:  # 逆时针存储 -> 反转为顺时针
+                        coords = coords[::-1]
+                elif walk_left != 0 and walk_right == 0:
+                    coords = coords[::-1]
+                arcs.append(coords)
+                topo.append((pid, 0))
+            else:
+                arcs.append(coords)
+                topo.append((walk_right, walk_left))
         return arcs, topo
+
+
+def _independent_polygon_arcs(
+    polygons: List[Any], snap_tolerance: float
+) -> Tuple[List[List[Tuple[float, float]]], List[Tuple[int, int]], List[bool]]:
+    """Encode every ring independently, matching official fresh WP files.
+
+    Returns arcs, ``(pid, 0)`` topology and a per-arc hole flag.  The hole
+    flags are required by the native polygon/ring/arc index.
+    """
+    arcs: List[List[Tuple[float, float]]] = []
+    topo: List[Tuple[int, int]] = []
+    holes: List[bool] = []
+    for pid, geom in enumerate(polygons, start=1):
+        for shell in _iter_shells(geom):
+            shell = orient(shell, sign=1.0)
+            rings = [(shell.exterior, False)]
+            rings.extend((ring, True) for ring in shell.interiors)
+            for ring, is_hole in rings:
+                coords = _PolygonArcDecomposer._points_preserving_duplicates(
+                    ring.coords, snap_tolerance
+                )
+                area2 = sum(
+                    coords[i][0] * coords[i + 1][1]
+                    - coords[i + 1][0] * coords[i][1]
+                    for i in range(len(coords) - 1)
+                )
+                if area2 > 0:
+                    coords = coords[::-1]
+                arcs.append(coords)
+                topo.append((pid, 0))
+                holes.append(is_hole)
+    return arcs, topo, holes
+
+
+def _uint8_parameter(value: Any, name: str, default: int) -> int:
+    """Return a validated uint8 graphic parameter.
+
+    Missing values use the documented default; silently masking invalid values
+    would change class/layer semantics and can make native fills invisible.
+    """
+    if _is_missing(value):
+        return default
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as exc:
+        raise WriterError(f"{name} must be an integer in 0..255") from exc
+    if not np.isfinite(number) or not number.is_integer() or not 0 <= number <= 255:
+        raise WriterError(f"{name} must be an integer in 0..255; got {value!r}")
+    return int(number)
 
 
 def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
@@ -1046,9 +1160,7 @@ def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
         if params is not None:
             row = params.iloc[i]
             if "class" in row.index:
-                record[1] = int(row["class"]) & 0xFF
-            elif "layer" in row.index:
-                record[1] = int(row["layer"]) & 0xFF
+                record[1] = _uint8_parameter(row["class"], "class", 1)
             for col, off in (("field5", 5), ("field6", 6), ("field7", 7)):
                 if col in row.index:
                     record[off] = int(row[col]) & 0xFF
@@ -1076,6 +1188,74 @@ def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
     return bytes(buf)
 
 
+def _polygon_ring_index_record(
+    pid: int,
+    arc_ids: List[int],
+    arcs: List[List[Tuple[float, float]]],
+    feature_count: int,
+    hole_flags: List[bool],
+) -> bytes:
+    """Encode one native polygon-to-ring/arc index record.
+
+    The lead is the sum of raw arc point counts + zero markers + 1.  A zero
+    follows each hole except when it is the file's final arc; a multi-feature
+    file also carries a zero after its very first arc.  Thus the final hole
+    does not inflate either the lead or the record length.
+    """
+    zero_count = 0
+    for arc_id in arc_ids:
+        if pid == 1 and arc_id == 1 and feature_count > 1:
+            zero_count += 1
+        if hole_flags[arc_id - 1] and arc_id != len(arcs):
+            zero_count += 1
+    values = [sum(len(arcs[arc_id - 1]) for arc_id in arc_ids) + zero_count + 1]
+    for arc_id in arc_ids:
+        values.append(arc_id)
+        if pid == 1 and arc_id == 1 and feature_count > 1:
+            values.append(0)
+        if hole_flags[arc_id - 1] and arc_id != len(arcs):
+            values.append(0)
+    return struct.pack(f"<{len(values)}i", *values)
+
+
+def _encode_polygon_coordinates(
+    arcs: List[List[Tuple[float, float]]],
+    topo: List[Tuple[int, int]],
+    factor: float,
+    hole_flags: List[bool],
+) -> Tuple[bytes, List[int]]:
+    """Encode coordinates plus the native polygon/ring/arc index.
+
+    Official fresh files place polygon i-1's index after the first arc of
+    polygon i, and the final polygon's index after the final arc.  Arc offsets
+    include these variable-length records, so arc index and coordinates must
+    always be encoded together.
+    """
+    owners = [left if left != 0 else right for left, right in topo]
+    arc_ids: Dict[int, List[int]] = defaultdict(list)
+    for i, pid in enumerate(owners, start=1):
+        arc_ids[pid].append(i)
+    feature_count = len(arc_ids)
+
+    coords = bytearray(b"\x00\x00")
+    offsets: List[int] = []
+    for i, arc in enumerate(arcs):
+        offsets.append(len(coords))
+        for x, y in arc:
+            coords += struct.pack("<2d", x * factor, y * factor)
+        if i > 0 and owners[i] != owners[i - 1]:
+            pid = owners[i - 1]
+            coords += _polygon_ring_index_record(
+                pid, arc_ids[pid], arcs, feature_count, hole_flags
+            )
+    if arcs:
+        pid = owners[-1]
+        coords += _polygon_ring_index_record(
+            pid, arc_ids[pid], arcs, feature_count, hole_flags
+        )
+    return bytes(coords), offsets
+
+
 def _encode_polygons(
     gdf: gpd.GeoDataFrame,
     params: Optional[pd.DataFrame],
@@ -1090,6 +1270,7 @@ def _encode_polygons(
     List[List[Tuple[float, float]]],
     List[int],
     List[Tuple[int, int]],
+    List[str],
 ]:
     """Encode the .wp core sections: arc index, coordinates, topology, head_9.
 
@@ -1102,31 +1283,19 @@ def _encode_polygons(
             shapely.make_valid(g) if not g.is_valid else g for g in polygons
         ]
     decomposer = _PolygonArcDecomposer(polygons, snap_tolerance)
-    arcs, topo = decomposer.build()
+    decomposer.build()
+    # Fresh files use independent rings: this preserves every input feature,
+    # keeps native ring indexing unambiguous and avoids same-side overwrites.
+    # The shared-arc decomposition above still validates degenerate input and
+    # supports source passthrough fingerprints.
+    topology_errors = [] if decomposer.independent_safe else decomposer.errors
+    arcs, topo, ring_holes = _independent_polygon_arcs(polygons, snap_tolerance)
 
-    # 结点注册（弧段端点去重，1 起编号）。原生 head_2 前导表 =
-    # [u16 0] + 每结点 (0, 结点号)，topo 记录前两字段 = 弧的起止结点号
-    # （2026-10-17 原生 J43C001002 面文件定案：LDZOFBB010 26 弧 52 结点
-    # → 前导 210 字节，arc1 偏移 210 实测吻合）。
-    node_ids: Dict[Tuple[float, float], int] = {}
-    node_list: List[Tuple[float, float]] = []
-
-    def node_id(pt: Tuple[float, float]) -> int:
-        key = (round(float(pt[0]), 12), round(float(pt[1]), 12))
-        if key not in node_ids:
-            node_ids[key] = len(node_list) + 1
-            node_list.append(key)
-        return node_ids[key]
-
-    for arc in arcs:
-        node_id(arc[0])
-        node_id(arc[-1])
-
-    lead = struct.pack("<H", 0)
-    for nid in range(1, len(node_list) + 1):
-        # 原生表项 = (0, 结点号)（MapGIS 重存版逐字节实证 2026-10-18；
-        # 新建文件 lee.wp 则整表缺省、坐标紧随 u16 前导）
-        lead += struct.pack("<2H", 0, nid)
+    # Coordinates include the native polygon/ring/arc index; arc offsets are
+    # returned from the same encoder so the two sections cannot diverge.
+    coords, arc_offsets = _encode_polygon_coordinates(
+        arcs, topo, factor, ring_holes
+    )
 
     # 弧段所在图层 = 其区要素的类码图层（原生实证：区类码 2 → 弧记录
     # 图层@47=2、head_8 标志=0x10002；默认 1）
@@ -1140,16 +1309,11 @@ def _encode_polygons(
             polygon_layers = [0 for _ in params[layer_col]]
 
     index = bytearray(_LINE_RECORD_SIZE)
-    coords = bytearray(lead)
     topo_rows: List[Tuple[int, int, int, int]] = []
     arc_layers: List[int] = []
     for i, (arc, (left, right)) in enumerate(zip(arcs, topo)):
-        sid = node_id(arc[0])
-        eid = node_id(arc[-1])
-        topo_rows.append((sid, eid, left, right))
-        offset = len(coords)
-        for x, y in arc:
-            coords += struct.pack("<2d", x * factor, y * factor)
+        topo_rows.append((0, 0, left, right))
+        offset = arc_offsets[i]
         owner = left if left != 0 else right
         layer = polygon_layers[owner - 1] if 1 <= owner <= len(polygon_layers) else 1
         arc_layers.append(layer)
@@ -1180,6 +1344,7 @@ def _encode_polygons(
         arcs,
         arc_layers,
         topo,
+        topology_errors,
     )
 
 
@@ -1225,16 +1390,33 @@ def _encode_polygon_aux(
     factor: float,
     layers: Optional[List[int]] = None,
 ) -> Tuple[bytes, bytes, bytes, bytes, bytes]:
-    """Encode the .wp auxiliary sections (native layout, 2026-10-17).
+    """Encode the .wp auxiliary sections.
 
-    head3 (index 2): metadata block (FILETIME, constant 426, empty path area).
+    head3 (index 2): per-arc attribute table (ID + length).  Five official
+    SHP->MapGIS WP pairs have 439 + 13*n_arcs bytes and prefix count=n_arcs.
     head5 (index 4): 55-byte zero block.  head6 (index 5): 392-byte metadata
     block (FILETIME, constants 387/1).  head7 (index 6): arcs+1 32-byte
     records, record 0 zero-filled and record k the stored-unit bounding box
     of arc k.  head8 (index 7): 4-byte lead plus one int32 per arc,
     0x00010000 ORed with the arc layer (its polygon's class layer).
     """
-    meta3 = _filetime_block(_POLY_META3_SIZE, _POLY_META3_LEN_CONST, 0)
+    lengths = []
+    for arc in arcs:
+        scaled = [(x * factor, y * factor) for x, y in arc]
+        lengths.append(shapely.geometry.LineString(scaled).length)
+    arc_data = pd.DataFrame(
+        {
+            "ID": pd.array(range(1, len(arcs) + 1), dtype="int32"),
+            "长度": pd.array(lengths, dtype="float64"),
+        }
+    )
+    arc_specs = _fields_from_dataframe(arc_data)
+    meta3 = _build_attribute_section(
+        arc_data,
+        arc_specs,
+        _POLY_ARC_ATTR_TYPE_STAMP,
+        prefix_count=len(arcs),
+    )
     meta6 = _filetime_block(_LINE_META_SIZE, _LINE_META_LENGTH_CONST, 1)
     boxes = bytearray(32)
     for arc in arcs:
@@ -1256,7 +1438,9 @@ def _encode_polygon_aux(
 
 
 def _detect_shape_type(gdf: gpd.GeoDataFrame) -> str:
-    types = {t for t in gdf.geom_type.unique() if t is not None}
+    # GeoPandas represents missing geometry with NaN in geom_type; leaving it
+    # in the set makes sorted(types) compare float with str and leak TypeError.
+    types = set(gdf.geom_type.dropna().unique())
     if not types:
         raise WriterError(
             "cannot detect the geometry type of an empty GeoDataFrame; "
@@ -1274,12 +1458,21 @@ def _detect_shape_type(gdf: gpd.GeoDataFrame) -> str:
     )
 
 
-def _normalise_geometries(gdf: gpd.GeoDataFrame, shape_type: str) -> gpd.GeoDataFrame:
-    """Force 2D, drop empty geometries, and explode Multi* where required."""
+def _normalise_geometries(
+    gdf: gpd.GeoDataFrame, shape_type: str, on_empty: str
+) -> gpd.GeoDataFrame:
+    """Force 2D and handle empty geometries; explode Multi* where required."""
     out = gdf.copy()
     mask = out.geometry.is_empty | out.geometry.isna()
     if mask.any():
-        warnings.warn(f"dropped {int(mask.sum())} empty/null geometries")
+        count = int(mask.sum())
+        if on_empty == "error":
+            positions = np.flatnonzero(mask.to_numpy())[:8].tolist()
+            raise WriterError(
+                f"found {count} empty/null geometries at row positions "
+                f"{positions}; pass on_empty='drop' to discard them explicitly"
+            )
+        warnings.warn(f"dropped {count} empty/null geometries")
         out = out.loc[~mask].reset_index(drop=True)
 
     if out.geometry.has_z.any():
@@ -1315,6 +1508,9 @@ class Writer:
     make_valid : bool, default True
         Repair invalid polygons with ``shapely.make_valid`` before arc
         decomposition (.wp only).
+    on_empty : {"error", "drop"}, default "error"
+        Reject empty/null geometries, or discard them with a warning only
+        when ``"drop"`` is explicitly requested.
     map_scale : float, default 1000.0
         Map-scale denominator used for projected CRS: coordinates are stored
         as ``value * 1000 / map_scale`` (the reader's inverse).  Ignored for
@@ -1346,6 +1542,7 @@ class Writer:
         geodataframe: gpd.GeoDataFrame,
         *,
         make_valid: bool = True,
+        on_empty: str = "error",
         map_scale: float = 1000.0,
         snap_tolerance: float = 0.0,
         graphic_params: bool = True,
@@ -1354,6 +1551,9 @@ class Writer:
         if not isinstance(geodataframe, gpd.GeoDataFrame):
             raise WriterError("Writer expects a geopandas.GeoDataFrame")
         self._make_valid = make_valid
+        if on_empty not in {"error", "drop"}:
+            raise WriterError("on_empty must be 'error' or 'drop'")
+        self._on_empty = on_empty
         self._map_scale = float(map_scale)
         self._snap = float(snap_tolerance)
         self._graphic_params = graphic_params
@@ -1366,7 +1566,7 @@ class Writer:
         else:
             self.shapeType = _detect_shape_type(geodataframe)
 
-        self._gdf = _normalise_geometries(geodataframe, self.shapeType)
+        self._gdf = _normalise_geometries(geodataframe, self.shapeType, on_empty)
         self._params: Optional[pd.DataFrame] = None
         self._attr = self._split_param_columns(self._gdf)
         if self.shapeType == "POLYGON":
@@ -1463,6 +1663,15 @@ class Writer:
             # 吸收，缺失列按默认填充；field5/6/7 透传保真
             present = [c for c in want if c in attr.columns]
             if present or "class" in attr.columns or "layer" in attr.columns:
+                # Capture the explicit class/layer source before graphic
+                # columns are removed.  A defaulted layer=0 must not become
+                # class=0 (which suppresses native fills); the class default
+                # is 1 unless the caller explicitly supplied either column.
+                class_values = None
+                if "class" in attr.columns:
+                    class_values = attr["class"].to_numpy()
+                elif "layer" in attr.columns:
+                    class_values = attr["layer"].to_numpy()
                 params = attr[present].reindex(columns=want)
                 self._params = params.fillna({
                     "fill_color": 0,
@@ -1475,14 +1684,14 @@ class Writer:
                     "field6": 0,
                     "field7": 0,
                 })
+                self._params["class"] = (
+                    np.ones(len(attr), dtype=np.int64)
+                    if class_values is None
+                    else class_values
+                )
                 attr = attr.drop(columns=present)
-                # 区参数类码 @1（=区图层，须与弧记录/head_8 标志一致）：
-                # 取可选 class 列（往返来源）或 layer 列，默认 1
-                for key in ("class", "layer"):
-                    if key in attr.columns:
-                        self._params["class"] = attr[key].reset_index(drop=True)
-                        attr = attr.drop(columns=key)
-                        break
+                if "class" in attr.columns:
+                    attr = attr.drop(columns="class")
             return attr
         if all(c in attr.columns for c in want):
             self._params = attr[want].reset_index(drop=True)
@@ -1553,8 +1762,21 @@ class Writer:
                 merged["_tail"] = passthrough.get("tail", b"")
                 return merged
             return secs
-        index, coords, topo_bytes, params, arcs, arc_layers, topo_pairs = _encode_polygons(
-            self._gdf, self._params, factor, self._make_valid, self._snap
+        (
+            index,
+            coords,
+            topo_bytes,
+            params,
+            arcs,
+            arc_layers,
+            topo_pairs,
+            topology_errors,
+        ) = _encode_polygons(
+            self._gdf,
+            self._params,
+            factor,
+            self._make_valid,
+            self._snap,
         )
         meta3, aux5, meta6, boxes, flags = _encode_polygon_aux(
             arcs, factor, arc_layers
@@ -1574,6 +1796,13 @@ class Writer:
             result = {i: secs[i] for i in range(13) if i in secs}
             result["_tail"] = passthrough.get("tail", b"")
             return result
+        if topology_errors:
+            shown = "; ".join(topology_errors[:4])
+            if len(topology_errors) > 4:
+                shown += f"; ... {len(topology_errors) - 4} more errors"
+            raise WriterError(
+                "polygon topology cannot be encoded safely: " + shown
+            )
         return {
             0: index,
             1: coords,
@@ -1596,9 +1825,10 @@ class Writer:
 
         Count sequence pinned 2026-10-18 on a MapGIS-6.7-created reference
         file (``lee.wp``): @260 record count (features for point/line, arcs
-        for polygon), @264 count + 1, @272 the constant 1, @276/@280 the
-        polygon feature count and count + 1 (zero elsewhere), @284 count + 1
-        again, @292 the constant 1.  MapGIS's renderer consults this sequence,
+        for polygon), @264 count + 1, @272 0 for points and 1 for line/polygon,
+        @276/@280 the polygon feature count and count + 1 (zero elsewhere),
+        @284 polygon arcs + 1, line 1, point 0, and @292 the constant 1.
+        MapGIS's renderer consults this sequence,
         so missing entries leave written polygons undisplayable.  @304..328
         holds the four-double file bounding box in stored coordinate units
         (window reset and symbol scaling).
@@ -1617,7 +1847,7 @@ class Writer:
                 280: ("I", features + 1),
                 284: ("I", count + 1),
             }
-        else:
+        elif self.shapeType == "LINE":
             count = features
             fields = {
                 260: ("I", count),
@@ -1626,11 +1856,24 @@ class Writer:
                 272: ("I", 1),
                 276: ("I", 0),
                 280: ("I", 0),
-                284: ("I", count + 1),
+                284: ("I", 1),
+            }
+        else:
+            count = features
+            fields = {
+                260: ("I", count),
+                264: ("I", count + 1),
+                268: ("I", 0),
+                272: ("I", 0),
+                276: ("I", 0),
+                280: ("I", 0),
+                284: ("I", 0),
             }
         fields[292] = ("I", 1)
-        # 类型标志字节（2026-10-18 原生实证：区=0x84，点=0x80，线=0）
-        fields[336] = ("B", {"POINT": 0x80, "LINE": 0, "POLYGON": 0x84}[self.shapeType])
+        # All 16 official SHP->MapGIS outputs use 0x80 for fresh files.
+        # Other values occur in native edited/re-saved files and are retained
+        # only when their source sections are passed through.
+        fields[336] = ("B", 0x80)
         fields.update(
             {
                 304: ("d", float(minx)),
@@ -1777,8 +2020,14 @@ class Writer:
             return sorted(out)
 
         ours = _fingerprint(arcs, topo)
+        # Source sections are decoded with scale=1.0 and therefore remain in
+        # stored units; our decomposed arcs are in map units.  Compare both in
+        # map units or projected files can never reuse their native bytes.
         theirs = _fingerprint(
-            [list(a.coords) for a in src_arcs],
+            [
+                [(x / factor, y / factor) for x, y in a.coords]
+                for a in src_arcs
+            ],
             [(int(t[2]), int(t[3])) for t in src_topo],
         )
         if not ours or ours != theirs:
