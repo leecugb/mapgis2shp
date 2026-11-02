@@ -11,6 +11,7 @@ from __future__ import annotations
 import datetime
 import os
 import struct
+import warnings
 from collections import deque
 from dataclasses import dataclass
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple
@@ -325,9 +326,17 @@ def _decode_attribute_field(record: bytes, field: _Field) -> Any:
         hour = chunk[0]
         minute = chunk[1]
         seconds = struct.unpack("<d", chunk[2:10])[0]
-        sec_whole = int(np.floor(seconds))
-        microsec = int(1_000_000 * (seconds - sec_whole))
+        # Source data occasionally carries a zero month/day for missing dates;
+        # fall back to None instead of raising ValueError mid-parse. The
+        # int()/datetime.time() conversions stay inside the guard so a NaN
+        # or Inf seconds payload (garbage in an uninitialised field) falls
+        # back to None like the sibling date branch instead of aborting the
+        # whole attribute parse with a raw ValueError/OverflowError.
         try:
+            if not np.isfinite(seconds):
+                return None
+            sec_whole = int(np.floor(seconds))
+            microsec = int(1_000_000 * (seconds - sec_whole))
             return datetime.time(hour, minute, sec_whole, microsec)
         except (ValueError, OverflowError):
             return None
@@ -337,6 +346,11 @@ def _decode_attribute_field(record: bytes, field: _Field) -> Any:
         return None
     size = struct.calcsize(f"<{fmt}")
     chunk = record[field.offset : field.offset + size]
+    if len(chunk) < size:
+        # Truncated record or a descriptor pointing past the record end:
+        # tolerate like the date/time branches instead of leaking a raw
+        # struct.error out of Reader.
+        return None
     return struct.unpack(f"<{fmt}", chunk)[0]
 
 
@@ -347,6 +361,13 @@ def _read_attribute_records(
     fields: List[_Field],
 ) -> pd.DataFrame:
     """Read attribute records assuming the file position is at the first record."""
+    if record_length <= 0:
+        # A file-derived signed int16: negative or zero here makes the
+        # bulk read below raise a raw ValueError ("read length must be
+        # non-negative or -1") or slice garbage -- report corruption as a
+        # MapGISError instead.
+        raise MapGISError(f"invalid attribute record length: {record_length}")
+
     # Skip the empty first record (MapGIS convention).
     file_obj.read(record_length)
 
@@ -373,14 +394,21 @@ def _read_attribute_records(
 
 def _read_attribute_header(
     file_obj: BinaryIO, start: int
-) -> Tuple[int, int, List[_Field]]:
-    """Read the attribute table header and return (record_count, record_length, fields).
+) -> Tuple[int, int, List[_Field], Dict[str, bytes]]:
+    """Read the attribute table header and return
+    (record_count, record_length, fields, raw_descriptors).
 
     The 322-byte fixed prefix is followed by field_count (int16), record_count
     (int32) and record_length (int16), then 18 bytes of padding, so the field
     descriptors begin at offset 348 within the attribute section. The prefix
     and descriptors are read in two bulk reads and unpacked structurally,
     avoiding one syscall per field as the previous per-read loop did.
+
+    ``raw_descriptors`` maps each *kept* field's name to its raw 39-byte
+    descriptor block. The bytes are captured here, at parse time, so a
+    descriptor skipped for its unknown type code cannot shift the pairing
+    (the previous positional re-read in ``Reader._parse`` mis-paired every
+    subsequent field's block in that case).
     """
     file_obj.seek(start)
 
@@ -391,13 +419,14 @@ def _read_attribute_header(
     field_count, record_count, record_length = struct.unpack_from("<hih", head, 322)
 
     if field_count <= 0:
-        return record_count, record_length, []
+        return record_count, record_length, [], {}
 
     desc_size = _FIELD_DESCRIPTOR_STRUCT.size
     desc_buf = file_obj.read(field_count * desc_size)
     n_fields = len(desc_buf) // desc_size
 
     fields: List[_Field] = []
+    raw_descriptors: Dict[str, bytes] = {}
     for i in range(n_fields):
         name_raw, type_code, offset, length, decimals = (
             _FIELD_DESCRIPTOR_STRUCT.unpack_from(desc_buf, i * desc_size)
@@ -406,8 +435,11 @@ def _read_attribute_header(
             fields.append(
                 _Field(_decode_gbk(name_raw), type_code, offset, length, decimals)
             )
+            raw_descriptors[fields[-1].name] = desc_buf[
+                i * desc_size : (i + 1) * desc_size
+            ]
 
-    return record_count, record_length, fields
+    return record_count, record_length, fields, raw_descriptors
 
 
 # ---------------------------------------------------------------------------
@@ -426,10 +458,10 @@ def _read_crs(file_obj: BinaryIO) -> Tuple[Any, float]:
         Factor applied to raw coordinates to obtain map units.
     """
     file_obj.seek(_CRS_PROJECTION_OFFSET)
-    projection_code = ord(file_obj.read(1))
+    projection_code = _read_struct(file_obj, "<B")[0]
 
     file_obj.seek(_CRS_ELLIPSOID_OFFSET)
-    ellipsoid_code = ord(file_obj.read(1))
+    ellipsoid_code = _read_struct(file_obj, "<B")[0]
 
     file_obj.seek(_CRS_SCALE_OFFSET)
     scale = _read_struct(file_obj, "<d")[0]
@@ -437,49 +469,70 @@ def _read_crs(file_obj: BinaryIO) -> Tuple[Any, float]:
     proj_name = {5: "tmerc", 2: "aea", 3: "lcc"}.get(projection_code)
     ellipsoid = _ELLIPSOID_PROJ4.get(ellipsoid_code)
 
-    if ellipsoid is None or scale == 0:
+    if ellipsoid is None:
         return "", 1.0
 
-    # Longitude/latitude (unprojected).
+    # Longitude/latitude (unprojected). The header scale field is not a
+    # coordinate scale for geographic files: MapGIS stores 0 or leaves it
+    # uninitialised there (LDZOFBA016.WT / LHCPGDAC05.WP store 0), so CRS
+    # detection must not depend on it -- before this fix both files read
+    # with crs="" and failed the stored baseline (2026-10-30 audit).
     if projection_code == 0:
         crs = pyproj.CRS(f"+proj=longlat {ellipsoid} +no_defs")
-        return crs, scale
+        return crs, 1.0
 
     if proj_name is None:
         return "", 1.0
 
-    # Projected CRS: scale is stored in mm/map-unit; convert to m.
+    # Projected CRS: scale is stored in mm/map-unit; convert to m. A zero,
+    # negative or NaN scale would collapse every coordinate to zero/NaN and
+    # is treated as "no usable CRS" instead of poisoning the geometry.
+    if not np.isfinite(scale) or scale <= 0:
+        return "", 1.0
     scale = scale / 1000.0
 
     file_obj.seek(_CRS_CENTRAL_MERIDIAN_OFFSET)
     central_meridian = _read_struct(file_obj, "<d")[0]
+    if not np.isfinite(central_meridian):
+        return "", 1.0
     central_meridian = _raw_dms_to_degrees(central_meridian)
+    if not np.isfinite(central_meridian):
+        return "", 1.0
 
-    if projection_code == 5:  # Transverse Mercator
-        crs = pyproj.CRS(
-            f"+proj={proj_name} +lat_0=0 +lon_0={central_meridian} +k=1 "
-            f"+x_0=500000 +y_0=0 {ellipsoid} +units=m +no_defs"
-        )
-        return crs, scale
+    try:
+        if projection_code == 5:  # Transverse Mercator
+            crs = pyproj.CRS(
+                f"+proj={proj_name} +lat_0=0 +lon_0={central_meridian} +k=1 "
+                f"+x_0=500000 +y_0=0 {ellipsoid} +units=m +no_defs"
+            )
+            return crs, scale
 
-    if projection_code in (2, 3):  # Albers / Lambert
-        file_obj.seek(_CRS_STD_LAT_OFFSET)
-        lat0 = _read_struct(file_obj, "<d")[0]
-        lat1 = _read_struct(file_obj, "<d")[0]
-        lat2 = _read_struct(file_obj, "<d")[0]
-        x_0 = _read_struct(file_obj, "<d")[0]
-        y_0 = _read_struct(file_obj, "<d")[0]
+        if projection_code in (2, 3):  # Albers / Lambert
+            file_obj.seek(_CRS_STD_LAT_OFFSET)
+            lat0 = _read_struct(file_obj, "<d")[0]
+            lat1 = _read_struct(file_obj, "<d")[0]
+            lat2 = _read_struct(file_obj, "<d")[0]
+            x_0 = _read_struct(file_obj, "<d")[0]
+            y_0 = _read_struct(file_obj, "<d")[0]
 
-        lat_0 = _raw_dms_to_degrees(lat0)
-        lat_1 = _raw_dms_to_degrees(lat1)
-        lat_2 = _raw_dms_to_degrees(lat2)
+            lat_0 = _raw_dms_to_degrees(lat0)
+            lat_1 = _raw_dms_to_degrees(lat1)
+            lat_2 = _raw_dms_to_degrees(lat2)
+            if not all(
+                np.isfinite(v) for v in (lat_0, lat_1, lat_2, x_0, y_0)
+            ):
+                return "", 1.0
 
-        crs = pyproj.CRS(
-            f"+proj={proj_name} +lat_0={lat_0} +lon_0={central_meridian} "
-            f"+lat_1={lat_1} +lat_2={lat_2} +x_0={x_0} +y_0={y_0} "
-            f"{ellipsoid} +units=m +no_defs"
-        )
-        return crs, scale
+            crs = pyproj.CRS(
+                f"+proj={proj_name} +lat_0={lat_0} +lon_0={central_meridian} "
+                f"+lat_1={lat_1} +lat_2={lat_2} +x_0={x_0} +y_0={y_0} "
+                f"{ellipsoid} +units=m +no_defs"
+            )
+            return crs, scale
+    except pyproj.exceptions.CRSError:
+        # Corrupt projection parameters (garbage header doubles) must not
+        # abort the read: report "no usable CRS" like any other failure.
+        return "", 1.0
 
     return "", 1.0
 
@@ -505,6 +558,12 @@ def _read_header_entries(
         if len(buf) < 8:
             raise MapGISError("header entry too short")
         start, volume = struct.unpack("<2i", buf[:8])
+        if start < 0 or volume < 0:
+            # File-derived int32s: a negative start/volume would otherwise
+            # surface as a raw ValueError/OSError from seek/read.
+            raise MapGISError(
+                f"invalid header entry: start={start}, volume={volume}"
+            )
         entries.append((start, volume))
     return entries
 
@@ -701,6 +760,12 @@ def _read_lines(
         if point_count < 0 or point_offset < 0:
             raise MapGISError(
                 f"invalid arc index: point_count={point_count}, point_offset={point_offset}"
+            )
+        if point_count == 1:
+            # A single-point arc cannot form a LineString (shapely raises a
+            # raw GEOSException); treat it as the corruption it is.
+            raise MapGISError(
+                f"degenerate arc with a single point at offset={point_offset}"
             )
         nbytes = point_count * 16
         raw = coord_buf[point_offset : point_offset + nbytes]
@@ -935,6 +1000,14 @@ class _PolygonTopologyBuilder:
     """Reconstruct shapely Polygon/MultiPolygon objects from MapGIS arcs."""
 
     def __init__(self, arcs: List[shapely.geometry.LineString], topology: np.ndarray):
+        if len(topology) > len(arcs):
+            # Topology row i references arc i; a table longer than the arc
+            # index (truncated/corrupt arc section) would otherwise crash
+            # build() with a raw IndexError.
+            raise MapGISError(
+                f"topology table has {len(topology)} rows but only "
+                f"{len(arcs)} arcs exist"
+            )
         self.arcs = arcs
         self.topology = topology
         # Precompute polygon-ID -> [(arc_index, reverse), ...] mapping so that
@@ -1188,6 +1261,11 @@ class _PolygonTopologyBuilder:
 
         if len(oriented_arcs) == 1:
             # Single-arc polygon: preserve the original simple Polygon path.
+            # A degenerate arc (<4 coordinates) yields an empty polygon,
+            # exactly like the multi-arc ring path below -- previously this
+            # raised a raw shapely ValueError for the same corrupt input.
+            if len(oriented_arcs[0]) < 4:
+                return shapely.geometry.Polygon()
             return shapely.geometry.Polygon(oriented_arcs[0])
 
         rings = self._merge_arcs_into_rings(oriented_arcs)
@@ -1273,6 +1351,8 @@ class Reader:
 
         file_obj.read(4)
         data_start = _read_struct(file_obj, "<i")[0]
+        if data_start < 0:
+            raise MapGISError(f"invalid header table offset: {data_start}")
         header_entries = _read_header_entries(
             file_obj, data_start, _HEADER_COUNT_PHYSICAL
         )
@@ -1289,16 +1369,17 @@ class Reader:
         self._raw_tail = file_obj.read(max(0, file_size - end))
 
         attr_start, _ = header_entries[_ATTR_HEADER_INDEX[self.shapeType]]
-        record_count, record_length, fields = _read_attribute_header(
-            file_obj, attr_start
+        record_count, record_length, fields, raw_descriptors = (
+            _read_attribute_header(file_obj, attr_start)
         )
         self.fields = [
             (field.name, field.type_name, field.length) for field in fields
         ]
         # 保留原始字段元数据供 Writer 往返复用（2026-10-18 原生验收实证：
-        # MapGIS 依赖原始字段声明宽度/描述符，密排压缩会导致区显示被拒）
-        file_obj.seek(attr_start + 348)
-        raw_blocks = [file_obj.read(39) for _ in range(len(fields))]
+        # MapGIS 依赖原始字段声明宽度/描述符，密排压缩会导致区显示被拒）。
+        # 原始 39 字节描述符由 _read_attribute_header 在解析时按名捕获，
+        # 保证与保留字段一一对应（2026-10-30 修复：曾按位置重读，
+        # 遇未识别类型码跳过的描述符时后续字段全部错配）。
         self._field_meta = {
             "record_length": record_length,
             "fields": [
@@ -1311,9 +1392,7 @@ class Reader:
                 }
                 for f in fields
             ],
-            "raw_descriptors": {
-                f.name: raw_blocks[i] for i, f in enumerate(fields)
-            },
+            "raw_descriptors": raw_descriptors,
         }
         self.data = _read_attribute_records(
             file_obj, record_count, record_length, fields
@@ -1376,12 +1455,19 @@ class Reader:
 
         # Active polygon IDs are the non-zero values in columns 2 and 3.
         active_ids = sorted({int(pid) for pid in topology[:, 2:4].flatten() if pid != 0})
-        self._polygon_active_ids = active_ids
+        # Keep exactly the IDs that have an attribute row: geometries, rows
+        # and (below) graphic params are all driven by this same filtered
+        # list so the three stay aligned. Previously geoms were built for
+        # every active ID while rows were clamped to len(self.data), so a
+        # topology ID beyond the attribute table crashed GeoDataFrame
+        # construction with a cryptic pandas ValueError.
+        row_ids = [pid for pid in active_ids if 1 <= pid <= len(self.data)]
+        self._polygon_active_ids = row_ids
 
         # MapGIS polygon IDs are 1-based; the attribute table rows are 0-based.
-        self.data = self.data.iloc[[pid - 1 for pid in active_ids if 1 <= pid <= len(self.data)]]
+        self.data = self.data.iloc[[pid - 1 for pid in row_ids]]
 
-        geoms = [builder.build(pid) for pid in active_ids]
+        geoms = [builder.build(pid) for pid in row_ids]
         if self._make_valid:
             geoms = [shapely.make_valid(g) if not g.is_valid else g for g in geoms]
         return geoms
@@ -1389,15 +1475,32 @@ class Reader:
     def _build_geodataframe(self) -> None:
         """Assemble the final GeoDataFrame and bounding box."""
         data = self.data
+        if len(data) != len(self.geom):
+            # Attribute rows and geometries come from independent sections;
+            # a well-formed file keeps them 1:1, so a disagreement means
+            # corruption -- say so plainly instead of letting pandas raise
+            # a cryptic "Length of values does not match length of index".
+            raise MapGISError(
+                f"attribute/geometry count mismatch: {len(data)} rows vs "
+                f"{len(self.geom)} geometries"
+            )
         # Graphic parameters align 1:1 with their features (points and lines
         # are never filtered; polygon params are filtered by the same active
         # IDs as the attribute rows), so same-length frames join column-wise.
         for params in (self.point_params, self.line_params, self.polygon_params):
-            if not params.empty and len(params) == len(data):
-                data = pd.concat(
-                    [data.reset_index(drop=True), params.reset_index(drop=True)],
-                    axis=1,
+            if params.empty:
+                continue
+            if len(params) != len(data):
+                warnings.warn(
+                    f"graphic parameters dropped: {len(params)} parameter "
+                    f"rows for {len(data)} features (section/feature count "
+                    "mismatch in the file)"
                 )
+                continue
+            data = pd.concat(
+                [data.reset_index(drop=True), params.reset_index(drop=True)],
+                axis=1,
+            )
         self.geodataframe = gpd.GeoDataFrame(data, crs=self.crs, geometry=self.geom)
         if getattr(self, "_field_meta", None):
             self.geodataframe.attrs["mapgis_field_meta"] = self._field_meta

@@ -114,6 +114,14 @@ OFFSET_UNIT_MM = 0.1
 # 亚视觉线宽阈值（16/17 回溯：0.078mm 线分量判隐匿）
 SUBLINE_VISIBLE_MIN_MM = 0.1
 
+# feature_rhythm 已裁定节奏线型白名单（2026-10-19 起逐值锚定）。模块级
+# 常量：渲染逐线特征调用，避免每次重建集合（2026-10-26）。
+# 与 linesty_adjudicated.PAIR_SEMANTICS 的键同步维护。
+_RHYTHM_SUPPORTED_NOS = frozenset((
+    1, 2, 3, 4, 5, 7, 14, 16, 17, 18, 21, 38,
+    48, 50, 51, 58, 153, 223, 388, 455, 575,
+))
+
 # 用户裁定表（ADJUDICATED / PAIR_SEMANTICS）已迁至仓内
 # pymapgis.linesty_adjudicated（含地质语义与图幅统计，不进发布件——
 # 2026-10-14 包定位裁定：地质语义解析不属于 mapgis2shp）。经
@@ -276,11 +284,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
       渲染对账纪律：**全部元素都必须消费**，尾段元素同样是图形
       （127|0 漏画尾段下线教训）。每行至少一条逐值锚定测试。
     """
-    supported = {
-        1, 2, 3, 4, 5, 7, 14, 16, 17, 18, 21, 38,
-        48, 50, 51, 58, 153, 223, 388, 455, 575,
-    }
-    if style is None or style.no not in supported:
+    if style is None or style.no not in _RHYTHM_SUPPORTED_NOS:
         return None
     # 线型 1/2（2026-10-21 用户暂定策略）：1|x 等价 1|0、2|x 等价 2|0
     # ——aux 不渲染。库结构：两记录子线数有限（1 族 1 条、2 族 5 条
