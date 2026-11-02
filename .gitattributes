@@ -6,3 +6,14 @@
 *.jpg binary
 *.tif binary
 *.mbtiles binary
+
+# MapGIS vector binaries (public fixtures + any local survey data): never
+# apply text normalization. Without these rules integrity relied on git's
+# 8 KB NUL sniffing — a regenerated fixture with no NUL in the first 8 KB
+# would be silently corrupted by LF/CRLF conversion (2026-10-26).
+*.wl binary
+*.wt binary
+*.wp binary
+*.WL binary
+*.WT binary
+*.WP binary

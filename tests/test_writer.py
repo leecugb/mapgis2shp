@@ -119,6 +119,15 @@ class TestPointWriter:
         assert len(reader) == 2
         assert reader.data["v"].tolist() == [1, 1]
 
+    def test_empty_annotation_pool_uses_official_two_byte_form(self, tmp_path) -> None:
+        path = tmp_path / "pool.wt"
+        Writer(_sample_point_gdf()).to_file(path)
+        raw = path.read_bytes()
+        data_start = struct.unpack_from("<i", raw, 12)[0]
+        start, size = struct.unpack_from("<2i", raw, data_start + 10)
+        assert size == 2
+        assert raw[start : start + size] == b"\x00\x00"
+
 
 class TestLineWriter:
     def test_roundtrip(self, tmp_path) -> None:
@@ -206,7 +215,7 @@ class TestLineWriter:
 
 
 class TestPolygonWriter:
-    def test_shared_boundary_roundtrip(self, tmp_path) -> None:
+    def test_adjacent_polygons_roundtrip_as_independent_rings(self, tmp_path) -> None:
         p1 = shapely.geometry.box(0, 0, 1, 1)
         p2 = shapely.geometry.box(1, 0, 2, 1)
         gdf = gpd.GeoDataFrame(
@@ -221,8 +230,7 @@ class TestPolygonWriter:
         assert total == pytest.approx(2.0)
         assert reader.geom[0].union(reader.geom[1]).area == pytest.approx(2.0)
 
-        # The shared edge must be stored as ONE arc with left/right = (2, 1)
-        # （无向成链约定：存储方向上 right_id 内域在左 → (walkR, walkL)）。
+        # Fresh files use independent closed rings and native ring indexes.
         with open(path, "rb") as f:
             data_start = struct.unpack_from("<i", f.read(16), 12)[0]
             f.seek(data_start)
@@ -235,9 +243,54 @@ class TestPolygonWriter:
             )
             f.seek(0)
             topo = _read_topology_table(f, *entries[3])
-        shared = [t for t in topo if t[2] == 2 and t[3] == 1]
-        assert len(arcs) == 3
-        assert len(shared) == 1
+        assert len(arcs) == 2
+        assert topo[:, 2].tolist() == [1, 2]
+        assert topo[:, 3].tolist() == [0, 0]
+
+    def test_ring_index_and_consecutive_duplicates(self, tmp_path) -> None:
+        p1 = shapely.geometry.Polygon(
+            [(0, 0), (1, 0), (1, 0), (1, 1), (0, 1), (0, 0)]
+        )
+        p2 = shapely.geometry.box(2, 0, 3, 1)
+        gdf = gpd.GeoDataFrame({"n": [1, 2]}, geometry=[p1, p2], crs="EPSG:4326")
+        path = tmp_path / "ring_index.wp"
+        Writer(gdf).to_file(path)
+        raw = path.read_bytes()
+        data_start = struct.unpack_from("<i", raw, 12)[0]
+        arc_start, _ = struct.unpack_from("<2i", raw, data_start)
+        coord_start, coord_size = struct.unpack_from("<2i", raw, data_start + 10)
+        assert struct.unpack_from("<i", raw, arc_start + 57 + 10)[0] == 6
+        assert struct.unpack_from("<i", raw, arc_start + 57 + 14)[0] == 2
+        assert struct.unpack_from("<i", raw, arc_start + 114 + 14)[0] == 98
+        # 第二弧之后：首面多一个计数并带 0；第二面仅有点数和弧号。
+        assert coord_size == 198
+        assert struct.unpack_from("<5i", raw, coord_start + 178) == (8, 1, 0, 6, 2)
+
+        single = tmp_path / "single_ring_index.wp"
+        Writer(gdf.iloc[[1]]).to_file(single)
+        raw = single.read_bytes()
+        data_start = struct.unpack_from("<i", raw, 12)[0]
+        coord_start, coord_size = struct.unpack_from("<2i", raw, data_start + 10)
+        assert coord_size == 90
+        assert struct.unpack_from("<2i", raw, coord_start + 82) == (6, 1)
+
+    def test_final_hole_omits_zero_and_updates_point_lead(self, tmp_path) -> None:
+        polygon = shapely.geometry.Polygon(
+            [(0, 0), (10, 0), (10, 10), (0, 10), (0, 0)],
+            [
+                [(1, 1), (2, 1), (2, 2), (1, 2), (1, 1)],
+                [(3, 3), (4, 3), (4, 4), (3, 4), (3, 3)],
+            ],
+        )
+        gdf = gpd.GeoDataFrame({"n": [1]}, geometry=[polygon], crs="EPSG:4326")
+        path = tmp_path / "two_holes.wp"
+        Writer(gdf).to_file(path)
+        raw = path.read_bytes()
+        data_start = struct.unpack_from("<i", raw, 12)[0]
+        coord_start, coord_size = struct.unpack_from("<2i", raw, data_start + 10)
+        assert coord_size == 262
+        # 15 raw points + one hole separator + 1; the final hole has no zero.
+        assert struct.unpack_from("<5i", raw, coord_start + 242) == (17, 1, 2, 0, 3)
 
     def test_hole_and_island(self, tmp_path) -> None:
         outer = shapely.geometry.Polygon(
@@ -274,6 +327,101 @@ class TestPolygonWriter:
             else [reader.geom[0]]
         )
         assert sum(len(part.interiors) for part in outer_parts) == 1
+
+    def test_single_polygon_arcs_stored_clockwise(self) -> None:
+        """Native convention (2026-10-17/18): every (pid, 0) arc is a CW ring.
+
+        The geometric-registration fix for coincident hole/island pairs must
+        not flip lone-hole arcs to CCW — the class docstring pins CW and the
+        Reader-Writer-Reader tests cannot catch it (the reader classifies
+        rings by containment, not winding).
+        """
+        from pymapgis.writer import _PolygonArcDecomposer
+
+        outer = shapely.geometry.Polygon(
+            [(0, 0), (6, 0), (6, 6), (0, 6), (0, 0)],
+            [[(2, 2), (4, 2), (4, 4), (2, 4), (2, 2)]],
+        )
+        decomposer = _PolygonArcDecomposer([outer], 0.0)
+        arcs, topo = decomposer.build()
+        assert len(arcs) == 2
+        for coords, (left, right) in zip(arcs, topo):
+            assert (left, right) == (1, 0)
+            area2 = sum(
+                coords[i][0] * coords[i + 1][1] - coords[i + 1][0] * coords[i][1]
+                for i in range(len(coords) - 1)
+            )
+            assert area2 < 0, "single-polygon arc must be stored clockwise"
+
+    def test_duplicate_rings_are_preserved_as_independent_arcs(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {"n": [1, 2]},
+            geometry=[
+                shapely.geometry.box(0, 0, 4, 4),
+                shapely.geometry.box(0, 0, 4, 4),
+            ],
+            crs="EPSG:4326",
+        )
+        reader = _write_and_read(gdf, tmp_path / "dup_independent.wp")
+        assert len(reader) == 2
+        assert reader.geodataframe.geometry.area.tolist() == [16.0, 16.0]
+
+    def test_snapped_degenerate_ring_is_rejected(self, tmp_path) -> None:
+        """A ring that collapses during snapping must not vanish silently."""
+        gdf = gpd.GeoDataFrame(
+            {"n": [1, 2]},
+            geometry=[
+                shapely.geometry.box(0, 0, 0.00001, 0.00001),
+                shapely.geometry.box(1, 1, 2, 2),
+            ],
+            crs="EPSG:4326",
+        )
+        path = tmp_path / "sliver.wp"
+        with pytest.raises(WriterError, match="collapsed"):
+            Writer(gdf, snap_tolerance=0.001).to_file(path)
+        assert not path.exists()
+
+    def test_missing_geometry_requires_explicit_drop(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {"n": [1, 2]},
+            geometry=[shapely.geometry.box(0, 0, 1, 1), None],
+            crs="EPSG:4326",
+        )
+        path = tmp_path / "missing.wp"
+        with pytest.raises(WriterError, match="empty/null geometries"):
+            Writer(gdf).to_file(path)
+        assert not path.exists()
+
+        with pytest.warns(UserWarning, match="dropped 1"):
+            reader = _write_and_read(gdf, path, on_empty="drop")
+        assert len(reader) == 1
+        assert reader.data["n"].tolist() == [1]
+
+    def test_filtered_frame_keeps_polygon_class_param(self, tmp_path) -> None:
+        """A filtered (non-contiguous index) polygon frame with a class column
+        must not crash _encode_polygon_params with NaN (2026-10-26)."""
+        gdf = gpd.GeoDataFrame(
+            {"n": [1, 2]},
+            geometry=[
+                shapely.geometry.Polygon(
+                    [(0, 0), (6, 0), (6, 6), (0, 6), (0, 0)],
+                    [[(2, 2), (4, 2), (4, 4), (2, 4), (2, 2)]],
+                ),
+                shapely.geometry.box(8, 0, 10, 2),
+            ],
+            crs="EPSG:4326",
+        )
+        reader = _write_and_read(
+            gdf, tmp_path / "src.wp", {"read_graphic_params": True}
+        )
+        frame = reader.geodataframe
+        filtered = frame[frame["n"] == 2]
+        assert list(filtered.index) != [0]
+        reader2 = _write_and_read(
+            filtered, tmp_path / "dst.wp", {"read_graphic_params": True}
+        )
+        assert len(reader2) == 1
+        assert reader2.geodataframe["class"].tolist() == filtered["class"].tolist()
 
     def test_multipolygon_stays_single_feature(self, tmp_path) -> None:
         mp = shapely.geometry.MultiPolygon(
@@ -325,6 +473,51 @@ class TestPolygonWriter:
         assert params["field7"] == 1
         assert "fill_color" not in reader.data.columns
 
+    def test_polygon_class_validation_and_missing_default(self, tmp_path) -> None:
+        base = {
+            "geometry": [
+                shapely.geometry.box(0, 0, 1, 1),
+                shapely.geometry.box(2, 0, 3, 1),
+            ],
+            "crs": "EPSG:4326",
+        }
+        for values in ([256, 300], [-1, 2], [1.5, 2], [np.inf, 2]):
+            gdf = gpd.GeoDataFrame({"class": values}, **base)
+            with pytest.raises(WriterError, match="class"):
+                Writer(gdf).to_file(tmp_path / "invalid_class.wp")
+
+        gdf = gpd.GeoDataFrame({"class": [2, np.nan]}, **base)
+        reader = _write_and_read(
+            gdf, tmp_path / "class_default.wp", {"read_graphic_params": True}
+        )
+        assert reader.geodataframe["class"].tolist() == [2, 1]
+
+    def test_defaulted_layer_does_not_zero_polygon_class(self, tmp_path) -> None:
+        """Supplying only a fill colour must retain the default class=1."""
+        gdf = gpd.GeoDataFrame(
+            {"fill_color": [195]},
+            geometry=[shapely.geometry.box(0, 0, 1, 1)],
+            crs="EPSG:4326",
+        )
+        reader = _write_and_read(
+            gdf, tmp_path / "fill_only.wp", {"read_graphic_params": True}
+        )
+        params = reader.geodataframe.iloc[0]
+        assert params["fill_color"] == 195
+        assert params["layer"] == 0
+        assert params["class"] == 1
+
+    def test_explicit_polygon_layer_still_supplies_class(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {"fill_color": [195], "layer": [3]},
+            geometry=[shapely.geometry.box(0, 0, 1, 1)],
+            crs="EPSG:4326",
+        )
+        reader = _write_and_read(
+            gdf, tmp_path / "explicit_layer.wp", {"read_graphic_params": True}
+        )
+        assert reader.geodataframe.iloc[0]["class"] == 3
+
     def test_polygon_area_conservation_real(self, tmp_path, sample_wp) -> None:
         with Reader(sample_wp, read_graphic_params=True) as source:
             gdf = source.geodataframe
@@ -340,6 +533,36 @@ class TestPolygonWriter:
                 assert reader.polygon_params["pattern"].tolist() == (
                     gdf["pattern"].tolist()
                 )
+
+    def test_projected_polygon_passthrough_compares_map_units(
+        self, tmp_path
+    ) -> None:
+        crs = (
+            "+proj=tmerc +lat_0=0 +lon_0=81 +k=1 +x_0=500000 +y_0=0 "
+            "+ellps=krass +units=m +no_defs"
+        )
+        gdf = gpd.GeoDataFrame(
+            {"n": [1]},
+            geometry=[shapely.geometry.box(500000, 4300000, 501000, 4301000)],
+            crs=crs,
+        )
+        first = tmp_path / "first.wp"
+        second = tmp_path / "second.wp"
+        Writer(gdf, map_scale=50000).to_file(first)
+        with Reader(first, read_graphic_params=True) as source:
+            roundtrip = source.geodataframe.copy()
+        Writer(roundtrip, map_scale=50000).to_file(second)
+
+        def section(path, index):
+            raw = path.read_bytes()
+            data_start = struct.unpack_from("<i", raw, 12)[0]
+            start, size = struct.unpack_from("<2i", raw, data_start + 10 * index)
+            return raw[start : start + size]
+
+        # Metadata contains a fresh FILETIME when rebuilt; equality therefore
+        # proves the projected source section was actually reused.
+        assert section(first, 2) == section(second, 2)
+        assert section(first, 10) == section(second, 10)
 
 
 class TestHeaderExtentFields:
@@ -367,7 +590,10 @@ class TestHeaderExtentFields:
         b = self._header(path)
         assert struct.unpack_from("<I", b, 260)[0] == 2
         assert struct.unpack_from("<I", b, 264)[0] == 3
+        assert struct.unpack_from("<I", b, 272)[0] == 0
+        assert struct.unpack_from("<I", b, 284)[0] == 0
         assert struct.unpack_from("<I", b, 292)[0] == 1
+        assert b[336] == 0x80
         box = struct.unpack_from("<4d", b, 304)
         assert box == pytest.approx((74.0, 39.5, 74.2, 39.7))
 
@@ -382,6 +608,10 @@ class TestHeaderExtentFields:
         b = self._header(path)
         assert struct.unpack_from("<I", b, 260)[0] == 1
         assert struct.unpack_from("<I", b, 264)[0] == 2
+        assert struct.unpack_from("<I", b, 272)[0] == 1
+        assert struct.unpack_from("<I", b, 284)[0] == 1
+        assert struct.unpack_from("<I", b, 292)[0] == 1
+        assert b[336] == 0x80
         box = struct.unpack_from("<4d", b, 304)
         assert box == pytest.approx((74.0, 39.5, 74.1, 39.6))
 
@@ -394,10 +624,12 @@ class TestHeaderExtentFields:
         path = tmp_path / "t.wp"
         Writer(gdf).to_file(path)
         b = self._header(path)
-        # 两区共享一条边：3 条弧段（共享边 + 两条开放环链；2026-10-17
-        # 无向成链定案，原生同构）
-        assert struct.unpack_from("<I", b, 260)[0] == 3
-        assert struct.unpack_from("<I", b, 264)[0] == 4
+        # 两个独立闭合环，坐标段同时携带面—环—弧索引。
+        assert struct.unpack_from("<I", b, 260)[0] == 2
+        assert struct.unpack_from("<I", b, 264)[0] == 3
+        assert struct.unpack_from("<I", b, 284)[0] == 3
+        assert struct.unpack_from("<I", b, 292)[0] == 1
+        assert b[336] == 0x80
         box = struct.unpack_from("<4d", b, 304)
         assert box == pytest.approx((0.0, 0.0, 2.0, 1.0))
 
@@ -461,6 +693,12 @@ class TestHeaderCrsBlock:
         assert struct.unpack_from("<d", b, 232)[0] == 1.0
         assert b[240] == 4 and b[242] == 1
 
+    def test_no_crs_leaves_entire_crs_block_zero(self, tmp_path) -> None:
+        b = self._write(tmp_path, crs=None)
+        assert b[109] == 0 and b[110] == 0
+        assert struct.unpack_from("<d", b, 143)[0] == 0.0
+        assert b[128:256] == b"\x00" * 128
+
     def test_projected_crs_leaves_coefficients_zero(self, tmp_path) -> None:
         b = self._write(
             tmp_path,
@@ -507,6 +745,7 @@ class TestLineAuxSections:
 
     def test_aux_section_layout(self, tmp_path) -> None:
         sec = self._sections(self._write(tmp_path))
+        assert len(sec[3]) == 0  # 官方新建线文件节点段为空
         assert len(sec[4]) == 55 and not any(sec[4])
         assert len(sec[5]) == 392
         assert struct.unpack_from("<Q", sec[5], 0)[0] > 0  # FILETIME 非零
@@ -532,9 +771,9 @@ class TestLineAuxSections:
 
 
 class TestPolygonAuxSections:
-    """面辅助段原生布局（2026-10-17 J43C001002 定案）。
+    """面辅助段布局，锚定官方 SHP->MapGIS 新建文件。
 
-    head_3=元数据块（FILETIME+常量 426，645B）；head_5=55 字节零块；
+    head_3=逐弧 ID/长度属性表；head_5=55 字节零块；
     head_6=392B 元数据块（387/1）；head_7=(弧段数+1)×32B 边界框；
     head_8=4B 首值+每弧段 int32=0x00010000；弧段记录头=01 02 常量。
     """
@@ -560,25 +799,33 @@ class TestPolygonAuxSections:
 
     def test_aux_section_layout(self, tmp_path) -> None:
         sec = self._sections(self._write(tmp_path))
-        # 两区共享边：3 条弧段、2 个端点结点（无向成链定案）
-        assert len(sec[0]) == 4 * 57  # 弧段索引 (n+1)
-        # head_2 前导 = [u16 0] + 每结点 (0, 结点号)；首弧坐标对紧随其后
-        lead = struct.unpack("<5H", sec[1][:10])
-        assert lead[0] == 0
-        pairs = struct.unpack("<8H", sec[1][:16])
-        assert pairs[1:5] == (0, 1, 0, 2)
-        assert len(sec[3]) == 4 * 24  # 拓扑
-        assert len(sec[2]) == 645 and struct.unpack_from("<Q", sec[2], 0)[0] > 0
+        # 两个独立闭合环；坐标段同时包含面—环—弧索引。
+        assert len(sec[0]) == 3 * 57  # 弧段索引 (n+1)
+        assert sec[1][:2] == b"\x00\x00"
+        assert len(sec[3]) == 3 * 24  # 拓扑
+        assert not any(sec[3][24:32])  # 首弧起止节点均为 0
+        # head_3 = 322B 前缀 + 26B 表头 + 2*39B 描述符 + (n+1)*13B 记录。
+        assert len(sec[2]) == 439 + 2 * 13
         assert struct.unpack_from("<I", sec[2], 12)[0] == 426
+        assert struct.unpack_from("<I", sec[2], 16)[0] == 2
+        assert struct.unpack_from("<hih", sec[2], 322) == (2, 3, 13)
+        assert struct.unpack_from("<i", sec[2], 348 + 29)[0] == 256  # ID 标志
+        lengths = []
+        for k in range(2):
+            record = sec[2][439 + 13 * k : 439 + 13 * (k + 1)]
+            assert record[0] == 1
+            assert struct.unpack_from("<i", record, 1)[0] == k + 1
+            lengths.append(struct.unpack_from("<d", record, 5)[0])
+        assert sum(lengths) == pytest.approx(8.0)  # 两个独立环的周长
         assert len(sec[4]) == 55 and not any(sec[4])
         assert len(sec[5]) == 392
         assert struct.unpack_from("<I", sec[5], 12)[0] == 387
-        assert len(sec[6]) == 4 * 32  # 弧段框 (arcs+1)
-        assert len(sec[7]) == 4 + 3 * 4  # 标志 (lead + arcs)
+        assert len(sec[6]) == 3 * 32  # 弧段框 (arcs+1)
+        assert len(sec[7]) == 4 + 2 * 4  # 标志 (lead + arcs)
         assert struct.unpack_from("<i", sec[7], 4)[0] == 0x00010000  # MapGIS 规范弧图层 0
         # 弧段框 = 存储单位边界框（首记录零填充；共享边 x=1）
         assert not any(sec[6][:32])
-        for k in range(1, 4):
+        for k in range(1, 3):
             xmin, ymin, xmax, ymax = struct.unpack_from("<4d", sec[6], k * 32)
             assert xmin <= xmax and ymin <= ymax
             assert 0.0 <= xmin and xmax <= 2.0 and 0.0 <= ymin and ymax <= 1.0

@@ -12,13 +12,18 @@ import numpy as np
 import pytest
 
 from pymapgis.reader import (
+    MapGISError,
     _decode_attribute_field,
     _decode_gbk,
     _Field,
     _PolygonTopologyBuilder,
     _raw_dms_to_degrees,
     _read_arc_index,
+    _read_attribute_records,
+    _read_crs,
+    _read_header_entries,
     _read_line_params,
+    _read_lines,
     _read_point_params,
     _read_points,
     _read_polygon_params,
@@ -111,6 +116,66 @@ class TestDecodeAttributeField:
         record = (2024).to_bytes(2, "little") + bytes([0, 0])
         assert _decode_attribute_field(record, field) is None
 
+    def test_time_nan_seconds_returns_none(self) -> None:
+        # 2026-10-30 审计回归：NaN/Inf 秒值回退 None，不得泄漏 int(NaN) 的
+        # 原生 ValueError/OverflowError（与日期分支的容忍语义一致）。
+        field = _Field("T", 7, 0, 10, 0)
+        record = bytes([3, 4]) + struct.pack("<d", float("nan")) + b"\x00" * 8
+        assert _decode_attribute_field(record, field) is None
+
+    def test_time_inf_seconds_returns_none(self) -> None:
+        field = _Field("T", 7, 0, 10, 0)
+        record = bytes([3, 4]) + struct.pack("<d", float("inf")) + b"\x00" * 8
+        assert _decode_attribute_field(record, field) is None
+
+    def test_numeric_short_chunk_returns_none(self) -> None:
+        # 描述符把数值字段声明到记录末尾之外：截断切片回退 None，
+        # 不得泄漏 struct.error("unpack requires a buffer of 4 bytes")。
+        field = _Field("X", 3, 90, 4, 0)
+        assert _decode_attribute_field(b"\x01" * 20, field) is None
+
+
+class TestCrsRobustness:
+    """2026-10-30 审计回归：地理文件 scale=0/NaN 不得丢 CRS——
+    LDZOFBA016.WT / LHCPGDAC05.WP 头部 scale=0 曾令 crs="" 与基线不符；
+    截断/NaN 头部回退 ("", 1.0)，不得泄漏 TypeError/ValueError/CRSError。"""
+
+    @staticmethod
+    def _header(projection: int = 0, ellipsoid: int = 1, scale: float = 1.0,
+                central: float = None) -> io.BytesIO:
+        buf = bytearray(220)
+        buf[109] = projection
+        buf[110] = ellipsoid
+        struct.pack_into("<d", buf, 143, scale)
+        if central is not None:
+            struct.pack_into("<d", buf, 151, central)
+        return io.BytesIO(bytes(buf))
+
+    def test_geographic_zero_scale_keeps_crs(self) -> None:
+        crs, scale = _read_crs(self._header(scale=0.0))
+        assert crs != "" and scale == 1.0
+
+    def test_geographic_nan_scale_keeps_crs(self) -> None:
+        crs, scale = _read_crs(self._header(scale=float("nan")))
+        assert crs != "" and scale == 1.0
+
+    def test_projected_zero_scale_returns_empty(self) -> None:
+        crs, scale = _read_crs(
+            self._header(projection=5, ellipsoid=16, scale=0.0, central=730000.0)
+        )
+        assert crs == "" and scale == 1.0
+
+    def test_projected_nan_central_meridian_returns_empty(self) -> None:
+        crs, _ = _read_crs(
+            self._header(projection=5, ellipsoid=16, scale=1000.0,
+                         central=float("nan"))
+        )
+        assert crs == ""
+
+    def test_truncated_header_raises_mapgis_error(self) -> None:
+        with pytest.raises(MapGISError):
+            _read_crs(io.BytesIO(b"\x00" * 120))
+
 
 class TestPolygonTopologyBuilder:
     def test_merge_two_arcs_into_ring(self) -> None:
@@ -160,6 +225,26 @@ class TestPolygonTopologyBuilder:
         assert mp.geom_type == "MultiPolygon"
         assert len(mp.geoms) == 1
         assert len(mp.geoms[0].interiors) == 0
+
+    def test_single_arc_degenerate_yields_empty_polygon(self) -> None:
+        # 2026-10-30 审计回归：单弧退化环与多弧路径一致地回退空多边形，
+        # 不得泄漏 "A linearring requires at least 4 coordinates"。
+        import shapely.geometry
+
+        arcs = [shapely.geometry.LineString([(0.0, 0.0), (1.0, 1.0)])]
+        topo = np.array([[0, 0, 1, 0]], dtype="int32")
+        g = _PolygonTopologyBuilder(arcs, topo).build(1)
+        assert g.is_empty
+
+    def test_topology_longer_than_arcs_raises(self) -> None:
+        # 2026-10-30 审计回归：拓扑表长于弧段索引（弧段区截断/损坏）
+        # 必须报 MapGISError，不得泄漏 IndexError。
+        import shapely.geometry
+
+        arcs = [shapely.geometry.LineString([(0, 0), (1, 0), (1, 1), (0, 0)])]
+        topo = np.array([[0, 0, 1, 0], [0, 0, 2, 0]], dtype="int32")
+        with pytest.raises(MapGISError):
+            _PolygonTopologyBuilder(arcs, topo)
 
 
 class TestVectorizedReaders:
@@ -220,6 +305,76 @@ class TestVectorizedReaders:
         assert topo[0, 3] == 2
         assert topo[1, 2] == 3
         assert topo[1, 3] == 4
+
+
+class TestMalformedStructureErrors:
+    """2026-10-30 审计回归：畸形文件报 MapGISError，不得泄漏原生异常。"""
+
+    def test_negative_record_length_raises(self) -> None:
+        with pytest.raises(MapGISError):
+            _read_attribute_records(
+                io.BytesIO(b"\x00" * 20), 2, -1, [_Field("a", 3, 0, 4, 0)]
+            )
+
+    def test_zero_record_length_raises(self) -> None:
+        with pytest.raises(MapGISError):
+            _read_attribute_records(
+                io.BytesIO(b"\x00" * 20), 2, 0, [_Field("a", 3, 0, 4, 0)]
+            )
+
+    def test_single_point_arc_rejected(self) -> None:
+        # 单点弧无法构成 LineString（shapely 抛原生 GEOSException）——
+        # 按损坏报 MapGISError。
+        empty = b"\x00" * 57
+        rec = bytearray(57)
+        struct.pack_into("<i", rec, 10, 1)   # point_count = 1
+        struct.pack_into("<i", rec, 14, 0)   # point_offset
+        coords = struct.pack("<2d", 1.0, 2.0)
+        with pytest.raises(MapGISError):
+            _read_lines(io.BytesIO(empty + bytes(rec)), 0, len(empty) + 57,
+                        0, len(coords), 1.0)
+
+    def test_negative_header_entry_rejected(self) -> None:
+        entry = struct.pack("<2i", -5, 10) + b"\xff\xff"
+        with pytest.raises(MapGISError):
+            _read_header_entries(io.BytesIO(entry * 16), 0)
+
+
+class TestPolygonActiveIdAlignment:
+    """2026-10-30 审计回归：拓扑引用超出属性表的区号被一致丢弃
+    （数据行/几何/区参数同一 filtered ID 集驱动），不再崩 GeoDataFrame。"""
+
+    def test_orphan_topology_id_dropped_consistently(self, tmp_path) -> None:
+        import geopandas as gpd
+        import shapely.geometry
+
+        from pymapgis import Reader, Writer
+
+        gdf = gpd.GeoDataFrame(
+            {"ID": [1, 2]},
+            geometry=[
+                shapely.geometry.box(0, 0, 1, 1),
+                shapely.geometry.box(2, 0, 3, 1),
+            ],
+            crs="EPSG:4326",
+        )
+        path = tmp_path / "two.wp"
+        Writer(gdf).to_file(path)
+
+        data = bytearray(path.read_bytes())
+        data_start = struct.unpack_from("<i", data, 12)[0]
+        entries = _read_header_entries(
+            io.BytesIO(bytes(data)), data_start, 16
+        )
+        topo_start, _ = entries[3]
+        # 把第一条弧的右区号改成无属性记录的 400（孤立 ID）。
+        struct.pack_into("<i", data, topo_start + 24 + 12, 400)
+        path.write_bytes(bytes(data))
+
+        with Reader(path) as reader:
+            assert len(reader) == 2
+            assert len(reader.data) == 2
+            assert list(reader.data["ID"]) == [1, 2]
 
 
 # ---------------------------------------------------------------------------
@@ -2098,7 +2253,7 @@ class TestCrsHeaderFields:
         fields = _crs_header_fields(None, 1000.0)
         assert fields[109] == ("B", 0)
         assert fields[110] == ("B", 0)
-        assert fields[143] == ("d", 1.0)
+        assert fields[143] == ("d", 0.0)
 
     def test_geographic_wgs84(self) -> None:
         fields = _crs_header_fields("EPSG:4326", 1000.0)
