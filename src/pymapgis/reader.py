@@ -110,9 +110,8 @@ _LINE_TRANSPARENT_OFFSET = 48  # uint8 透明输出（0=否，1=白色填充透�
 # 布局 v2（2026-10-22 用户 MapGIS 区参数对话框四次对账定案，取代旧
 # 2026-10-14 "u8@5=填充色/@6=图案/u16@9=图案色" 读法——后者三处全错）：
 #   u8  @1   class（区图层类码；0 令填充不可显示）
-#   u8  @5/@6/@7  field5/field6/field7（语义未裁定挂账；@7 为按层标志
-#                0/1/2/3/15；@6 呈岩性分带：沉积 26-91/侵入 128-132/
-#                变质 239-246）
+#   u8  @5/@6/@7  field5/6/7：24 位面环索引在坐标 section 内的字节偏移
+#                field5 低字节、field6 中字节、field7 高字节。
 #   u16 @9   填充颜色（色号，值域 2..1465；>870 为用户扩展色域）
 #   u16 @13  填充图案号（Fillgrph 图案库索引；@12 恒 0）
 #   u16 @17/@21  图案高度/宽度（mm）= f32 位型高16位（值<<16 还原；
@@ -132,9 +131,9 @@ _LINE_TRANSPARENT_OFFSET = 48  # uint8 透明输出（0=否，1=白色填充透�
 _POLYGON_PARAM_SECTION = 8
 _POLYGON_PARAM_RECORD_SIZE = 40
 _POLY_CLASS_OFFSET = 1        # uint8 class code（0=显示闸门）
-_POLY_FIELD5_OFFSET = 5       # uint8 语义未裁定（挂账）
-_POLY_FIELD6_OFFSET = 6       # uint8 语义未裁定（岩性分带特征）
-_POLY_FIELD7_OFFSET = 7       # uint8 按层标志（0/1/2/3/15）
+_POLY_FIELD5_OFFSET = 5       # uint8 环索引偏移低字节
+_POLY_FIELD6_OFFSET = 6       # uint8 环索引偏移中字节
+_POLY_FIELD7_OFFSET = 7       # uint8 环索引偏移高字节
 _POLY_FILL_COLOR_OFFSET = 9   # uint16 fill colour index（低字节@9）
 _POLY_PATTERN_OFFSET = 13     # uint16 fill-pattern number（Fillgrph 索引；
                               # @12 恒 0——面16=293(25 01)/面19=252(fc 00)
@@ -878,8 +877,8 @@ def _read_polygon_params(
     布局 v2（2026-10-22 用户 MapGIS 区参数对话框四次对账定案）：
 
     - uint8  @1: class（区图层类码；0 令填充不可显示）
-    - uint8  @5/@6/@7: field5/field6/field7（语义未裁定挂账；@7 按层标志
-      0/1/2/3/15；@6 呈岩性分带：沉积 26-91/侵入 128-132/变质 239-246）
+    - uint8  @5/@6/@7: 24 位面环索引在坐标 section 内的字节偏移
+      （field5 低字节、field6 中字节、field7 高字节）
     - uint16 @9: 填充颜色（值域 2..1465；>870 为用户扩展色域）
     - uint16 @12: 填充图案号（Fillgrph 图案库索引）
     - float32 @17/@21: 图案高度/宽度（mm）

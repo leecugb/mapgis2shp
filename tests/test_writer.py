@@ -265,6 +265,11 @@ class TestPolygonWriter:
         # 第二弧之后：首面多一个计数并带 0；第二面仅有点数和弧号。
         assert coord_size == 198
         assert struct.unpack_from("<5i", raw, coord_start + 178) == (8, 1, 0, 6, 2)
+        param_start = struct.unpack_from("<i", raw, data_start + 80)[0]
+        first = raw[param_start + 40 : param_start + 80]
+        second = raw[param_start + 80 : param_start + 120]
+        assert first[5] | (first[6] << 8) | (first[7] << 16) == 178
+        assert second[5] | (second[6] << 8) | (second[7] << 16) == 190
 
         single = tmp_path / "single_ring_index.wp"
         Writer(gdf.iloc[[1]]).to_file(single)
@@ -273,6 +278,9 @@ class TestPolygonWriter:
         coord_start, coord_size = struct.unpack_from("<2i", raw, data_start + 10)
         assert coord_size == 90
         assert struct.unpack_from("<2i", raw, coord_start + 82) == (6, 1)
+        param_start = struct.unpack_from("<i", raw, data_start + 80)[0]
+        record = raw[param_start + 40 : param_start + 80]
+        assert record[5] | (record[6] << 8) | (record[7] << 16) == 82
 
     def test_final_hole_omits_zero_and_updates_point_lead(self, tmp_path) -> None:
         polygon = shapely.geometry.Polygon(
@@ -436,15 +444,26 @@ class TestPolygonWriter:
     def test_invalid_polygon_repaired(self, tmp_path) -> None:
         bowtie = shapely.geometry.Polygon([(0, 0), (2, 2), (2, 0), (0, 2), (0, 0)])
         gdf = gpd.GeoDataFrame({"n": [1]}, geometry=[bowtie], crs="EPSG:4326")
-        reader = _write_and_read(gdf, tmp_path / "out.wp")
+        reader = _write_and_read(gdf, tmp_path / "out.wp", make_valid=True)
         assert len(reader) == 1
         assert reader.geom[0].area == pytest.approx(2.0)
+
+    def test_invalid_polygon_preserved_by_default(self, tmp_path) -> None:
+        bowtie = shapely.geometry.Polygon([(0, 0), (2, 2), (2, 0), (0, 2), (0, 0)])
+        gdf = gpd.GeoDataFrame({"n": [1]}, geometry=[bowtie], crs="EPSG:4326")
+        reader = _write_and_read(
+            gdf,
+            tmp_path / "preserved.wp",
+            {"make_valid": False},
+        )
+        assert len(reader) == 1
+        assert reader.geom[0].area == pytest.approx(0.0)
 
     def test_polygon_params_fidelity(self, tmp_path) -> None:
         # head_9 布局 v2（2026-10-22 对话框锚定）：u16@9 填充色（>255
         # 路径 1226）、u16@13 图案号、u16@17/@21 图案高宽（f32 高16位）、
-        # u8@23 图案色、u8@30 图层；@5/@6/@7 往返透传（旧版清零致
-        # 2026-03-12 jws 三幅图案层数据丢失的回归锚）。
+        # u8@23 图案色、u8@30 图层；@5/@6/@7 组成 24 位环索引偏移，
+        # 由坐标编码器同步计算，不能作为普通属性透传。
         gdf = gpd.GeoDataFrame(
             {
                 "fill_color": [1226],
@@ -468,9 +487,10 @@ class TestPolygonWriter:
         assert params["pattern_width"] == pytest.approx(3.0)
         assert params["pattern_color"] == 9
         assert params["layer"] == 3
-        assert params["field5"] == 74
-        assert params["field6"] == 130
-        assert params["field7"] == 1
+        # field5/6/7 为坐标段内环索引偏移：单个 5 点环为 2+5*16=82。
+        assert params["field5"] == 82
+        assert params["field6"] == 0
+        assert params["field7"] == 0
         assert "fill_color" not in reader.data.columns
 
     def test_polygon_class_validation_and_missing_default(self, tmp_path) -> None:

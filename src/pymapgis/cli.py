@@ -44,10 +44,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=None,
         help="Character encoding used when reading the input GIS file (e.g. GBK)",
     )
-    parser.add_argument(
+    validity = parser.add_mutually_exclusive_group()
+    validity.add_argument(
+        "--make-valid",
+        action="store_true",
+        help="Apply shapely.make_valid() instead of preserving native rings",
+    )
+    validity.add_argument(
         "--no-make-valid",
         action="store_true",
-        help="Do not apply shapely.make_valid() to reconstructed polygons",
+        help="Preserve native rings (default; kept for backward compatibility)",
     )
     parser.add_argument(
         "--graphic-params",
@@ -70,7 +76,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.input.suffix.lower() in _MAPGIS_SUFFIXES:
             with Reader(
                 args.input,
-                make_valid=not args.no_make_valid,
+                make_valid=args.make_valid,
                 read_graphic_params=args.graphic_params,
             ) as reader:
                 kwargs = {"driver": args.driver} if args.driver else {}
@@ -89,7 +95,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
             kwargs = {"encoding": args.encoding} if args.encoding else {}
             gdf = gpd.read_file(args.input, **kwargs)
-            writer = Writer(gdf, make_valid=not args.no_make_valid)
+            writer = Writer(gdf, make_valid=args.make_valid)
             writer.to_file(args.output)
             print(f"Wrote {len(writer)} feature(s) to {args.output}")
     except (InvalidFileError, MapGISError) as exc:

@@ -76,6 +76,12 @@ class TestCliMain:
         assert code == 0
         assert output.exists()
 
+    def test_make_valid_opt_in(self, sample_wp: Path, tmp_path: Path) -> None:
+        output = tmp_path / "out.geojson"
+        code = main([str(sample_wp), str(output), "--make-valid"])
+        assert code == 0
+        assert output.exists()
+
     def test_graphic_params(self, sample_wt: Path, tmp_path: Path) -> None:
         output = tmp_path / "out.geojson"
         code = main([str(sample_wt), str(output), "--graphic-params"])
