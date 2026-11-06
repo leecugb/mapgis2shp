@@ -11,7 +11,9 @@ Known degradation: text annotations stored in auxiliary sections of native
 .wt files are not produced, so written .wt files carry no label text in
 MapGIS (symbol points are unaffected).  The .wl auxiliary sections (node
 table, 55-byte block, 392-byte metadata block, bounding-box table, per-line
-flags) follow the native J43C001002 layout pinned 2026-10-17.
+flags) follow the native J43C001002 layout pinned 2026-10-17.  Polygon
+field5/6/7 are computed as 24-bit ring-index offsets; fresh native display
+still requires acceptance testing.
 
 Compatible with Python 3.9+.
 """
@@ -69,7 +71,8 @@ _FILE_ID_FOR = {"POINT": 1, "LINE": 0, "POLYGON": 2}
 _EXT_FOR = {"POINT": ".wt", "LINE": ".wl", "POLYGON": ".wp"}
 
 # 区图形参数列（布局 v2，2026-10-22 对话框锚定；与 reader._read_polygon_params
-# 同源——不含 class，class 由 _split_param_columns 单独吸收）
+# 同源——不含 class，class 由 _split_param_columns 单独吸收；
+# field5/6/7 为 24 位环索引偏移，由坐标编码器计算，不是样式默认值）
 _POLYGON_PARAM_COLUMNS = [
     "fill_color", "pattern", "pattern_height", "pattern_width",
     "pattern_color", "layer", "field5", "field6", "field7",
@@ -1140,14 +1143,20 @@ def _uint8_parameter(value: Any, name: str, default: int) -> int:
     return int(number)
 
 
-def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
+def _encode_polygon_params(
+    params: Optional[pd.DataFrame],
+    count: int,
+    ring_index_offsets: Optional[Dict[int, int]] = None,
+) -> bytes:
     """Encode the head_9 polygon-parameter section (40 bytes, first record
     mirrors the native 0x04 marker).
 
     布局 v2（2026-10-22 对话框锚定，与 reader._read_polygon_params 同源）：
-    u8@1 class；u8@5/6/7 field5/6/7（语义未裁定，往返透传）；u16@9
-    填充颜色；u16@13 填充图案号；u16@17/@21 图案高/宽（f32 位型高16位）；
+    u8@1 class；u8@5/6/7 field5/6/7 组成 24 位环索引偏移；
+    u16@9 填充颜色；u16@13 填充图案号；u16@17/@21 图案高/宽（f32 位型高16位）；
     u8@23 图案颜色；u8@30 图层。缺失列按默认 0（class 默认 1）。
+    field5/6/7 不是样式值：必须指向该面环索引在坐标 section 内的起始
+    字节，由 _encode_polygon_coordinates 同步计算，不能默认置零。
     数据丢失教训（2026-03-12 jws 三幅）：旧版只写 @5/@6/@9、@12-39
     清零 → 图案层全部丢失；本轮起全字段回写，往返保真。
     """
@@ -1184,6 +1193,15 @@ def _encode_polygon_params(params: Optional[pd.DataFrame], count: int) -> bytes:
                 record[23] = int(row["pattern_color"]) & 0xFF
             if "layer" in row.index:
                 record[30] = int(row["layer"]) & 0xFF
+        if ring_index_offsets is not None:
+            pointer = ring_index_offsets[i + 1]
+            if not 0 <= pointer <= 0xFFFFFF:
+                raise WriterError(
+                    f"polygon ring index offset exceeds 24 bits: {pointer}"
+                )
+            record[5] = pointer & 0xFF
+            record[6] = (pointer >> 8) & 0xFF
+            record[7] = (pointer >> 16) & 0xFF
         buf += record
     return bytes(buf)
 
@@ -1223,19 +1241,21 @@ def _encode_polygon_coordinates(
     topo: List[Tuple[int, int]],
     factor: float,
     hole_flags: List[bool],
-) -> Tuple[bytes, List[int]]:
+) -> Tuple[bytes, List[int], Dict[int, int]]:
     """Encode coordinates plus the native polygon/ring/arc index.
 
     Official fresh files place polygon i-1's index after the first arc of
     polygon i, and the final polygon's index after the final arc.  Arc offsets
     include these variable-length records, so arc index and coordinates must
-    always be encoded together.
+    always be encoded together.  Also return each polygon's 24-bit ring-index
+    offset for field5/6/7 in head_9.
     """
     owners = [left if left != 0 else right for left, right in topo]
     arc_ids: Dict[int, List[int]] = defaultdict(list)
     for i, pid in enumerate(owners, start=1):
         arc_ids[pid].append(i)
     feature_count = len(arc_ids)
+    ring_index_offsets: Dict[int, int] = {}
 
     coords = bytearray(b"\x00\x00")
     offsets: List[int] = []
@@ -1245,15 +1265,17 @@ def _encode_polygon_coordinates(
             coords += struct.pack("<2d", x * factor, y * factor)
         if i > 0 and owners[i] != owners[i - 1]:
             pid = owners[i - 1]
+            ring_index_offsets[pid] = len(coords)
             coords += _polygon_ring_index_record(
                 pid, arc_ids[pid], arcs, feature_count, hole_flags
             )
     if arcs:
         pid = owners[-1]
+        ring_index_offsets[pid] = len(coords)
         coords += _polygon_ring_index_record(
             pid, arc_ids[pid], arcs, feature_count, hole_flags
         )
-    return bytes(coords), offsets
+    return bytes(coords), offsets, ring_index_offsets
 
 
 def _encode_polygons(
@@ -1293,7 +1315,7 @@ def _encode_polygons(
 
     # Coordinates include the native polygon/ring/arc index; arc offsets are
     # returned from the same encoder so the two sections cannot diverge.
-    coords, arc_offsets = _encode_polygon_coordinates(
+    coords, arc_offsets, ring_index_offsets = _encode_polygon_coordinates(
         arcs, topo, factor, ring_holes
     )
 
@@ -1340,7 +1362,7 @@ def _encode_polygons(
         bytes(index),
         bytes(coords),
         bytes(topo_bytes),
-        _encode_polygon_params(params, len(gdf)),
+        _encode_polygon_params(params, len(gdf), ring_index_offsets),
         arcs,
         arc_layers,
         topo,
@@ -1505,9 +1527,10 @@ class Writer:
         for .wt, LineString/MultiLineString for .wl, Polygon/MultiPolygon for
         .wp.  MultiPoint and MultiLineString are exploded (with a warning);
         MultiPolygon stays a single polygon feature, matching the reader.
-    make_valid : bool, default True
+    make_valid : bool, default False
         Repair invalid polygons with ``shapely.make_valid`` before arc
-        decomposition (.wp only).
+        decomposition (.wp only).  Disabled by default to preserve native
+        rings, duplicate vertices and hole topology for interoperability.
     on_empty : {"error", "drop"}, default "error"
         Reject empty/null geometries, or discard them with a warning only
         when ``"drop"`` is explicitly requested.
@@ -1541,7 +1564,7 @@ class Writer:
         self,
         geodataframe: gpd.GeoDataFrame,
         *,
-        make_valid: bool = True,
+        make_valid: bool = False,
         on_empty: str = "error",
         map_scale: float = 1000.0,
         snap_tolerance: float = 0.0,
@@ -1787,7 +1810,10 @@ class Writer:
             # （2026-10-18 实证：MapGIS 按内部期望校验元数据块尺寸与弧段
             # 形态，自行重建无法复现；透传保证往返件与原生同构）
             secs = {int(k): bytes(v) for k, v in passthrough["sections"].items()}
-            secs[8] = params
+            # Preserve the source pointer table as well as source geometry:
+            # its field5/6/7 offsets belong to the original arc layout.
+            if 8 not in secs:
+                secs[8] = params
             secs[9] = attr_section
             if 10 not in secs:
                 secs[10] = _encode_polygon_label_boxes(self._gdf, factor)
