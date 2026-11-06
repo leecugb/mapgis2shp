@@ -2,12 +2,19 @@
 """pymapgis - Read and write MapGIS vector files with GeoPandas GeoDataFrames.
 
 Also provides parsers for the MapGIS 6.x graphic libraries (Subgraph.lib
-symbol library, LINESTY.lib line-style library and Colorlib.lib color
-library) that the graphic parameters of .wt/.wl/.wp features reference.
+symbol library, LINESTY.lib line-style library, Fillgrph.lib pattern library
+and Colorlib.lib color library) and an optional original-library rendering
+pipeline for the .wt/.wl/.wp features that reference them.
 """
 
 from pymapgis._version import __version__
 from pymapgis.colorlib import ColorLib
+from pymapgis.graphic import (
+    GraphicLibraries,
+    GraphicRenderer,
+    GraphicRenderResult,
+    render_graphic_map,
+)
 from pymapgis.linesty import (
     Element,
     LineStyle,
@@ -58,5 +65,10 @@ __all__ = [
     "dotline_params",
     "linedot_params",
     "ColorLib",
+    # Original graphic-library rendering (optional matplotlib dependency)
+    "GraphicLibraries",
+    "GraphicRenderer",
+    "GraphicRenderResult",
+    "render_graphic_map",
     "__version__",
 ]
