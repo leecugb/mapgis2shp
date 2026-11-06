@@ -45,6 +45,12 @@ MapGIS is a widely used closed-source GIS platform in China, especially in geolo
 pip install mapgis2shp
 ```
 
+For original graphic-library rendering, install the optional Matplotlib dependency:
+
+```bash
+pip install "mapgis2shp[render]"
+```
+
 The Python package is imported as `pymapgis`:
 
 ```python
@@ -260,6 +266,59 @@ main, aux = compose_feature_style(styles, 211, 0)  # (style, aux) pair rule
 Line-style style numbers and symbol numbers are *library-local*: they
 resolve only against the same (or a byte-identical) library that produced
 the data.
+
+## Rendering with the original graphic libraries
+
+`pymapgis.graphic` renders `.wp`, `.wl` and `.wt` layers directly from
+`Fillgrph.lib`, `LINESTY.lib`, `Subgraph.lib` and `Colorlib.lib`. It preserves
+polygon holes, stamps line-style elements along the original coordinates
+without extending line endpoints, instantiates subgraph geometry and fills,
+and renders WT text annotations.
+
+```python
+from pymapgis import GraphicLibraries, GraphicRenderer
+
+libraries = GraphicLibraries.from_directory("/path/to/SLIB")
+renderer = GraphicRenderer(
+    libraries,
+    scale=250000,
+    # Optional installation-specific settings:
+    exclude_text_categories={"代号"},
+    text_category_scales={"产状": 0.45, "断层产状": 0.45},
+    text_font_family=["Noto Sans CJK JP", "SimSun", "DejaVu Sans"],
+)
+result = renderer.render(
+    ["area.wp", "boundaries.wl", "points.wt"],  # automatically WP → WL → WT
+    "map.png",                                 # .png and .pdf are supported
+    figsize=(12, 10),
+    dpi=300,
+)
+print(result.reports)  # drawn features, fallbacks, unresolved colours, ...
+```
+
+The one-shot equivalent is:
+
+```python
+from pymapgis import render_graphic_map
+
+result = render_graphic_map(
+    ["area.wp", "boundaries.wl", "points.wt"],
+    "/path/to/SLIB",
+    "map.pdf",
+    scale=250000,
+)
+```
+
+For an existing Matplotlib workflow, use `renderer.draw_layers(ax, layers)` or
+`renderer.draw_layer(ax, gdf, kind="wl")`. File paths and pre-read
+GeoDataFrames can be mixed. The latter must have been read with
+`read_graphic_params=True` (and `read_point_params=True` for WT).
+
+The paper-mm/map-unit conversion is inferred from the CRS. For local data
+without a CRS, pass `map_units_per_mm` explicitly. Extended Pcolor entries are
+not guessed: supply verified values with `color_overrides={1167: (r, g, b)}`.
+Unresolved feature colours and line-style solid fallbacks are counted in each
+layer's report.
 
 ## Supported formats
 

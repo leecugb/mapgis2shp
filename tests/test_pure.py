@@ -30,7 +30,7 @@ from pymapgis.reader import (
     _read_struct,
     _read_topology_table,
 )
-from pymapgis.slib import SubgraphLib
+from pymapgis.slib import Element, SubgraphLib, parse_elements
 
 
 class TestDecodeGbk:
@@ -673,6 +673,73 @@ class TestPointParams:
         assert np.isnan(row["font_zh"])
 
 
+class TestSlibElements:
+    """Subgraph 描述区五字块、图元分组与已裁定填充语义。"""
+
+    @pytest.mark.parametrize("mode,fill_color,expected", [
+        (0, 6, 6),       # #43：Colorlib 红色填充
+        (0, 4, 4),       # #43：Colorlib 黄色填充
+        (5, 7, -1),      # #41：实心黑，w1 不是显示色
+        (5, 4, -1),      # #42：同上
+        (0, 0, None),
+        (0, 1, None),    # #21：编辑器“无填充”值
+        (2, 6, None),
+        (6, 6, None),
+        (1, 6, None),    # 未裁定模式不得擅自填色
+        (3, 6, None),
+        (4, 6, None),
+    ])
+    def test_fill_kind(self, mode, fill_color, expected) -> None:
+        el = Element(mode=mode, fill_color=fill_color, w2=0, w3=0,
+                     sub_start=0, sub_count=1)
+        assert el.fill_kind == expected
+
+    def test_parse_groups(self) -> None:
+        header = [46, 10,
+                  0, 6, 11, 12, 1,
+                  5, 4, 21, 22, 2,
+                  3, 2, 4]
+        elements = parse_elements(header, [3, 2, 4])
+        assert [(e.mode, e.fill_color, e.w2, e.w3,
+                 e.sub_start, e.sub_count) for e in elements] == [
+            (0, 6, 11, 12, 0, 1),
+            (5, 4, 21, 22, 1, 2),
+        ]
+        assert [e.fill_kind for e in elements] == [6, -1]
+        assert sum(e.sub_count for e in elements) == 3
+
+    @pytest.mark.parametrize("header,counts", [
+        ([], [2]),                         # 缺少记录头
+        ([1, 4], []),                     # 缺少点数表
+        ([1, 4, 0, 0, 2], [2]),           # 描述区不是五字块
+        ([1, 4, 0, 6, 0, 0, 0, 2], [2]),  # w4=0
+        ([1, 4, 0, 6, 0, 0, 2, 2], [2]),  # 子路径范围越界
+        ([1, 4, 0, 6, 0, 0, 1, 2, 2], [2, 2]),  # 总组数不足
+    ])
+    def test_malformed_description_rejected(self, header, counts) -> None:
+        assert parse_elements(header, counts) == []
+
+    def test_indexed_decode_populates_elements(self, tmp_path) -> None:
+        pts = [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0),
+               (0.2, 0.2), (0.4, 0.4)]
+        rec = (struct.pack("<2H5H5H2H", 46, 10,
+                           0, 6, 0, 0, 1,
+                           5, 4, 0, 0, 1,
+                           3, 2)
+               + b"".join(struct.pack("<2f", x, y) for x, y in pts))
+        rec_b = struct.pack("<4H2f", 1, 2, 0, 1, 0.1, 0.2)
+        data = (struct.pack("<2I", 8, 8 + len(rec))
+                + rec + rec_b + b"\x00" * 32)
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+
+        sym = SubgraphLib(str(path)).decode(0)
+        assert sym is not None
+        assert [len(sp.points) for sp in sym.subpaths] == [3, 2]
+        assert [(e.sub_start, e.sub_count, e.fill_kind)
+                for e in sym.elements] == [(0, 1, 6), (1, 1, -1)]
+
+
 class TestSlibTailChain:
     """Subgraph.lib 未索引尾段走查 + 末条索引记录 0xBE 假阳性回归。
 
@@ -827,6 +894,22 @@ class TestSlibThreePointArc:
         assert sp.circle is not None and sp.arc is None
         assert sp.closed
         assert sp.circle == pytest.approx((0.5488, 0.1402, 0.0550))
+
+    def test_explicit_zero_to_360_circle(self, tmp_path) -> None:
+        # #41/#42：显式 0°→360° 与双哨兵一样表示整圆。
+        rec = self._record(46, [(0.5, 0.5), (0.2, 0.0), (360.0, 0.0)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        sp = s.subpaths[0]
+        assert sp.circle == pytest.approx((0.5, 0.5, 0.2))
+        assert sp.arc is None and sp.closed
+
+    def test_zero_start_half_circle(self, tmp_path) -> None:
+        # #25：起角 0° 合法，不得把 0°→180° 半圆当普通三点折线。
+        rec = self._record(46, [(0.5, 0.5), (0.2, 0.0), (180.0, 0.0)])
+        s = self._lib_with(tmp_path, rec).decode(0)
+        sp = s.subpaths[0]
+        assert sp.circle is None
+        assert sp.arc == pytest.approx((0.5, 0.5, 0.2, 0.0, 180.0))
 
     def test_plain_zero_rejected(self, tmp_path) -> None:
         # 退化零值组（符号 7 不对称小子路径同构）非哨兵 → 不判圆（回归锚）
