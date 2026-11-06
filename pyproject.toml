@@ -36,6 +36,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+render = [
+    "matplotlib>=3.5",
+]
 dev = [
     "build>=0.10",
     "pytest>=7.0",

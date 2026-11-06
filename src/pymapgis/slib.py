@@ -73,6 +73,69 @@ class SubPath:
 
 
 @dataclass
+class Element:
+    """子图图元组（描述区 5 字块，2026-11-03 全库 7358/7358 验证：
+    sum(w4)==子路径数，跨索引/尾段/尾段区域三区一致）。
+
+    块布局 = [w0 填充模式, w1 填充色号, w2（笔色？，暂定）, w3（未裁定）,
+             w4 组内子路径数]。
+    填充模式实证：w0=0 且 w1>1 → Colorlib 索引 w1 实心填充（#43 象限
+    红=6/黄=4 真值裁定 ✓；w1∈{0,1} 不填——1 为编辑器"无填充"值，#21
+    N 笔画实证）；w0=5 → 实心黑（#41/#42 真值裁定 ✓，色号来源暂定
+    ——两例 w1 分别为 7/4 均不显色）；w0∈{2,6} → 不填充（#4516/
+    #4561/#3065/#3160/#994/#21/#25 真值 ✓）；w0∈{1,3,4} 未裁定
+    （挂账，一律按不填处理）。w1 在 w0=2 组内呈 1785..1811 聚——
+    该模式不使用 w1（疑似编辑器残留角值），色语义仅在填充模式下
+    成立。
+    """
+
+    mode: int
+    fill_color: int
+    w2: int
+    w3: int
+    sub_start: int
+    sub_count: int
+
+    @property
+    def fill_kind(self) -> Optional[int]:
+        """已裁定填充：返回色号（Colorlib 索引，-1=实证黑）；未裁定/不填
+        返回 None。
+
+        2026-11-03 修正：mode=0 且 w1==1 按**不填**处理——#21 N 笔画
+        块 [0,1,1,1,1] 真值不填充（其闭包面积/首尾距与 #43 楔子几乎
+        相同，几何门无法区分），故 w1=1 疑为编辑器"无填充"专用值
+        （色语义与几何门无关，纯字面值判别）。mode=5 → -1 黑。"""
+        if self.mode == 0 and self.fill_color > 1:
+            return self.fill_color
+        if self.mode == 5:
+            return -1  # 实心黑（#41/#42 实证；色号来源待定，暂以黑渲染）
+        return None
+
+
+def parse_elements(header_u16: List[int], counts: List[int]) -> List[Element]:
+    """header_u16（首两字 = type,n）+ 已确定子路径点数表 → 图元组列表。
+    结构不符（块数不整 5 / w4 越界 / 总数不等）返回 []——诚实拒解，
+    不臆造分组。"""
+    if len(header_u16) < 4 or not counts:
+        return []
+    desc = header_u16[2:len(header_u16) - len(counts)]
+    if len(desc) % 5 != 0:
+        return []
+    out: List[Element] = []
+    start = 0
+    for i in range(0, len(desc), 5):
+        w0, w1, w2, w3, w4 = desc[i:i + 5]
+        if w4 == 0 or start + w4 > len(counts):
+            return []
+        out.append(Element(mode=w0, fill_color=w1, w2=w2, w3=w3,
+                           sub_start=start, sub_count=w4))
+        start += w4
+    if start != len(counts):
+        return []
+    return out
+
+
+@dataclass
 class Symbol:
     no: int
     type: int
@@ -80,6 +143,7 @@ class Symbol:
     header_len: int
     header_u16: List[int]
     subpaths: List[SubPath] = field(default_factory=list)
+    elements: List[Element] = field(default_factory=list)
 
     @property
     def n_points(self) -> int:
@@ -386,6 +450,7 @@ class SubgraphLib:
         counts = self._subpath_counts(header_u16, len(pts))
         if not counts:
             counts = [len(pts)]  # 头尾无点数表 → 单子路径
+        sym.elements = parse_elements(header_u16, counts)
         i = 0
         for cnt in counts:
             sp = SubPath(points=pts[i:i + cnt])
@@ -408,6 +473,7 @@ class SubgraphLib:
         counts = list(header_u16[-k:]) if k else []
         if not counts or sum(counts) != len(pts) or min(counts) < 2:
             return None  # 走查元数据与实际不符 → 诚实拒解
+        sym.elements = parse_elements(header_u16, counts)
         i = 0
         for cnt in counts:
             sp = SubPath(points=pts[i:i + cnt])
@@ -556,8 +622,9 @@ def _three_point_arc(
     判定门（防止误吞普通三点折线）：
       ① 恰 3 点；② |p2.y| ≤ 0.01（恒零槽）；
       ③ 0.005 ≤ p1.x ≤ 1.0（半径合法域）；
-      ④ 弧段要求 |p1.y| ≥ 5°、|p2.x| ≥ 5° 且
-         5° ≤ (p2.x − p1.y) mod 360 ≤ 355°（非退化）；
+      ④ 弧段要求 |p2.x| ≥ 5（角度域值，真折线不可能出现）且
+         5° ≤ (p2.x − p1.y) mod 360 ≤ 355°（非退化；起角 p1.y 允许 ≈0°，
+         2026-11-03 #25 半圆实证——见函数尾注）；
       ⑤ 圆心 |p0| 各分量 ≤ 1.5mm。不满足返回 None（维持点序直连）。
     与 _center_ref_circle 的区分：后者首末点 ≈ 同点（p0≈p2），
     本规则 p0 与 p2 无关——_classify 中中心参考圆优先。
@@ -577,15 +644,26 @@ def _three_point_arc(
     # #23 空槽 p0 与 p2 相距 0.4mm+，才是真参数弧组）。
     if math.hypot(x0 - x2, y0 - y2) <= 0.01:
         return None
-    # 整圆分支：哨兵须为 0xB3000000 精确位型（#23 空槽实证）。
+    # 整圆分支：① #23 空槽双哨兵（原裁定）＋ ② 显式角度整圆
+    # （2026-11-03 #41/#42 实证：[(0,0),(0.5,±0),(360,0)]——编辑器亦以
+    # 显式 0°→360° 写整圆，非仅哨兵空槽；门 |y1|<0.01 且 |x2−360|<0.01，
+    # 真折线不可能含 360mm 坐标，无误吞风险。**朝向/语义待用户图面裁定**）。
     # 普通退化三点组（p1.y/p2.x=0.0，如符号 7 不对称小子路径）不得误判——
     # 哨兵是特定的负非规格化值而非数学零。
-    if struct.pack("<f", y1) == _ARC_SENTINEL and \
-            struct.pack("<f", x2) == _ARC_SENTINEL:
+    y1_sent = struct.pack("<f", y1) == _ARC_SENTINEL
+    x2_sent = struct.pack("<f", x2) == _ARC_SENTINEL
+    if (y1_sent and x2_sent) or \
+            (abs(y1) < 0.01 and abs(x2 - 360.0) < 0.01):
         return ("circle", (x0, y0, x1))
-    a0, a1 = y1 % 360.0, x2 % 360.0
-    if abs(y1) < 5.0 or abs(x2) < 5.0:
+    # 弧段分支（2026-11-03 起角门放宽：#25 [(圆心),(r,−0),(180,0)] = 显式
+    # 0°→180° 半圆，CCW 上半，与其弦点子路径 y>0 分布互证；旧 |y1|≥5° 门
+    # 会把它拒之门外画成 180mm 飞线。终角 |x2|≥5 门保留——角度域值不可能
+    # 出现在 ±0.5mm 符号空间（全链坐标审计 ≤1.485），张角 5..355 门挡退化。
+    # 影响面全库扫描：恰 3 条子路径改判（#25 sp0、#41 sp0、#42 sp0），
+    # 零附带损伤；朝向语义同列待图面裁定。）
+    if abs(x2) < 5.0:
         return None
+    a0, a1 = y1 % 360.0, x2 % 360.0
     sweep = (a1 - a0) % 360.0
     if not (5.0 <= sweep <= 355.0):
         return None
