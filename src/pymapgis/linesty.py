@@ -37,7 +37,7 @@ f32 载荷区三型：
   - 参数型：其余 → 元素参数（节奏表/点位置等）
 
   n=1 且 24B = 实线型：色@2（Colorlib 1-based，0=默认/随图元，全库笔色
-                       普查 0×31 主用）、宽@16 f32（mm）、纵向偏移@20 f32
+                       普查 0×31 主用）、笔段终点 x1@16 f32、纵向偏移 yoff@20 f32
 
 形态自持判定规则（用户裁定 16/17 回溯双中）：
   展开元素模板 → 全点状单元且线分量宽 <0.1mm → 纯点线；
@@ -75,17 +75,15 @@ f32 载荷区三型：
   - 线型生成方法：规律性（等大单元周期平铺）/ 按控制点（相邻点间填一单元）；
     线型调整方法："调整"=端部符号完整化——图元级渲染开关（.WL 字段待定位）
 
-M67 线型保存语义（Mpedit60.hlp"保存线型"节，2026-10-14 提取——
-点线解析的决定性规格）：
+M67 线型保存语义（Mpedit60.hlp"保存线型"节，2026-10-14 提取）：
   - 线型=符号编辑框内几何：基线（首尾相接线段）+上下复制一个单位+普染
   - **主色/辅助色**：存库时指定主色，其余为辅助色；使用时图元参数
     可重指定（=可变颜色）
-  - **可变线宽/固定线宽（点线点径的来源）**：存库时指定线宽号→转成
-    线的可变线宽，其它为固定线宽；**使用时图元线宽参数替换可变线宽**。
-    → 点线族（16 等）的**点径 = 图元线宽**（库内数值只是可变标记），
-    点距 = 库内固定间距 × X系数；线宽类尺寸不受 Y 系数影响。
-    （(16,0) w=0.15 x=0.8 y=0.3 → 点径 0.15mm、点距 0.24mm，
-    用户核验定案 2026-10-14）
+  - 库内存在可变线宽/固定线宽机制，但不能据此把所有点三元组的半径
+    自动替换成图元线宽。2026-10-20 对 16|0/16|1 的后续复核明确：
+    两者分别为 r=0.044/0.0781 的差别实体，当前 `feature_rhythm()` 直接
+    消费库内 (x,y,r)；2026-10-14 的“16 族点径一律替换为图元线宽”
+    参数化模型不再作为当前渲染规则。
 """
 from __future__ import annotations
 
@@ -160,18 +158,34 @@ def contact_semantics(linetype: int, aux: int = 0) -> Optional[dict]:
     return CONTACT_FORM.get((str(linetype), str(aux)))
 
 
-def compose_feature_style(lib: "LinestyLib", linetype: int, aux: int = 0):
-    """图元显示样式 = 线型号记录 + 辅助线型号记录叠加（aux=0 不叠加）。
+def _aux_selects_subline(style: Optional[LineStyle], aux: int) -> bool:
+    """Return whether *aux* selects a main-record variant, not an overlay.
 
-    官方语义（2026-10-14 三重证实：用户裁定 (2,0)=纯虚线 + MapGIS67
-    编辑器 DLL 字段名『线型号/辅助线型号/辅助色/覆盖方式』+ MapGIS 官方
-    文档『线型由线型号+辅助线型号唯一确定』）。
-    返回 (主样式 LineStyle|None, 辅助样式 LineStyle|None)。
-    X/Y 系数语义（官方）：X=沿线方向伸缩（改间隔与符号长度），
-    Y=垂线方向伸缩（改线宽方向）。
+    Verified dual semantics: an in-range aux indexes the main record's subline
+    variants; an out-of-range aux is an independent auxiliary line-style record.
+    Style 2 is the adjudicated exception: aux > 4 denotes its equivalent-dash
+    data-field family and must not be decoded as another visible record.
+    """
+    if not aux or style is None or not getattr(style, "sublines", None):
+        return False
+    if style.no == 2:
+        return True
+    return aux < len(style.sublines)
+
+
+def compose_feature_style(lib: "LinestyLib", linetype: int, aux: int = 0):
+    """图元显示样式 = 主记录变体，或主记录 + 独立辅助记录。
+
+    官方字段为“线型号/辅助线型号”双参数。已验证的双重语义：aux 在主记录
+    子线范围内时选择该变体，本函数第二项返回 None；越界时才返回独立的
+    辅助线型记录。2 号族的越界等价虚线裁定属于主记录语义，不叠加 aux。
+
+    调用方选择主记录变体时仍须把原 aux 传给 feature_rhythm() 或结构子线
+    解析器。X/Y 系数语义（官方）：X=沿线方向伸缩，Y=垂线方向伸缩。
     """
     main = lib.decode(linetype)
-    aux_style = lib.decode(aux) if aux else None
+    aux_style = (lib.decode(aux)
+                 if aux and not _aux_selects_subline(main, aux) else None)
     return main, aux_style
 
 
@@ -253,14 +267,38 @@ def _tick_line_rhythm(
     return lines, dots
 
 
+def _merge_coincident_solid_dots(
+    dots: List[Tuple[float, float, float]],
+) -> List[Tuple[float, float, float]]:
+    """Merge redundant solid disks without changing their visible union.
+
+    Several verified records repeat the same referenced dot, and 16|0 also
+    stores a smaller concentric disk. All dots here use the same feature colour
+    and have no outline, so only the largest disk at each coordinate is visible.
+    This rule is deliberately limited to solid dots, never open circle strokes.
+    """
+    merged: Dict[Tuple[float, float], float] = {}
+    for x, y, radius in dots:
+        key = (x, y)
+        merged[key] = max(radius, merged.get(key, radius))
+    return [(x, y, radius) for (x, y), radius in merged.items()]
+
+
 def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
     """线型 3/4 节奏裁定读法（2026-10-19 用户逐行目视定案，3|x 六行 +
     4|x 四行全裁定）。
 
-    定案规则（"aux 选择主记录子线索引"——旧挂账"记录内子线渲染选择
+    **适用域：单条 LineStyle 记录的节奏选择，不是完整双参数叠加器。**
+    本函数的 aux 在 3/4 等记录族中选择主记录 sub[aux]。完整的
+    (linetype, aux_linetype) 图元由 compose_feature_style 区分两种角色：
+    范围内 aux 选择主记录变体；越界 aux 才返回独立辅助记录（2 号族等价
+    裁定例外）。GraphicRenderer 只叠加第二项非空的独立辅助记录。
+    不得把 16|1、38|2、65|4 等变体选择再误画成一条独立辅助线。
+
+    单记录规则（"aux 选择主记录子线索引"——旧挂账"记录内子线渲染选择
     规则"的定案实例）：
-      - (lt, aux) 渲染**主记录 sub[aux]**；aux 记录的笔不渲染
-        （3|1 的红色 24B 实线笔已裁定弃画）。
+      - 在适用记录族中渲染**主记录 sub[aux]**；aux 记录的笔不由此函数
+        负责（3|1 的红色 24B 实线笔已裁定不由本单记录路径绘制）。
       - 节奏 f32 = (x, y) 坐标对序列；点/竖线与线相间、与两侧线等距。
       - 线型 3：sub0–4 同构 dash_dot（线 0→f[2]、点@f[4] r=f[6]、
         两侧空白对称、周期 = 线 + 2×空 + 2×r；sub4 记录内第二组为
@@ -472,7 +510,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
             return None
         return {"kind": "dash_dot_raised",
                 "lines": lines,
-                "dots": dots,
+                "dots": _merge_coincident_solid_dots(dots),
                 "period_mm": 1.0}
     # 线型 16（16|0/16|1 走 dotline_params/PAIR_SEMANTICS；16|2 于
     # 2026-10-19 用户目视定案）：16|2 = 两段基线 + 两个抬升圆点
@@ -491,7 +529,7 @@ def feature_rhythm(style: Optional[LineStyle], aux: int = 0) -> Optional[dict]:
                     for i in range(n_ref)]
             return {"kind": "dotline_lib_r",
                     "lines": [],
-                    "dots": dots,
+                    "dots": _merge_coincident_solid_dots(dots),
                     "period_mm": 1.0}
         if aux != 2 or len(f) < 20:
             return None
@@ -847,8 +885,53 @@ class SubLine:
             return None
         return out
 
+    def parameter_geometry(self) -> List[Tuple[str, object]]:
+        """Decode geometry solely from element templates and f32 payloads.
+
+        This is the data-driven path used by the original-library renderer:
+        no line-style number, adjudication table, radius policy or per-record
+        special case is consulted. Explicit ``UNIT_FILLED_POLY`` and
+        ``UNIT_DOT`` control those geometry roles; payload pairs and point
+        triplets control the remaining shapes. A zero unit alone never
+        discards stored coordinate pairs, because many records use them for
+        visible segments rather than empty moves.
+
+        A point triplet from a non-``UNIT_DOT`` element carries
+        ``filled=None`` because the record does not prove its fill state.
+        Callers must not replace that unknown with a style-specific guess.
+        """
+        if self.is_solid:
+            seg = self.seg
+            return [("segment", seg)] if seg is not None else []
+        out: List[Tuple[str, object]] = []
+        for element, values in self.payload_groups():
+            if element.is_filled_poly:
+                pairs = [(values[i], values[i + 1])
+                         for i in range(0, len(values) - 1, 2)]
+                if len(pairs) >= 3:
+                    out.append(("fill", pairs))
+                continue
+            if len(values) == 3 or (
+                len(values) == 6 and all(abs(v) < 1e-9 for v in values[3:])
+            ):
+                filled = True if element.unit == UNIT_DOT else None
+                out.append(("dot", (values[0], values[1], values[2], filled)))
+                continue
+            pairs = [(values[i], values[i + 1])
+                     for i in range(0, len(values) - 1, 2)]
+            if len(pairs) == 2:
+                out.append(("segment", (*pairs[0], *pairs[1])))
+            elif len(pairs) >= 3:
+                out.append(("polyline", pairs))
+        return out
+
     def payload_geometry(self) -> List[Tuple[str, object]]:
-        """元素载荷几何语义（2026-10-20 定案 + 10-21 填充裁定）。
+        """兼容/辅助几何路径（含历史裁定规则）。
+
+        公共原始渲染优先使用 :meth:`parameter_geometry`，以库参数为主。
+        本函数保留旧行为供既有调用方对照，不代表当前唯一格式解释。
+
+        元素载荷几何语义（2026-10-20 定案 + 10-21 填充裁定）。
 
         **unit 号不是语义分类依据**（825|0 填充漏画根因：unit=1/
         513/513 同构填充三单元被 unit==1 判据漏画两个）。判据 =
@@ -1256,9 +1339,12 @@ ADJUDICATED_STRUCTS = {
 def render_ops(style: Optional[LineStyle], linetype: int = 0, aux: int = 0,
                feature_width: float = 0.15, x_coef: float = 1.0,
                y_coef: float = 1.0) -> dict:
-    """生成结构化渲染操作码列表，与用户裁定形状相似。
+    """生成结构化渲染操作码列表（兼容/辅助路径）。
 
-    返回 {"ops": [...], "verdict_match": 是否命中裁定规格, "spec": 说明}。
+    本函数包含历史逐线型号裁定规格；公共原始渲染优先使用
+    :meth:`SubLine.parameter_geometry` 和库内直接节奏结构，不以本操作码
+    覆盖库参数。返回 {"ops": [...], "verdict_match": 是否命中裁定规格,
+    "spec": 说明}。
     ops 元素为 (操作, 参数) 元组，操作 ∈
       rhythm / solid / dashed / dotline / dash_dot / solid_side_ticks /
       solid_teeth / parallel_solid / parallel_solid_dashed /

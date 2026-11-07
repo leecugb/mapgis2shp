@@ -122,6 +122,31 @@ class TestCliLib:
         out = capsys.readouterr().out
         assert "solid pen: color=6" in out
 
+    def test_fillgrph_pattern(self, capsys) -> None:
+        library = Path(__file__).parent / "fixtures" / "slib" / "Fillgrph.lib"
+        code = main(["lib", str(library), "--pattern", "220"])
+        assert code == 0
+        out = capsys.readouterr().out
+        assert "1337 records" in out
+        assert "pattern 220:" in out
+        assert "polylines=" in out
+
+    def test_colorlib_colour(self, capsys) -> None:
+        library = Path(__file__).parent / "fixtures" / "slib" / "Colorlib.lib"
+        code = main(["lib", str(library), "--color", "602"])
+        assert code == 0
+        out = capsys.readouterr().out
+        assert "871 entries" in out
+        assert "colour 602: channels=(38, 13, 0, 13) RGB=(206, 217, 206)" in out
+
+    def test_pcolor_colour(self, capsys) -> None:
+        library = Path(__file__).parent / "fixtures" / "slib" / "Pcolor.lib"
+        code = main(["lib", str(library), "--color", "602"])
+        assert code == 0
+        out = capsys.readouterr().out
+        assert "4098 colour nodes" in out
+        assert "colour 602: channels=(0, 0, 0, 77) RGB=(255, 255, 178)" in out
+
     def test_linesty_missing(self, tmp_path: Path) -> None:
         code = main(["lib", str(tmp_path / "missing.lib")])
         assert code == 1
@@ -136,6 +161,15 @@ class TestCliLib:
 
 
 class TestCliEntryPoint:
+    def test_top_level_help_lists_library_and_rendering_interfaces(self, capsys) -> None:
+        with pytest.raises(SystemExit) as excinfo:
+            main(["--help"])
+        assert excinfo.value.code == 0
+        out = capsys.readouterr().out
+        assert "pymapgis lib LIB" in out
+        assert "Subgraph, LINESTY, Fillgrph, Colorlib and Pcolor" in out
+        assert "render_graphic_map" in out
+
     def test_module_execution(self, sample_wt: Path, tmp_path: Path) -> None:
         output = tmp_path / "out.geojson"
         result = subprocess.run(

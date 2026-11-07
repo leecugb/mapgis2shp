@@ -7,13 +7,20 @@ optional dependency and is imported only when rendering is requested.
 
 The renderer consumes library geometry rather than replacing it with thematic
 styles: WP fill/pattern records, WL line-style rhythms, and WT subgraph/text
-records.  Coordinates always come from the vector features.  In particular,
-line-style stamps follow the original polyline and never extend its endpoints.
+records. WL geometry first uses adjudicated variants where they have already
+been verified against MapGIS output, then falls back to the library's direct
+rhythm structure or the selected subline's ``parameter_geometry()`` for other
+records. Multiple solid pens are retained as overlays, while alternative
+non-solid sublines are not merged. Per-style-number adjudication is not part
+of the generic fallback. Coordinates always come from the vector features.
+In particular, line-style stamps follow the original polyline and never extend
+its endpoints.
 """
 
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple, Union
@@ -22,7 +29,13 @@ import numpy as np
 
 from pymapgis.colorlib import ColorLib
 from pymapgis.fillgrph import FillgrphLib, pattern_geometry
-from pymapgis.linesty import LinestyLib, feature_rhythm
+from pymapgis.linesty import (
+    LinestyLib,
+    _RHYTHM_SUPPORTED_NOS,
+    _aux_selects_subline,
+    feature_rhythm,
+)
+from pymapgis.pcolor import PcolorLib
 from pymapgis.reader import Reader
 from pymapgis.slib import SubgraphLib
 
@@ -45,6 +58,7 @@ class GraphicLibraries:
     subgraph: SubgraphLib
     fillgrph: FillgrphLib
     color: ColorLib
+    pcolor: Optional[PcolorLib] = None
     directory: Optional[Path] = None
 
     @classmethod
@@ -67,6 +81,8 @@ class GraphicLibraries:
             subgraph=SubgraphLib(str(root / "Subgraph.lib")),
             fillgrph=FillgrphLib(str(root / "Fillgrph.lib")),
             color=ColorLib(str(root / "Colorlib.lib")),
+            pcolor=(PcolorLib(str(root / "Pcolor.lib"))
+                    if (root / "Pcolor.lib").is_file() else None),
             directory=root,
         )
 
@@ -108,6 +124,11 @@ class GraphicRenderer:
     ----------
     libraries:
         A :class:`GraphicLibraries` instance.
+    fill_library:
+        Library used for WP fill colours. ``"auto"`` (default) uses Pcolor
+        when available and Colorlib otherwise; ``"pcolor"`` requires Pcolor;
+        ``"color"`` explicitly selects the legacy Colorlib-only comparison.
+        The other colour roles always use Colorlib.
     scale:
         Map scale denominator.  At 1:250000, one paper millimetre represents
         250 metres on the ground.
@@ -117,8 +138,21 @@ class GraphicRenderer:
         CRS and is useful for local engineering coordinate systems.
     color_overrides:
         Optional ``{color_number: (r, g, b)}`` mapping for installation-local
-        or extended Pcolor entries.  RGB components must be in the 0–1 range.
-        No inferred extended colours are enabled by default.
+        or extended Pcolor entries. Applied to WP ``fill_color`` only; pattern,
+        line, auxiliary and point colours resolve directly through Colorlib.
+        RGB components must be in the 0–1 range. No inferred extended colours
+        are enabled by default. Overrides are for thematic/comparison output,
+        not for original graphic-library rendering.
+    unit_color_overrides:
+        Optional ``{normalised_unit_code: (r, g, b)}`` map for verified
+        unit-specific corrections (for example ``Qp3pal``). A matching unit
+        takes precedence over its numeric fill colour and numeric overrides.
+        No geological recolouring is enabled without this explicit map.
+        Overrides are for thematic/comparison output only, never for original
+        graphic-library rendering.
+    unit_code_fields:
+        Attribute fields searched in order for a unit code. Defaults to
+        ``("QDUECC", "QDUECD")``.
     fallback_color:
         Colour used for unresolved feature colours; unresolved library-defined
         symbol fills are instead left unfilled.
@@ -127,12 +161,31 @@ class GraphicRenderer:
         decoded.  Every such feature is counted as ``fallback`` in the report.
     symbol_fills:
         Consume adjudicated Subgraph ``Element.fill_kind`` fills.
+    polygon_labels:
+        Draw one complete label per polygon from its unit-code attributes at
+        ``representative_point()``, following the geosciml4china scheme.
+    polygon_label_fields:
+        Attribute fields searched in order for the complete polygon label.
+        Defaults to ``("QDUECC_eff", "QDUECC", "QDUECD")``.
+    polygon_label_fontsize:
+        Polygon-label size in typographic points; default 4.5 pt.
     exclude_text_categories:
-        Optional CHFCEC categories to omit, for example ``{"代号"}``.
+        Optional CHFCEC categories to omit. Defaults to ``{"代号"}`` so
+        fragmented WT unit-code annotations are not duplicated over the
+        polygon-derived labels. Use ``exclude_text_categories=()`` together
+        with ``polygon_labels=False`` for the legacy WT-only behaviour.
     text_category_scales:
         Optional CHFCEC-specific font-size multipliers.
     text_font_family:
         Optional Matplotlib font family or fallback list for text annotations.
+    native_text_layout:
+        Place characters using the stored ``width + spacing`` advance.
+        Script size/baseline and font substitution remain display approximations.
+    font_zh_map / font_en_map:
+        Optional ``{native_font_number: Matplotlib_font_family}`` mappings.
+        Unknown mapped numbers are reported as ``unknown_fonts``.
+    font_style_map:
+        Optional ``{native_font_style: {Matplotlib_text_keyword: value}}`` map.
 
     Notes
     -----
@@ -144,9 +197,12 @@ class GraphicRenderer:
         self,
         libraries: GraphicLibraries,
         *,
+        fill_library: str = "auto",
         scale: float = 250000.0,
         map_units_per_mm: Optional[float] = None,
         color_overrides: Optional[Mapping[int, RGB]] = None,
+        unit_color_overrides: Optional[Mapping[str, RGB]] = None,
+        unit_code_fields: Sequence[str] = ("QDUECC", "QDUECD"),
         fallback_color: RGB = (0.85, 0.85, 0.85),
         line_min_pt: float = 0.05,
         dot_min_pt: float = 0.2,
@@ -157,13 +213,25 @@ class GraphicRenderer:
         max_pattern_tiles: int = 40000,
         fallback_to_solid: bool = True,
         symbol_fills: bool = True,
-        exclude_text_categories: Sequence[str] = (),
+        polygon_labels: bool = True,
+        polygon_label_fields: Sequence[str] = ("QDUECC_eff", "QDUECC", "QDUECD"),
+        polygon_label_fontsize: float = 4.5,
+        exclude_text_categories: Sequence[str] = ("代号",),
         text_category_scales: Optional[Mapping[str, float]] = None,
         text_scale: float = 1.0,
         text_font_family: Any = None,
+        native_text_layout: bool = True,
+        font_zh_map: Optional[Mapping[int, Any]] = None,
+        font_en_map: Optional[Mapping[int, Any]] = None,
+        font_style_map: Optional[Mapping[int, Mapping[str, Any]]] = None,
     ) -> None:
         if scale <= 0:
             raise ValueError("scale must be positive")
+        if fill_library not in {"auto", "color", "pcolor"}:
+            raise ValueError("fill_library must be 'auto', 'color' or 'pcolor'")
+        if fill_library == "pcolor" and libraries.pcolor is None:
+            raise ValueError("fill_library='pcolor' requires Pcolor.lib")
+        self.fill_library = fill_library
         if map_units_per_mm is not None and map_units_per_mm <= 0:
             raise ValueError("map_units_per_mm must be positive")
         if tile_pixels < 4:
@@ -176,6 +244,11 @@ class GraphicRenderer:
         self.color_overrides = {
             int(no): self._validate_rgb(rgb) for no, rgb in (color_overrides or {}).items()
         }
+        self.unit_color_overrides = {
+            self._normalise_unit_code(code): self._validate_rgb(rgb)
+            for code, rgb in (unit_color_overrides or {}).items()
+        }
+        self.unit_code_fields = tuple(unit_code_fields)
         self.fallback_color = self._validate_rgb(fallback_color)
         self.line_min_pt = float(line_min_pt)
         self.dot_min_pt = float(dot_min_pt)
@@ -186,11 +259,22 @@ class GraphicRenderer:
         self.max_pattern_tiles = int(max_pattern_tiles)
         self.fallback_to_solid = bool(fallback_to_solid)
         self.symbol_fills = bool(symbol_fills)
+        self.polygon_labels = bool(polygon_labels)
+        self.polygon_label_fields = tuple(polygon_label_fields)
+        self.polygon_label_fontsize = float(polygon_label_fontsize)
+        if self.polygon_label_fontsize <= 0:
+            raise ValueError("polygon_label_fontsize must be positive")
         self.exclude_text_categories = {str(x).strip() for x in exclude_text_categories}
         self.text_category_scales = dict(text_category_scales or {})
         self.text_scale = float(text_scale)
         self.text_font_family = text_font_family
-        self._rhythm_cache: Dict[int, Optional[dict]] = {}
+        self.native_text_layout = bool(native_text_layout)
+        self.font_zh_map = {int(code): value for code, value in (font_zh_map or {}).items()}
+        self.font_en_map = {int(code): value for code, value in (font_en_map or {}).items()}
+        self.font_style_map = {
+            int(code): dict(options) for code, options in (font_style_map or {}).items()
+        }
+        self._rhythm_cache: Dict[Tuple[int, int], Optional[dict]] = {}
         self._symbol_cache: Dict[int, Any] = {}
         self._tile_cache: Dict[int, Optional[np.ndarray]] = {}
 
@@ -450,15 +534,49 @@ class GraphicRenderer:
     def _bump(report: Dict[str, Any], key: str, amount: int = 1) -> None:
         report[key] = int(report.get(key, 0)) + amount
 
+    @staticmethod
+    def _normalise_unit_code(value: Any) -> str:
+        """Remove MapGIS script controls without changing unit letters/digits."""
+        text = GraphicRenderer._text(value)
+        text = text.replace("#-", "↓").replace("#+", "↑").replace("#=", "→")
+        return re.sub(r"[\x00-\x03\s→↓↑]", "", text)
+
+    def _unit_code(self, row: Any) -> str:
+        for field in self.unit_code_fields:
+            code = self._normalise_unit_code(row.get(field, ""))
+            if code:
+                return code
+        return ""
+
+    def _unit_label(self, row: Any) -> str:
+        for field in self.polygon_label_fields:
+            label = self._text(row.get(field, "")).strip()
+            if label:
+                return label
+        return ""
+
     def _color(
-        self, number: Any, report: Dict[str, Any], *, fallback: bool = True
+        self,
+        number: Any,
+        report: Dict[str, Any],
+        *,
+        fallback: bool = True,
+        role: str = "feature",
     ) -> Optional[RGB]:
         no = self._int(number)
-        if no in self.color_overrides:
+        # Installation-specific comparison overrides apply only to WP fills.
+        # Native WP fills use Pcolor in auto mode; every other role uses
+        # Colorlib and never inherits a fill override.
+        if role == "fill" and no in self.color_overrides:
             key = str(no)
             report["overridden_colors"][key] = report["overridden_colors"].get(key, 0) + 1
             return self.color_overrides[no]
-        rgb = self.libraries.color.rgb01(no)
+        use_pcolor = role == "fill" and (
+            self.fill_library == "pcolor"
+            or (self.fill_library == "auto" and self.libraries.pcolor is not None)
+        )
+        library = self.libraries.pcolor if use_pcolor else self.libraries.color
+        rgb = library.rgb01(no) if library is not None else None
         if rgb is not None:
             return tuple(rgb)  # type: ignore[return-value]
         key = str(no)
@@ -494,15 +612,50 @@ class GraphicRenderer:
             )
         return PathPatch(MplPath(vertices, codes), **kwargs)
 
+    def _draw_polygon_label(
+        self, ax: Any, row: Any, geom: Any, report: Dict[str, Any]
+    ) -> None:
+        """Draw a complete unit code using the geosciml4china polygon scheme."""
+        if not self.polygon_labels:
+            return
+        raw_label = self._unit_label(row)
+        label = _annotation_to_mathtext(raw_label)
+        if not label:
+            return
+        point = geom.representative_point()
+        has_greek = any("Ͱ" <= char <= "Ͽ" for char in raw_label)
+        kwargs = {"fontfamily": "Times New Roman"} if has_greek else {}
+        ax.text(
+            point.x,
+            point.y,
+            label,
+            fontsize=self.polygon_label_fontsize,
+            ha="center",
+            va="center",
+            zorder=12,
+            bbox={"boxstyle": "round,pad=0.05", "fc": "white", "ec": "none", "alpha": 0.5},
+            **kwargs,
+        )
+        self._bump(report, "polygon_label")
+
     def _draw_wp(self, ax: Any, gdf: Any, report: Dict[str, Any]) -> None:
         unit = self._unit(gdf)
         for _, row in gdf.iterrows():
+            if self._int(row.get("class", 1), 1) == 0:
+                self._bump(report, "excluded_class")
+                continue
             polygons = list(self._iter_polygons(row.geometry))
             if not polygons:
                 continue
             self._bump(report, "drawn")
             report["holes"] = int(report.get("holes", 0)) + sum(len(p.interiors) for p in polygons)
-            rgb = self._color(row.get("fill_color"), report)
+            unit_code = self._unit_code(row)
+            rgb = self.unit_color_overrides.get(unit_code)
+            if rgb is not None:
+                counts = report.setdefault("unit_overrides", {})
+                counts[unit_code] = counts.get(unit_code, 0) + 1
+            else:
+                rgb = self._color(row.get("fill_color"), report, role="fill")
             for poly in polygons:
                 ax.add_patch(
                     self._polygon_patch(
@@ -513,6 +666,7 @@ class GraphicRenderer:
                         zorder=2,
                     )
                 )
+            self._draw_polygon_label(ax, row, row.geometry, report)
             pattern = self._int(row.get("pattern"))
             height = self._float(row.get("pattern_height"), 0.0)
             width = self._float(row.get("pattern_width"), 0.0)
@@ -623,6 +777,7 @@ class GraphicRenderer:
             "polylines": [],
             "dots": [],
             "fills": [],
+            "unknown_fills": 0,
         }
         for values in rhythm.get("lines", []):
             x0, x1 = values[0], values[1]
@@ -656,62 +811,121 @@ class GraphicRenderer:
         return out
 
     @staticmethod
-    def _payload_rhythm(style: Any) -> Optional[dict]:
+    def _payload_rhythm(style: Any, subline: int = 0) -> Optional[dict]:
+        """Build a rhythm from stored parameter geometry.
+
+        Non-solid sublines are alternative variants: consume the selected one
+        (zero-based) rather than merging variants. Multiple solid pen records
+        are genuine overlays and are all retained.
+        """
         if style is None or not getattr(style, "sublines", None):
             return None
+        sublines = style.sublines
+        if not all(item.is_solid for item in sublines):
+            if not 0 <= subline < len(sublines):
+                return None
+            sublines = [sublines[subline]]
         out = {
             "kind": "payload",
-            "period_mm": 1.0,
+            "period_mm": 0.0,
             "lines": [],
             "polylines": [],
             "dots": [],
             "fills": [],
+            "unknown_fills": 0,
         }
-        for kind, data in style.sublines[0].payload_geometry():
-            if kind == "segment":
-                x0, y0, x1, y1 = data
-                out["polylines"].append([(x0, y0), (x1, y1)])
-            elif kind == "polyline":
-                out["polylines"].append(list(data))
-            elif kind == "fill":
-                out["fills"].append(list(data))
-            elif kind == "dot":
-                x, y, radius, filled = data
-                if filled:
-                    out["dots"].append((x, y, radius))
-                else:
-                    out["polylines"].append(
-                        [
-                            (
-                                x + radius * math.cos(2 * math.pi * i / 24.0),
-                                y + radius * math.sin(2 * math.pi * i / 24.0),
-                            )
-                            for i in range(25)
-                        ]
-                    )
+        periods = []
+        for subline in sublines:
+            period = subline.period_mm
+            if period is not None and period > 0:
+                periods.append(period)
+            for kind, data in subline.parameter_geometry():
+                if kind == "gap":
+                    continue
+                if kind == "segment":
+                    x0, y0, x1, y1 = data
+                    out["polylines"].append([(x0, y0), (x1, y1)])
+                elif kind == "polyline":
+                    out["polylines"].append(list(data))
+                elif kind == "fill":
+                    out["fills"].append(list(data))
+                elif kind == "dot":
+                    x, y, radius, filled = data
+                    if filled is True:
+                        out["dots"].append((x, y, radius))
+                    else:
+                        # Unknown fill remains unfilled; no radius/unit/style
+                        # adjudication is substituted for missing evidence.
+                        out["unknown_fills"] += 1
+                        out["polylines"].append(
+                            [
+                                (
+                                    x + radius * math.cos(2 * math.pi * i / 24.0),
+                                    y + radius * math.sin(2 * math.pi * i / 24.0),
+                                )
+                                for i in range(25)
+                            ]
+                        )
         if not out["polylines"] and not out["dots"] and not out["fills"]:
             return None
+        xs = [p[0] for line in out["polylines"] for p in line]
+        xs.extend(p[0] for ring in out["fills"] for p in ring)
+        xs.extend(dot[0] for dot in out["dots"])
+        # Offset describes layout position, while payload endpoints describe
+        # the actual extent. Both are required for a non-gapped base segment.
+        out["period_mm"] = max(periods + ([max(xs)] if xs else [1.0]))
+        if out["period_mm"] <= 0:
+            out["period_mm"] = 1.0
         return out
 
-    def _rhythm(self, number: int) -> Optional[dict]:
-        if number in self._rhythm_cache:
-            return self._rhythm_cache[number]
+    def _rhythm(self, number: int, aux: int = 0) -> Optional[dict]:
+        """Resolve verified variants first, then structural library geometry."""
+        key = (number, aux)
+        if key in self._rhythm_cache:
+            return self._rhythm_cache[key]
         style = self.libraries.linesty.decode(number)
-        rhythm = feature_rhythm(style, 0) if style is not None else None
-        if rhythm is not None:
-            result = self._normalise_rhythm(rhythm)
-        else:
-            result = self._payload_rhythm(style)
-        self._rhythm_cache[number] = result
+        result = None
+        if style is not None and getattr(style, "sublines", None):
+            if style.no in _RHYTHM_SUPPORTED_NOS:
+                # Adjudicated variants have already been verified against
+                # MapGIS output. Unsupported aux variants stay unresolved
+                # rather than silently falling back to a different shape.
+                rhythm = feature_rhythm(style, aux)
+                if rhythm is not None:
+                    result = self._normalise_rhythm(rhythm)
+            elif len(style.sublines) == 1 and style.sublines[0].is_solid:
+                result = self._normalise_rhythm(
+                    {"kind": "solid_pen", "lines": [], "period_mm": 1.0}
+                )
+            else:
+                variant = (
+                    _aux_selects_subline(style, aux)
+                    and not all(item.is_solid for item in style.sublines)
+                )
+                native = None if variant else style.rhythm()
+                if native and native.get("segments"):
+                    result = self._normalise_rhythm(
+                        {
+                            "kind": "inline_dash",
+                            "lines": native["segments"],
+                            "period_mm": native["period_mm"],
+                        }
+                    )
+                else:
+                    result = self._payload_rhythm(style, aux if variant else 0)
+        self._rhythm_cache[key] = result
         return result
 
     def _draw_wl(self, ax: Any, gdf: Any, report: Dict[str, Any]) -> None:
         unit = self._unit(gdf)
         transform = ax.transData
-        points_per_unit = abs(
+        pixels_per_unit = abs(
             transform.transform((1.0, 0.0))[0] - transform.transform((0.0, 0.0))[0]
         )
-        points_per_unit = max(points_per_unit, 1e-9)
+        pixels_per_unit = max(pixels_per_unit, 1e-9)
+        # transData yields display pixels, while Matplotlib line widths and
+        # scatter areas use typographic points (1/72 inch).
+        points_per_unit = pixels_per_unit * 72.0 / ax.figure.dpi
         buffer = _StampBuffer()
         for _, row in gdf.iterrows():
             lines = list(self._iter_lines(row.geometry))
@@ -725,7 +939,9 @@ class GraphicRenderer:
             aux = self._int(row.get("aux_linetype"))
             xc = self._float(row.get("x_coef"), 1.0) or 1.0
             yc = self._float(row.get("y_coef"), 1.0) or 1.0
-            rhythm = self._rhythm(linetype)
+            style = self.libraries.linesty.decode(linetype)
+            independent_aux = bool(aux) and not _aux_selects_subline(style, aux)
+            rhythm = self._rhythm(linetype, aux)
             for line in lines:
                 points = np.asarray(line.coords, dtype=float)
                 self._draw_wl_line(
@@ -741,9 +957,8 @@ class GraphicRenderer:
                     buffer,
                     report,
                     prefix="",
-                    main=True,
                 )
-                if aux:
+                if independent_aux:
                     aux_rhythm = self._rhythm(aux)
                     aux_number = self._int(row.get("aux_color"))
                     aux_color = self._color(aux_number, report) if aux_number else color
@@ -760,7 +975,6 @@ class GraphicRenderer:
                         buffer,
                         report,
                         prefix="aux_",
-                        main=False,
                     )
         self._flush_stamps(ax, buffer, points_per_unit)
 
@@ -779,7 +993,6 @@ class GraphicRenderer:
         report: Dict[str, Any],
         *,
         prefix: str,
-        main: bool,
     ) -> None:
         if len(points) < 2:
             return
@@ -807,8 +1020,13 @@ class GraphicRenderer:
             )
             return
         self._bump(report, prefix + "pattern")
-        if main and rhythm["kind"] == "raised_lines":
-            self._draw_raised_parallel(ax, points, rhythm, color, yc, unit, line_width)
+        unknown_fills = int(rhythm.get("unknown_fills", 0))
+        if unknown_fills:
+            self._bump(report, prefix + "unknown_fill", unknown_fills)
+        if rhythm["kind"] == "raised_lines":
+            self._draw_raised_parallel(
+                ax, points, rhythm, color, xc, yc, unit, line_width
+            )
         else:
             self._stamp_along(
                 points,
@@ -828,35 +1046,66 @@ class GraphicRenderer:
         points: np.ndarray,
         rhythm: dict,
         color: RGB,
+        xc: float,
         yc: float,
         unit: float,
         line_width: float,
     ) -> None:
-        from shapely.geometry import LineString
+        """Draw raised-line variants using library lengths on the source curve.
 
-        # The base line is the exact original coordinate sequence: no smoothing,
-        # simplification, re-sampling or endpoint extrapolation.
-        ax.plot(
-            points[:, 0], points[:, 1], color=color, lw=line_width, solid_capstyle="butt", zorder=4
-        )
-        raised = next(
-            (float(v[2]) for v in rhythm.get("lines", []) if len(v) > 2 and v[2] != 0.0), 0.1
-        )
-        offset = raised * yc * unit
-        if offset == 0.0:
+        Unlike a screen-space dash pattern, every interval here is a paper-mm
+        interval from ``LINESTY.lib``. Base-chainage interpolation preserves the
+        original vertices; offset curves are used only for non-zero library y
+        levels, with endpoints mapped back from base chainage.
+        """
+        from shapely.geometry import LineString
+        from shapely.ops import substring
+
+        base = LineString(points)
+        total = base.length
+        period = float(rhythm["period_mm"]) * xc * unit
+        if total <= 1e-12 or period <= 0:
             return
-        curve = LineString(points).offset_curve(offset)
-        for part in self._iter_lines(curve):
-            xy = np.asarray(part.coords)
-            ax.plot(
-                xy[:, 0],
-                xy[:, 1],
-                color=color,
-                lw=line_width,
-                linestyle=(0, (3, 2)),
-                dash_capstyle="butt",
-                zorder=4,
-            )
+        curves = {}
+        for values in rhythm.get("lines", []):
+            if len(values) < 2:
+                continue
+            x0, x1 = float(values[0]), float(values[1])
+            y = float(values[2]) if len(values) > 2 else 0.0
+            start = x0 * xc * unit
+            end = x1 * xc * unit
+            if start == end:
+                continue
+            offset = y * yc * unit
+            if offset not in curves:
+                curves[offset] = base if offset == 0.0 else base.offset_curve(offset)
+            curve = curves[offset]
+            if curve.is_empty:
+                continue
+            first = math.floor(-start / period)
+            last = math.ceil((total - start) / period)
+            for cycle in range(first, last + 1):
+                a = start + cycle * period
+                b = end + cycle * period
+                lo = max(0.0, min(a, b))
+                hi = min(total, max(a, b))
+                if hi <= lo:
+                    continue
+                if offset == 0.0:
+                    part = substring(base, lo, hi)
+                else:
+                    # Pattern phase is measured on the original line, not on
+                    # the longer/shorter offset curve.
+                    c0 = curve.project(base.interpolate(lo))
+                    c1 = curve.project(base.interpolate(hi))
+                    part = substring(curve, min(c0, c1), max(c0, c1))
+                for line in self._iter_lines(part):
+                    xy = np.asarray(line.coords)
+                    if len(xy) >= 2:
+                        ax.plot(
+                            xy[:, 0], xy[:, 1], color=color, lw=line_width,
+                            solid_capstyle="butt", zorder=4,
+                        )
 
     def _stamp_along(
         self,
@@ -893,6 +1142,8 @@ class GraphicRenderer:
             ty = delta[indices, 1] / safe_lengths
             return bx, by, tx, ty
 
+        offset_curves = {}
+        base = None
         for polyline in rhythm["polylines"]:
             if len(polyline) < 2:
                 continue
@@ -901,8 +1152,78 @@ class GraphicRenderer:
             for i in range(len(px) - 1):
                 s0 = cycles * period + px[i]
                 s1 = cycles * period + px[i + 1]
-                valid = (np.maximum(s0, s1) > 0.0) & (np.minimum(s0, s1) < total)
+                if px[i] == px[i + 1]:
+                    # A vertical tick has no longitudinal length. Keep its
+                    # origin instance, but do not duplicate it at a closed
+                    # line's end seam.
+                    valid = (s0 >= 0.0) & (s0 < total)
+                else:
+                    valid = (np.maximum(s0, s1) > 0.0) & (np.minimum(s0, s1) < total)
                 if not np.any(valid):
+                    continue
+                if px[i] != px[i + 1] and py[i] == 0.0 and py[i + 1] == 0.0:
+                    # Zero-offset strokes (including the 38|2 solid baseline)
+                    # must follow every source vertex, not become straight
+                    # chords between rhythm endpoints.
+                    for d0, d1 in zip(s0[valid], s1[valid]):
+                        lo = max(0.0, min(d0, d1))
+                        hi = min(total, max(d0, d1))
+                        if hi <= lo:
+                            continue
+                        bx0, by0, _, _ = anchor(np.asarray([lo]))
+                        bx1, by1, _, _ = anchor(np.asarray([hi]))
+                        start = np.asarray([bx0[0], by0[0]])
+                        end = np.asarray([bx1[0], by1[0]])
+                        interior = points[(cumulative > lo) & (cumulative < hi)]
+                        xy = np.concatenate(([start], interior, [end]), axis=0)
+                        if d0 > d1:
+                            xy = xy[::-1]
+                        segments = np.stack((xy[:-1], xy[1:]), axis=1)
+                        segments = segments[np.any(segments[:, 0] != segments[:, 1], axis=1)]
+                        if not len(segments):
+                            continue
+                        buffer.segments.append(segments)
+                        count = len(segments)
+                        buffer.segment_colors.extend([color] * count)
+                        buffer.segment_widths.extend([line_width] * count)
+                    continue
+                if px[i] != px[i + 1] and py[i] == py[i + 1]:
+                    # Constant-offset parallel strokes follow the complete
+                    # offset curve too; only zero-offset lines use raw points.
+                    from shapely.geometry import LineString
+                    from shapely.ops import substring
+
+                    if base is None:
+                        base = LineString(points)
+                    offset = float(py[i])
+                    if offset not in offset_curves:
+                        offset_curves[offset] = base.offset_curve(offset)
+                    curve = offset_curves[offset]
+                    if not curve.is_empty:
+                        for d0, d1 in zip(s0[valid], s1[valid]):
+                            lo = max(0.0, min(d0, d1))
+                            hi = min(total, max(d0, d1))
+                            if hi <= lo:
+                                continue
+                            c0 = curve.project(base.interpolate(lo))
+                            c1 = curve.project(base.interpolate(hi))
+                            part = substring(curve, min(c0, c1), max(c0, c1))
+                            for line in self._iter_lines(part):
+                                xy = np.asarray(line.coords)
+                                if d0 > d1:
+                                    xy = xy[::-1]
+                                if len(xy) < 2:
+                                    continue
+                                segments = np.stack((xy[:-1], xy[1:]), axis=1)
+                                segments = segments[
+                                    np.any(segments[:, 0] != segments[:, 1], axis=1)
+                                ]
+                                if not len(segments):
+                                    continue
+                                buffer.segments.append(segments)
+                                count = len(segments)
+                                buffer.segment_colors.extend([color] * count)
+                                buffer.segment_widths.extend([line_width] * count)
                     continue
                 bx0, by0, tx0, ty0 = anchor(s0[valid])
                 bx1, by1, tx1, ty1 = anchor(s1[valid])
@@ -1018,12 +1339,18 @@ class GraphicRenderer:
         stroke_rgb: RGB,
         unit: float,
         report: Dict[str, Any],
+        pen_width_mm: Optional[float] = None,
     ) -> bool:
         from matplotlib.patches import Polygon
 
         symbol = self._symbol(number)
         if symbol is None:
             return False
+        line_width_pt = (
+            self.symbol_line_width_pt
+            if pen_width_mm is None or pen_width_mm <= 0
+            else pen_width_mm * MM_TO_PT
+        )
         ca = math.cos(math.radians(angle))
         sa = math.sin(math.radians(angle))
         sx, sy = width_mm * unit, height_mm * unit
@@ -1114,11 +1441,132 @@ class GraphicRenderer:
                     [p[0] for p in transformed],
                     [p[1] for p in transformed],
                     color=stroke_rgb,
-                    lw=self.symbol_line_width_pt,
+                    lw=line_width_pt,
                     solid_capstyle="round",
                     zorder=5,
                 )
         return True
+
+    def _font_kwargs(self, row: Any, char: str, report: Dict[str, Any]) -> Dict[str, Any]:
+        """Resolve optional native font-number maps for one character."""
+        family = self.text_font_family
+        unknown = report.setdefault("unknown_fonts", {})
+        if ord(char) < 128 and self.font_en_map:
+            code = self._int(row.get("font_en"))
+            if code in self.font_en_map:
+                family = self.font_en_map[code]
+            else:
+                key = f"font_en:{code}"
+                unknown[key] = unknown.get(key, 0) + 1
+        elif self.font_zh_map:
+            code = self._int(row.get("font_zh"))
+            if code in self.font_zh_map:
+                family = self.font_zh_map[code]
+            else:
+                key = f"font_zh:{code}"
+                unknown[key] = unknown.get(key, 0) + 1
+        kwargs: Dict[str, Any] = {"fontfamily": family}
+        if self.font_style_map:
+            code = self._int(row.get("font_style"))
+            options = self.font_style_map.get(code)
+            if options is None:
+                key = f"font_style:{code}"
+                unknown[key] = unknown.get(key, 0) + 1
+            else:
+                kwargs.update(options)
+        return kwargs
+
+    @staticmethod
+    def _annotation_tokens(raw: str) -> List[Tuple[str, str]]:
+        """Split MapGIS annotation controls into per-character display tokens."""
+        text = str(raw)
+        for char in ("\x00", "\x01", "\x02", "\x03", " "):
+            text = text.replace(char, "")
+        text = text.replace("#-", "↓").replace("#+", "↑").replace("#=", "→").strip()
+        tokens: List[Tuple[str, str]] = []
+        mode = "normal"
+        for char in text:
+            if char in "→↓↑":
+                mode = {"→": "normal", "↓": "sub", "↑": "sup"}[char]
+            else:
+                tokens.append((char, mode))
+        return tokens
+
+    def _draw_annotation(
+        self, ax: Any, row: Any, point: Any, rgb: RGB, unit: float, report: Dict[str, Any]
+    ) -> None:
+        raw = self._text(row.get("CHFCED", ""))
+        if not raw.strip():
+            self._bump(report, "text_skipped")
+            return
+        height = self._float(row.get("height"), 2.0)
+        category = self._text(row.get("CHFCEC", "")).strip()
+        scale = self.text_scale * self._float(
+            self.text_category_scales.get(category), 1.0
+        )
+        base_size = max(height * MM_TO_PT * scale, 0.8)
+        angle = self._float(row.get("angle"), 0.0)
+        width = self._float(row.get("width"), height)
+        spacing = self._float(row.get("spacing"), 0.0)
+        advance = width + spacing
+        tokens = self._annotation_tokens(raw)
+        if self.native_text_layout and advance > 0 and tokens and "\n" not in raw:
+            ca = math.cos(math.radians(angle))
+            sa = math.sin(math.radians(angle))
+            has_controls = any(mark in raw for mark in ("#-", "#+", "#=", "→", "↓", "↑"))
+            for index, (char, mode) in enumerate(tokens):
+                # Script size/baseline is a display approximation; the stored
+                # character advance itself is used without an inferred factor.
+                offset = (0.0 if mode == "normal" else
+                          (-0.35 if mode == "sub" else 0.5) * height * unit)
+                x = point.x + index * advance * unit * ca - offset * sa
+                y = point.y + index * advance * unit * sa + offset * ca
+                content = _GREEK_MATHTEXT.get(char, char) if has_controls else char
+                if has_controls:
+                    content = "$\\mathrm{" + content + "}$"
+                ax.text(
+                    x,
+                    y,
+                    content,
+                    fontsize=max(base_size * (0.7 if mode != "normal" else 1.0), 0.6),
+                    color=rgb,
+                    ha="left",
+                    va="baseline",
+                    rotation=angle,
+                    rotation_mode="anchor",
+                    zorder=6,
+                    **self._font_kwargs(row, char, report),
+                )
+            self._bump(report, "text")
+            self._bump(report, "spaced_text")
+            if spacing < 0:
+                self._bump(report, "compressed_text")
+            if any(mode != "normal" for _, mode in tokens):
+                self._bump(report, "script_text")
+            self._bump(report, "drawn")
+            return
+
+        if self.native_text_layout and advance <= 0:
+            self._bump(report, "invalid_spacing")
+        label = _annotation_to_mathtext(raw)
+        if not label:
+            self._bump(report, "text_skipped")
+            return
+        ax.text(
+            point.x,
+            point.y,
+            label,
+            fontsize=base_size,
+            color=rgb,
+            ha="left",
+            va="baseline",
+            rotation=angle,
+            rotation_mode="anchor",
+            zorder=6,
+            **self._font_kwargs(row, raw[:1] or " ", report),
+        )
+        self._bump(report, "text")
+        self._bump(report, "drawn")
 
     def _draw_wt(self, ax: Any, gdf: Any, report: Dict[str, Any]) -> None:
         unit = self._unit(gdf)
@@ -1144,36 +1592,13 @@ class GraphicRenderer:
                         rgb,
                         unit,
                         report,
+                        pen_width_mm=self._float(row.get("pen_width"), 0.0),
                     )
                     self._bump(report, "symbols" if ok else "symbols_unresolved")
                     if ok:
                         self._bump(report, "drawn")
                 else:
-                    raw = self._text(row.get("CHFCED", ""))
-                    label = _annotation_to_mathtext(raw)
-                    if not label:
-                        self._bump(report, "text_skipped")
-                        continue
-                    height = self._float(row.get("height"), 2.0)
-                    scale = self.text_scale * self._float(
-                        self.text_category_scales.get(category), 1.0
-                    )
-                    font_size = max(height * MM_TO_PT * scale, 0.8)
-                    ax.text(
-                        point.x,
-                        point.y,
-                        label,
-                        fontsize=font_size,
-                        color=rgb,
-                        ha="left",
-                        va="baseline",
-                        rotation=self._float(row.get("angle"), 0.0),
-                        rotation_mode="anchor",
-                        fontfamily=self.text_font_family,
-                        zorder=6,
-                    )
-                    self._bump(report, "text")
-                    self._bump(report, "drawn")
+                    self._draw_annotation(ax, row, point, rgb, unit, report)
 
 
 _GREEK_MATHTEXT = {

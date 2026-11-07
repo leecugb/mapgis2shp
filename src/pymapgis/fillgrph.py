@@ -35,7 +35,7 @@ import math
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 _U16 = struct.Struct("<H")
 _U32 = struct.Struct("<I")
@@ -80,19 +80,29 @@ class FillgrphLib:
             struct.unpack_from("<IH", self.data, 6 + i * 6)
             for i in range(self.count)
         ]
+        # Precompute record ends once. The old record_bounds scanned all
+        # following slots on every decode (O(N) per lookup, O(N²) for a full
+        # library census). Mapping by offset also preserves the original
+        # "next greater offset" rule for non-monotonic or duplicate entries.
+        offsets = sorted({off for off, _ in self.entries if off > 0})
+        end_by_offset = {
+            off: offsets[i + 1] if i + 1 < len(offsets) else len(self.data)
+            for i, off in enumerate(offsets)
+        }
+        self._record_ends: Dict[int, int] = {
+            i: end_by_offset[off]
+            for i, (off, _) in enumerate(self.entries) if off > 0
+        }
 
     def record_bounds(self, no: int) -> Tuple[int, int]:
-        """no = 1-based 图案号；返回记录字节区间。"""
+        """no = 1-based 图案号；返回记录字节区间（O(1) 查询）。"""
         i = no - 1
         if not (0 <= i < self.count):
             raise IndexError(f"pattern {no} out of range")
         off = self.entries[i][0]
         if off == 0:
             raise IndexError(f"pattern {no} is an empty slot")
-        for k in range(i + 1, self.count):
-            if self.entries[k][0] > off:
-                return off, self.entries[k][0]
-        return off, len(self.data)
+        return off, self._record_ends[i]
 
     def decode(self, no: int) -> Optional[FillPattern]:
         """解码图案 no（1-based）。
@@ -127,15 +137,29 @@ class FillgrphLib:
                 strokes.append(FillStroke(kind=kind, width=width, points=pts))
                 raw.extend(pts)
                 acc += counts[i]
-            # points = 全记录坐标精确去重（首现序；2026-10-19 F1 审计：
-            # 旧 0.003 容差会摧毁密集曲线——367 图案实证，改逐位精确）
-            pts: List[Tuple[float, float]] = []
-            for p in raw:
-                if p not in pts:
-                    pts.append(p)
+            # points = 全记录坐标按 f32 位型精确去重（首现序）。
+            # 用位型键 + 集合替代逐点线性包含检查，O(n) 且保留 ±0 差异。
+            pts = _dedup_points(raw)
             return FillPattern(no=no, grid=grid, unit=unit,
                                strokes=strokes, points=pts, raw_points=raw)
         return None
+
+
+def _point_bits(point: Tuple[float, float]) -> bytes:
+    """Return the original f32 pair's comparison key (keeps -0.0 distinct)."""
+    return _PAIR.pack(point[0], point[1])
+
+
+def _dedup_points(points: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+    """Deduplicate points by f32 bit pattern in O(n), preserving first order."""
+    out: List[Tuple[float, float]] = []
+    seen = set()
+    for point in points:
+        key = _point_bits(point)
+        if key not in seen:
+            seen.add(key)
+            out.append(point)
+    return out
 
 
 def _merge_close(
@@ -150,9 +174,12 @@ def _merge_close(
     pattern_geometry 按可视性剔除并计数（"dropped"），不在此吞并。
     """
     out: List[Tuple[float, float]] = []
-    for x, y in pts:
-        if not out or (x != out[-1][0] or y != out[-1][1]):
-            out.append((x, y))
+    previous = None
+    for point in pts:
+        key = _point_bits(point)
+        if key != previous:
+            out.append(point)
+            previous = key
     return out
 
 

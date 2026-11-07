@@ -10,9 +10,10 @@ from pathlib import Path
 import pytest
 
 from pymapgis import Reader, Writer
+from pymapgis.testing import fixture_path
 
-FIXTURE_DIR = Path(__file__).parent / "fixtures" / "mapgis"
-MANIFEST_PATH = FIXTURE_DIR.parent / "fixture_manifest.json"
+FIXTURE_DIR = fixture_path("mapgis")
+MANIFEST_PATH = fixture_path("fixture_manifest.json")
 EXPECTED = {
     "synthetic_points.wt": ("POINT", [73.5, 39.5, 74.0, 39.7], 3),
     "synthetic_lines.wl": ("LINE", [73.4, 39.4, 74.0, 39.8], 3),

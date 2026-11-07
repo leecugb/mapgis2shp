@@ -1,6 +1,6 @@
-# Public MapGIS regression fixtures
+# MapGIS regression fixtures
 
-This directory contains small synthetic MapGIS binaries and the code used to generate them. They allow a fresh source checkout to exercise actual `.wt`, `.wl`, and `.wp` input files without downloading restricted geological-survey data.
+This directory contains small synthetic MapGIS binaries and an explicitly integrated real JWD/SLIB dataset. The synthetic files support basic tests without external data; the real dataset supports self-contained graphic-library rendering regression.
 
 ## Contents
 
@@ -39,15 +39,26 @@ python -m pytest -q tests/test_public_fixtures.py
 
 Regeneration rewrites the three binaries and their manifest. Header timestamps or other native metadata can change binary checksums even when the semantic content is unchanged. Review semantic differences and the updated checksums together.
 
-## Optional proprietary Colorlib test
+## Bundled JWD and SLIB integration dataset
 
-`Colorlib.lib` is not bundled. The two ColorLib tests skip unless a readable library is explicitly supplied:
+The project owner explicitly supplied twelve real JWD vectors and five matching SLIB libraries for integration testing:
+
+- `jwd/`: 5 WP (including two `.WP~` backups), 5 WL and 2 WT files, 7,094 features, 7,092,289 bytes.
+- `slib/`: `Subgraph.lib`, `LINESTY.lib`, `Fillgrph.lib`, `Colorlib.lib` and `Pcolor.lib`, 12,289,478 bytes.
+- `jwd_slib_manifest.json`: provenance, roles, byte counts and SHA-256 for every file. Total dataset size: 19,381,767 bytes.
+
+These files are bundled by explicit project-owner request for regression testing. They are **not** part of the synthetic-fixture Apache-2.0 dedication, and no additional licence or public-domain dedication is inferred. Both the source archive and wheel include them. Source tests use `tests/fixtures/`; wheel installations expose the same files as `pymapgis/testing/fixtures/`, with `pymapgis.testing.fixture_path()` resolving the correct location automatically.
+
+Run the real integration tests without any absolute-path configuration:
 
 ```bash
-PYMAPGIS_COLORLIB=/path/to/Colorlib.lib python -m pytest -q tests/test_pure.py -k ColorLib
+python -m pytest -q tests/test_graphic_real_jwd.py
+python -m pytest -q tests/test_pure.py -k "ColorLib or PcolorLib"
 ```
 
-An explicitly supplied path that is invalid should be treated as a failed test, not silently skipped.
+`PYMAPGIS_JWD` and `PYMAPGIS_SLIB` can override the fixture directories for another installation. `PYMAPGIS_COLORLIB` and `PYMAPGIS_PCOLOR` override individual colour libraries. An explicitly supplied invalid path, a missing bundled file or a checksum mismatch fails the test instead of silently skipping it.
+
+The tests verify Reader and graphic-library behaviour, report invariants and PNG/PDF generation. They do not replace native MapGIS display, editing, save/reopen or visual acceptance.
 
 ## Fixture licence
 

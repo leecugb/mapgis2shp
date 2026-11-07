@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "integrated_at": "2026-11-07",
+  "description": "Owner-supplied real JWD vectors and SLIB libraries for self-contained integration tests",
+  "source": {
+    "vectors": "E:/AFH0.3米数据/JWD",
+    "libraries": "D:/SLIB/SLIB"
+  },
+  "fixture_roots": {
+    "vectors": "tests/fixtures/jwd",
+    "libraries": "tests/fixtures/slib"
+  },
+  "environment_overrides": {
+    "vectors": "PYMAPGIS_JWD",
+    "libraries": "PYMAPGIS_SLIB",
+    "colorlib": "PYMAPGIS_COLORLIB",
+    "pcolor": "PYMAPGIS_PCOLOR"
+  },
+  "vectors": {
+    "LDLYAAE002.WP~": {
+      "kind": "wp",
+      "role": "hydrology polygons",
+      "bytes": 319715,
+      "sha256": "f711d678df6f2c2465dee29b3b7724ad34896c9d432915d828acfb0821a5a5ba"
+    },
+    "LDZOFBB001.WP": {
+      "kind": "wp",
+      "role": "sedimentary formation polygons",
+      "bytes": 2166438,
+      "sha256": "8d80883847761968957ffd294247214623210e86a3b460449f9dcb29bec0f099"
+    },
+    "LDZOFBB002.WP": {
+      "kind": "wp",
+      "role": "volcanic polygons",
+      "bytes": 93953,
+      "sha256": "26b70111b8ed1328d59a5f8c5974cf44209892a5d645e28f0ed474ffe967aefa"
+    },
+    "LDZOFBB003.WP~": {
+      "kind": "wp",
+      "role": "intrusive polygons",
+      "bytes": 194676,
+      "sha256": "76e482ff7c5e9329eb7064a97aac784180b90b0c885dcb9ac2e097b960bf94a9"
+    },
+    "LDZOFBB004.WP": {
+      "kind": "wp",
+      "role": "metamorphic formation polygons",
+      "bytes": 330259,
+      "sha256": "6bb1518fce30603dcad9fa479ae22ba363cce4828e44918a4ed59ab0efce89ce"
+    },
+    "LDLYAAE001.WL": {
+      "kind": "wl",
+      "role": "hydrology lines",
+      "bytes": 833885,
+      "sha256": "827e7d8acfa0b3c4458b37f2f04a6311bd42fd3d9d11e8671ec5ed668d90b014"
+    },
+    "LDZOFBA002.WL": {
+      "kind": "wl",
+      "role": "geological boundaries",
+      "bytes": 2166050,
+      "sha256": "bdc156aa842f373aa48a390d21c7a23ab88b9c4a5e4f871b00b1f91a3692b045"
+    },
+    "LDZOFBA003.WL": {
+      "kind": "wl",
+      "role": "faults",
+      "bytes": 444675,
+      "sha256": "8cd3c147e97d7fb0da39c09f2dd8b9e87f7a5b740111e37a8d79d4ee57dd68a6"
+    },
+    "LDZOFBA005.WL": {
+      "kind": "wl",
+      "role": "fold structures",
+      "bytes": 8547,
+      "sha256": "ef2bfc4d4c4a3ef5130f126bade4ea5782efe09e4b499b9d1ae4717bed6123e9"
+    },
+    "LDZOFBB098.WL": {
+      "kind": "wl",
+      "role": "fault annotation lines",
+      "bytes": 55097,
+      "sha256": "1a463e2317f89dde7bad13d1a0b64ff2edacd418acb1e499b6b293bf1fabd29c"
+    },
+    "LDZOFBA016.WT": {
+      "kind": "wt",
+      "role": "attitude symbols",
+      "bytes": 75185,
+      "sha256": "f57b0a88eda1e7ef66b7e313f5a8a6ab644299bad6bd481f61a5734c3c8c8e51"
+    },
+    "LDZOFBB099.WT": {
+      "kind": "wt",
+      "role": "geological labels and annotations",
+      "bytes": 403809,
+      "sha256": "8444cf8bab1ad60aee39fa5cc6405b4fb976c75575fa40eafa7ce064210deb09"
+    }
+  },
+  "libraries": {
+    "Subgraph.lib": {
+      "role": "WT point symbols",
+      "bytes": 9133990,
+      "sha256": "c1b5c81c48e42814e478d74d7a888f0e200c3901a6410a12db477c2cd99294ee"
+    },
+    "LINESTY.lib": {
+      "role": "WL line styles",
+      "bytes": 519050,
+      "sha256": "1f6c7462882ac83f25787e07f11f5860336d3e16c988ca62b607b397ae4f537f"
+    },
+    "Fillgrph.lib": {
+      "role": "WP fill patterns",
+      "bytes": 2501678,
+      "sha256": "6038d35e2c5d98f50dd7592b37d46cc579b628aa6db596715c2d81345a555171"
+    },
+    "Colorlib.lib": {
+      "role": "pattern/line/point colours",
+      "bytes": 3500,
+      "sha256": "ee7d841116835b2b01236c178a8d657d5e31733d2782c3673415451ee3eee6d4"
+    },
+    "Pcolor.lib": {
+      "role": "WP fill colours",
+      "bytes": 131260,
+      "sha256": "7911bc7ae16a72d2d19372ef710754bc24145b2ebb0234c874abb72776c84fd3"
+    }
+  },
+  "validation": {
+    "feature_count": 7094,
+    "layer_count": 12,
+    "library_count": 5,
+    "native_visual_acceptance": "not replaced by these regression fixtures"
+  },
+  "licence_note": "Bundled by explicit project-owner request for regression testing; no additional licence or public-domain dedication is inferred.",
+  "totals": {
+    "vector_bytes": 7092289,
+    "library_bytes": 12289478,
+    "bytes": 19381767
+  }
+}

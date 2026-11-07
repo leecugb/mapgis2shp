@@ -160,7 +160,7 @@ _CRS_SCALE_OFFSET = 143
 _CRS_CENTRAL_MERIDIAN_OFFSET = 151
 _CRS_STD_LAT_OFFSET = 175
 
-# Which of the 10 header sections holds the attribute table.
+# Which of the 16 physical header sections holds the attribute table.
 _ATTR_HEADER_INDEX = {
     "POINT": 2,
     "LINE": 2,
@@ -261,7 +261,11 @@ def _raw_dms_to_degrees(raw: float) -> float:
     and sign pitfalls of a string-based approach: it preserves fractional
     seconds (lost when formatting with ``:.0f``) and handles western
     longitudes (negative values) and short values without zero-padding.
+    Non-finite input returns NaN so the CRS caller can apply its normal
+    invalid-parameter fallback instead of raising during ``int()`` conversion.
     """
+    if not np.isfinite(raw):
+        return float("nan")
     sign = -1.0 if raw < 0 else 1.0
     a = abs(raw)
     # Split off the MMSS.sss tail; the remaining whole is DDD * 10000.
@@ -548,7 +552,8 @@ def _read_header_entries(
 
     Callers that only need the ten logical sections use the default; the
     physical table has 16 entries (entry 11 carries the per-polygon label-box
-    section), so polygon parsing requests all of them.
+    section), and the main parser reads all of them for raw-section
+    passthrough.
     """
     file_obj.seek(data_start)
     entries: List[Tuple[int, int]] = []
@@ -790,9 +795,9 @@ def _read_line_params(
     Each 57-byte line index record carries the line display parameters after
     the coordinate offset, in the official MapGIS order: the int16 style
     number at 22 (index into the MapGIS line-style library, e.g. 1 = plain
-    solid line), the int16 auxiliary style number at 24 (辅助线型号, the
-    second record overlaid per the "线型号-辅助线型号" pair), the int16
-    colour index at 26 (Colorlib, 1-based; pinned 2026-10-14: every feature
+    solid line), the uint8 auxiliary style number at 24 (辅助线型号) and a
+    separate uint8 auxiliary flag at 25 (0 = normal, 1 = special/residual),
+    the int16 colour index at 26 (Colorlib, 1-based; pinned 2026-10-14: every feature
     of LYGREBA001 carries the constant 194 = RGB(0,255,175), matching the
     user-adjudicated 青绿 of pair ("211","0"); across all 18 Kurgan line
     layers every @26 value lies in [1, 546], i.e. inside the 870-entry
@@ -880,7 +885,7 @@ def _read_polygon_params(
     - uint8  @5/@6/@7: 24 位面环索引在坐标 section 内的字节偏移
       （field5 低字节、field6 中字节、field7 高字节）
     - uint16 @9: 填充颜色（值域 2..1465；>870 为用户扩展色域）
-    - uint16 @12: 填充图案号（Fillgrph 图案库索引）
+    - uint16 @13: 填充图案号（Fillgrph 图案库索引）
     - float32 @17/@21: 图案高度/宽度（mm）
     - uint8  @23: 图案颜色
     - uint8  @30: 图层
@@ -1299,10 +1304,13 @@ class Reader:
     read_graphic_params : bool, optional
         Decode graphic parameters for any file type: point parameters for
         ``.wt`` (as above), line parameters for ``.wl`` (columns ``linetype``,
-        ``aux_linetype``, ``color``, ``width``, ``x_coef``, ``y_coef``,
-        exposed as :attr:`line_params`), and polygon parameters for ``.wp``
-        (columns ``fill_color``, ``pattern``, ``pattern_color`` from the
-        head_9 section, exposed as :attr:`polygon_params`). Style and colour
+        ``aux_linetype``, ``aux_flag``, ``color``, ``width``, ``x_coef``,
+        ``y_coef``, ``aux_color``, ``layer`` and ``transparent``, exposed as
+        :attr:`line_params`), and polygon parameters for ``.wp`` (columns
+        ``class``, ``fill_color``, ``pattern``, ``pattern_height``,
+        ``pattern_width``, ``pattern_color``, ``layer``, ``field5``,
+        ``field6`` and ``field7``, exposed as :attr:`polygon_params`). The
+        three field bytes form the 24-bit ring-index offset. Style and colour
         numbers reference the external MapGIS symbol/line-style/pattern
         libraries and are not self-contained. Default False.
 

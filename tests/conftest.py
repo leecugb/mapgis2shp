@@ -8,8 +8,10 @@ from typing import Any, Dict
 
 import pytest
 
+from pymapgis.testing import fixture_path
+
 DATA_DIR = Path(__file__).parent.parent
-PUBLIC_FIXTURE_DIR = Path(__file__).parent / "fixtures" / "mapgis"
+PUBLIC_FIXTURE_DIR = fixture_path("mapgis")
 
 
 def _glob_first(pattern: str, public_name: str) -> Path:

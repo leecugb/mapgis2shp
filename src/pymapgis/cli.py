@@ -24,9 +24,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="pymapgis",
         description=(
-            "Convert between MapGIS vector files (.wt, .wl, .wp) and common "
-            "GIS formats (.shp, .geojson, .gpkg, ...)."
+            "Read, convert and write MapGIS vectors (.wt, .wl, .wp), parse "
+            "the five graphic-library types, and render vectors from them."
         ),
+        epilog=(
+            "Additional interfaces:\n"
+            "  pymapgis lib LIB [--symbol N | --style N | --pattern N | --color N]\n"
+            "  Inspect Subgraph, LINESTY, Fillgrph, Colorlib and Pcolor libraries.\n"
+            "  Original-library rendering: use GraphicRenderer or render_graphic_map "
+            "from pymapgis (optional Matplotlib extra)."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "input",
@@ -109,36 +117,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 
 def _sniff_lib_kind(path: Path) -> str:
-    """Identify a MapGIS graphic library by name, then by magic.
-
-    LINESTY.lib / Fillgrph.lib start with ``[u32 count][u16 reserved=0]``;
-    Subgraph.lib starts with ``[u32 index_bytes][u32 first_offset>0]``.
-    """
+    """Identify a supported MapGIS graphic library by name and magic."""
     name = path.name.lower()
-    if "linesty" in name or "fillgrph" in name:
-        return "linesty"
-    if "subgraph" in name:
-        return "subgraph"
+    named = {
+        "linesty": "linesty",
+        "fillgrph": "fillgrph",
+        "subgraph": "subgraph",
+        "colorlib": "colorlib",
+        "pcolor": "pcolor",
+    }
+    for token, kind in named.items():
+        if token in name:
+            return kind
     with path.open("rb") as f:
-        head = f.read(8)
+        head = f.read(16)
+    if head.startswith(b"PCOLOR"):
+        return "pcolor"
+    if head.startswith(b"C.U.G"):
+        return "colorlib"
     if len(head) < 8:
         raise MapGISError("library file too short")
     return "linesty" if head[4] == 0 and head[5] == 0 else "subgraph"
 
 
 def _lib_main(argv: Sequence[str]) -> int:
-    """Inspect a MapGIS graphic library (Subgraph.lib / LINESTY.lib)."""
+    """Inspect any of the five supported MapGIS graphic libraries."""
     parser = argparse.ArgumentParser(
         prog="pymapgis lib",
         description=(
-            "Inspect MapGIS 6.x graphic libraries: Subgraph.lib (point-symbol "
-            "library) and LINESTY.lib (line-style library)."
+            "Inspect Subgraph.lib, LINESTY.lib, Fillgrph.lib, Colorlib.lib "
+            "or Pcolor.lib structures and selected records."
         ),
     )
     parser.add_argument("library", type=Path, help="Path to the library file")
     parser.add_argument(
         "--kind",
-        choices=["auto", "subgraph", "linesty"],
+        choices=["auto", "subgraph", "linesty", "fillgrph", "colorlib", "pcolor"],
         default="auto",
         help="Library kind (default: auto-detect from name/magic)",
     )
@@ -153,6 +167,24 @@ def _lib_main(argv: Sequence[str]) -> int:
         type=int,
         default=None,
         help="LINESTY.lib: decode line-style number NO (1-based, as in .wl records)",
+    )
+    parser.add_argument(
+        "--pattern",
+        type=int,
+        default=None,
+        help="Fillgrph.lib: decode fill-pattern number NO (1-based)",
+    )
+    parser.add_argument(
+        "--color",
+        type=int,
+        default=None,
+        help="Colorlib.lib / Pcolor.lib: decode colour number NO",
+    )
+    parser.add_argument(
+        "--channel-order",
+        choices=["KCMY", "YMCK"],
+        default="KCMY",
+        help="Colour channel model (default: KCMY)",
     )
     parser.add_argument(
         "--aux",
@@ -178,7 +210,13 @@ def _lib_main(argv: Sequence[str]) -> int:
     try:
         if kind == "subgraph":
             return _lib_subgraph(args)
-        return _lib_linesty(args)
+        if kind == "linesty":
+            return _lib_linesty(args)
+        if kind == "fillgrph":
+            return _lib_fillgrph(args)
+        if kind in {"colorlib", "pcolor"}:
+            return _lib_color(args, pcolor=kind == "pcolor")
+        raise MapGISError(f"unsupported library kind: {kind}")
     except MapGISError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -221,7 +259,6 @@ def _lib_linesty(args: argparse.Namespace) -> int:
         census,
         classify_form,
         compose_feature_style,
-        pair_semantics,
     )
 
     lib = LinestyLib(str(args.library))
@@ -243,9 +280,8 @@ def _lib_linesty(args: argparse.Namespace) -> int:
         print(f"error: style {args.style} empty or out of range",
               file=sys.stderr)
         return 1
-    main_style, aux_style = compose_feature_style(lib, args.style, args.aux)
+    _, aux_style = compose_feature_style(lib, args.style, args.aux)
     form, evidence = classify_form(style)
-    sem = pair_semantics(args.style, args.aux)
     print(f"style {args.style} (aux={args.aux}): {len(style.sublines)} sublines")
     for s in style.sublines:
         if s.is_solid:
@@ -257,8 +293,6 @@ def _lib_linesty(args: argparse.Namespace) -> int:
             print(f"  template subline: n={s.n} length={s.length} [{desc}]")
     print(f"form: {form}")
     print(f"evidence: {evidence}")
-    if sem:
-        print(f"pair semantics: {sem}")
     rhythm = style.rhythm()
     if rhythm:
         print(f"rhythm: pens={rhythm['pens']} segments={rhythm['segments']} "
@@ -266,4 +300,46 @@ def _lib_linesty(args: argparse.Namespace) -> int:
     if args.aux and aux_style is not None:
         print(f"aux style {args.aux}: {len(aux_style.sublines)} sublines "
               f"(overlaid per the 线型号-辅助线型号 rule)")
+    return 0
+
+
+def _lib_fillgrph(args: argparse.Namespace) -> int:
+    from pymapgis.fillgrph import FillgrphLib, pattern_geometry
+
+    lib = FillgrphLib(str(args.library))
+    print(f"{args.library.name}: {lib.count} records")
+    if args.pattern is None:
+        return 0
+    geometry = pattern_geometry(lib, args.pattern)
+    if geometry is None:
+        print(f"error: pattern {args.pattern} is empty or unsupported", file=sys.stderr)
+        return 1
+    print(
+        f"pattern {args.pattern}: "
+        f"fill_polygons={len(geometry['fill_polygons'])}, "
+        f"polylines={len(geometry['polylines'])}, "
+        f"circles={len(geometry['circles'])}, arcs={len(geometry['arcs'])}"
+    )
+    return 0
+
+
+def _lib_color(args: argparse.Namespace, *, pcolor: bool) -> int:
+    if pcolor:
+        from pymapgis.pcolor import PcolorLib as library_class
+    else:
+        from pymapgis.colorlib import ColorLib as library_class
+
+    lib = library_class(str(args.library), channel_order=args.channel_order)
+    if pcolor:
+        print(f"{args.library.name}: {lib.count} colour nodes (max_no={lib.max_no})")
+    else:
+        print(f"{args.library.name}: {lib.max_no + 1} entries (max_no={lib.max_no})")
+    if args.color is None:
+        return 0
+    channels = lib.kcmy(args.color)
+    rgb = lib.rgb(args.color)
+    if channels is None or rgb is None:
+        print(f"error: colour {args.color} out of range", file=sys.stderr)
+        return 1
+    print(f"colour {args.color}: channels={channels} RGB={rgb} model={lib.channel_order}")
     return 0
