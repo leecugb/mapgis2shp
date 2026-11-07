@@ -11,7 +11,7 @@ the package's public API scope.
 
 from pymapgis._version import __version__
 from pymapgis.colorlib import ColorLib
-from pymapgis.fillgrph import FillPattern, FillStroke, FillgrphLib, pattern_geometry
+from pymapgis.fillgrph import FillgrphLib, FillPattern, FillStroke, pattern_geometry
 from pymapgis.graphic import (
     GraphicLibraries,
     GraphicRenderer,
@@ -26,8 +26,6 @@ from pymapgis.linesty import (
     census,
     classify_form,
     compose_feature_style,
-    dotline_params,
-    linedot_params,
 )
 from pymapgis.pcolor import PcolorLib
 from pymapgis.reader import (
