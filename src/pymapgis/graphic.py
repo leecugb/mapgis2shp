@@ -30,8 +30,8 @@ import numpy as np
 from pymapgis.colorlib import ColorLib
 from pymapgis.fillgrph import FillgrphLib, pattern_geometry
 from pymapgis.linesty import (
-    LinestyLib,
     _RHYTHM_SUPPORTED_NOS,
+    LinestyLib,
     _aux_selects_subline,
     feature_rhythm,
 )
@@ -542,15 +542,15 @@ class GraphicRenderer:
         return re.sub(r"[\x00-\x03\s→↓↑]", "", text)
 
     def _unit_code(self, row: Any) -> str:
-        for field in self.unit_code_fields:
-            code = self._normalise_unit_code(row.get(field, ""))
+        for field_name in self.unit_code_fields:
+            code = self._normalise_unit_code(row.get(field_name, ""))
             if code:
                 return code
         return ""
 
     def _unit_label(self, row: Any) -> str:
-        for field in self.polygon_label_fields:
-            label = self._text(row.get(field, "")).strip()
+        for field_name in self.polygon_label_fields:
+            label = self._text(row.get(field_name, "")).strip()
             if label:
                 return label
         return ""

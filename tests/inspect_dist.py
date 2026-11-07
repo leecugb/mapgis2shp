@@ -38,7 +38,10 @@ def _check_common(names: list[str], artifact: str, *, allow_slib_fixtures: bool 
         )
         if Path(name).name.lower() in library_names and not sanctioned:
             bundled.append(name)
-    _require(not bundled, f"{artifact}: graphic libraries outside the test fixture directory: {bundled}")
+    _require(
+        not bundled,
+        f"{artifact}: graphic libraries outside the test fixture directory: {bundled}",
+    )
 
 
 def _check_wheel(path: Path) -> None:

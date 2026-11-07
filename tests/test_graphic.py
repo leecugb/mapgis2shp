@@ -12,7 +12,8 @@ from shapely.geometry import LineString, Point, Polygon
 import pymapgis.graphic as graphic
 from pymapgis import GraphicLibraries, GraphicRenderer, render_graphic_map
 from pymapgis.graphic import _annotation_to_mathtext, _StampBuffer
-from pymapgis.linesty import Element as LineElement, LineStyle, SubLine
+from pymapgis.linesty import Element as LineElement
+from pymapgis.linesty import LineStyle, SubLine
 from pymapgis.slib import Element, SubPath, Symbol
 
 
