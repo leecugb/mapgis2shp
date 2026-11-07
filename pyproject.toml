@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mapgis2shp"
-version = "2.6.0"
+version = "2.7.0"
 description = "Open-source bidirectional interoperability for MapGIS 6.x/67 binary vector formats with GeoPandas."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -80,6 +80,13 @@ exclude = [
     "src/pymapgis/semantics",
     "src/pymapgis/linesty_adjudicated.py",
 ]
+
+[tool.hatch.build.targets.wheel.force-include]
+"tests/fixtures/jwd" = "pymapgis/testing/fixtures/jwd"
+"tests/fixtures/slib" = "pymapgis/testing/fixtures/slib"
+"tests/fixtures/mapgis" = "pymapgis/testing/fixtures/mapgis"
+"tests/fixtures/jwd_slib_manifest.json" = "pymapgis/testing/fixtures/jwd_slib_manifest.json"
+"tests/fixtures/fixture_manifest.json" = "pymapgis/testing/fixtures/fixture_manifest.json"
 
 [tool.hatch.build.targets.wheel.sources]
 "src" = ""

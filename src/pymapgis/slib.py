@@ -728,7 +728,11 @@ def fit_circle(pts: List[Tuple[float, float]]) -> Optional[Tuple[float, float, f
 
 
 def symbol_geometries(lib: SubgraphLib, no: int) -> dict:
-    """符号几何的结构化导出（渲染/重建消费）：{subpaths, circles, bbox}。"""
+    """符号几何的结构化导出（渲染/重建消费）。
+
+    返回 {subpaths, circles, arcs, elements, bbox}；elements 保留描述区
+    分组、原始字段及已裁定 fill_kind，避免调用方重新解析 header_u16。
+    """
     sym = lib.decode(no)
     if sym is None:
         return {"no": no, "error": "decode failed"}
@@ -737,6 +741,15 @@ def symbol_geometries(lib: SubgraphLib, no: int) -> dict:
                        if sp.circle],
            "arcs": [[round(v, 6) for v in sp.arc] for sp in sym.subpaths
                     if sp.arc],
+           "elements": [{
+               "mode": e.mode,
+               "fill_color": e.fill_color,
+               "w2": e.w2,
+               "w3": e.w3,
+               "sub_start": e.sub_start,
+               "sub_count": e.sub_count,
+               "fill_kind": e.fill_kind,
+           } for e in sym.elements],
            "bbox": None}
     xs, ys = [], []
     for sp in sym.subpaths:
