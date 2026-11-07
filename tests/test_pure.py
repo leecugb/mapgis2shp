@@ -7,6 +7,7 @@ import io
 import math
 import os
 import struct
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -30,7 +31,7 @@ from pymapgis.reader import (
     _read_struct,
     _read_topology_table,
 )
-from pymapgis.slib import Element, SubgraphLib, parse_elements
+from pymapgis.slib import Element, SubgraphLib, parse_elements, symbol_geometries
 
 
 class TestDecodeGbk:
@@ -68,6 +69,12 @@ class TestRawDmsToDegrees:
         assert _raw_dms_to_degrees(730030.5) == pytest.approx(
             73.0 + 30.5 / 3600.0
         )
+
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+    def test_nonfinite_returns_nan(self, value: float) -> None:
+        # CRS callers reject NaN in their normal finite-parameter checks;
+        # converting it to minutes must not leak ValueError first.
+        assert math.isnan(_raw_dms_to_degrees(value))
 
 
 class TestReadStruct:
@@ -171,6 +178,18 @@ class TestCrsRobustness:
                          central=float("nan"))
         )
         assert crs == ""
+
+    @pytest.mark.parametrize("projection", [2, 3])
+    @pytest.mark.parametrize("bad", [float("nan"), float("inf")])
+    def test_nonfinite_conic_parallel_returns_empty(self, projection, bad) -> None:
+        # DMS conversion must return NaN for the caller's finite-value gate;
+        # projection 2/3 previously leaked ValueError at int(NaN).
+        stream = self._header(
+            projection=projection, ellipsoid=16, scale=1000.0, central=730000.0
+        )
+        struct.pack_into("<d", stream.getbuffer(), 175, bad)
+        crs, scale = _read_crs(stream)
+        assert crs == "" and scale == 1.0
 
     def test_truncated_header_raises_mapgis_error(self) -> None:
         with pytest.raises(MapGISError):
@@ -383,7 +402,7 @@ class TestPolygonActiveIdAlignment:
 
 
 class TestPublicApi:
-    """包级导出：图形库解析器（Subgraph.lib / LINESTY.lib）为公共 API。
+    """包级导出：五个图形库解析器及原始渲染入口均为公共 API。
 
     裁定表（ADJUDICATED / PAIR_SEMANTICS，含地质语义）不是包级导出，
     也不进发布件（2026-10-14 包定位裁定）——它们是仓内
@@ -396,10 +415,17 @@ class TestPublicApi:
         for name in (
             "SubgraphLib", "LinestyLib", "compose_feature_style",
             "classify_form", "census", "symbol_geometries", "fit_circle",
+            "ColorLib", "PcolorLib", "FillgrphLib", "FillPattern", "FillStroke",
+            "pattern_geometry", "GraphicLibraries", "GraphicRenderer",
+            "render_graphic_map",
         ):
             assert hasattr(pymapgis, name), name
         for name in ("ADJUDICATED", "PAIR_SEMANTICS", "pair_semantics"):
             assert not hasattr(pymapgis, name), name
+        # Legacy helpers remain importable from pymapgis.linesty, but are not
+        # part of the curated top-level public API.
+        assert "dotline_params" not in pymapgis.__all__
+        assert "linedot_params" not in pymapgis.__all__
 
     def test_adjudicated_tables_repo_side(self) -> None:
         """仓内环境（可导入 linesty_adjudicated）裁定表可用。"""
@@ -738,6 +764,13 @@ class TestSlibElements:
         assert [len(sp.points) for sp in sym.subpaths] == [3, 2]
         assert [(e.sub_start, e.sub_count, e.fill_kind)
                 for e in sym.elements] == [(0, 1, 6), (1, 1, -1)]
+        geo = symbol_geometries(SubgraphLib(str(path)), 0)
+        assert geo["elements"] == [
+            {"mode": 0, "fill_color": 6, "w2": 0, "w3": 0,
+             "sub_start": 0, "sub_count": 1, "fill_kind": 6},
+            {"mode": 5, "fill_color": 4, "w2": 0, "w3": 0,
+             "sub_start": 1, "sub_count": 1, "fill_kind": -1},
+        ]
 
 
 class TestSlibTailChain:
@@ -1174,6 +1207,39 @@ class TestFillgrph:
         assert len(geo["polylines"][0]) == 20
         assert geo["dropped"] == 0
 
+    def test_signed_zero_uses_bitwise_identity(self, tmp_path) -> None:
+        """±0 的数值相等不代表 f32 位型相同，不得作为重复点合并。"""
+        from pymapgis.fillgrph import pattern_geometry
+        pts = [(0.0, 0.0), (-0.0, 0.0), (0.0, 0.0),
+               (-0.0, -0.0), (-0.0, -0.0), (1.0, 1.0)]
+        spec = [((2, 0, 0, 4, 1), len(pts))]
+        lib = self._lib_with(tmp_path, self._record(4, 24, spec, pts), no=260)
+        pat = lib.decode(260)
+        assert pat is not None
+        # 全记录去重：(0,0)、(-0,0)、(-0,-0)、(1,1) 四种位型。
+        assert len(pat.points) == 4
+        assert struct.pack("<2f", *pat.points[0]) != struct.pack(
+            "<2f", *pat.points[1]
+        )
+        geo = pattern_geometry(lib, 260)
+        assert geo is not None
+        # 连续去重仅移除第二个完全同位型的 (-0,-0)。
+        assert len(geo["polylines"][0]) == 5
+
+    def test_record_bounds_use_next_greater_offset(self, tmp_path) -> None:
+        """预计算边界仍遵守非单调索引的“下一个更大偏移”规则。"""
+        from pymapgis.fillgrph import FillgrphLib
+        entries = (struct.pack("<IH", 40, 1) + struct.pack("<IH", 24, 1)
+                   + struct.pack("<IH", 56, 1))
+        data = (struct.pack("<I", 3) + b"\x00\x00" + entries
+                + b"\x00" * 48)
+        path = tmp_path / "Fillgrph.lib"
+        path.write_bytes(data)
+        lib = FillgrphLib(str(path))
+        assert lib.record_bounds(1) == (40, 56)
+        assert lib.record_bounds(2) == (24, 40)
+        assert lib.record_bounds(3) == (56, 72)
+
     def test_243_252_247_253_polylines(self, tmp_path) -> None:
         from pymapgis.fillgrph import pattern_geometry
         # 243：2 用户折线 = 4 文件笔划（回描段省略——视觉等价）
@@ -1408,6 +1474,28 @@ class TestConsumptionLaw:
         sl = self._style([0.0] * 8, ((0, 2, 4), (0, 2, 0))).sublines[0]
         assert sl.consumption is None
 
+    def test_parameter_geometry_dot_fill_is_not_inferred_from_radius(self) -> None:
+        # 同一三元组仅因 unit 改变而具有不同证据强度：UNIT_DOT 明确画点，
+        # 其他 unit 的 filled 必须保持未知，不套用半径阈值或线型号。
+        sl = self._style([0.5, 0.0, 0.05], ((2, 1, 0),)).sublines[0]
+        assert sl.parameter_geometry() == [("dot", (0.5, 0.0, 0.05, None))]
+        sl = self._style([0.5, 0.0, 0.05], ((3, 1, 0),)).sublines[0]
+        assert sl.parameter_geometry() == [("dot", (0.5, 0.0, 0.05, True))]
+
+    def test_parameter_geometry_fill_comes_from_unit(self) -> None:
+        pairs = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 0.0)]
+        values = [v for point in pairs for v in point]
+        sl = self._style(values, ((2, 4, 0),)).sublines[0]
+        assert sl.parameter_geometry() == [("polyline", pairs)]
+        sl = self._style(values, ((1, 4, 0),)).sublines[0]
+        assert sl.parameter_geometry() == [("fill", pairs)]
+
+    def test_parameter_geometry_preserves_unit_zero_coordinates(self) -> None:
+        # unit=0 不能单独证明空移；两个坐标对仍按真实线段输出。
+        sl = self._style([0.0, 0.0, 1.0, 0.0], ((0, 2, 0),)).sublines[0]
+        sl.length = 26  # n=1/24B 是实线笔结构，本例是非实线元素
+        assert sl.parameter_geometry() == [("segment", (0.0, 0.0, 1.0, 0.0))]
+
     def test_payload_geometry_fill_by_shape_not_unit(self) -> None:
         """825|0 根因回归：unit=1/513 同构闭合多边形载荷均判填充。"""
         fill_pairs = [(0.0975, 0.0739), (0.0975, 0.0729), (0.0975, 0.0739),
@@ -1464,27 +1552,37 @@ class TestConsumptionLaw:
         assert geo == [("segment", (0.0, -0.0012, 0.635, -0.0012))]
 
 
-class TestColorLib:
-    """Colorlib.lib 色表（2026-10-21 四锚定案，用户图面核验）。
+def _slib_library_path(name: str, env_var: str) -> Path:
+    from pymapgis.testing import slib_path
 
-    offset = 16 + 色号×4；条目 on-disk = (K, C, M, Y)。
-    """
+    configured = os.environ.get(env_var)
+    path = Path(configured) if configured else slib_path(name)
+    if not path.is_file():
+        raise FileNotFoundError(f"Required SLIB test library is unavailable: {path}")
+    return path
+
+
+class TestColorLib:
+    """Colorlib.lib 色表：JWD 参考管线使用的 KCMY 原生映射。"""
 
     @staticmethod
     def _lib():
         from pymapgis.colorlib import ColorLib
 
-        path = os.environ.get("PYMAPGIS_COLORLIB")
-        if not path:
-            pytest.skip("Set PYMAPGIS_COLORLIB to a readable Colorlib.lib for this test")
-        return ColorLib(path)
+        return ColorLib(str(_slib_library_path("Colorlib.lib", "PYMAPGIS_COLORLIB")))
 
-    def test_four_anchors(self) -> None:
+    def test_reference_anchors(self) -> None:
         lib = self._lib()
-        assert lib.rgb(1) == (0, 0, 0)            # 黑（K=255）
-        assert lib.rgb(9) == (255, 255, 255)      # 白（全零）
-        assert lib.rgb(175) == (255, 0, 0)        # 纯红（M+Y）
-        assert lib.rgb(173) == (255, 163, 163)    # 淡桃红（用户复核锚）
+        expected = {
+            1: (0, 0, 0),
+            9: (255, 255, 255),
+            173: (255, 163, 163),
+            175: (255, 0, 0),
+            602: (206, 217, 206),  # Qp3pal 原生填充色
+            652: (51, 204, 76),    # Qhfl 原生填充色
+        }
+        for no, rgb in expected.items():
+            assert lib.rgb(no) == rgb, no
         assert lib.kcmy(175) == (0, 0, 255, 255)
 
     def test_out_of_range_none(self) -> None:
@@ -1492,6 +1590,96 @@ class TestColorLib:
         assert lib.rgb(-1) is None
         assert lib.rgb(lib.max_no + 1) is None
         assert lib.rgb01(3) is not None
+
+
+    def test_explicit_alternate_channel_model(self) -> None:
+        lib = self._lib()
+        alternate = type(lib)(_slib_library_path("Colorlib.lib", "PYMAPGIS_COLORLIB"),
+                              channel_order="YMCK")
+        expected = {
+            1: (255, 255, 0),
+            2: (255, 0, 255),
+            3: (0, 255, 255),
+            4: (0, 0, 0),
+            194: (0, 255, 175),
+            257: (255, 0, 0),
+            271: (247, 247, 255),
+        }
+        for no, rgb in expected.items():
+            assert alternate.rgb(no) == rgb, no
+
+
+class TestPcolorLib:
+    """Pcolor.lib 32-byte node layout and native colour anchors."""
+
+    @staticmethod
+    def _lib():
+        from pymapgis.pcolor import PcolorLib
+        return PcolorLib(str(_slib_library_path("Pcolor.lib", "PYMAPGIS_PCOLOR")))
+
+    def test_native_node_layout_and_white(self) -> None:
+        lib = self._lib()
+        assert lib.count == 4098
+        assert lib.max_no == 4097
+        assert lib.trailing_bytes == 28
+        expected = {
+            1: (0, 0, 0),
+            2: (0, 255, 255),
+            9: (255, 255, 255),
+            602: (255, 255, 178),
+            652: (255, 255, 204),
+            1051: (255, 255, 255),
+            1092: (255, 255, 255),
+            1167: (255, 255, 127),
+            1168: (255, 255, 153),
+        }
+        for no, rgb in expected.items():
+            assert lib.rgb(no) == rgb, no
+            assert lib.assigned(no), no
+        assert lib.kcmy(1051) == (0, 0, 0, 0)  # 全零 KCMY 是合法白色
+        assert lib.rgb(lib.max_no + 1) is None
+
+    def test_extended_dialog_anchors(self) -> None:
+        lib = self._lib()
+        expected = {
+            881: (242, 255, 102), 882: (229, 255, 76),
+            903: (242, 178, 76), 904: (242, 153, 51),
+            914: (217, 255, 25), 923: (178, 255, 0),
+            1045: (255, 255, 215), 1046: (255, 255, 215),
+            1051: (255, 255, 255), 1096: (229, 229, 229),
+            1224: (255, 76, 215), 1226: (255, 127, 229),
+            1239: (242, 242, 242), 1465: (167, 222, 98),
+        }
+        for no, rgb in expected.items():
+            assert lib.rgb(no) == rgb, no
+
+    def test_explicit_alternate_channel_model(self) -> None:
+        lib = self._lib()
+        alternate = type(lib)(_slib_library_path("Pcolor.lib", "PYMAPGIS_PCOLOR"),
+                              channel_order="YMCK")
+        assert alternate.rgb(1) == (255, 255, 0)
+        assert alternate.rgb(2) == (255, 0, 255)
+
+    def test_synthetic_node_layout(self, tmp_path) -> None:
+        from pymapgis.pcolor import PcolorLib
+        data = bytearray(6 * 32 + 28)
+        data[:8] = b"PCOLOR 3"
+        for no, channels in {
+            0: (0, 0, 0, 0),
+            1: (255, 0, 0, 0),
+            2: (0, 255, 0, 0),
+        }.items():
+            offset = (no + 3) * 32 + 28
+            data[offset:offset + 4] = bytes(channels)
+        path = tmp_path / "Pcolor.lib"
+        path.write_bytes(data)
+        lib = PcolorLib(str(path))
+        assert (lib.count, lib.max_no, lib.trailing_bytes) == (3, 2, 28)
+        assert lib.rgb(0) == (255, 255, 255)
+        assert lib.rgb(1) == (0, 0, 0)
+        assert lib.rgb(2) == (0, 255, 255)
+        assert lib.assigned(0)
+        assert lib.rgb(3) is None
 
 
 class TestFeatureRhythm:
@@ -1523,12 +1711,14 @@ class TestFeatureRhythm:
         16|0 r=0.044 与 16|1 r=0.0781 是差别实体，M67 可变线宽替换
         规则本族限定适用域——render_ops 不得统一替换为图元线宽。"""
         from pymapgis.linesty import feature_rhythm, render_ops
-        # 16|0：4 引用三元组 r=0.044
-        st = self._style([0.5, 0.0, 0.044] * 4, n=4,
+        # 16|0：同坐标 4 引用；实库还含一个较小同心圆，实心并集仅保留最大圆
+        st = self._style([0.5, 0.0, 0.044, 0.5, 0.0, 0.04,
+                          0.5, 0.0, 0.044, 0.5, 0.0, 0.044], n=4,
                          elems=((258, 2, 0), (258, 2, 3), (258, 2, 6), (259, 2, 9)),
                          aux=0, no=16)
         r = feature_rhythm(st, 0)
         assert r["kind"] == "dotline_lib_r"
+        assert len(r["dots"]) == 1
         assert r["dots"][0] == pytest.approx((0.5, 0.0, 0.044), abs=1e-4)
         ops = render_ops(st, 16, 0)
         # rhythm 单源：render_ops 输出 ("rhythm", 结构体)（2026-10-20 优化）
@@ -1541,6 +1731,7 @@ class TestFeatureRhythm:
                          elems=((3, 3, 0),), aux=1, no=16)
         r = feature_rhythm(st, 1)
         assert r["kind"] == "dotline_lib_r"
+        assert len(r["dots"]) == 1
         assert r["dots"][0][2] == pytest.approx(0.0781, abs=1e-4)
         ops = render_ops(st, 16, 1)
         assert ops["ops"][0][0] == "rhythm"
@@ -1606,7 +1797,7 @@ class TestFeatureRhythm:
         r = feature_rhythm(st, 0)
         assert r["kind"] == "dash_dot_raised"
         assert r["dots"][0] == pytest.approx((0.5, 0.1504, 0.04), abs=1e-4)
-        assert len(r["dots"]) == 2
+        assert len(r["dots"]) == 1  # 同坐标冗余引用只画一次
         assert r["lines"][0] == pytest.approx((0.0, 1.0, 0.0), abs=1e-4)
         assert r["period_mm"] == pytest.approx(1.0)
         # 17|2：4 引用 r=0.012（小点变体）
@@ -1617,7 +1808,7 @@ class TestFeatureRhythm:
                          aux=2, no=17)
         r = feature_rhythm(st, 2)
         assert r["kind"] == "dash_dot_raised"
-        assert len(r["dots"]) == 4
+        assert len(r["dots"]) == 1  # 4 个同坐标引用合并为一个实心圆
         assert r["dots"][0][2] == pytest.approx(0.012, abs=1e-4)
         # 未裁定 aux 诚实 None
         assert feature_rhythm(st, 1) is None

@@ -322,22 +322,22 @@ class TestPolygonParams:
             assert "pattern" not in reader.geodataframe.columns
 
     @pytest.mark.integration
-    def test_field6_clusters_by_rock_category(self) -> None:
-        """@6（field6，语义未裁定）按岩性分带：沉积 26-91、侵入 128-132、
-        变质 239-246——2026-10-22 布局 v2 后图案号移至 u16@12，此带为
-        field6 特征（旧 int16 错位读法将其 <<8）。"""
-        for fname, lo, hi in [
-            ("LDZOFBB001.WP", 26, 91),
-            ("LDZOFBB003.WP", 128, 132),
-            ("LDZOFBB004.WP", 239, 246),
-        ]:
+    def test_ring_pointer_bytes_are_decoded(self) -> None:
+        """field5/6/7 是 24 位环索引偏移的三个字节，不是岩性代码。
+
+        早期测试把 field6 的数值分布解释为岩性分带；指针语义确定后，
+        该分布只能反映文件布局。这里仅验证三个原始 uint8 字节被完整
+        暴露，不再为偏移值赋予地质语义。
+        """
+        for fname in ("LDZOFBB001.WP", "LDZOFBB003.WP", "LDZOFBB004.WP"):
             path = Path(fname)
             if not path.exists():
                 pytest.skip(f"{fname} not found")
             with Reader(path, read_graphic_params=True) as reader:
                 pp = reader.polygon_params
                 assert len(pp) == len(reader.geodataframe)
-                assert pp["field6"].between(lo, hi).all(), fname
+                values = pp[["field5", "field6", "field7"]].to_numpy()
+                assert np.all((0 <= values) & (values <= 255)), fname
                 # 填充色跨地质单元变化。
                 assert pp["fill_color"].nunique() > 1
 
@@ -350,6 +350,6 @@ class TestPolygonParams:
         with Reader(path, read_graphic_params=True) as reader:
             gdf = reader.geodataframe
             assert len(gdf) == 46
-            # 侵入岩体 @6（field6）在侵入岩带 128-132（布局 v2 后
-            # 图案号已移至 u16@12）。
-            assert gdf["field6"].between(128, 132).all()
+            # 三个指针字节与过滤后的区要素逐行对齐；数值本身只表示
+            # 坐标段偏移，不参与地质分类。
+            assert gdf[["field5", "field6", "field7"]].notna().all().all()

@@ -45,7 +45,7 @@ Thumbs.db
 src/pymapgis/rendering/
 src/pymapgis/semantics/
 
-# MapGIS sample/test vector data (real geological survey data, not for distribution)
+# MapGIS sample/test vector data (real survey data is excluded by default)
 *.WT
 *.WL
 *.WP
@@ -53,14 +53,21 @@ src/pymapgis/semantics/
 *.WL~
 *.WP~
 
-# Public synthetic regression fixtures are the only MapGIS binaries intended
-# for distribution. Root-level and other real survey files remain ignored.
+# Real geological survey vectors remain ignored except for the explicitly
+# integrated owner-supplied regression dataset. Public synthetic fixtures and
+# tests/fixtures/jwd are the only MapGIS binaries intended for source archives.
 !tests/fixtures/mapgis/*.wt
 !tests/fixtures/mapgis/*.wl
 !tests/fixtures/mapgis/*.wp
 !tests/fixtures/mapgis/*.WT
 !tests/fixtures/mapgis/*.WL
 !tests/fixtures/mapgis/*.WP
+!tests/fixtures/jwd/*.WT
+!tests/fixtures/jwd/*.WL
+!tests/fixtures/jwd/*.WP
+!tests/fixtures/jwd/*.WT~
+!tests/fixtures/jwd/*.WL~
+!tests/fixtures/jwd/*.WP~
 
 # MapGIS project / raster overlay files
 *.MPJ
