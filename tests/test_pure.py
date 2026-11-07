@@ -2014,8 +2014,9 @@ class TestFeatureRhythm:
         assert len(r["lines"]) == 3 and len(r["dots"]) == 3
         assert r["period_mm"] == 1.0
         # 三线起止（升序）——逐线锚定，防配对错位
-        assert r["lines"] == pytest.approx(
-            [(0.069764, 0.279915), (0.413688, 0.627549), (0.763889, 0.964053)])
+        expected_lines = [(0.069764, 0.279915), (0.413688, 0.627549), (0.763889, 0.964053)]
+        for actual, expected in zip(r["lines"], expected_lines):
+            assert actual == pytest.approx(expected)
         # 三档竖短线 = (相邻线间隙中点, 刻度高 |y0|, 顶端)（2026-10-19
         # 用户裁定：档文件序 = 间隙序——档1(短,0.0046)→第1间隙、
         # 档2/档3(0.0073)→第2/3间隙；tick 与两侧 dash 等间距）
