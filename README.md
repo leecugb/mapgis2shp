@@ -7,7 +7,7 @@
 
 Read **and write** MapGIS 6.x/67 vector files (`.wt`, `.wl`, `.wp`) with [GeoPandas](https://geopandas.org/) GeoDataFrames.
 
-MapGIS is a widely used closed-source GIS platform in China, especially in geological surveying, engineering, and scientific research. `pymapgis` provides a lightweight, open-source reader **and writer** for its native point, line, and polygon vector formats.
+MapGIS is a widely used closed-source GIS platform in China, especially in geological surveying, engineering, and scientific research. `pymapgis` provides a lightweight, open-source toolkit for reading, converting and writing its native point, line and polygon vector formats, parsing its graphic libraries, and rendering those vectors from the original libraries.
 
 > **Relationship to prior work:** This package (`mapgis2shp`, import name `pymapgis`) is the matured, validated successor to the first author's earlier [`pymapgis`](https://github.com/leecugb/pymapgis) (2022) single-file reader — both developed by **Shijie Li** (leecugb). The present version adds coordinate-reference inference, vectorised parsing, polygon-topology reconstruction, and independent validation against the official MapGIS export.
 
@@ -900,6 +900,11 @@ Unknown field-type descriptors are skipped without shifting the retained raw des
 5. **Graphic parameters are library-dependent**: symbol, line-style, colour and pattern numbers reference the MapGIS system libraries (Slib, line-style and pattern libraries) of the originating installation, which are not embedded in the file. They are only meaningful together with those libraries (and their versions); some field assignments are validated candidates rather than certainties (see the per-section notes).
 
 ## Changelog
+
+### 2.7.1 (2026-11-07)
+
+- Document original-library rendering in the package introduction and project metadata; clarify the complete vector / graphic-library / rendering scope
+- Fix CI Ruff checks, pin Python 3.9 to Ubuntu 24.04, update checkout/setup-python actions and make nested `pytest.approx()` tests compatible with current pytest
 
 ### 2.7.0 (2026-11-07)
 

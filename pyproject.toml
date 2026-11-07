@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mapgis2shp"
-version = "2.7.0"
-description = "Open-source bidirectional interoperability for MapGIS 6.x/67 binary vector formats with GeoPandas."
+version = "2.7.1"
+description = "Open-source MapGIS vector interoperability, graphic-library parsing and original-library rendering with GeoPandas."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
