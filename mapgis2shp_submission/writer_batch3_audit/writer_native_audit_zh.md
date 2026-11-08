@@ -13,7 +13,7 @@
 |---|---|
 | 第三批原生用例 | 12 passed |
 | 当前 wheel 的 JWD 与两批 Writer 回归 | 33 passed |
-| 完整测试套件 | 364 passed, 0 skipped |
+| 完整测试套件 | 366 passed, 0 skipped |
 | Ruff | 全部通过 |
 | Twine | wheel、sdist 均通过 |
 | wheel 内容检查 | 184 entries，通过 |

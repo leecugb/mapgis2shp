@@ -35,7 +35,7 @@
 
 - bundled JWD 中两个 `.WP~` 已按用户要求改为同名 `.WP`，目标文件此前不存在；两个字节数和 SHA-256 均未改变。测试目录只有这 2 个备份，未处理工作区其他历史文件。
 - `tests/test_graphic_real_jwd.py` 与论文共用 `regression_layers()` 兼容路径。规范化 WP 直接传入，发布版 `.WP~` 由 Reader 预读为 GeoDataFrame。
-- 38|2 测试现在显式断言 37 个要素、782 个源顶点、`max_deviation == 0.0`。
+- 38|2 测试现在显式断言 37 个要素、782 个源顶点、`max_deviation <= 1e-9`，保留逐顶点检查并允许平台浮点舍入误差。
 - 新增 `drawn + excluded_text == 7094` 断言，支撑图注中的 5,732 + 1,362 = 7,094。
 - 源码与当前 wheel 安装态各运行 10 个 targeted tests，均为 10 passed。另从 PyPI 下载公开发布的 2.7.1，在独立 target 目录中实际运行兼容 Quickstart，确认其原始 `.WP~` fixture 得到 7,094/5,732/1,362 且全部未解决项为零。
 - 完整套件在 Python 3.12.7、GeoPandas 1.1.1、Matplotlib 3.11.2 下为 **326 passed, 0 skipped**；运行时需将虚拟环境 `Scripts` 放入 PATH，使 console-script 测试能发现 `pymapgis`。
@@ -63,8 +63,9 @@
 - 05 的组合偏移为 81,634，与原生一致；06 两个面均超过 65,535，偏移差异与拓扑组织分开解释。
 - 空几何默认拒绝，`on_empty="drop"` 保留有效面；全同顶点退化环明确拒绝，未生成空面。
 - 08 的长中文、null、int32 极值、浮点和日期均与源 SHP 一致。原生转换存在浮点精度下降和空浮点值变 0，未据此要求 Writer 降级。
-- 当前 wheel 的 JWD 与两批 Writer 回归合计 33 passed；完整套件 **364 passed, 0 skipped**。wheel 184 项，sdist 219 项，Ruff、Twine 和归档检查全部通过。
+- 当前 wheel 的 JWD 与两批 Writer 回归合计 33 passed；完整套件 **366 passed, 0 skipped**。wheel 184 项，sdist 219 项，Ruff、Twine 和归档检查全部通过。
 - 中文报告为 `writer_batch3_audit/writer_native_audit_zh.md`。UTM 投影显示、环索引及异常输入的原生打开、编辑和另存验收仍待做。
+- CI 失败复核发现远端上传改变了 `LDLYAAE002.WP` 与 `LDZOFBB003.WP` 的原生 pattern 参数。经用户确认，已从原始提交恢复两份文件，保留原始 12 层回归语义；manifest 哈希和 pattern=165 均已恢复。38|2 容差统一为 `<=1e-9`，不把平台浮点舍入误写为绝对零。
 
 ## 投稿前待办
 
