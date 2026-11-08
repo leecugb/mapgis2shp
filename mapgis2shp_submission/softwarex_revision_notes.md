@@ -67,6 +67,14 @@
 - 中文报告为 `writer_batch3_audit/writer_native_audit_zh.md`。UTM 投影显示、环索引及异常输入的原生打开、编辑和另存验收仍待做。
 - CI 失败复核发现远端上传改变了 `LDLYAAE002.WP` 与 `LDZOFBB003.WP` 的原生 pattern 参数。经用户确认，已从原始提交恢复两份文件，保留原始 12 层回归语义；manifest 哈希和 pattern=165 均已恢复。38|2 容差统一为 `<=1e-9`，不把平台浮点舍入误写为绝对零。
 
+## Reader/Writer 综合回归（2026-11-08）
+
+- `verify_pymapgis.py` 的 36 个真实文件全部读取成功，invalid geometry 为 0。
+- `verify_pymapgis.py --roundtrip` 的 36 个 Reader → Writer → Reader 往返全部成功，面文件 `area_rel_diff=0.00e+00`。
+- 原生拓扑抽查确认 Reader 按左右面 ID 重建多部件几何。`02_two_sizes` 的第二条弧同时属于面 1 和面 2，因此 Reader 的多部件结果不是无依据复制，未修改这部分实现。
+- 中文字段名 `面积`、`周长` 的原始 GBK 描述符与解码结果一致，控制台显示乱码不构成 Reader 解码缺陷。
+- UTM 写出语义已在 README 明确：先转换为 Gauss-Kruger（k=1）和正确中央经线，比较时再回转原 UTM CRS。CI 已在 Windows、Ubuntu、macOS 和发行构建中全部通过。
+
 ## 投稿前待办
 
 - [ ] 用 LaTeX 编译并检查版式（本机尚未安装 pdflatex）。

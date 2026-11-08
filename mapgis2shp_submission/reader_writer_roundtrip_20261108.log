@@ -1,0 +1,39 @@
+Round-tripping 36 files (Reader -> Writer -> Reader)...
+LDLYAAA005.WL: OK | 16 features | 0.119s
+LDLYAAE001.WL: OK | 1143 features | 0.712s
+LDLYAAE002.WP: OK | 128 features | 0.562s | area_rel_diff=0.00e+00
+LDLYAAI002.WT: OK | 242 features | 0.217s
+LDZOFBA002.WL: OK | 2222 features | 1.450s
+LDZOFBA003.WL: OK | 310 features | 0.427s
+LDZOFBA005.WL: OK | 4 features | 0.067s
+LDZOFBA016.WT: OK | 305 features | 0.153s
+LDZOFBB001.WP: OK | 608 features | 2.616s | area_rel_diff=0.00e+00
+LDZOFBB002.WP: OK | 10 features | 0.229s | area_rel_diff=0.00e+00
+LDZOFBB003.WP: OK | 46 features | 0.318s | area_rel_diff=0.00e+00
+LDZOFBB004.WP: OK | 49 features | 0.493s | area_rel_diff=0.00e+00
+LDZOFBB009.WP: OK | 20 features | 0.139s | area_rel_diff=0.00e+00
+LDZOFBB010.WP: OK | 4 features | 0.123s | area_rel_diff=0.00e+00
+LDZOFBB098.WL: OK | 245 features | 0.147s
+LDZOFBB099.WT: OK | 2024 features | 0.759s
+LFZYBAA002.WL: OK | 5 features | 0.037s
+LFZYBAB002.WL: OK | 24 features | 0.046s
+LFZYBCBA01.WT: OK | 6 features | 0.030s
+LFZYBCBA02.WL: OK | 10 features | 0.038s
+LFZYBCT001.WT: OK | 6981 features | 2.333s
+LFZYBCT002.WL: OK | 2331 features | 1.280s
+LHCPGDAC01.WL: OK | 3 features | 0.032s
+LHCPGDAC05.WP: OK | 2 features | 0.076s | area_rel_diff=0.00e+00
+LHCPGDAC06.WL: OK | 2 features | 0.048s
+LHCPGDAC08.WP: OK | 4 features | 0.130s | area_rel_diff=0.00e+00
+LHCPGDAC09.WL: OK | 4 features | 0.058s
+LHCPGDAC11.WP: OK | 8 features | 0.150s | area_rel_diff=0.00e+00
+LHCPGDAC12.WL: OK | 10 features | 0.077s
+LHTQGTA001.WL: OK | 4 features | 0.034s
+LYGREBA001.WL: OK | 71 features | 0.102s
+LYGREBA004.WL: OK | 25 features | 0.079s
+LZLPGDJ002.WL: OK | 3 features | 0.038s
+LZLPGDJ004.WP: OK | 2 features | 0.081s | area_rel_diff=0.00e+00
+LZLPGDJ006.WP: OK | 1 features | 0.094s | area_rel_diff=0.00e+00
+LZLPGDJ009.WP: OK | 2 features | 0.055s | area_rel_diff=0.00e+00
+
+All files round-tripped successfully (not recorded in baseline).

@@ -283,6 +283,10 @@ polygon label boxes and file footers.
   (e.g. `pattern_color` → `pattern_col`) when passing through `.shp`, which
   disables the matching parameter group on write; GeoJSON/GeoPackage or a
   direct GeoDataFrame hand-off is unaffected
+- UTM inputs are first reprojected to Gauss-Kruger (k=1) with the
+  zone-derived central meridian, because MapGIS 6x cannot store the UTM zone
+  scale factor. Reproject the written result back to the original UTM CRS when
+  comparing coordinates
 - Longitude/latitude, Transverse Mercator, Albers, and Lambert CRS are
   written; other projections raise `WriterError`
 - CGCS2000 has no MapGIS ellipsoid code and is written as WGS84 with a

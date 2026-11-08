@@ -195,7 +195,7 @@ Archive verification & 184 wheel entries and 219 source-archive entries pass con
 \end{tabular}
 \end{table}
 
-The current regression also covers topology, auxiliary rhythms, symbols, text layout, font mappings, Mathtext scripts, DPI conversion and unresolved variants. A direct census test asserts every structural total in Table~\ref{tab:libraries}. Twenty-three native SHP conversion cases additionally verify Writer attributes, polygon topology, default styles, UTM round-trips, null/degenerate-input handling and 24-bit ring-index bounds. These checks establish internal consistency rather than vendor-identical rendering.
+The current regression also covers topology, auxiliary rhythms, symbols, text layout, font mappings, Mathtext scripts, DPI conversion and unresolved variants. A direct census test asserts every structural total in Table~\ref{tab:libraries}. Twenty-three native SHP conversion cases additionally verify Writer attributes, polygon topology, default styles, UTM round-trips, null/degenerate-input handling and 24-bit ring-index bounds. The 36-file Reader--Writer--Reader smoke suite also passed with zero area relative difference. These checks establish internal consistency rather than vendor-identical rendering.
 
 \subsection{Historical native-export validation}
 
