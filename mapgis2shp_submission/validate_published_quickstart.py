@@ -1,9 +1,9 @@
 """Verify the manuscript Quickstart against an isolated published wheel."""
-from pathlib import Path
-from tempfile import TemporaryDirectory
 import argparse
 import json
 import sys
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 parser = argparse.ArgumentParser()
 parser.add_argument("package_dir", type=Path)
@@ -20,10 +20,8 @@ paths = sorted(jwd_path().iterdir())
 print("PUBLISHED_FIXTURE_NAMES", [path.name for path in paths])
 layers = []
 for path in paths:
-    if path.suffix.lower() == ".wp~":
-        layers.append(Reader(str(path), read_graphic_params=True).geodataframe)
-    else:
-        layers.append(path)
+    layer = Reader(str(path), read_graphic_params=True).geodataframe
+    layers.append(layer.to_crs("EPSG:32643"))
 
 renderer = GraphicRenderer(
     GraphicLibraries.from_directory(slib_path()),
@@ -31,6 +29,7 @@ renderer = GraphicRenderer(
     native_text_layout=True,
     polygon_labels=True,
     polygon_label_fontsize=5.0,
+    polygon_label_scale=0.7,
     text_font_family=["Microsoft YaHei", "SimSun", "DejaVu Sans"],
     font_zh_map={1: "SimSun", 4: "SimHei"},
     font_en_map={0: "DejaVu Sans"},

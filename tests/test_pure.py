@@ -745,6 +745,22 @@ class TestSlibElements:
     def test_malformed_description_rejected(self, header, counts) -> None:
         assert parse_elements(header, counts) == []
 
+    def test_missing_count_table_does_not_fabricate_elements(self, tmp_path) -> None:
+        rec = struct.pack(
+            "<8H8f",
+            2, 8, 0, 6, 0, 0, 1, 9,
+            0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+        )
+        data = struct.pack("<2I", 8, 8 + len(rec)) + rec + b"\x00" * 32
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+
+        sym = SubgraphLib(str(path)).decode(0)
+        assert sym is not None
+        assert len(sym.subpaths) == 1
+        assert len(sym.subpaths[0].points) == 4
+        assert sym.elements == []
+
     def test_indexed_decode_populates_elements(self, tmp_path) -> None:
         pts = [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0),
                (0.2, 0.2), (0.4, 0.4)]

@@ -62,12 +62,15 @@ class GraphicLibraries:
     directory: Optional[Path] = None
 
     @classmethod
-    def from_directory(cls, directory: PathLike) -> "GraphicLibraries":
+    def from_directory(
+        cls, directory: PathLike, *, channel_order: str = "KCMY"
+    ) -> "GraphicLibraries":
         """Load ``LINESTY.lib``, ``Subgraph.lib``, ``Fillgrph.lib`` and
         ``Colorlib.lib`` from *directory*.
 
-        A single error lists every missing library instead of failing one file
-        at a time.
+        ``channel_order`` is forwarded to both colour-library parsers for
+        installations with a verified alternate channel model. A single error
+        lists every missing library instead of failing one file at a time.
         """
         root = Path(directory)
         names = ("LINESTY.lib", "Subgraph.lib", "Fillgrph.lib", "Colorlib.lib")
@@ -80,8 +83,8 @@ class GraphicLibraries:
             linesty=LinestyLib(str(root / "LINESTY.lib")),
             subgraph=SubgraphLib(str(root / "Subgraph.lib")),
             fillgrph=FillgrphLib(str(root / "Fillgrph.lib")),
-            color=ColorLib(str(root / "Colorlib.lib")),
-            pcolor=(PcolorLib(str(root / "Pcolor.lib"))
+            color=ColorLib(str(root / "Colorlib.lib"), channel_order=channel_order),
+            pcolor=(PcolorLib(str(root / "Pcolor.lib"), channel_order=channel_order)
                     if (root / "Pcolor.lib").is_file() else None),
             directory=root,
         )
@@ -113,6 +116,8 @@ class _StampBuffer:
     dots: List[np.ndarray] = field(default_factory=list)
     dot_radii: List[float] = field(default_factory=list)
     dot_colors: List[RGB] = field(default_factory=list)
+    dot_filled: List[bool] = field(default_factory=list)
+    dot_widths: List[float] = field(default_factory=list)
     fills: List[np.ndarray] = field(default_factory=list)
     fill_colors: List[RGB] = field(default_factory=list)
 
@@ -159,6 +164,13 @@ class GraphicRenderer:
     fallback_to_solid:
         Draw an original-coordinate solid line when a line style cannot be
         decoded.  Every such feature is counted as ``fallback`` in the report.
+    max_pattern_bytes:
+        Maximum size of one expanded RGBA pattern image. The default is
+        128 MiB; larger requests are reported as ``pattern_too_large`` before
+        allocation.
+    max_pattern_cycles:
+        Maximum repeat cycles for one WL feature. Excessively dense patterns
+        are skipped and counted as ``cycle_limit`` in the layer report.
     symbol_fills:
         Consume adjudicated Subgraph ``Element.fill_kind`` fills.
     polygon_labels:
@@ -169,6 +181,9 @@ class GraphicRenderer:
         Defaults to ``("QDUECC_eff", "QDUECC", "QDUECD")``.
     polygon_label_fontsize:
         Polygon-label size in typographic points; default 4.5 pt.
+    polygon_label_scale:
+        Multiplier applied to ``polygon_label_fontsize``. The default 0.70
+        produces 3.15 pt from the default base size.
     exclude_text_categories:
         Optional CHFCEC categories to omit. Defaults to ``{"代号"}`` so
         fragmented WT unit-code annotations are not duplicated over the
@@ -176,11 +191,16 @@ class GraphicRenderer:
         with ``polygon_labels=False`` for the legacy WT-only behaviour.
     text_category_scales:
         Optional CHFCEC-specific font-size multipliers.
+    attitude_text_scale:
+        Additional multiplier for the CHFCEC categories ``产状``、``断层产状``
+        and ``断层辅助点``. The default 0.30 is compounded with ``text_scale``
+        and any category-specific multiplier.
     text_font_family:
         Optional Matplotlib font family or fallback list for text annotations.
     native_text_layout:
-        Place characters using the stored ``width + spacing`` advance.
-        Script size/baseline and font substitution remain display approximations.
+        Place characters using the stored ``width + spacing`` advance, scaled
+        by the same text multiplier as the font. Script size/baseline and font
+        substitution remain display approximations.
     font_zh_map / font_en_map:
         Optional ``{native_font_number: Matplotlib_font_family}`` mappings.
         Unknown mapped numbers are reported as ``unknown_fonts``.
@@ -211,13 +231,17 @@ class GraphicRenderer:
         polygon_edge_width_pt: float = 0.0,
         tile_pixels: int = 26,
         max_pattern_tiles: int = 40000,
+        max_pattern_bytes: int = 128 * 1024 ** 2,
+        max_pattern_cycles: int = 100000,
         fallback_to_solid: bool = True,
         symbol_fills: bool = True,
         polygon_labels: bool = True,
         polygon_label_fields: Sequence[str] = ("QDUECC_eff", "QDUECC", "QDUECD"),
         polygon_label_fontsize: float = 4.5,
+        polygon_label_scale: float = 0.7,
         exclude_text_categories: Sequence[str] = ("代号",),
         text_category_scales: Optional[Mapping[str, float]] = None,
+        attitude_text_scale: float = 0.3,
         text_scale: float = 1.0,
         text_font_family: Any = None,
         native_text_layout: bool = True,
@@ -238,6 +262,10 @@ class GraphicRenderer:
             raise ValueError("tile_pixels must be at least 4")
         if max_pattern_tiles < 1:
             raise ValueError("max_pattern_tiles must be positive")
+        if max_pattern_bytes < 1:
+            raise ValueError("max_pattern_bytes must be positive")
+        if max_pattern_cycles < 1:
+            raise ValueError("max_pattern_cycles must be positive")
         self.libraries = libraries
         self.scale = float(scale)
         self.map_units_per_mm = map_units_per_mm
@@ -248,7 +276,7 @@ class GraphicRenderer:
             self._normalise_unit_code(code): self._validate_rgb(rgb)
             for code, rgb in (unit_color_overrides or {}).items()
         }
-        self.unit_code_fields = tuple(unit_code_fields)
+        self.unit_code_fields = self._string_tuple(unit_code_fields)
         self.fallback_color = self._validate_rgb(fallback_color)
         self.line_min_pt = float(line_min_pt)
         self.dot_min_pt = float(dot_min_pt)
@@ -257,16 +285,36 @@ class GraphicRenderer:
         self.polygon_edge_width_pt = float(polygon_edge_width_pt)
         self.tile_pixels = int(tile_pixels)
         self.max_pattern_tiles = int(max_pattern_tiles)
+        self.max_pattern_bytes = int(max_pattern_bytes)
+        self.max_pattern_cycles = int(max_pattern_cycles)
         self.fallback_to_solid = bool(fallback_to_solid)
         self.symbol_fills = bool(symbol_fills)
         self.polygon_labels = bool(polygon_labels)
-        self.polygon_label_fields = tuple(polygon_label_fields)
+        self.polygon_label_fields = self._string_tuple(polygon_label_fields)
         self.polygon_label_fontsize = float(polygon_label_fontsize)
         if self.polygon_label_fontsize <= 0:
             raise ValueError("polygon_label_fontsize must be positive")
-        self.exclude_text_categories = {str(x).strip() for x in exclude_text_categories}
-        self.text_category_scales = dict(text_category_scales or {})
+        self.polygon_label_scale = float(polygon_label_scale)
+        if not math.isfinite(self.polygon_label_scale) or self.polygon_label_scale <= 0:
+            raise ValueError("polygon_label_scale must be positive and finite")
+        self.exclude_text_categories = {
+            str(x).strip() for x in self._string_tuple(exclude_text_categories)
+        }
+        self.text_category_scales = {
+            str(category): float(value)
+            for category, value in (text_category_scales or {}).items()
+        }
+        if any(
+            not math.isfinite(value) or value <= 0
+            for value in self.text_category_scales.values()
+        ):
+            raise ValueError("text_category_scales must contain positive finite values")
+        self.attitude_text_scale = float(attitude_text_scale)
+        if not math.isfinite(self.attitude_text_scale) or self.attitude_text_scale <= 0:
+            raise ValueError("attitude_text_scale must be positive and finite")
         self.text_scale = float(text_scale)
+        if not math.isfinite(self.text_scale) or self.text_scale <= 0:
+            raise ValueError("text_scale must be positive and finite")
         self.text_font_family = text_font_family
         self.native_text_layout = bool(native_text_layout)
         self.font_zh_map = {int(code): value for code, value in (font_zh_map or {}).items()}
@@ -275,8 +323,14 @@ class GraphicRenderer:
             int(code): dict(options) for code, options in (font_style_map or {}).items()
         }
         self._rhythm_cache: Dict[Tuple[int, int], Optional[dict]] = {}
+        self._line_style_cache: Dict[int, Any] = {}
         self._symbol_cache: Dict[int, Any] = {}
         self._tile_cache: Dict[int, Optional[np.ndarray]] = {}
+
+    @staticmethod
+    def _string_tuple(values: Union[str, Sequence[str]]) -> Tuple[str, ...]:
+        """Treat a bare string as one field/category, not as characters."""
+        return (values,) if isinstance(values, str) else tuple(values)
 
     @staticmethod
     def _validate_rgb(rgb: RGB) -> RGB:
@@ -391,7 +445,11 @@ class GraphicRenderer:
         return [self._draw_layer(ax, layer) for layer in prepared]
 
     def draw_layer(self, ax: Any, layer: Any, *, kind: Optional[str] = None) -> Dict[str, Any]:
-        """Draw one layer onto an Axes whose extent is already established."""
+        """Draw one layer onto an Axes whose extent is already established.
+
+        GeoDataFrames may set ``attrs['source']`` for report attribution and
+        ``attrs['kind']`` to ``wl``/``wp``/``wt`` when geometry is empty.
+        """
         prepared = self._coerce_layer(layer, kind=kind)
         ax.figure.canvas.draw()
         return self._draw_layer(ax, prepared)
@@ -404,8 +462,9 @@ class GraphicRenderer:
             source = str(path)
         else:
             gdf = layer
-            inferred = ""
-            source = "<GeoDataFrame>"
+            metadata = getattr(gdf, "attrs", {}) or {}
+            inferred = str(metadata.get("kind", ""))
+            source = str(metadata.get("source", "<GeoDataFrame>"))
         kind = (kind or inferred or self._infer_kind(gdf)).lower()
         if kind not in ("wl", "wp", "wt"):
             raise ValueError("Layer kind must be wl, wp or wt; got {!r}".format(kind))
@@ -629,10 +688,11 @@ class GraphicRenderer:
             point.x,
             point.y,
             label,
-            fontsize=self.polygon_label_fontsize,
+            fontsize=self.polygon_label_fontsize * self.polygon_label_scale,
             ha="center",
             va="center",
             zorder=12,
+            parse_math=label.startswith("$\\mathrm{"),
             bbox={"boxstyle": "round,pad=0.05", "fc": "white", "ec": "none", "alpha": 0.5},
             **kwargs,
         )
@@ -640,6 +700,7 @@ class GraphicRenderer:
 
     def _draw_wp(self, ax: Any, gdf: Any, report: Dict[str, Any]) -> None:
         unit = self._unit(gdf)
+        fill_patches = []
         for _, row in gdf.iterrows():
             if self._int(row.get("class", 1), 1) == 0:
                 self._bump(report, "excluded_class")
@@ -657,7 +718,7 @@ class GraphicRenderer:
             else:
                 rgb = self._color(row.get("fill_color"), report, role="fill")
             for poly in polygons:
-                ax.add_patch(
+                fill_patches.append(
                     self._polygon_patch(
                         poly,
                         facecolor=rgb,
@@ -683,6 +744,12 @@ class GraphicRenderer:
                 self._bump(report, "pattern_too_large")
             else:
                 self._bump(report, "pattern_unresolved")
+        if fill_patches:
+            from matplotlib.collections import PatchCollection
+
+            collection = PatchCollection(fill_patches, match_original=True)
+            collection.set_zorder(2)
+            ax.add_collection(collection)
 
     def _tile_mask(self, number: int) -> Optional[np.ndarray]:
         if number in self._tile_cache:
@@ -696,7 +763,10 @@ class GraphicRenderer:
             self._tile_cache[number] = None
             return None
         size = self.tile_pixels
-        fig = Figure(figsize=(size / 100.0, size / 100.0), dpi=100, facecolor="none")
+        # A one-inch square at dpi=size has exact pixel dimensions. Using
+        # size/100 inches at dpi=100 can round down to size-1 on some
+        # Matplotlib versions.
+        fig = Figure(figsize=(1.0, 1.0), dpi=size, facecolor="none")
         FigureCanvasAgg(fig)
         ax = fig.add_axes([0, 0, 1, 1])
         ax.set_xlim(0, 1)
@@ -707,7 +777,11 @@ class GraphicRenderer:
             ax.add_patch(Polygon(ring, closed=True, fc="k", ec="none"))
         for points in geometry["polylines"]:
             ax.plot(
-                [p[0] for p in points], [p[1] for p in points], "k-", lw=0.8, solid_capstyle="round"
+                [p[0] for p in points],
+                [p[1] for p in points],
+                "k-",
+                lw=0.8 * 100.0 / size,
+                solid_capstyle="round",
             )
         for cx, cy, radius in geometry["circles"]:
             ax.add_patch(Circle((cx, cy), radius, fc="k", ec="none"))
@@ -718,7 +792,7 @@ class GraphicRenderer:
                 [cx + radius * math.cos(t) for t in angles],
                 [cy + radius * math.sin(t) for t in angles],
                 "k-",
-                lw=0.8,
+                lw=0.8 * 100.0 / size,
             )
         fig.canvas.draw()
         rgba = np.asarray(fig.canvas.buffer_rgba())
@@ -738,7 +812,13 @@ class GraphicRenderer:
         y0 = math.floor(miny / height) * height
         nx = max(1, int(math.ceil((maxx - x0) / width)))
         ny = max(1, int(math.ceil((maxy - y0) / height)))
-        if nx * ny > self.max_pattern_tiles:
+        tile_count = nx * ny
+        if tile_count > self.max_pattern_tiles:
+            return "too_large"
+        rgba_bytes = (
+            tile_count * self.tile_pixels * self.tile_pixels * 4 * np.dtype(np.float32).itemsize
+        )
+        if rgba_bytes > self.max_pattern_bytes:
             return "too_large"
         tile = np.zeros((self.tile_pixels, self.tile_pixels, 4), dtype=np.float32)
         tile[..., 0], tile[..., 1], tile[..., 2] = rgb
@@ -769,6 +849,28 @@ class GraphicRenderer:
                 yield from GraphicRenderer._iter_lines(part)
 
     @staticmethod
+    def _substring_parts(curve: Any, start: float, end: float) -> List[Any]:
+        """Return LineString slices for either single- or multi-part curves."""
+        from shapely.ops import substring
+
+        if start >= end or curve.is_empty:
+            return []
+        if curve.geom_type == "LineString":
+            return [substring(curve, start, end)]
+        parts = []
+        offset = 0.0
+        for line in getattr(curve, "geoms", []):
+            if line.geom_type != "LineString":
+                continue
+            length = line.length
+            lo = max(0.0, start - offset)
+            hi = min(length, end - offset)
+            if hi > lo:
+                parts.append(substring(line, lo, hi))
+            offset += length
+        return parts
+
+    @staticmethod
     def _normalise_rhythm(rhythm: dict) -> dict:
         out = {
             "kind": rhythm.get("kind", "rhythm"),
@@ -794,8 +896,12 @@ class GraphicRenderer:
                 "dotline_lib_r",
                 "line_slash_dot",
                 "filled_rect_dot_bars",
+                "mixed_dash",
             ):
-                out["dots"].append((x, values[1], values[2]))
+                dot = (x, values[1], values[2])
+                if len(values) > 3:
+                    dot += (bool(values[3]),)
+                out["dots"].append(dot)
             else:
                 h, top = values[1], values[2]
                 ya, yb = (-h, top) if abs(abs(h) - abs(top)) < 1e-9 and h > 0 else (h, top)
@@ -853,8 +959,10 @@ class GraphicRenderer:
                     x, y, radius, filled = data
                     if filled is True:
                         out["dots"].append((x, y, radius))
+                    elif filled is False:
+                        out["dots"].append((x, y, radius, False))
                     else:
-                        # Unknown fill remains unfilled; no radius/unit/style
+                        # Unknown fill remains an outline; no radius/unit/style
                         # adjudication is substituted for missing evidence.
                         out["unknown_fills"] += 1
                         out["polylines"].append(
@@ -873,17 +981,28 @@ class GraphicRenderer:
         xs.extend(dot[0] for dot in out["dots"])
         # Offset describes layout position, while payload endpoints describe
         # the actual extent. Both are required for a non-gapped base segment.
-        out["period_mm"] = max(periods + ([max(xs)] if xs else [1.0]))
+        if xs:
+            # Preserve positive offsets while also accounting for payload that
+            # extends left of the repeat origin.
+            extent = max(xs) - min(0.0, min(xs))
+            out["period_mm"] = max(periods + [extent])
+        else:
+            out["period_mm"] = max(periods + [1.0])
         if out["period_mm"] <= 0:
             out["period_mm"] = 1.0
         return out
+
+    def _line_style(self, number: int) -> Any:
+        if number not in self._line_style_cache:
+            self._line_style_cache[number] = self.libraries.linesty.decode(number)
+        return self._line_style_cache[number]
 
     def _rhythm(self, number: int, aux: int = 0) -> Optional[dict]:
         """Resolve verified variants first, then structural library geometry."""
         key = (number, aux)
         if key in self._rhythm_cache:
             return self._rhythm_cache[key]
-        style = self.libraries.linesty.decode(number)
+        style = self._line_style(number)
         result = None
         if style is not None and getattr(style, "sublines", None):
             if style.no in _RHYTHM_SUPPORTED_NOS:
@@ -933,13 +1052,18 @@ class GraphicRenderer:
                 continue
             self._bump(report, "drawn")
             color = self._color(row.get("color"), report)
-            width_mm = self._float(row.get("width"), 0.1) or 0.1
+            width_mm = self._float(row.get("width"), 0.1)
             line_width = max(width_mm * unit * points_per_unit, self.line_min_pt)
             linetype = self._int(row.get("linetype"))
             aux = self._int(row.get("aux_linetype"))
-            xc = self._float(row.get("x_coef"), 1.0) or 1.0
-            yc = self._float(row.get("y_coef"), 1.0) or 1.0
-            style = self.libraries.linesty.decode(linetype)
+            if self._int(row.get("aux_flag"), 0) != 0:
+                aux = 0
+            xc = self._float(row.get("x_coef"), 1.0)
+            yc = self._float(row.get("y_coef"), 1.0)
+            transparent_fills = self._int(row.get("transparent"), 0) != 0 and all(
+                abs(component - 1.0) <= 1e-12 for component in color
+            )
+            style = self._line_style(linetype)
             independent_aux = bool(aux) and not _aux_selects_subline(style, aux)
             rhythm = self._rhythm(linetype, aux)
             for line in lines:
@@ -957,11 +1081,15 @@ class GraphicRenderer:
                     buffer,
                     report,
                     prefix="",
+                    transparent_fills=transparent_fills,
                 )
                 if independent_aux:
                     aux_rhythm = self._rhythm(aux)
                     aux_number = self._int(row.get("aux_color"))
                     aux_color = self._color(aux_number, report) if aux_number else color
+                    aux_transparent_fills = self._int(row.get("transparent"), 0) != 0 and all(
+                        abs(component - 1.0) <= 1e-12 for component in aux_color
+                    )
                     self._draw_wl_line(
                         ax,
                         points,
@@ -975,6 +1103,7 @@ class GraphicRenderer:
                         buffer,
                         report,
                         prefix="aux_",
+                        transparent_fills=aux_transparent_fills,
                     )
         self._flush_stamps(ax, buffer, points_per_unit)
 
@@ -993,6 +1122,7 @@ class GraphicRenderer:
         report: Dict[str, Any],
         *,
         prefix: str,
+        transparent_fills: bool = False,
     ) -> None:
         if len(points) < 2:
             return
@@ -1019,16 +1149,21 @@ class GraphicRenderer:
                 zorder=4,
             )
             return
-        self._bump(report, prefix + "pattern")
+        before = (
+            len(buffer.segments),
+            len(buffer.dots),
+            len(buffer.fills),
+            len(ax.lines),
+        )
         unknown_fills = int(rhythm.get("unknown_fills", 0))
         if unknown_fills:
             self._bump(report, prefix + "unknown_fill", unknown_fills)
         if rhythm["kind"] == "raised_lines":
-            self._draw_raised_parallel(
+            outcome = self._draw_raised_parallel(
                 ax, points, rhythm, color, xc, yc, unit, line_width
             )
         else:
-            self._stamp_along(
+            outcome = self._stamp_along(
                 points,
                 rhythm,
                 xc,
@@ -1038,7 +1173,20 @@ class GraphicRenderer:
                 line_width,
                 self.dot_min_pt / points_per_unit,
                 buffer,
+                transparent_fills=transparent_fills,
             )
+        after = (
+            len(buffer.segments),
+            len(buffer.dots),
+            len(buffer.fills),
+            len(ax.lines),
+        )
+        if outcome == "too_many_cycles":
+            self._bump(report, prefix + "cycle_limit")
+        elif before == after:
+            self._bump(report, prefix + "empty_pattern")
+        else:
+            self._bump(report, prefix + "pattern")
 
     def _draw_raised_parallel(
         self,
@@ -1050,7 +1198,7 @@ class GraphicRenderer:
         yc: float,
         unit: float,
         line_width: float,
-    ) -> None:
+    ) -> Optional[str]:
         """Draw raised-line variants using library lengths on the source curve.
 
         Unlike a screen-space dash pattern, every interval here is a paper-mm
@@ -1059,13 +1207,15 @@ class GraphicRenderer:
         levels, with endpoints mapped back from base chainage.
         """
         from shapely.geometry import LineString
-        from shapely.ops import substring
 
         base = LineString(points)
         total = base.length
         period = float(rhythm["period_mm"]) * xc * unit
         if total <= 1e-12 or period <= 0:
-            return
+            return None
+        ratio = total / period
+        if not math.isfinite(ratio) or ratio + 4 > self.max_pattern_cycles:
+            return "too_many_cycles"
         curves = {}
         for values in rhythm.get("lines", []):
             if len(values) < 2:
@@ -1092,20 +1242,65 @@ class GraphicRenderer:
                 if hi <= lo:
                     continue
                 if offset == 0.0:
-                    part = substring(base, lo, hi)
+                    parts = self._substring_parts(base, lo, hi)
                 else:
                     # Pattern phase is measured on the original line, not on
                     # the longer/shorter offset curve.
                     c0 = curve.project(base.interpolate(lo))
                     c1 = curve.project(base.interpolate(hi))
-                    part = substring(curve, min(c0, c1), max(c0, c1))
-                for line in self._iter_lines(part):
-                    xy = np.asarray(line.coords)
-                    if len(xy) >= 2:
-                        ax.plot(
-                            xy[:, 0], xy[:, 1], color=color, lw=line_width,
-                            solid_capstyle="butt", zorder=4,
-                        )
+                    parts = self._substring_parts(curve, min(c0, c1), max(c0, c1))
+                for part in parts:
+                    for line in self._iter_lines(part):
+                        xy = np.asarray(line.coords)
+                        if len(xy) >= 2:
+                            ax.plot(
+                                xy[:, 0], xy[:, 1], color=color, lw=line_width,
+                                solid_capstyle="butt", zorder=4,
+                            )
+
+    @staticmethod
+    def _clip_fill_to_range(
+        distances: np.ndarray, offsets: np.ndarray, total: float
+    ) -> List[np.ndarray]:
+        """Clip one fill ring to the source-line chainage interval."""
+        points = np.column_stack((distances, offsets))
+        if len(points) < 3 or not np.all(np.isfinite(points)):
+            return []
+        if not np.array_equal(points[0], points[-1]):
+            points = np.vstack((points, points[0]))
+        x, y = points[:, 0], points[:, 1]
+        signed_twice_area = np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))
+        if abs(signed_twice_area) <= 1e-18:
+            return []
+        from shapely.errors import GEOSException
+        from shapely.geometry import Polygon
+        from shapely.ops import clip_by_rect
+        from shapely.validation import make_valid
+
+        margin = max(float(np.ptp(offsets)), 1.0)
+        try:
+            polygon = Polygon(points)
+            if not polygon.is_valid:
+                polygon = make_valid(polygon)
+            clipped = clip_by_rect(
+                polygon,
+                0.0,
+                float(np.min(offsets)) - margin,
+                total,
+                float(np.max(offsets)) + margin,
+            )
+        except (GEOSException, ValueError):
+            return []
+        if clipped.is_empty:
+            return []
+        candidates = [clipped] if clipped.geom_type == "Polygon" else list(
+            getattr(clipped, "geoms", [])
+        )
+        return [
+            np.asarray(part.exterior.coords)
+            for part in candidates
+            if part.geom_type == "Polygon" and part.area > 0
+        ]
 
     def _stamp_along(
         self,
@@ -1118,17 +1313,21 @@ class GraphicRenderer:
         line_width: float,
         min_radius: float,
         buffer: _StampBuffer,
-    ) -> None:
+        transparent_fills: bool = False,
+    ) -> Optional[str]:
         period = float(rhythm["period_mm"]) * xc * unit
         if period <= 0 or len(points) < 2:
-            return
+            return None
         delta = np.diff(points, axis=0)
         lengths = np.hypot(delta[:, 0], delta[:, 1])
         cumulative = np.concatenate(([0.0], np.cumsum(lengths)))
         total = float(cumulative[-1])
         if total <= 1e-12:
-            return
-        cycles = np.arange(-1, max(1, int(math.ceil(total / period))) + 1, dtype=float)
+            return None
+        ratio = total / period
+        if not math.isfinite(ratio) or ratio + 2 > self.max_pattern_cycles:
+            return "too_many_cycles"
+        cycles = np.arange(-1, max(1, int(math.ceil(ratio))) + 1, dtype=float)
 
         def anchor(distance: np.ndarray):
             distance = np.clip(distance, 0.0, total)
@@ -1191,7 +1390,6 @@ class GraphicRenderer:
                     # Constant-offset parallel strokes follow the complete
                     # offset curve too; only zero-offset lines use raw points.
                     from shapely.geometry import LineString
-                    from shapely.ops import substring
 
                     if base is None:
                         base = LineString(points)
@@ -1207,23 +1405,25 @@ class GraphicRenderer:
                                 continue
                             c0 = curve.project(base.interpolate(lo))
                             c1 = curve.project(base.interpolate(hi))
-                            part = substring(curve, min(c0, c1), max(c0, c1))
-                            for line in self._iter_lines(part):
-                                xy = np.asarray(line.coords)
-                                if d0 > d1:
-                                    xy = xy[::-1]
-                                if len(xy) < 2:
-                                    continue
-                                segments = np.stack((xy[:-1], xy[1:]), axis=1)
-                                segments = segments[
-                                    np.any(segments[:, 0] != segments[:, 1], axis=1)
-                                ]
-                                if not len(segments):
-                                    continue
-                                buffer.segments.append(segments)
-                                count = len(segments)
-                                buffer.segment_colors.extend([color] * count)
-                                buffer.segment_widths.extend([line_width] * count)
+                            for part in self._substring_parts(
+                                curve, min(c0, c1), max(c0, c1)
+                            ):
+                                for line in self._iter_lines(part):
+                                    xy = np.asarray(line.coords)
+                                    if d0 > d1:
+                                        xy = xy[::-1]
+                                    if len(xy) < 2:
+                                        continue
+                                    segments = np.stack((xy[:-1], xy[1:]), axis=1)
+                                    segments = segments[
+                                        np.any(segments[:, 0] != segments[:, 1], axis=1)
+                                    ]
+                                    if not len(segments):
+                                        continue
+                                    buffer.segments.append(segments)
+                                    count = len(segments)
+                                    buffer.segment_colors.extend([color] * count)
+                                    buffer.segment_widths.extend([line_width] * count)
                     continue
                 bx0, by0, tx0, ty0 = anchor(s0[valid])
                 bx1, by1, tx1, ty1 = anchor(s1[valid])
@@ -1234,7 +1434,9 @@ class GraphicRenderer:
                 count = len(segments)
                 buffer.segment_colors.extend([color] * count)
                 buffer.segment_widths.extend([line_width] * count)
-        for x, y, radius in rhythm["dots"]:
+        for values in rhythm["dots"]:
+            x, y, radius = values[:3]
+            filled = len(values) < 4 or bool(values[3])
             distance = cycles * period + x * xc * unit
             valid = (distance >= 0.0) & (distance <= total)
             if not np.any(valid):
@@ -1245,22 +1447,40 @@ class GraphicRenderer:
             count = int(np.count_nonzero(valid))
             buffer.dot_radii.extend([max(radius * unit, min_radius)] * count)
             buffer.dot_colors.extend([color] * count)
+            buffer.dot_filled.extend([filled] * count)
+            buffer.dot_widths.extend([line_width] * count)
+        if transparent_fills:
+            return
         for ring in rhythm["fills"]:
             if len(ring) < 3:
                 continue
             px = np.asarray([p[0] for p in ring], dtype=float) * xc * unit
             py = np.asarray([p[1] for p in ring], dtype=float) * yc * unit
             distances = cycles[:, None] * period + px[None, :]
-            valid = ((distances >= 0.0) & (distances <= total)).all(axis=1)
-            if not np.any(valid):
-                continue
-            bx, by, tx, ty = anchor(distances[valid].ravel())
-            py2 = np.tile(py, int(np.count_nonzero(valid)))
-            x = (bx - ty * py2).reshape((-1, len(px)))
-            y = (by + tx * py2).reshape((-1, len(px)))
-            for row in np.stack((x, y), axis=-1):
-                buffer.fills.append(row)
-                buffer.fill_colors.append(color)
+            inside = (distances >= 0.0) & (distances <= total)
+            complete = inside.all(axis=1)
+            if np.any(complete):
+                bx, by, tx, ty = anchor(distances[complete].ravel())
+                py2 = np.tile(py, int(np.count_nonzero(complete)))
+                x = (bx - ty * py2).reshape((-1, len(px)))
+                y = (by + tx * py2).reshape((-1, len(px)))
+                for row in np.stack((x, y), axis=-1):
+                    buffer.fills.append(row)
+                    buffer.fill_colors.append(color)
+            # A partial motif at either endpoint is clipped, not discarded.
+            # Bounding-box overlap also catches a wide ring whose vertices all
+            # fall outside the source interval while its interior covers it.
+            overlaps = (distances.max(axis=1) >= 0.0) & (
+                distances.min(axis=1) <= total
+            )
+            partial = overlaps & ~complete
+            for index in np.flatnonzero(partial):
+                for clipped in self._clip_fill_to_range(distances[index], py, total):
+                    bx, by, tx, ty = anchor(clipped[:, 0])
+                    x = bx - ty * clipped[:, 1]
+                    y = by + tx * clipped[:, 1]
+                    buffer.fills.append(np.column_stack((x, y)))
+                    buffer.fill_colors.append(color)
 
     @staticmethod
     def _flush_stamps(ax: Any, buffer: _StampBuffer, points_per_unit: float) -> None:
@@ -1279,12 +1499,26 @@ class GraphicRenderer:
         if buffer.dots:
             points = np.concatenate(buffer.dots, axis=0)
             radii = np.asarray(buffer.dot_radii)
+            filled = (
+                buffer.dot_filled
+                if len(buffer.dot_filled) == len(buffer.dot_colors)
+                else [True] * len(buffer.dot_colors)
+            )
+            widths = (
+                buffer.dot_widths
+                if len(buffer.dot_widths) == len(buffer.dot_colors)
+                else [0.0] * len(buffer.dot_colors)
+            )
             ax.scatter(
                 points[:, 0],
                 points[:, 1],
                 s=(2 * radii * points_per_unit) ** 2,
-                c=buffer.dot_colors,
-                linewidths=0,
+                facecolors=[color if is_filled else "none"
+                            for color, is_filled in zip(buffer.dot_colors, filled)],
+                edgecolors=["none" if is_filled else color
+                            for color, is_filled in zip(buffer.dot_colors, filled)],
+                linewidths=[0.0 if is_filled else width
+                            for width, is_filled in zip(widths, filled)],
                 zorder=5,
             )
         if buffer.fills:
@@ -1314,19 +1548,6 @@ class GraphicRenderer:
             self._symbol_cache[number] = self.libraries.subgraph.decode(number)
         return self._symbol_cache[number]
 
-    @staticmethod
-    def _ring_area(points: Sequence[Tuple[float, float]]) -> float:
-        return (
-            abs(
-                sum(
-                    points[i][0] * points[(i + 1) % len(points)][1]
-                    - points[(i + 1) % len(points)][0] * points[i][1]
-                    for i in range(len(points))
-                )
-            )
-            / 2.0
-        )
-
     def _draw_symbol(
         self,
         ax: Any,
@@ -1353,16 +1574,36 @@ class GraphicRenderer:
         )
         ca = math.cos(math.radians(angle))
         sa = math.sin(math.radians(angle))
-        sx, sy = width_mm * unit, height_mm * unit
+        # Fit the native shape inside the requested dimensions without changing
+        # its aspect ratio: uniform scale in symbol space, then rotate/translate.
+        # A missing/zero dimension falls back to the other one instead of
+        # collapsing the whole symbol to a point.
+        dimensions = [abs(width_mm), abs(height_mm)]
+        positive = [value for value in dimensions if value > 0]
+        scale = (min(positive) if positive else 1.0) * unit
 
         def transform(px: float, py: float) -> Tuple[float, float]:
-            return (x + (px * ca - py * sa) * sx, y + (px * sa + py * ca) * sy)
+            px *= scale
+            py *= scale
+            return (x + px * ca - py * sa, y + px * sa + py * ca)
 
         def circle_points(cx: float, cy: float, radius: float) -> List[Tuple[float, float]]:
             return [
                 (
                     cx + radius * math.cos(2 * math.pi * i / 48.0),
                     cy + radius * math.sin(2 * math.pi * i / 48.0),
+                )
+                for i in range(49)
+            ]
+
+        def arc_points(
+            cx: float, cy: float, radius: float, a0: float, a1: float
+        ) -> List[Tuple[float, float]]:
+            sweep = (a1 - a0) % 360.0
+            return [
+                (
+                    cx + radius * math.cos(math.radians(a0 + sweep * i / 48.0)),
+                    cy + radius * math.sin(math.radians(a0 + sweep * i / 48.0)),
                 )
                 for i in range(49)
             ]
@@ -1385,18 +1626,12 @@ class GraphicRenderer:
                     points = None
                     if subpath.circle is not None:
                         points = circle_points(*subpath.circle)
-                    elif subpath.arc is None and subpath.template_digit is None:
-                        candidate = subpath.points
-                        if (
-                            len(candidate) >= 4
-                            and self._ring_area(candidate) > 0.005
-                            and math.hypot(
-                                candidate[0][0] - candidate[-1][0],
-                                candidate[0][1] - candidate[-1][1],
-                            )
-                            <= 0.05
-                        ):
-                            points = candidate
+                    elif subpath.arc is not None:
+                        points = arc_points(*subpath.arc)
+                    elif len(subpath.points) >= 3:
+                        # The library descriptor, not a geometric similarity
+                        # threshold, decides whether this subpath is filled.
+                        points = list(subpath.points)
                     if points:
                         ax.add_patch(
                             Polygon(
@@ -1411,15 +1646,7 @@ class GraphicRenderer:
             if subpath.circle is not None:
                 points = circle_points(*subpath.circle)
             elif subpath.arc is not None:
-                cx, cy, radius, a0, a1 = subpath.arc
-                sweep = (a1 - a0) % 360.0
-                points = [
-                    (
-                        cx + radius * math.cos(math.radians(a0 + sweep * i / 48.0)),
-                        cy + radius * math.sin(math.radians(a0 + sweep * i / 48.0)),
-                    )
-                    for i in range(49)
-                ]
+                points = arc_points(*subpath.arc)
             else:
                 points = list(subpath.points)
                 if subpath.closed and points:
@@ -1501,14 +1728,15 @@ class GraphicRenderer:
             return
         height = self._float(row.get("height"), 2.0)
         category = self._text(row.get("CHFCEC", "")).strip()
-        scale = self.text_scale * self._float(
-            self.text_category_scales.get(category), 1.0
-        )
+        category_scale = self._float(self.text_category_scales.get(category), 1.0)
+        if category in {"产状", "断层产状", "断层辅助点"}:
+            category_scale *= self.attitude_text_scale
+        scale = self.text_scale * category_scale
         base_size = max(height * MM_TO_PT * scale, 0.8)
         angle = self._float(row.get("angle"), 0.0)
         width = self._float(row.get("width"), height)
         spacing = self._float(row.get("spacing"), 0.0)
-        advance = width + spacing
+        advance = (width + spacing) * scale
         tokens = self._annotation_tokens(raw)
         if self.native_text_layout and advance > 0 and tokens and "\n" not in raw:
             ca = math.cos(math.radians(angle))
@@ -1521,7 +1749,7 @@ class GraphicRenderer:
                           (-0.35 if mode == "sub" else 0.5) * height * unit)
                 x = point.x + index * advance * unit * ca - offset * sa
                 y = point.y + index * advance * unit * sa + offset * ca
-                content = _GREEK_MATHTEXT.get(char, char) if has_controls else char
+                content = _mathtext_escape(char) if has_controls else char
                 if has_controls:
                     content = "$\\mathrm{" + content + "}$"
                 ax.text(
@@ -1534,6 +1762,7 @@ class GraphicRenderer:
                     va="baseline",
                     rotation=angle,
                     rotation_mode="anchor",
+                    parse_math=has_controls,
                     zorder=6,
                     **self._font_kwargs(row, char, report),
                 )
@@ -1562,6 +1791,7 @@ class GraphicRenderer:
             va="baseline",
             rotation=angle,
             rotation_mode="anchor",
+            parse_math=label.startswith("$\\mathrm{"),
             zorder=6,
             **self._font_kwargs(row, raw[:1] or " ", report),
         )
@@ -1628,6 +1858,27 @@ _GREEK_MATHTEXT = {
 }
 
 
+_MATHTEXT_LITERAL_ESCAPES = {
+    "\\": r"\backslash{}",
+    "{": r"\{",
+    "}": r"\}",
+    "_": r"\_",
+    "^": r"\textasciicircum{}",
+    "$": r"\$",
+    "%": r"\%",
+    "#": r"\#",
+    "~": r"\textasciitilde{}",
+}
+
+
+def _mathtext_escape(value: str) -> str:
+    """Escape literal label text while retaining supported Greek commands."""
+    return "".join(
+        _GREEK_MATHTEXT.get(char, _MATHTEXT_LITERAL_ESCAPES.get(char, char))
+        for char in value
+    )
+
+
 def _annotation_to_mathtext(code: str) -> str:
     """Convert MapGIS ``#-/#+/#=`` and arrow annotation controls to mathtext."""
     if not code:
@@ -1652,7 +1903,7 @@ def _annotation_to_mathtext(code: str) -> str:
         groups.append((mode, buffer))
     segments: List[str] = []
     for mode, value in groups:
-        escaped = "".join(_GREEK_MATHTEXT.get(char, char) for char in value)
+        escaped = _mathtext_escape(value)
         if not escaped:
             continue
         if mode in ("sub", "sup"):
@@ -1679,7 +1930,8 @@ def render_graphic_map(
     ``slib`` may be an SLIB directory or an existing :class:`GraphicLibraries`.
     Renderer options (``scale``, ``map_units_per_mm``, ``color_overrides``, …)
     and output options (``figsize``, ``dpi``, ``margin``, ``title``) are passed
-    as keyword arguments.
+    as keyword arguments. ``channel_order`` is forwarded when ``slib`` is a
+    directory.
 
     Example
     -------
@@ -1690,9 +1942,13 @@ def render_graphic_map(
     """
     output_keys = {"figsize", "dpi", "margin", "title"}
     render_options = {key: kwargs.pop(key) for key in list(kwargs) if key in output_keys}
-    libraries = (
-        slib if isinstance(slib, GraphicLibraries) else GraphicLibraries.from_directory(slib)
-    )
+    channel_order = kwargs.pop("channel_order", "KCMY")
+    if isinstance(slib, GraphicLibraries):
+        if channel_order != "KCMY":
+            raise ValueError("channel_order is only valid when slib is a directory")
+        libraries = slib
+    else:
+        libraries = GraphicLibraries.from_directory(slib, channel_order=channel_order)
     renderer = GraphicRenderer(libraries, **kwargs)
     return renderer.render(layers, output, **render_options)
 

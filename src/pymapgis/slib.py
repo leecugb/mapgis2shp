@@ -448,9 +448,10 @@ class SubgraphLib:
         pts = list(zip(arr[0::2].tolist(), arr[1::2].tolist()))
         sym = Symbol(no=no, type=t, n=n, header_len=hl, header_u16=header_u16)
         counts = self._subpath_counts(header_u16, len(pts))
+        has_count_table = bool(counts)
         if not counts:
-            counts = [len(pts)]  # 头尾无点数表 → 单子路径
-        sym.elements = parse_elements(header_u16, counts)
+            counts = [len(pts)]  # 头尾无点数表 → 单子路径，但不伪造描述区分组
+        sym.elements = parse_elements(header_u16, counts) if has_count_table else []
         i = 0
         for cnt in counts:
             sp = SubPath(points=pts[i:i + cnt])
