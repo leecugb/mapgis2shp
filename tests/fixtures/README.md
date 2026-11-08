@@ -49,6 +49,10 @@ The project owner explicitly supplied twelve real JWD vectors and five matching 
 
 These files are bundled by explicit project-owner request for regression testing. They are **not** part of the synthetic-fixture Apache-2.0 dedication, and no additional licence or public-domain dedication is inferred. Both the source archive and wheel include them. Source tests use `tests/fixtures/`; wheel installations expose the same files as `pymapgis/testing/fixtures/`, with `pymapgis.testing.fixture_path()` resolving the correct location automatically.
 
+The authoritative source is the public V1 *Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000)*, sheet **J43C001002**, produced by the Development and Research Center of China Geological Survey and distributed by the National Geological Archives of China. Dataset DOI: **10.23650/data.A.2018.NGA131703.K1.1.1.V1**; companion article DOI: **10.12029/gc2018Z101**. The five SLIB files accompany the same source package. See [DATA_ATTRIBUTION.md](../../DATA_ATTRIBUTION.md) for complete citations and the usage boundary.
+
+From 2026-11-08, current JWD regression and examples use only the original open-edition vectors and SLIB. New coordinate-warped or virtual-geological-unit derivatives are no longer generated or recommended; historical derivative directories are not the regression master. Public, non-classified and test-only status does not by itself grant arbitrary redistribution rights.
+
 Run the real integration tests without any absolute-path configuration:
 
 ```bash
@@ -81,6 +85,18 @@ python -m pytest -q tests/test_writer_native_batch3.py
 ```
 
 UTM inputs are reprojected to Gauss-Kruger (k=1) before encoding because MapGIS 6x does not store the UTM zone scale factor. The tests reproject the written result back to EPSG:32643 and use an explicit 1e-5 m Hausdorff tolerance for projection round-trips. Null geometry must be rejected by default and is retained only through an explicit `on_empty="drop"` request; fully degenerate rings are rejected rather than silently written as empty polygons.
+
+## Fourth native Writer batch
+
+`writer_batch4/` contains twenty domestic Gauss-Kruger SHP cases and eighteen MapGIS-native outputs supplied for Writer auditing. All cases use a 75°E central meridian, k=1 and metre units. The cases cover MultiPoint, MultiLineString, 257 point records, empty/null geometry, 10,001 line vertices, duplicate rings, a bowtie, a degenerate ring, 80 attribute fields, a 5,001-vertex exterior ring, duplicate geometry and a zero-feature file. `03_POINT_MULTIPOINT` and `20_EMPTY_FILE` have no native output and are recorded explicitly in `writer_batch4_manifest.json`.
+
+The native outputs are comparison evidence, not a desired-behaviour specification. In particular, native case 09 merges and duplicates geometry, case 07 fills empty records with lines from the previous conversion, case 06 loses the second MultiLineString part, and several native metric fields disagree with native geometry. Writer regressions therefore assert source fidelity, valid topology, correct metric fields and null semantics rather than copying those defects. Native point/line default styles and the large-ring 24-bit offset of 81,650 are matched explicitly.
+
+```bash
+python -m pytest -q tests/test_writer_native_batch4.py
+```
+
+The fourth batch currently has 28 passing regressions. Source and wheel fixture layouts both include the root manifest and all SHP/native files. MapGIS version and conversion settings were not provided and are not inferred.
 
 ## Fixture licence
 
