@@ -923,7 +923,7 @@ Unknown field-type descriptors are skipped without shifting the retained raw des
 - Add eleven native SHP-to-MapGIS Writer cases with provenance manifests and source/wheel fixture access; align default WT point size 0.1 mm, colour 6 and pen width 0.1 mm, and default WL width 0.05 mm, X/Y coefficients 1.0 and `aux_flag=1` with the supplied native conversion reference
 - Normalize the two bundled WP backup filenames to `.WP`, and add a compatibility loader that still handles the published V2.7.1 `.WP~` layout through `Reader`
 - Add `examples/render_bundled_jwd.py` with PNG/PDF/SVG output and sanitized JSON reports, and run it in CI
-- Assert all 782 38|2 source vertices and `max_deviation == 0.0`, pin `drawn + excluded_text == 7094`, cover the published WP-backup layout, and add direct Subgraph/LINESTY/Fillgrph/Colorlib/Pcolor structural-census assertions
+- Assert all 782 38|2 source vertices and `max_deviation <= 1e-9`, pin `drawn + excluded_text == 7094`, cover the published WP-backup layout, and add direct Subgraph/LINESTY/Fillgrph/Colorlib/Pcolor structural-census assertions
 - Select `geopandas<1.2` only in the `dev` reference environment because GeoPandas 1.2 changes edge pixels in the optional legacy rendering reference path; ordinary runtime requirements are unchanged
 - Synchronize the citation title and 2.7.1 Zenodo DOI, and clarify the SoftwareX validation artifacts and native-acceptance boundary
 

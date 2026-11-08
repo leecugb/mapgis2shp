@@ -304,7 +304,8 @@ def test_38_2_solid_segments_preserve_all_real_source_vertices():
                 checked_parts += 1
     assert checked_features == 37
     assert checked_vertices == 782
-    assert max_deviation == 0.0
+    # Preserve every source vertex while allowing platform floating-point roundoff.
+    assert max_deviation == pytest.approx(0.0, abs=1e-9)
     assert checked_parts >= checked_features
 
 
