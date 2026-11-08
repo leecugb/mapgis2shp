@@ -112,15 +112,19 @@ _ATTR_TYPE_STAMP = {"POINT": 621, "LINE": 1011, "POLYGON": 972}
 # Per-point auxiliary constants (native values observed in J43C001002).
 _POINT_FLAG_INT = 65539  # head5 4-byte record value
 
-# Graphic-parameter defaults (validated against native J43C001002 files).
+# Graphic-parameter defaults (validated against native J43C001002 files and
+# the second native SHP-conversion batch dated 2026-11-07).
 _DEFAULT_POINT_TYPE = POINT_TYPE_SYMBOL
 _DEFAULT_SYMBOL_NO = 1
-_DEFAULT_POINT_SIZE = 1.0  # mm
+_DEFAULT_POINT_SIZE = 0.1  # mm
+_DEFAULT_POINT_COLOR = 6
+_DEFAULT_POINT_PEN_WIDTH = 0.1  # mm
 _DEFAULT_LINETYPE = 1
 _DEFAULT_AUX_LINETYPE = 0
+_DEFAULT_AUX_FLAG = 1
 _DEFAULT_LINE_COLOR = 1  # int16 @26 (Colorlib 1-based); 1 in all inspected native files
-_DEFAULT_LINE_WIDTH = 0.1  # mm
-_DEFAULT_LINE_COEF = 5.0  # x/y pattern coefficient (MapGIS 重存规范值)
+_DEFAULT_LINE_WIDTH = 0.05  # mm
+_DEFAULT_LINE_COEF = 1.0  # x/y pattern coefficient
 
 
 # ---------------------------------------------------------------------------
@@ -455,7 +459,7 @@ def _build_attribute_section(
 # Coordinate reference system
 # ---------------------------------------------------------------------------
 
-_PROJ_CODE_FOR = {"tmerc": 5, "aea": 2, "lcc": 3}
+_PROJ_CODE_FOR = {"tmerc": 5, "utm": 5, "aea": 2, "lcc": 3}
 
 # Lazily built inverse of ``_ELLIPSOID_PROJ4``:
 # (a, 1/f, has_towgs84) -> ellipsoid code.
@@ -528,6 +532,47 @@ def _proj4_params(crs: pyproj.CRS) -> Dict[str, float]:
         except ValueError:
             continue
     return params
+
+
+def _projection_name(crs: Any) -> str:
+    """Return the PROJ projection identifier, or an empty string."""
+    for part in pyproj.CRS(crs).to_proj4().split():
+        if part.startswith("+proj="):
+            return part.split("=", 1)[1]
+    return ""
+
+
+def _prepare_crs(gdf: gpd.GeoDataFrame):
+    """Convert UTM geometry to a MapGIS-representable Gauss-Kruger CRS.
+
+    MapGIS 6x stores the Transverse Mercator family and central meridian but
+    not UTM's zone-specific scale factor. Writing UTM coordinates unchanged
+    with k=1 would move the data geographically, so reproject before encoding.
+    """
+    if gdf.crs in (None, ""):
+        return gdf, gdf.crs
+    crs = pyproj.CRS(gdf.crs)
+    if _projection_name(crs) != "utm":
+        return gdf, crs
+    zone = _proj4_params(crs).get("zone")
+    if zone is None:
+        raise WriterError("UTM input requires an explicit zone")
+    lon_0 = int(zone) * 6 - 183
+    preserved = []
+    for part in crs.to_proj4().split():
+        if part.startswith(("+proj=", "+zone=", "+k=", "+lat_0=", "+lon_0=", "+x_0=", "+y_0=")):
+            continue
+        preserved.append(part)
+    target_proj4 = " ".join(
+        ["+proj=tmerc", "+lat_0=0", f"+lon_0={lon_0}", "+k=1",
+         "+x_0=500000", "+y_0=0", *preserved]
+    )
+    target = pyproj.CRS.from_proj4(target_proj4)
+    warnings.warn(
+        "UTM coordinates reprojected to Gauss-Kruger (k=1) before writing; "
+        "MapGIS 6x cannot store the UTM zone scale factor"
+    )
+    return gdf.to_crs(target), target
 
 
 # Header CRS-block constants observed in every inspected native J43C001002
@@ -631,12 +676,8 @@ def _crs_header_fields(crs: Any, map_scale: float) -> Dict[int, Tuple[str, Any]]
         return fields
 
     params = _proj4_params(crs)
-    proj = None
-    for part in crs.to_proj4().split():
-        if part.startswith("+proj="):
-            proj = part.split("=", 1)[1]
-            break
-    code = _PROJ_CODE_FOR.get(proj or "")
+    proj = _projection_name(crs)
+    code = _PROJ_CODE_FOR.get(proj)
     if code is None:
         raise WriterError(
             f"unsupported projection {proj!r}; MapGIS 6x files only carry "
@@ -743,7 +784,11 @@ def _encode_points(gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame], factor
         # 2026-10-15 wat 明码补齐（reader.py 对称）：颜色@75/图层@83 两类点
         # 共用；@49 按 kind 分写——字符串点=中文字体 u8(+西文字体@51/字形@53)，
         # 子图点=笔宽 f32。
-        color = int(row["color"]) if (row is not None and "color" in row.index) else 1
+        color = (
+            int(row["color"])
+            if (row is not None and "color" in row.index)
+            else _DEFAULT_POINT_COLOR
+        )
         layer = int(row["layer"]) if (row is not None and "layer" in row.index) else 0
         struct.pack_into("<B", record, 75, color & 0xFF)
         struct.pack_into("<B", record, 83, layer & 0xFF)
@@ -751,7 +796,7 @@ def _encode_points(gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame], factor
             pen = (float(row["pen_width"])
                    if (row is not None and "pen_width" in row.index
                        and np.isfinite(row["pen_width"]))
-                   else 0.05)
+                   else _DEFAULT_POINT_PEN_WIDTH)
             struct.pack_into("<f", record, 49, pen)
         else:
             fzh = int(row["font_zh"]) if (row is not None and "font_zh" in row.index) else 1
@@ -795,7 +840,11 @@ def _encode_lines(
         struct.pack_into("<h", record, 22, linetype)
         # 2026-10-15 修复：aux 写 u8@24 + 标志字节 @25（原 int16 写两字节，
         # 会把 0 写进 @25 覆盖标志位；现按 reader 对称拆 u8 对）。
-        aux_flag = int(row["aux_flag"]) if (row is not None and "aux_flag" in row.index) else 0
+        aux_flag = (
+            int(row["aux_flag"])
+            if (row is not None and "aux_flag" in row.index)
+            else _DEFAULT_AUX_FLAG
+        )
         struct.pack_into("<B", record, 24, aux & 0xFF)
         struct.pack_into("<B", record, 25, aux_flag & 0xFF)
         struct.pack_into("<h", record, 26, color)
@@ -1590,11 +1639,11 @@ class Writer:
             self.shapeType = _detect_shape_type(geodataframe)
 
         self._gdf = _normalise_geometries(geodataframe, self.shapeType, on_empty)
+        self._gdf, self._crs = _prepare_crs(self._gdf)
         self._params: Optional[pd.DataFrame] = None
         self._attr = self._split_param_columns(self._gdf)
         if self.shapeType == "POLYGON":
             self._attr = self._add_polygon_standard_fields(self._attr)
-        self._crs = self._gdf.crs
 
     def _add_polygon_standard_fields(self, attr: pd.DataFrame) -> pd.DataFrame:
         """Append the native ID/面积/周长 standard fields for .wp tables.
@@ -1644,7 +1693,7 @@ class Writer:
                 {
                     "linetype": _DEFAULT_LINETYPE,
                     "aux_linetype": _DEFAULT_AUX_LINETYPE,
-                    "aux_flag": 0,
+                    "aux_flag": _DEFAULT_AUX_FLAG,
                     "color": _DEFAULT_LINE_COLOR,
                     "width": _DEFAULT_LINE_WIDTH,
                     "x_coef": _DEFAULT_LINE_COEF,
@@ -1667,9 +1716,9 @@ class Writer:
                     "width": _DEFAULT_POINT_SIZE,
                     "spacing": 0.0,
                     "angle": 0.0,
-                    "color": 1,
+                    "color": _DEFAULT_POINT_COLOR,
                     "layer": 0,
-                    "pen_width": 0.05,
+                    "pen_width": _DEFAULT_POINT_PEN_WIDTH,
                     "font_zh": 1,
                     "font_en": 0,
                     "font_style": 0,

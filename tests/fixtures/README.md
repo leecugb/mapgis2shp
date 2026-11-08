@@ -43,7 +43,7 @@ Regeneration rewrites the three binaries and their manifest. Header timestamps o
 
 The project owner explicitly supplied twelve real JWD vectors and five matching SLIB libraries for integration testing:
 
-- `jwd/`: 5 WP (including two `.WP~` backups), 5 WL and 2 WT files, 7,094 features, 7,092,289 bytes.
+- `jwd/`: 5 WP, 5 WL and 2 WT files, 7,094 features, 7,092,289 bytes.
 - `slib/`: `Subgraph.lib`, `LINESTY.lib`, `Fillgrph.lib`, `Colorlib.lib` and `Pcolor.lib`, 12,289,478 bytes.
 - `jwd_slib_manifest.json`: provenance, roles, byte counts and SHA-256 for every file. Total dataset size: 19,381,767 bytes.
 
@@ -59,6 +59,28 @@ python -m pytest -q tests/test_pure.py -k "ColorLib or PcolorLib"
 `PYMAPGIS_JWD` and `PYMAPGIS_SLIB` can override the fixture directories for another installation. `PYMAPGIS_COLORLIB` and `PYMAPGIS_PCOLOR` override individual colour libraries. An explicitly supplied invalid path, a missing bundled file or a checksum mismatch fails the test instead of silently skipping it.
 
 The tests verify Reader and graphic-library behaviour, report invariants and PNG/PDF generation. They do not replace native MapGIS display, editing, save/reopen or visual acceptance.
+
+## Native Writer SHP conversion batch
+
+`writer_batch2/` contains eleven small synthetic SHP cases and their MapGIS-native WT/WL/WP conversion outputs, supplied for Writer auditing. The cases cover minimal rings, holes, multipart polygons, shared edges, duplicate vertices, an invalid bowtie, points with nullable dates and MultiLineString input. The MapGIS version and conversion settings were not provided and are not inferred. `writer_batch2_manifest.json` records provenance, byte counts and SHA-256 for all 68 files.
+
+Run the native Writer regressions with:
+
+```bash
+python -m pytest -q tests/test_writer_native_batch2.py
+```
+
+The tests compare source semantics and native default point/line graphic parameters. They do not require the native conversion to preserve every source geometry decision: multipart lines are exploded by Writer, shared polygon boundaries may be represented differently, and the invalid bowtie is split into triangles by both paths.
+
+## Third native Writer batch
+
+`writer_batch3/` adds twelve SHP cases and their native MapGIS outputs for large 24-bit ring-index offsets, duplicate geometries, projected UTM input, long attributes, null geometry and degenerate rings. The MapGIS version and conversion settings are likewise not inferred. `writer_batch3_manifest.json` records all 74 files and their SHA-256 values.
+
+```bash
+python -m pytest -q tests/test_writer_native_batch3.py
+```
+
+UTM inputs are reprojected to Gauss-Kruger (k=1) before encoding because MapGIS 6x does not store the UTM zone scale factor. The tests reproject the written result back to EPSG:32643 and use an explicit 1e-5 m Hausdorff tolerance for projection round-trips. Null geometry must be rejected by default and is retained only through an explicit `on_empty="drop"` request; fully degenerate rings are rejected rather than silently written as empty polygons.
 
 ## Fixture licence
 

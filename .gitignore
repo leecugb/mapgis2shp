@@ -54,8 +54,8 @@ src/pymapgis/semantics/
 *.WP~
 
 # Real geological survey vectors remain ignored except for the explicitly
-# integrated owner-supplied regression dataset. Public synthetic fixtures and
-# tests/fixtures/jwd are the only MapGIS binaries intended for source archives.
+# integrated owner-supplied regression datasets. Public synthetic fixtures and
+# the JWD and Writer-native batches are intended for source archives.
 !tests/fixtures/mapgis/*.wt
 !tests/fixtures/mapgis/*.wl
 !tests/fixtures/mapgis/*.wp
@@ -68,6 +68,12 @@ src/pymapgis/semantics/
 !tests/fixtures/jwd/*.WT~
 !tests/fixtures/jwd/*.WL~
 !tests/fixtures/jwd/*.WP~
+!tests/fixtures/writer_batch2/*.WT
+!tests/fixtures/writer_batch2/*.WL
+!tests/fixtures/writer_batch2/*.WP
+!tests/fixtures/writer_batch3/*.WT
+!tests/fixtures/writer_batch3/*.WL
+!tests/fixtures/writer_batch3/*.WP
 
 # MapGIS project / raster overlay files
 *.MPJ
