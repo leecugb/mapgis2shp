@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "mapgis2shp: an open-source Python reader and writer for the MapGIS 6.x/67 binary vector formats, validated against the native export"
+title: "mapgis2shp: open-source interoperability and original-library rendering for legacy MapGIS 6.x/67 vector data"
 message: "If you use this software, please cite it as below."
 abstract: >-
   mapgis2shp (import name pymapgis) is an open-source Python reader and
@@ -15,7 +15,7 @@ version: "2.7.1"
 date-released: 2026-11-07
 license: Apache-2.0
 repository-code: https://github.com/leecugb/mapgis2shp
-url: https://doi.org/10.5281/zenodo.21487339
+url: https://doi.org/10.5281/zenodo.24036158
 keywords:
   - MapGIS
   - GIS
@@ -48,7 +48,7 @@ authors:
     affiliation: Xi'an Mineral Resources Survey, China Geological Survey
 preferred-citation:
   type: software
-  title: "mapgis2shp: an open-source Python reader and writer for the MapGIS 6.x/67 binary vector formats, validated against the native export"
+  title: "mapgis2shp: open-source interoperability and original-library rendering for legacy MapGIS 6.x/67 vector data"
   authors:
     - given-names: Shijie
       family-names: Li
@@ -71,11 +71,11 @@ preferred-citation:
     - given-names: Zengyun
       family-names: Zuo
       affiliation: Xi'an Mineral Resources Survey, China Geological Survey
-  version: "2.6.0"
-  date-released: 2026-10-26
+  version: "2.7.1"
+  date-released: 2026-11-07
   license: Apache-2.0
   repository-code: https://github.com/leecugb/mapgis2shp
-  url: https://doi.org/10.5281/zenodo.21487339
+  url: https://doi.org/10.5281/zenodo.24036158
   keywords:
     - MapGIS
     - GIS

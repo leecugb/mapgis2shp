@@ -10,11 +10,13 @@ import hashlib
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from examples.render_bundled_jwd import regression_layers, summarise
 from pymapgis import GraphicLibraries, GraphicRenderer, Reader
 from pymapgis.graphic import _StampBuffer
 from pymapgis.testing import fixture_path, jwd_path, slib_path
@@ -26,10 +28,10 @@ BUNDLED_JWD = jwd_path()
 BUNDLED_SLIB = slib_path()
 LIBRARY_NAMES = ("Subgraph.lib", "LINESTY.lib", "Fillgrph.lib", "Colorlib.lib", "Pcolor.lib")
 LAYER_NAMES = [
-    "LDLYAAE002.WP~",
+    "LDLYAAE002.WP",
     "LDZOFBB001.WP",
     "LDZOFBB002.WP",
-    "LDZOFBB003.WP~",
+    "LDZOFBB003.WP",
     "LDZOFBB004.WP",
     "LDLYAAE001.WL",
     "LDZOFBA002.WL",
@@ -59,14 +61,8 @@ def _slib_root() -> Path:
 
 
 def _layers(root: Path):
-    layers = []
-    for name in LAYER_NAMES:
-        path = root / name
-        if path.suffix.lower() == ".wp~":
-            layers.append(Reader(str(path), read_graphic_params=True).geodataframe)
-        else:
-            layers.append(path)
-    return layers
+    # Exercise the same compatibility path as the manuscript Quickstart.
+    return regression_layers(root)
 
 
 def test_real_jwd_twelve_layer_render(tmp_path):
@@ -108,6 +104,7 @@ def test_real_jwd_twelve_layer_render(tmp_path):
     assert sum(item.get("compressed_text", 0) for item in reports) == 0
     assert sum(item.get("script_text", 0) for item in reports) == 0
     assert sum(item.get("excluded_text", 0) for item in reports) == 1362
+    assert sum(item["drawn"] + item.get("excluded_text", 0) for item in reports) == 7094
     assert sum(item.get("unknown_fill", 0) + item.get("aux_unknown_fill", 0)
                for item in reports) == 0
     assert sum(item.get("excluded_class", 0) for item in reports) == 0
@@ -123,6 +120,36 @@ def test_real_jwd_twelve_layer_render(tmp_path):
 
     assert png.read_bytes().startswith(b"\x89PNG")
     assert pdf.read_bytes().startswith(b"%PDF")
+
+
+def test_published_wp_backup_layout_quickstart(tmp_path):
+    """The V2.7.1 fixture layout also runs without renderer modifications."""
+    root = _jwd_root()
+    legacy = tmp_path / "legacy_jwd"
+    shutil.copytree(root, legacy)
+    for name in ("LDLYAAE002.WP", "LDZOFBB003.WP"):
+        (legacy / name).rename(legacy / (name + "~"))
+
+    renderer = GraphicRenderer(
+        GraphicLibraries.from_directory(_slib_root()),
+        scale=250000,
+        native_text_layout=True,
+        font_zh_map={1: "SimSun", 4: "SimHei"},
+        font_en_map={0: "DejaVu Sans"},
+        text_font_family=["Microsoft YaHei", "SimSun", "DejaVu Sans"],
+    )
+    result = renderer.render(regression_layers(legacy), tmp_path / "legacy.png", dpi=80)
+    summary = summarise(result.reports)
+    result.figure.clear()
+
+    assert summary["layers"] == 12
+    assert summary["features"] == 7094
+    assert summary["drawn"] + summary["excluded_text"] == 7094
+    assert summary["unknown_colour_occurrences"] == 0
+    assert summary["solid_fallbacks"] == 0
+    assert summary["unknown_fills"] == 0
+    assert summary["unresolved_symbols"] == 0
+    assert summary["unknown_fonts"] == []
 
 
 def test_real_jwd_quaternary_library_colors():
@@ -251,6 +278,8 @@ def test_38_2_solid_segments_preserve_all_real_source_vertices():
     rhythm = renderer._rhythm(38, 2)
     checked_features = 0
     checked_parts = 0
+    checked_vertices = 0
+    max_deviation = 0.0
     for name in ("LDZOFBA002.WL", "LDZOFBA003.WL"):
         gdf = Reader(str(root / name), read_graphic_params=True).geodataframe
         selected = gdf[(gdf["linetype"] == 38) & (gdf["aux_linetype"] == 2)]
@@ -270,8 +299,12 @@ def test_38_2_solid_segments_preserve_all_real_source_vertices():
                 for vertex in points:
                     distance = np.min(np.linalg.norm(endpoints - vertex, axis=1))
                     assert distance <= 1e-9, (name, checked_features, vertex, distance)
+                    checked_vertices += 1
+                    max_deviation = max(max_deviation, float(distance))
                 checked_parts += 1
     assert checked_features == 37
+    assert checked_vertices == 782
+    assert max_deviation == 0.0
     assert checked_parts >= checked_features
 
 
@@ -285,3 +318,26 @@ def test_bundled_jwd_slib_fixture_manifest():
             assert len(data) == expected["bytes"], name
             assert hashlib.sha256(data).hexdigest() == expected["sha256"], name
     assert manifest["totals"]["bytes"] == 19381767
+
+
+def test_bundled_library_structural_census():
+    """Pin every structural-coverage total printed in the manuscript."""
+    libraries = GraphicLibraries.from_directory(_slib_root())
+
+    assert libraries.subgraph.symbol_count == 7360
+
+    styles = [libraries.linesty.decode(no) for no in range(1, libraries.linesty.count + 1)]
+    nonempty = [style for style in styles if style is not None and style.sublines]
+    assert len(nonempty) == 859
+    assert sum(len(style.sublines) for style in nonempty) == 984
+    assert all(not style.truncated for style in nonempty)
+
+    assert libraries.fillgrph.count == 1337
+    assert sum(
+        libraries.fillgrph.decode(no) is not None
+        for no in range(1, libraries.fillgrph.count + 1)
+    ) == 1280
+    assert libraries.color.max_no == 870
+    assert libraries.pcolor is not None
+    assert libraries.pcolor.count == 4098
+    assert libraries.pcolor.trailing_bytes == 28

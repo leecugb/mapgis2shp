@@ -2,7 +2,7 @@ name: test-and-build
 
 on:
   push:
-    branches: [main, "softwarex-readiness-*"]
+    branches: [main, main-integration-20261102, "softwarex-readiness-*"]
   pull_request:
   workflow_dispatch:
 
@@ -44,6 +44,8 @@ jobs:
         run: python -m pytest -q
       - name: Run the public geological workflow
         run: python examples/geological_workflow.py
+      - name: Run the bundled original-library rendering example
+        run: python examples/render_bundled_jwd.py --output-dir "${{ runner.temp }}/jwd-render" --dpi 160
 
   build:
     name: Build and inspect release archives

@@ -1,0 +1,1066 @@
+{
+  "created_utc": "2026-10-17T07:44:15.459205+00:00",
+  "protocol": {
+    "reader_defaults": {
+      "make_valid": true,
+      "read_point_params": false,
+      "read_graphic_params": false
+    },
+    "repeats_per_layer_and_corpus": 3,
+    "statistic": "median; first/min/max samples retained",
+    "process_isolation": "fresh Python process per layer and per corpus pass",
+    "timing_scope": "Reader construction plus GeoDataFrame access; imports excluded",
+    "memory_metric": "Windows peak working set (peak_wset) via psutil",
+    "memory_baseline": "RSS after pymapgis import and garbage collection",
+    "cache_note": "Repeated reads may benefit from operating-system file caching"
+  },
+  "environment": {
+    "python_version": "3.14.6",
+    "python_implementation": "CPython",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "machine": "AMD64",
+    "cpu": "12th Gen Intel(R) Core(TM) i9-12950HX",
+    "cpu_physical_cores": 16,
+    "cpu_logical_cores": 24,
+    "physical_memory_bytes": 34029162496,
+    "package_versions": {
+      "geopandas": "1.1.4",
+      "numpy": "2.4.6",
+      "pandas": "3.0.3",
+      "pyogrio": "0.13.0",
+      "pyproj": "3.7.2",
+      "shapely": "2.1.2",
+      "psutil": "7.2.2"
+    }
+  },
+  "layers": [
+    {
+      "features": 16,
+      "geometry_type": "LINE",
+      "frame_rows": 16,
+      "bbox": [
+        73.49999900094726,
+        39.000000001929855,
+        75.00000099999441,
+        40.000000010579086
+      ],
+      "file": "LDLYAAA005.WL",
+      "size_bytes": 25742,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.009053399999174871,
+        0.002871400000003632,
+        0.0027103000011265976
+      ],
+      "first_seconds": 0.009053399999174871,
+      "median_seconds": 0.002871400000003632,
+      "min_seconds": 0.0027103000011265976,
+      "max_seconds": 0.009053399999174871,
+      "baseline_rss_bytes": 112222208,
+      "final_rss_bytes": 114642944,
+      "peak_rss_bytes": 114647040,
+      "peak_increment_bytes": 2424832
+    },
+    {
+      "features": 1143,
+      "geometry_type": "LINE",
+      "frame_rows": 1143,
+      "bbox": [
+        73.50148929782634,
+        39.00000000040029,
+        75.00000099999441,
+        40.00000003328248
+      ],
+      "file": "LDLYAAE001.WL",
+      "size_bytes": 833885,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.02482609999970009,
+        0.01728499999990163,
+        0.016622299999653478
+      ],
+      "first_seconds": 0.02482609999970009,
+      "median_seconds": 0.01728499999990163,
+      "min_seconds": 0.016622299999653478,
+      "max_seconds": 0.02482609999970009,
+      "baseline_rss_bytes": 112373760,
+      "final_rss_bytes": 117592064,
+      "peak_rss_bytes": 117596160,
+      "peak_increment_bytes": 5222400
+    },
+    {
+      "features": 128,
+      "geometry_type": "POLYGON",
+      "frame_rows": 128,
+      "bbox": [
+        73.49999999996275,
+        38.99999999999621,
+        74.99094219561695,
+        39.64473468292831
+      ],
+      "file": "LDLYAAE002.WP",
+      "size_bytes": 319715,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.082053400001314,
+        0.0742947999988246,
+        0.07363590000022668
+      ],
+      "first_seconds": 0.082053400001314,
+      "median_seconds": 0.0742947999988246,
+      "min_seconds": 0.07363590000022668,
+      "max_seconds": 0.082053400001314,
+      "baseline_rss_bytes": 112095232,
+      "final_rss_bytes": 116817920,
+      "peak_rss_bytes": 121298944,
+      "peak_increment_bytes": 9203712
+    },
+    {
+      "features": 242,
+      "geometry_type": "POINT",
+      "frame_rows": 242,
+      "bbox": [
+        73.60872189266048,
+        39.02313595221242,
+        74.96354518933116,
+        39.97466304797418
+      ],
+      "file": "LDLYAAI002.WT",
+      "size_bytes": 56859,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.008988999999928637,
+        0.005029599999033962,
+        0.0051045000000158325
+      ],
+      "first_seconds": 0.008988999999928637,
+      "median_seconds": 0.0051045000000158325,
+      "min_seconds": 0.005029599999033962,
+      "max_seconds": 0.008988999999928637,
+      "baseline_rss_bytes": 112455680,
+      "final_rss_bytes": 114917376,
+      "peak_rss_bytes": 114921472,
+      "peak_increment_bytes": 2465792
+    },
+    {
+      "features": 2222,
+      "geometry_type": "LINE",
+      "frame_rows": 2222,
+      "bbox": [
+        73.49999900075113,
+        39.00000000040029,
+        75.00000099999441,
+        40.00000003327712
+      ],
+      "file": "LDZOFBA002.WL",
+      "size_bytes": 2166050,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.0382065000012517,
+        0.029263199998240452,
+        0.02951310000025842
+      ],
+      "first_seconds": 0.0382065000012517,
+      "median_seconds": 0.02951310000025842,
+      "min_seconds": 0.029263199998240452,
+      "max_seconds": 0.0382065000012517,
+      "baseline_rss_bytes": 111890432,
+      "final_rss_bytes": 115752960,
+      "peak_rss_bytes": 119451648,
+      "peak_increment_bytes": 7561216
+    },
+    {
+      "features": 310,
+      "geometry_type": "LINE",
+      "frame_rows": 310,
+      "bbox": [
+        73.49999900075113,
+        39.00000001975259,
+        75.00000099999441,
+        40.00000003327712
+      ],
+      "file": "LDZOFBA003.WL",
+      "size_bytes": 444675,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.016619900001387578,
+        0.0090319000009913,
+        0.008770200000071782
+      ],
+      "first_seconds": 0.016619900001387578,
+      "median_seconds": 0.0090319000009913,
+      "min_seconds": 0.008770200000071782,
+      "max_seconds": 0.016619900001387578,
+      "baseline_rss_bytes": 112144384,
+      "final_rss_bytes": 115597312,
+      "peak_rss_bytes": 115601408,
+      "peak_increment_bytes": 3457024
+    },
+    {
+      "features": 4,
+      "geometry_type": "LINE",
+      "frame_rows": 4,
+      "bbox": [
+        73.75743975721352,
+        39.02525770761914,
+        74.99892931487689,
+        39.82776244046353
+      ],
+      "file": "LDZOFBA005.WL",
+      "size_bytes": 8547,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.007099599999492057,
+        0.003395499999896856,
+        0.00328329999865673
+      ],
+      "first_seconds": 0.007099599999492057,
+      "median_seconds": 0.003395499999896856,
+      "min_seconds": 0.00328329999865673,
+      "max_seconds": 0.007099599999492057,
+      "baseline_rss_bytes": 112103424,
+      "final_rss_bytes": 114540544,
+      "peak_rss_bytes": 114544640,
+      "peak_increment_bytes": 2441216
+    },
+    {
+      "features": 305,
+      "geometry_type": "POINT",
+      "frame_rows": 305,
+      "bbox": [
+        73.70410125499775,
+        39.00417639220542,
+        74.99651963733831,
+        39.99815544698026
+      ],
+      "file": "LDZOFBA016.WT",
+      "size_bytes": 75185,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.014143800000965712,
+        0.005755400001362432,
+        0.0058233999989170115
+      ],
+      "first_seconds": 0.014143800000965712,
+      "median_seconds": 0.0058233999989170115,
+      "min_seconds": 0.005755400001362432,
+      "max_seconds": 0.014143800000965712,
+      "baseline_rss_bytes": 112541696,
+      "final_rss_bytes": 115240960,
+      "peak_rss_bytes": 115245056,
+      "peak_increment_bytes": 2703360
+    },
+    {
+      "features": 608,
+      "geometry_type": "POLYGON",
+      "frame_rows": 608,
+      "bbox": [
+        73.49999900075113,
+        38.99999999999661,
+        75.00000099999441,
+        40.00000003327712
+      ],
+      "file": "LDZOFBB001.WP",
+      "size_bytes": 2166438,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.37378910000006726,
+        0.37175869999919087,
+        0.36512340000081167
+      ],
+      "first_seconds": 0.37378910000006726,
+      "median_seconds": 0.37175869999919087,
+      "min_seconds": 0.36512340000081167,
+      "max_seconds": 0.37378910000006726,
+      "baseline_rss_bytes": 112291840,
+      "final_rss_bytes": 119865344,
+      "peak_rss_bytes": 135172096,
+      "peak_increment_bytes": 22880256
+    },
+    {
+      "features": 10,
+      "geometry_type": "POLYGON",
+      "frame_rows": 10,
+      "bbox": [
+        74.35500043138602,
+        39.09499881584331,
+        75.00000099999441,
+        39.394691936269915
+      ],
+      "file": "LDZOFBB002.WP",
+      "size_bytes": 93953,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.019526599999153404,
+        0.018710499998633168,
+        0.014910500000041793
+      ],
+      "first_seconds": 0.019526599999153404,
+      "median_seconds": 0.018710499998633168,
+      "min_seconds": 0.014910500000041793,
+      "max_seconds": 0.019526599999153404,
+      "baseline_rss_bytes": 112230400,
+      "final_rss_bytes": 116674560,
+      "peak_rss_bytes": 116678656,
+      "peak_increment_bytes": 4448256
+    },
+    {
+      "features": 46,
+      "geometry_type": "POLYGON",
+      "frame_rows": 46,
+      "bbox": [
+        73.71111111970849,
+        38.99999999999615,
+        74.99999999999442,
+        39.97268040673517
+      ],
+      "file": "LDZOFBB003.WP",
+      "size_bytes": 194676,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.05073219999940193,
+        0.0417208999988361,
+        0.04198360000009416
+      ],
+      "first_seconds": 0.05073219999940193,
+      "median_seconds": 0.04198360000009416,
+      "min_seconds": 0.0417208999988361,
+      "max_seconds": 0.05073219999940193,
+      "baseline_rss_bytes": 112001024,
+      "final_rss_bytes": 116486144,
+      "peak_rss_bytes": 118607872,
+      "peak_increment_bytes": 6606848
+    },
+    {
+      "features": 49,
+      "geometry_type": "POLYGON",
+      "frame_rows": 49,
+      "bbox": [
+        73.50149029782634,
+        38.999999999995794,
+        75.00000099999441,
+        40.00000003327712
+      ],
+      "file": "LDZOFBB004.WP",
+      "size_bytes": 330259,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.07155819999934465,
+        0.06447009999828879,
+        0.06376869999985502
+      ],
+      "first_seconds": 0.07155819999934465,
+      "median_seconds": 0.06447009999828879,
+      "min_seconds": 0.06376869999985502,
+      "max_seconds": 0.07155819999934465,
+      "baseline_rss_bytes": 111796224,
+      "final_rss_bytes": 117276672,
+      "peak_rss_bytes": 121126912,
+      "peak_increment_bytes": 9330688
+    },
+    {
+      "features": 20,
+      "geometry_type": "POLYGON",
+      "frame_rows": 20,
+      "bbox": [
+        73.50909964131534,
+        39.15478158252966,
+        74.98196211207147,
+        39.736509164825385
+      ],
+      "file": "LDZOFBB009.WP",
+      "size_bytes": 73085,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.01897619999908784,
+        0.014009000000442029,
+        0.014400599999135011
+      ],
+      "first_seconds": 0.01897619999908784,
+      "median_seconds": 0.014400599999135011,
+      "min_seconds": 0.014009000000442029,
+      "max_seconds": 0.01897619999908784,
+      "baseline_rss_bytes": 112181248,
+      "final_rss_bytes": 116203520,
+      "peak_rss_bytes": 116207616,
+      "peak_increment_bytes": 4026368
+    },
+    {
+      "features": 4,
+      "geometry_type": "POLYGON",
+      "frame_rows": 4,
+      "bbox": [
+        73.49999999996267,
+        38.999999999995794,
+        74.99999999999442,
+        40.00000003192663
+      ],
+      "file": "LDZOFBB010.WP",
+      "size_bytes": 48365,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.013684100000318722,
+        0.009166899999399902,
+        0.008827400000882335
+      ],
+      "first_seconds": 0.013684100000318722,
+      "median_seconds": 0.009166899999399902,
+      "min_seconds": 0.008827400000882335,
+      "max_seconds": 0.013684100000318722,
+      "baseline_rss_bytes": 111955968,
+      "final_rss_bytes": 116047872,
+      "peak_rss_bytes": 116051968,
+      "peak_increment_bytes": 4096000
+    },
+    {
+      "features": 245,
+      "geometry_type": "LINE",
+      "frame_rows": 245,
+      "bbox": [
+        73.6660939361972,
+        39.00144320050782,
+        74.99710660500973,
+        39.99857471694215
+      ],
+      "file": "LDZOFBB098.WL",
+      "size_bytes": 55097,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.009372499998789863,
+        0.005573000000367756,
+        0.005470099999001832
+      ],
+      "first_seconds": 0.009372499998789863,
+      "median_seconds": 0.005573000000367756,
+      "min_seconds": 0.005470099999001832,
+      "max_seconds": 0.009372499998789863,
+      "baseline_rss_bytes": 112517120,
+      "final_rss_bytes": 115027968,
+      "peak_rss_bytes": 115032064,
+      "peak_increment_bytes": 2514944
+    },
+    {
+      "features": 2024,
+      "geometry_type": "POINT",
+      "frame_rows": 2024,
+      "bbox": [
+        73.54027795246446,
+        39.000433347421335,
+        74.99625730190496,
+        39.999197496828124
+      ],
+      "file": "LDZOFBB099.WT",
+      "size_bytes": 403809,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.025222599999324302,
+        0.019676300000355695,
+        0.021031799999036593
+      ],
+      "first_seconds": 0.025222599999324302,
+      "median_seconds": 0.021031799999036593,
+      "min_seconds": 0.019676300000355695,
+      "max_seconds": 0.025222599999324302,
+      "baseline_rss_bytes": 112148480,
+      "final_rss_bytes": 116129792,
+      "peak_rss_bytes": 116133888,
+      "peak_increment_bytes": 3985408
+    },
+    {
+      "features": 5,
+      "geometry_type": "LINE",
+      "frame_rows": 5,
+      "bbox": [
+        73.49999999996209,
+        38.999999999994415,
+        75.00000099999441,
+        39.9999999999969
+      ],
+      "file": "LFZYBAA002.WL",
+      "size_bytes": 17250,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.006335899999612593,
+        0.002785500000754837,
+        0.0027351000007911352
+      ],
+      "first_seconds": 0.006335899999612593,
+      "median_seconds": 0.002785500000754837,
+      "min_seconds": 0.0027351000007911352,
+      "max_seconds": 0.006335899999612593,
+      "baseline_rss_bytes": 112103424,
+      "final_rss_bytes": 114544640,
+      "peak_rss_bytes": 114548736,
+      "peak_increment_bytes": 2445312
+    },
+    {
+      "features": 24,
+      "geometry_type": "LINE",
+      "frame_rows": 24,
+      "bbox": [
+        73.49999900002994,
+        39.00000000061093,
+        75.00000099999441,
+        40.00000003316787
+      ],
+      "file": "LFZYBAB002.WL",
+      "size_bytes": 6638,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.0070340999991458375,
+        0.002897099999245256,
+        0.002917100000559003
+      ],
+      "first_seconds": 0.0070340999991458375,
+      "median_seconds": 0.002917100000559003,
+      "min_seconds": 0.002897099999245256,
+      "max_seconds": 0.0070340999991458375,
+      "baseline_rss_bytes": 112545792,
+      "final_rss_bytes": 114946048,
+      "peak_rss_bytes": 114950144,
+      "peak_increment_bytes": 2404352
+    },
+    {
+      "features": 6,
+      "geometry_type": "POINT",
+      "frame_rows": 6,
+      "bbox": [
+        73.95553190473443,
+        38.992250278027704,
+        75.00316767479012,
+        39.985261242934484
+      ],
+      "file": "LFZYBCBA01.WT",
+      "size_bytes": 2472,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.006030200000168406,
+        0.0032102000004670117,
+        0.0029095999998389743
+      ],
+      "first_seconds": 0.006030200000168406,
+      "median_seconds": 0.0032102000004670117,
+      "min_seconds": 0.0029095999998389743,
+      "max_seconds": 0.006030200000168406,
+      "baseline_rss_bytes": 111935488,
+      "final_rss_bytes": 114216960,
+      "peak_rss_bytes": 114221056,
+      "peak_increment_bytes": 2285568
+    },
+    {
+      "features": 10,
+      "geometry_type": "LINE",
+      "frame_rows": 10,
+      "bbox": [
+        73.4333178115741,
+        38.997351336281945,
+        75.00062924591715,
+        39.99154894800095
+      ],
+      "file": "LFZYBCBA02.WL",
+      "size_bytes": 3894,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.00612120000005234,
+        0.002967700000226614,
+        0.0027033000005758367
+      ],
+      "first_seconds": 0.00612120000005234,
+      "median_seconds": 0.002967700000226614,
+      "min_seconds": 0.0027033000005758367,
+      "max_seconds": 0.00612120000005234,
+      "baseline_rss_bytes": 112177152,
+      "final_rss_bytes": 114569216,
+      "peak_rss_bytes": 114573312,
+      "peak_increment_bytes": 2396160
+    },
+    {
+      "features": 6981,
+      "geometry_type": "POINT",
+      "frame_rows": 6981,
+      "bbox": [
+        73.50623114431869,
+        39.001351536333864,
+        74.99826524664292,
+        39.99999458118608
+      ],
+      "file": "LFZYBCT001.WT",
+      "size_bytes": 1369986,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.07972929999959888,
+        0.06825100000060047,
+        0.06824240000059945
+      ],
+      "first_seconds": 0.07972929999959888,
+      "median_seconds": 0.06825100000060047,
+      "min_seconds": 0.06824240000059945,
+      "max_seconds": 0.07972929999959888,
+      "baseline_rss_bytes": 112263168,
+      "final_rss_bytes": 117997568,
+      "peak_rss_bytes": 121044992,
+      "peak_increment_bytes": 8781824
+    },
+    {
+      "features": 2331,
+      "geometry_type": "LINE",
+      "frame_rows": 2331,
+      "bbox": [
+        73.49999900159848,
+        39.000000000811596,
+        75.00000099999441,
+        40.000000033284145
+      ],
+      "file": "LFZYBCT002.WL",
+      "size_bytes": 578675,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.050292800000534044,
+        0.03111489999901096,
+        0.030793699999776436
+      ],
+      "first_seconds": 0.050292800000534044,
+      "median_seconds": 0.03111489999901096,
+      "min_seconds": 0.030793699999776436,
+      "max_seconds": 0.050292800000534044,
+      "baseline_rss_bytes": 112070656,
+      "final_rss_bytes": 116981760,
+      "peak_rss_bytes": 116985856,
+      "peak_increment_bytes": 4915200
+    },
+    {
+      "features": 3,
+      "geometry_type": "LINE",
+      "frame_rows": 3,
+      "bbox": [
+        74.10630564375123,
+        39.11487277648112,
+        75.00000099999441,
+        40.00000000978101
+      ],
+      "file": "LHCPGDAC01.WL",
+      "size_bytes": 4276,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.009199199999784469,
+        0.002882500000850996,
+        0.0029603000002680346
+      ],
+      "first_seconds": 0.009199199999784469,
+      "median_seconds": 0.0029603000002680346,
+      "min_seconds": 0.002882500000850996,
+      "max_seconds": 0.009199199999784469,
+      "baseline_rss_bytes": 112402432,
+      "final_rss_bytes": 114704384,
+      "peak_rss_bytes": 114708480,
+      "peak_increment_bytes": 2306048
+    },
+    {
+      "features": 2,
+      "geometry_type": "POLYGON",
+      "frame_rows": 2,
+      "bbox": [
+        74.45090174722189,
+        39.12735967488347,
+        74.66737675013013,
+        39.23527955743248
+      ],
+      "file": "LHCPGDAC05.WP",
+      "size_bytes": 8803,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.0076664999996864935,
+        0.0035124999994877726,
+        0.0033445999997638864
+      ],
+      "first_seconds": 0.0076664999996864935,
+      "median_seconds": 0.0035124999994877726,
+      "min_seconds": 0.0033445999997638864,
+      "max_seconds": 0.0076664999996864935,
+      "baseline_rss_bytes": 112160768,
+      "final_rss_bytes": 114728960,
+      "peak_rss_bytes": 114733056,
+      "peak_increment_bytes": 2572288
+    },
+    {
+      "features": 2,
+      "geometry_type": "LINE",
+      "frame_rows": 2,
+      "bbox": [
+        74.45090174722189,
+        39.12735967488347,
+        74.66737575013013,
+        39.23527955743248
+      ],
+      "file": "LHCPGDAC06.WL",
+      "size_bytes": 6070,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.0061141999995015794,
+        0.002676299998711329,
+        0.0025998999990406446
+      ],
+      "first_seconds": 0.0061141999995015794,
+      "median_seconds": 0.002676299998711329,
+      "min_seconds": 0.0025998999990406446,
+      "max_seconds": 0.0061141999995015794,
+      "baseline_rss_bytes": 112009216,
+      "final_rss_bytes": 114307072,
+      "peak_rss_bytes": 114311168,
+      "peak_increment_bytes": 2301952
+    },
+    {
+      "features": 4,
+      "geometry_type": "POLYGON",
+      "frame_rows": 4,
+      "bbox": [
+        74.37748524452002,
+        39.15292914685094,
+        74.99469918238557,
+        39.44386740978757
+      ],
+      "file": "LHCPGDAC08.WP",
+      "size_bytes": 21497,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.00780289999966044,
+        0.0041388999998162035,
+        0.003977100001065992
+      ],
+      "first_seconds": 0.00780289999966044,
+      "median_seconds": 0.0041388999998162035,
+      "min_seconds": 0.003977100001065992,
+      "max_seconds": 0.00780289999966044,
+      "baseline_rss_bytes": 112168960,
+      "final_rss_bytes": 114864128,
+      "peak_rss_bytes": 114868224,
+      "peak_increment_bytes": 2699264
+    },
+    {
+      "features": 4,
+      "geometry_type": "LINE",
+      "frame_rows": 4,
+      "bbox": [
+        74.37748524452002,
+        39.15292914685094,
+        74.99469918238557,
+        39.44386740978757
+      ],
+      "file": "LHCPGDAC09.WL",
+      "size_bytes": 17598,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.006666600000244216,
+        0.002830100000210223,
+        0.002698199999940698
+      ],
+      "first_seconds": 0.006666600000244216,
+      "median_seconds": 0.002830100000210223,
+      "min_seconds": 0.002698199999940698,
+      "max_seconds": 0.006666600000244216,
+      "baseline_rss_bytes": 112472064,
+      "final_rss_bytes": 114786304,
+      "peak_rss_bytes": 114790400,
+      "peak_increment_bytes": 2318336
+    },
+    {
+      "features": 8,
+      "geometry_type": "POLYGON",
+      "frame_rows": 8,
+      "bbox": [
+        74.34744222849793,
+        39.70080441453578,
+        74.99999999999442,
+        40.00000002975243
+      ],
+      "file": "LHCPGDAC11.WP",
+      "size_bytes": 33365,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.00883090000024822,
+        0.005107800001496798,
+        0.004968400000507245
+      ],
+      "first_seconds": 0.00883090000024822,
+      "median_seconds": 0.005107800001496798,
+      "min_seconds": 0.004968400000507245,
+      "max_seconds": 0.00883090000024822,
+      "baseline_rss_bytes": 112226304,
+      "final_rss_bytes": 115056640,
+      "peak_rss_bytes": 115060736,
+      "peak_increment_bytes": 2834432
+    },
+    {
+      "features": 10,
+      "geometry_type": "LINE",
+      "frame_rows": 10,
+      "bbox": [
+        74.34744222849793,
+        39.70080441453578,
+        74.99999999999442,
+        40.00000002975243
+      ],
+      "file": "LHCPGDAC12.WL",
+      "size_bytes": 25494,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.0063420000005862676,
+        0.0027722999984689523,
+        0.0027307000000291737
+      ],
+      "first_seconds": 0.0063420000005862676,
+      "median_seconds": 0.0027722999984689523,
+      "min_seconds": 0.0027307000000291737,
+      "max_seconds": 0.0063420000005862676,
+      "baseline_rss_bytes": 112799744,
+      "final_rss_bytes": 115138560,
+      "peak_rss_bytes": 115142656,
+      "peak_increment_bytes": 2342912
+    },
+    {
+      "features": 4,
+      "geometry_type": "LINE",
+      "frame_rows": 4,
+      "bbox": [
+        73.69389177069776,
+        39.0000000059946,
+        74.99999999999442,
+        40.00000003197615
+      ],
+      "file": "LHTQGTA001.WL",
+      "size_bytes": 4777,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.009281900000132737,
+        0.0029997999990882818,
+        0.002955899999506073
+      ],
+      "first_seconds": 0.009281900000132737,
+      "median_seconds": 0.0029997999990882818,
+      "min_seconds": 0.002955899999506073,
+      "max_seconds": 0.009281900000132737,
+      "baseline_rss_bytes": 112205824,
+      "final_rss_bytes": 114634752,
+      "peak_rss_bytes": 114638848,
+      "peak_increment_bytes": 2433024
+    },
+    {
+      "features": 71,
+      "geometry_type": "LINE",
+      "frame_rows": 71,
+      "bbox": [
+        73.5014393384295,
+        39.000000016321714,
+        75.00000099999441,
+        40.00000003328526
+      ],
+      "file": "LYGREBA001.WL",
+      "size_bytes": 147448,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.008554999998523272,
+        0.0044606000010389835,
+        0.004336100000728038
+      ],
+      "first_seconds": 0.008554999998523272,
+      "median_seconds": 0.0044606000010389835,
+      "min_seconds": 0.004336100000728038,
+      "max_seconds": 0.008554999998523272,
+      "baseline_rss_bytes": 112361472,
+      "final_rss_bytes": 115118080,
+      "peak_rss_bytes": 115122176,
+      "peak_increment_bytes": 2760704
+    },
+    {
+      "features": 25,
+      "geometry_type": "LINE",
+      "frame_rows": 25,
+      "bbox": [
+        73.89100053049208,
+        39.17672009363549,
+        75.00000099999441,
+        39.94821208517838
+      ],
+      "file": "LYGREBA004.WL",
+      "size_bytes": 33134,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.00761160000001837,
+        0.0033471999995526858,
+        0.0032405000001745066
+      ],
+      "first_seconds": 0.00761160000001837,
+      "median_seconds": 0.0033471999995526858,
+      "min_seconds": 0.0032405000001745066,
+      "max_seconds": 0.00761160000001837,
+      "baseline_rss_bytes": 112041984,
+      "final_rss_bytes": 114491392,
+      "peak_rss_bytes": 114495488,
+      "peak_increment_bytes": 2453504
+    },
+    {
+      "features": 3,
+      "geometry_type": "LINE",
+      "frame_rows": 3,
+      "bbox": [
+        73.93480539870572,
+        39.016884901936834,
+        74.99999999999442,
+        39.92257505583287
+      ],
+      "file": "LZLPGDJ002.WL",
+      "size_bytes": 5028,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.006912700000611949,
+        0.003272399999332265,
+        0.003198099999281112
+      ],
+      "first_seconds": 0.006912700000611949,
+      "median_seconds": 0.003272399999332265,
+      "min_seconds": 0.003198099999281112,
+      "max_seconds": 0.006912700000611949,
+      "baseline_rss_bytes": 112332800,
+      "final_rss_bytes": 114778112,
+      "peak_rss_bytes": 114782208,
+      "peak_increment_bytes": 2449408
+    },
+    {
+      "features": 2,
+      "geometry_type": "POLYGON",
+      "frame_rows": 2,
+      "bbox": [
+        73.90935931387304,
+        38.999999999996064,
+        74.88308504532047,
+        40.000000033260115
+      ],
+      "file": "LZLPGDJ004.WP",
+      "size_bytes": 11848,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.011820800000350573,
+        0.006058599999960279,
+        0.005851699999766424
+      ],
+      "first_seconds": 0.011820800000350573,
+      "median_seconds": 0.006058599999960279,
+      "min_seconds": 0.005851699999766424,
+      "max_seconds": 0.011820800000350573,
+      "baseline_rss_bytes": 112398336,
+      "final_rss_bytes": 116219904,
+      "peak_rss_bytes": 116224000,
+      "peak_increment_bytes": 3825664
+    },
+    {
+      "features": 1,
+      "geometry_type": "POLYGON",
+      "frame_rows": 1,
+      "bbox": [
+        74.50760119330872,
+        39.1790063407206,
+        74.91112042580608,
+        39.34357017856311
+      ],
+      "file": "LZLPGDJ006.WP",
+      "size_bytes": 6642,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.007007599999269587,
+        0.003487199999653967,
+        0.0034529000004113186
+      ],
+      "first_seconds": 0.007007599999269587,
+      "median_seconds": 0.003487199999653967,
+      "min_seconds": 0.0034529000004113186,
+      "max_seconds": 0.007007599999269587,
+      "baseline_rss_bytes": 112218112,
+      "final_rss_bytes": 114888704,
+      "peak_rss_bytes": 114892800,
+      "peak_increment_bytes": 2674688
+    },
+    {
+      "features": 2,
+      "geometry_type": "POLYGON",
+      "frame_rows": 2,
+      "bbox": [
+        73.96496582198176,
+        38.99999999999661,
+        74.71834094001748,
+        39.91113562745839
+      ],
+      "file": "LZLPGDJ009.WP",
+      "size_bytes": 9726,
+      "pymapgis_version": "2.4.0",
+      "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+      "duration_samples_seconds": [
+        0.007596299999931944,
+        0.0037133999994694022,
+        0.004410499999721651
+      ],
+      "first_seconds": 0.007596299999931944,
+      "median_seconds": 0.004410499999721651,
+      "min_seconds": 0.0037133999994694022,
+      "max_seconds": 0.007596299999931944,
+      "baseline_rss_bytes": 112275456,
+      "final_rss_bytes": 114888704,
+      "peak_rss_bytes": 114892800,
+      "peak_increment_bytes": 2617344
+    }
+  ],
+  "corpus": {
+    "file_count": 36,
+    "features": 16874,
+    "size_bytes": 9610961,
+    "pymapgis_version": "2.4.0",
+    "pymapgis_source": "D:\\JWD\\src\\pymapgis\\__init__.py",
+    "duration_samples_seconds": [
+      0.8639161999999487,
+      0.8349562999992486,
+      0.8476558000002115
+    ],
+    "first_seconds": 0.8639161999999487,
+    "median_seconds": 0.8476558000002115,
+    "min_seconds": 0.8349562999992486,
+    "max_seconds": 0.8639161999999487,
+    "baseline_rss_bytes": 112504832,
+    "final_rss_bytes": 124403712,
+    "peak_rss_bytes": 135811072,
+    "peak_increment_bytes": 23306240
+  }
+}
