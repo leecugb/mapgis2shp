@@ -413,7 +413,12 @@ the legacy comparison path. All other colour roles continue to use Colorlib.
 `Fillgrph.lib`, `LINESTY.lib`, `Subgraph.lib` and `Colorlib.lib`. It preserves
 polygon holes, stamps line-style elements along the original coordinates
 without extending line endpoints, instantiates subgraph geometry and fills,
-and renders WT text annotations.
+and renders WT text annotations. Subgraph geometry uses a uniform
+`min(width, height)` scale before rotation, preserving its native aspect ratio
+instead of applying directional shear. A zero dimension falls back to the other
+dimension, rather than collapsing the symbol. Geographic layers should be
+projected to a suitable conformal CRS before rendering; the JWD example uses
+EPSG:32643.
 
 ```python
 from pymapgis import GraphicLibraries, GraphicRenderer
@@ -422,15 +427,17 @@ libraries = GraphicLibraries.from_directory("/path/to/SLIB")
 renderer = GraphicRenderer(
     libraries,
     scale=250000,
-    # Native WT layout: per-character advance = width + spacing.
+    # Native WT layout: advance = (width + spacing) × text scale.
     native_text_layout=True,
     # Geosciml4china-style labels from polygon attributes (default):
     polygon_labels=True,
     polygon_label_fields=("QDUECC_eff", "QDUECC", "QDUECD"),
     polygon_label_fontsize=4.5,
+    polygon_label_scale=0.7,  # Default: 70% of the base size (3.15 pt here).
     # Fragmented WT unit-code annotations are excluded by default:
     exclude_text_categories={"代号"},
     text_category_scales={"产状": 0.45, "断层产状": 0.45},
+    attitude_text_scale=0.3,  # Additional 30% for attitude and fault-dip text.
     text_font_family=["Noto Sans CJK JP", "SimSun", "DejaVu Sans"],
     # Optional native font-number mappings (installation-local):
     font_zh_map={1: "SimSun", 4: "SimHei"},
@@ -453,6 +460,13 @@ five matching SLIB files, use:
 python examples/render_bundled_jwd.py --output-dir jwd_render
 ```
 
+Optional interface flags are `--input-dir`, `--target-crs`, `--source-crs` and
+`--map-units-per-mm`. The default output projection is computed independently
+with each layer's `estimate_utm_crs()`, avoiding a hard-coded zone for other
+sheets. Set `--target-crs` to override it. Layers with missing CRS metadata
+require either `--source-crs` or `--map-units-per-mm`; `--source-crs` establishes
+the input CRS before projection.
+
 The example writes `jwd_map.png`, `jwd_map.pdf`, `jwd_map.svg` and
 `jwd_render_reports.json`. Its `regression_layers()` helper pre-reads `.WP~`
 backup polygons with `Reader`, so both the published V2.7.1 fixture layout and
@@ -463,8 +477,9 @@ features from drawn features and excluded annotations. These values are
 internal regression evidence, not native MapGIS visual acceptance.
 
 By default, complete geological-unit labels come from polygon attributes and
-are drawn at each geometry's `representative_point()` with Mathtext, 4.5 pt
-type and a translucent background, following the geosciml4china pipeline.
+are drawn at each geometry's `representative_point()` with Mathtext at 70% of
+the 4.5 pt base size (3.15 pt) and a translucent background, following the
+geosciml4china pipeline.
 Fragmented WT annotations whose `CHFCEC` is `代号` are reported as
 `excluded_text` instead of being duplicated. `polygon_label` counts the new
 labels. Set `polygon_labels=False` and `exclude_text_categories=()` to restore
@@ -483,10 +498,17 @@ result = render_graphic_map(
 )
 ```
 
+When the one-shot API receives an SLIB directory, `channel_order="YMCK"` is
+forwarded to both colour-library parsers. To use an existing
+`GraphicLibraries` instance, construct it with the desired channel order first.
+
 For an existing Matplotlib workflow, use `renderer.draw_layers(ax, layers)` or
 `renderer.draw_layer(ax, gdf, kind="wl")`. File paths and pre-read
 GeoDataFrames can be mixed. The latter must have been read with
-`read_graphic_params=True` (and `read_point_params=True` for WT).
+`read_graphic_params=True` (and `read_point_params=True` for WT). Set
+`gdf.attrs['source']` to preserve the layer name in reports, and
+`gdf.attrs['kind']` to `wl`, `wp` or `wt`; the kind is especially useful for
+empty layers whose geometry type cannot be inferred.
 
 The paper-mm/map-unit conversion is inferred from the CRS. For local data
 without a CRS, pass `map_units_per_mm` explicitly. For original graphic-library
@@ -507,18 +529,30 @@ output. Its current display-parameter boundaries are explicit:
 - Polygon `class=0` features are skipped and counted as `excluded_class`
 - Positive WT `pen_width` values override `symbol_line_width_pt`; zero/missing
   values retain that display default
-- With `native_text_layout=True` (default), character advance is exactly
-  `width + spacing`, including negative compression values. Script size and
-  baseline remain typographic approximations. Set it to `False` for whole-label
-  Mathtext layout
+- With `native_text_layout=True` (default), character advance is
+  `(width + spacing) × scale`, including negative compression values. The
+  default attitude multiplier is 0.3 for `产状`, `断层产状` and `断层辅助点`;
+  set `attitude_text_scale=1.0` to disable this additional multiplier, or use
+  `text_category_scales` for other category vocabularies. Script size and
+  baseline remain typographic approximations. Set native layout to `False` for
+  whole-label Mathtext layout
 - Polygon unit labels default to `QDUECC_eff`, `QDUECC` or `QDUECD`, anchored at
-  `representative_point()` with 4.5 pt Mathtext and a translucent background;
-  Greek labels use Times New Roman. WT `代号` annotations are excluded by
-  default; the two paths can be switched independently through
-  `polygon_labels` and `exclude_text_categories`
+  `representative_point()` with 3.15 pt Mathtext (70% of the 4.5 pt base) and a
+  translucent background; Greek labels use Times New Roman. WT `代号`
+  annotations are excluded by default; the two paths can be switched
+  independently through `polygon_labels` and `exclude_text_categories`
 - Native font numbers are installation-local. Supply `font_zh_map`,
   `font_en_map` and optionally `font_style_map`; unmapped numbers are counted
   in `unknown_fonts` rather than silently treated as resolved
+- `pattern` is counted only when a feature adds visible geometry. A pattern with
+  no visible output is reported as `empty_pattern`; stored zero widths and
+  coefficients are preserved rather than silently replaced with defaults.
+  Exceeding
+  `max_pattern_cycles` (default 100,000) is reported as `cycle_limit`. Pattern memory is bounded
+  independently by `max_pattern_tiles` and `max_pattern_bytes`; the first limit
+  reached wins. At the default 26-pixel tiles, the 128 MiB byte cap is reached
+  before the nominal 40,000-tile cap, so both controls must be considered when
+  tuning large patterns
 - The aux field has verified dual semantics. An in-range value selects a main-
   record subline variant; an out-of-range value is decoded and drawn as an
   independent auxiliary record. The style-2 equivalent-dash family is the

@@ -342,3 +342,34 @@ def test_bundled_library_structural_census():
     assert libraries.pcolor is not None
     assert libraries.pcolor.count == 4098
     assert libraries.pcolor.trailing_bytes == 28
+
+
+def test_short_fold_axis_is_clipped_not_dropped(tmp_path):
+    """The 74.990 km third fold retains its 75 km-period partial motif."""
+    gdf = Reader(
+        str(_jwd_root() / "LDZOFBA005.WL"), read_graphic_params=True
+    ).geodataframe.to_crs("EPSG:32643")
+    fold = gdf[gdf["ID"] == 3]
+    assert len(fold) == 1
+    assert fold.geometry.length.iloc[0] < 75000
+
+    renderer = GraphicRenderer(GraphicLibraries.from_directory(_slib_root()), scale=250000)
+    result = renderer.render([fold], tmp_path / "fold-3.png", figsize=(6, 4), dpi=80)
+    assert result.reports[0]["pattern"] == 1
+    assert any(
+        len(collection.get_paths()) > 0
+        for collection in result.axes.collections
+        if hasattr(collection, "get_paths")
+    )
+    result.figure.clear()
+
+
+def test_regression_layers_preserves_metadata_and_filters_nonvectors(tmp_path):
+    source = BUNDLED_JWD / "LDZOFBB003.WP"
+    shutil.copyfile(source, tmp_path / "LDZOFBB003.WP~")
+    (tmp_path / "notes.txt").write_text("not a vector", encoding="utf-8")
+
+    layers = regression_layers(tmp_path)
+    assert len(layers) == 1
+    assert layers[0].attrs["source"] == "LDZOFBB003.WP~"
+    assert layers[0].attrs["kind"] == "wp"

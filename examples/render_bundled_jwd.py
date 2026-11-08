@@ -36,8 +36,14 @@ def regression_layers(root):
     """Accept both the published WP-backup and normalized WP fixture layouts."""
     layers = []
     for path in sorted(Path(root).iterdir()):
-        if path.suffix.lower() == ".wp~":
-            layers.append(Reader(str(path), read_graphic_params=True).geodataframe)
+        suffix = path.suffix.lower()
+        if suffix not in {".wl", ".wp", ".wt", ".wp~"}:
+            continue
+        if suffix == ".wp~":
+            layer = Reader(str(path), read_graphic_params=True).geodataframe
+            layer.attrs["source"] = path.name
+            layer.attrs["kind"] = "wp"
+            layers.append(layer)
         else:
             layers.append(path)
     return layers
@@ -69,6 +75,14 @@ def summarise(reports):
             for report in reports
         ),
         "unresolved_symbols": sum(report.get("symbols_unresolved", 0) for report in reports),
+        "empty_patterns": sum(
+            report.get("empty_pattern", 0) + report.get("aux_empty_pattern", 0)
+            for report in reports
+        ),
+        "cycle_limits": sum(
+            report.get("cycle_limit", 0) + report.get("aux_cycle_limit", 0)
+            for report in reports
+        ),
         "unknown_fonts": unknown_fonts,
     }
 
@@ -82,6 +96,28 @@ def main() -> None:
         help="Directory for jwd_map.png, jwd_map.pdf, jwd_map.svg and reports",
     )
     parser.add_argument("--dpi", type=int, default=600)
+    parser.add_argument(
+        "--input-dir",
+        type=Path,
+        default=None,
+        help="Optional directory of twelve JWD-compatible layers; defaults to bundled data",
+    )
+    parser.add_argument(
+        "--target-crs",
+        default=None,
+        help="Optional output CRS such as EPSG:32643; default estimates UTM per layer",
+    )
+    parser.add_argument(
+        "--source-crs",
+        default=None,
+        help="CRS to assign to layers with missing CRS metadata, such as EPSG:4326",
+    )
+    parser.add_argument(
+        "--map-units-per-mm",
+        type=float,
+        default=None,
+        help="Map-coordinate units per paper millimetre for layers without a CRS",
+    )
     args = parser.parse_args()
 
     libraries = GraphicLibraries.from_directory(slib_path())
@@ -91,11 +127,39 @@ def main() -> None:
         native_text_layout=True,
         polygon_labels=True,
         polygon_label_fontsize=5.0,
+        polygon_label_scale=0.7,
+        map_units_per_mm=args.map_units_per_mm,
         text_font_family=["Microsoft YaHei", "SimSun", "DejaVu Sans"],
         font_zh_map={1: "SimSun", 4: "SimHei"},
         font_en_map={0: "DejaVu Sans"},
     )
-    layers = regression_layers(jwd_path())
+    input_dir = args.input_dir if args.input_dir is not None else jwd_path()
+    raw_layers = regression_layers(input_dir)
+    layers = []
+    for layer in raw_layers:
+        if hasattr(layer, "to_crs"):
+            source_name = layer.attrs.get("source", "<GeoDataFrame>")
+            kind = layer.attrs.get("kind")
+        else:
+            path = Path(layer)
+            source_name = path.name
+            kind = path.suffix.lower().lstrip(".")
+            layer = GraphicRenderer.read_layer(path)
+        layer.attrs["source"] = source_name
+        layer.attrs["kind"] = kind
+        if layer.crs is None and args.source_crs:
+            layer = layer.set_crs(args.source_crs, allow_override=True)
+        if layer.crs is not None:
+            if len(layer) == 0:
+                if args.target_crs:
+                    layer = layer.set_crs(args.target_crs, allow_override=True)
+            else:
+                target_crs = args.target_crs or layer.estimate_utm_crs()
+                if target_crs != layer.crs:
+                    layer = layer.to_crs(target_crs)
+        layers.append(layer)
+    if args.map_units_per_mm is None and any(layer.crs is None for layer in layers):
+        parser.error("Layers without CRS require --source-crs or --map-units-per-mm")
     args.output_dir.mkdir(parents=True, exist_ok=True)
     png = args.output_dir / "jwd_map.png"
     pdf = args.output_dir / "jwd_map.pdf"
