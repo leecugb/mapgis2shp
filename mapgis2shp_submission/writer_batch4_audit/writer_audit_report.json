@@ -1,0 +1,54 @@
+{
+  "batch": "writer_batch4",
+  "source_directory": "F:/writer_shp_batch4_20261108_flat",
+  "crs": {
+    "projection": "Gauss-Kruger / tmerc",
+    "central_meridian": 75,
+    "scale_factor": 1,
+    "false_easting_m": 500000,
+    "units": "m"
+  },
+  "shp_cases": 20,
+  "shp_features": 292,
+  "native_mapgis_files": 18,
+  "native_missing_cases": [
+    "03_POINT_MULTIPOINT",
+    "20_EMPTY_FILE"
+  ],
+  "writer_production_code_changes": [],
+  "writer_behaviour": {
+    "03_POINT_MULTIPOINT": "Explodes to three points with an explicit warning; native output is absent.",
+    "06_LINE_MULTI_DUPLICATE": "Preserves all three line parts; native output loses the second MultiLineString part.",
+    "07_LINE_EMPTY": "Rejects empty/null input by default and drops it only on request; native output inserts geometry from the previous conversion.",
+    "09_POLY_BASIC": "Keeps triangle and rectangle separate; native output merges the rectangle into the first polygon and duplicates it.",
+    "14_POLY_DEGENERATE": "Rejects a ring with fewer than three distinct vertices; native output represents it as a line.",
+    "15_POLY_EMPTY": "Default rejects; on_empty=drop retains the one valid polygon, matching the native valid feature.",
+    "20_EMPTY_FILE": "Writes a zero-feature file with an explicit geometry type; native output is absent."
+  },
+  "native_defects_not_inherited": [
+    "duplicated and incorrectly grouped polygon geometry",
+    "foreign geometry inserted into empty records",
+    "lost MultiLineString parts",
+    "incorrect area and perimeter attributes",
+    "NaN, Infinity and null values coerced to zero",
+    "missing CRS metadata"
+  ],
+  "verified_matches": {
+    "point_and_line_native_default_styles": true,
+    "large_ring_24_bit_offset": 81650,
+    "attribute_fields_80_plus_chinese_preserved": true,
+    "point_records_257_preserved": true,
+    "line_vertices_10001_preserved": true,
+    "writer_metric_fields_follow_output_geometry": true
+  },
+  "tests": {
+    "batch4_passed": 28,
+    "full_suite_passed": 407,
+    "full_suite_skipped": 1,
+    "ruff": "passed",
+    "wheel_entries": 305,
+    "sdist_entries": 341,
+    "archive_inspection": "passed"
+  },
+  "native_visual_acceptance": false
+}

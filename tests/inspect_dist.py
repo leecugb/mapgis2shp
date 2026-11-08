@@ -50,6 +50,27 @@ WRITER_BATCH3_NAMES = tuple(
     )
     for stem in WRITER_BATCH3_SHP_STEMS
 ) + ("README_转换说明.md", "manifest.csv")
+WRITER_BATCH4_SHP_STEMS = (
+    "01_POINT_BASIC", "02_POINT_ATTR_NULL", "03_POINT_MULTIPOINT", "04_POINT_257",
+    "05_LINE_BASIC", "06_LINE_MULTI_DUPLICATE", "07_LINE_EMPTY", "08_LINE_10001_VERTICES",
+    "09_POLY_BASIC", "10_POLY_HOLE_MULTIPART", "11_POLY_SHARED_ISLAND",
+    "12_POLY_DUPLICATE_VERTICES", "13_POLY_BOWTIE", "14_POLY_DEGENERATE",
+    "15_POLY_EMPTY", "16_POLY_80_FIELDS", "17_POLY_LARGE_RING",
+    "18_POLY_DUPLICATE_ATTRIBUTES", "19_POLY_LONG_TEXT", "20_EMPTY_FILE",
+)
+WRITER_BATCH4_NATIVE_STEMS = tuple(
+    stem for stem in WRITER_BATCH4_SHP_STEMS
+    if stem not in {"03_POINT_MULTIPOINT", "20_EMPTY_FILE"}
+)
+WRITER_BATCH4_NAMES = tuple(
+    stem + suffix
+    for stem in WRITER_BATCH4_SHP_STEMS
+    for suffix in (".shp", ".shx", ".dbf", ".cpg", ".prj")
+) + tuple(
+    stem + (".WT" if stem.startswith(("01", "02", "04")) else
+            ".WL" if stem.startswith(("05", "06", "07", "08")) else ".WP")
+    for stem in WRITER_BATCH4_NATIVE_STEMS
+) + ("README_转换说明.md",)
 
 
 def _require(condition: bool, message: str) -> None:
@@ -91,11 +112,14 @@ def _check_wheel(path: Path) -> None:
         "pymapgis/testing/fixtures/fixture_manifest.json",
         "pymapgis/testing/fixtures/writer_batch2_manifest.json",
         "pymapgis/testing/fixtures/writer_batch3_manifest.json",
+        "pymapgis/testing/fixtures/writer_batch4_manifest.json",
     }
     for name in WRITER_BATCH2_NAMES:
         required.add("pymapgis/testing/fixtures/writer_batch2/" + name)
     for name in WRITER_BATCH3_NAMES:
         required.add("pymapgis/testing/fixtures/writer_batch3/" + name)
+    for name in WRITER_BATCH4_NAMES:
+        required.add("pymapgis/testing/fixtures/writer_batch4/" + name)
     for name in JWD_FIXTURE_NAMES:
         required.add("pymapgis/testing/fixtures/jwd/" + name)
     for name in SLIB_FIXTURE_NAMES:
@@ -123,12 +147,14 @@ def _check_sdist(path: Path) -> None:
         "/tests/test_graphic_real_jwd.py",
         "/tests/test_writer_native_batch2.py",
         "/tests/test_writer_native_batch3.py",
+        "/tests/test_writer_native_batch4.py",
         "/tests/fixtures/build_mapgis_fixtures.py",
         # test_public_fixtures.py reads the manifest at module scope; an sdist
         # without it passes inspection but crashes the shipped tests.
         "/tests/fixtures/fixture_manifest.json",
         "/tests/fixtures/writer_batch2_manifest.json",
         "/tests/fixtures/writer_batch3_manifest.json",
+        "/tests/fixtures/writer_batch4_manifest.json",
         "/tests/fixtures/mapgis/synthetic_points.wt",
         "/tests/fixtures/mapgis/synthetic_lines.wl",
         "/tests/fixtures/mapgis/synthetic_polygons.wp",
@@ -156,6 +182,9 @@ def _check_sdist(path: Path) -> None:
     )
     required_suffixes += tuple(
         "/tests/fixtures/writer_batch3/" + name for name in WRITER_BATCH3_NAMES
+    )
+    required_suffixes += tuple(
+        "/tests/fixtures/writer_batch4/" + name for name in WRITER_BATCH4_NAMES
     )
     for suffix in required_suffixes:
         _require(any(name.endswith(suffix) for name in names),

@@ -1,0 +1,785 @@
+{
+  "title": "Writer native SHP audit batch 4",
+  "created": "2026-11-08",
+  "crs": {
+    "name": "Gauss-Kruger central meridian 75E",
+    "proj4": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+    "central_meridian": 75,
+    "scale_factor": 1,
+    "false_easting": 500000,
+    "units": "m"
+  },
+  "conversion_requested": "Use MapGIS native SHP-to-MapGIS conversion, never pymapgis.Writer",
+  "cases": [
+    {
+      "case": "01_POINT_BASIC",
+      "focus": "基本点、中文名称和浮点属性",
+      "features": 2,
+      "geometry_types": {
+        "Point": 2
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "01_POINT_BASIC.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "01_POINT_BASIC.dbf",
+          "bytes": 376,
+          "sha256": "10af010124a0b8bd3368e2e4dccae3f727a1843f52947bcbc9946fe6c4ed1732"
+        },
+        {
+          "file": "01_POINT_BASIC.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "01_POINT_BASIC.shp",
+          "bytes": 156,
+          "sha256": "0a5020307a14ccb808db52acd2feb8419fbc67012f0ca1d3c00ec0467ee644b7"
+        },
+        {
+          "file": "01_POINT_BASIC.shx",
+          "bytes": 116,
+          "sha256": "f8be5694357683100505bad2af765e77329813082ea5dab01456314de4b1ad65"
+        }
+      ],
+      "native_file": "01_POINT_BASIC.WT",
+      "native_sha256": "2cd7091def7a7eeb526367d73ce913768249eb1551632e6d82afbb6982bfb124"
+    },
+    {
+      "case": "02_POINT_ATTR_NULL",
+      "focus": "空值、int32极值、非有限浮点和控制符",
+      "features": 3,
+      "geometry_types": {
+        "Point": 3
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "02_POINT_ATTR_NULL.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "02_POINT_ATTR_NULL.dbf",
+          "bytes": 1129,
+          "sha256": "7aa1293f91e0e759c3fe3a5e2a70566e47cba82d0b7001bbac099262376b9a3d"
+        },
+        {
+          "file": "02_POINT_ATTR_NULL.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "02_POINT_ATTR_NULL.shp",
+          "bytes": 184,
+          "sha256": "300aa686367ade39f3398b83b4378e0ea1bb39e4af6c9bafd9c831b14c21b49b"
+        },
+        {
+          "file": "02_POINT_ATTR_NULL.shx",
+          "bytes": 124,
+          "sha256": "60e8de15692fb4673a48b82f101a96c6d46a830c0d860d515b9ce03a0924394c"
+        }
+      ],
+      "native_file": "02_POINT_ATTR_NULL.WT",
+      "native_sha256": "6d11b2454395a2be3b72fb43928e4a61df4c27ea76bb4d92663b6e194903bfbd"
+    },
+    {
+      "case": "03_POINT_MULTIPOINT",
+      "focus": "MultiPoint与单点混合",
+      "features": 2,
+      "geometry_types": {
+        "MultiPoint": 2
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "03_POINT_MULTIPOINT.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "03_POINT_MULTIPOINT.dbf",
+          "bytes": 104,
+          "sha256": "db023f6cc5d545c0d0fc5a7ee6e2291639e99b14cd68e213e9561ca96ebacd49"
+        },
+        {
+          "file": "03_POINT_MULTIPOINT.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "03_POINT_MULTIPOINT.shp",
+          "bytes": 244,
+          "sha256": "c48a2abf821ee125801e92666316d5381d4d0dcf5d1cb8ac83b31e104c0eec41"
+        },
+        {
+          "file": "03_POINT_MULTIPOINT.shx",
+          "bytes": 116,
+          "sha256": "c5d4e35a9507a0922e7c2b294bbc600f433c1140cd93eb3f2ba62cbf546a56e9"
+        }
+      ],
+      "native_file": null,
+      "native_sha256": null
+    },
+    {
+      "case": "04_POINT_257",
+      "focus": "超过255条记录的属性与坐标对齐",
+      "features": 257,
+      "geometry_types": {
+        "Point": 257
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "04_POINT_257.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "04_POINT_257.dbf",
+          "bytes": 30199,
+          "sha256": "ef2ba590ac07771a4627e9558c2938232086879f5a5d54583526ce83810838ee"
+        },
+        {
+          "file": "04_POINT_257.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "04_POINT_257.shp",
+          "bytes": 7296,
+          "sha256": "817ba48b5cd0731dd19a38f3bd2857855848c3a01ba80d0df6843cd9ea487d46"
+        },
+        {
+          "file": "04_POINT_257.shx",
+          "bytes": 2156,
+          "sha256": "bcd3154fc74c3fb3f4a1cb97e3dfe6d6e1924e11a191000cf959ae9024c930b8"
+        }
+      ],
+      "native_file": "04_POINT_257.WT",
+      "native_sha256": "40f26908812b814bc2f10f649aa29dfe3d46fdabf70f938e11116978d50c9800"
+    },
+    {
+      "case": "05_LINE_BASIC",
+      "focus": "基本折线与中文属性",
+      "features": 2,
+      "geometry_types": {
+        "LineString": 2
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "05_LINE_BASIC.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "05_LINE_BASIC.dbf",
+          "bytes": 376,
+          "sha256": "0f4481371f80bfb7b2254c2241cca340ed9f692c85e542830bec66fc6eaf41ba"
+        },
+        {
+          "file": "05_LINE_BASIC.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "05_LINE_BASIC.shp",
+          "bytes": 308,
+          "sha256": "77e2ad0bed8a1b8b3f615ba4c72ebe9b448a999219d8b51f54c3acdf0a7e6b41"
+        },
+        {
+          "file": "05_LINE_BASIC.shx",
+          "bytes": 116,
+          "sha256": "02a626fc15cc05abec30d9cec045037563b05c695952b05ebe8a5d1a871b938d"
+        }
+      ],
+      "native_file": "05_LINE_BASIC.WL",
+      "native_sha256": "dd92ed7e1cc1fa113abc16a226b4589a8f75084c2c728342d529233bc14b6bc1"
+    },
+    {
+      "case": "06_LINE_MULTI_DUPLICATE",
+      "focus": "连续重复点和MultiLineString",
+      "features": 2,
+      "geometry_types": {
+        "MultiLineString": 2
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "06_LINE_MULTI_DUPLICATE.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "06_LINE_MULTI_DUPLICATE.dbf",
+          "bytes": 104,
+          "sha256": "db023f6cc5d545c0d0fc5a7ee6e2291639e99b14cd68e213e9561ca96ebacd49"
+        },
+        {
+          "file": "06_LINE_MULTI_DUPLICATE.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "06_LINE_MULTI_DUPLICATE.shp",
+          "bytes": 392,
+          "sha256": "b5a48897c7b871d21c07fdf612344ac3035dea98491e6b9dd65d4b3b588166d3"
+        },
+        {
+          "file": "06_LINE_MULTI_DUPLICATE.shx",
+          "bytes": 116,
+          "sha256": "eb0a300f0481a9b6934b4f6f44f5c002ee5eefde44b7837cd8bd7530e7a63307"
+        }
+      ],
+      "native_file": "06_LINE_MULTI_DUPLICATE.WL",
+      "native_sha256": "a9ca769eece05b4ed2d18f88c5e92f814bea63e652daadb55e591cf36c94b031"
+    },
+    {
+      "case": "07_LINE_EMPTY",
+      "focus": "正常线、null和空线混合",
+      "features": 3,
+      "geometry_types": {
+        "LineString": 2
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "07_LINE_EMPTY.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "07_LINE_EMPTY.dbf",
+          "bytes": 123,
+          "sha256": "8afb2a0acfaa4c7fdf0a6d587fbba066f9458adaea5ff0e77f73fa92a15f78df"
+        },
+        {
+          "file": "07_LINE_EMPTY.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "07_LINE_EMPTY.shp",
+          "bytes": 212,
+          "sha256": "e33c9d4e904be463b0d25e20479161769c96bccf991e2f62f5db90804185ef85"
+        },
+        {
+          "file": "07_LINE_EMPTY.shx",
+          "bytes": 124,
+          "sha256": "f96c53d5da4ecc6b252b34890453a5c1fba525b95cee50538ded0a8f2334476d"
+        }
+      ],
+      "native_file": "07_LINE_EMPTY.WL",
+      "native_sha256": "88a040b2e85b7375707eec57f375192fc1ee7ed058dd9f4517cc560b3a67853e"
+    },
+    {
+      "case": "08_LINE_10001_VERTICES",
+      "focus": "一万零一个线顶点及大坐标段",
+      "features": 1,
+      "geometry_types": {
+        "LineString": 1
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "08_LINE_10001_VERTICES.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "08_LINE_10001_VERTICES.dbf",
+          "bytes": 85,
+          "sha256": "4479d7a24ac6fb609943f8a89499c040dcdcb3483a8859cabc627d82f301e7b0"
+        },
+        {
+          "file": "08_LINE_10001_VERTICES.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "08_LINE_10001_VERTICES.shp",
+          "bytes": 160172,
+          "sha256": "345706bf5bcf402d36a117f930b9039c12a5cb8faedfce16ac6b833b725f6121"
+        },
+        {
+          "file": "08_LINE_10001_VERTICES.shx",
+          "bytes": 108,
+          "sha256": "9716830ca4f8d86f3f522fcea063bec5210c6ba7988bd077449c4cfe8f2cc511"
+        }
+      ],
+      "native_file": "08_LINE_10001_VERTICES.WL",
+      "native_sha256": "6bc4b0162c33a015863efc709c89d47e4ffe01be54bb18df68656ea983aa9b2b"
+    },
+    {
+      "case": "09_POLY_BASIC",
+      "focus": "最小三角形和矩形",
+      "features": 2,
+      "geometry_types": {
+        "Polygon": 2
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "09_POLY_BASIC.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "09_POLY_BASIC.dbf",
+          "bytes": 104,
+          "sha256": "db023f6cc5d545c0d0fc5a7ee6e2291639e99b14cd68e213e9561ca96ebacd49"
+        },
+        {
+          "file": "09_POLY_BASIC.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "09_POLY_BASIC.shp",
+          "bytes": 356,
+          "sha256": "232039dabaefd334ee265ad248868fedbbd86feef7b5b6b9ae03d28ff943539c"
+        },
+        {
+          "file": "09_POLY_BASIC.shx",
+          "bytes": 116,
+          "sha256": "e6bd436dd92353309cb8bb7e2cbfe0f88ebbc129cd50df39bec694c69a61f394"
+        }
+      ],
+      "native_file": "09_POLY_BASIC.WP",
+      "native_sha256": "e346bbd06a1e6d5c27be6c79ba8d2a453e1d07086f46aa9bf49dc3e224b577bc"
+    },
+    {
+      "case": "10_POLY_HOLE_MULTIPART",
+      "focus": "双孔、多部件和独立三角面",
+      "features": 1,
+      "geometry_types": {
+        "MultiPolygon": 1
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "10_POLY_HOLE_MULTIPART.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "10_POLY_HOLE_MULTIPART.dbf",
+          "bytes": 85,
+          "sha256": "4479d7a24ac6fb609943f8a89499c040dcdcb3483a8859cabc627d82f301e7b0"
+        },
+        {
+          "file": "10_POLY_HOLE_MULTIPART.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "10_POLY_HOLE_MULTIPART.shp",
+          "bytes": 472,
+          "sha256": "2a5c4642665120dcd916187a69a3cbd7ea0a3a0052310eecde2e8c05b73dcd05"
+        },
+        {
+          "file": "10_POLY_HOLE_MULTIPART.shx",
+          "bytes": 108,
+          "sha256": "7194aa28a73e3d21b4a01fd9a1cd42483aaa8561cd1fb11f5daa64763df3d1d9"
+        }
+      ],
+      "native_file": "10_POLY_HOLE_MULTIPART.WP",
+      "native_sha256": "2c4cadd2816473993311a2bdbfb3dd1c4cc27630a57a4c0cb259b21e34d8a121"
+    },
+    {
+      "case": "11_POLY_SHARED_ISLAND",
+      "focus": "共边、孔洞与边界完全一致的独立岛",
+      "features": 4,
+      "geometry_types": {
+        "Polygon": 4
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "11_POLY_SHARED_ISLAND.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "11_POLY_SHARED_ISLAND.dbf",
+          "bytes": 142,
+          "sha256": "e61c365023160ef6a1da003ee8e21eae2aec9f75321dab5fc1b8bde4af11b968"
+        },
+        {
+          "file": "11_POLY_SHARED_ISLAND.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "11_POLY_SHARED_ISLAND.shp",
+          "bytes": 728,
+          "sha256": "b9d5f3eaff049cb09fcd2380168eb56c9acc1c094bad9c8707ed0c1054c954ac"
+        },
+        {
+          "file": "11_POLY_SHARED_ISLAND.shx",
+          "bytes": 132,
+          "sha256": "9222dc5f712d2a40b8d46864d1334104f3c0d6507be72af2b46ba0e9b9ecfce3"
+        }
+      ],
+      "native_file": "11_POLY_SHARED_ISLAND.WP",
+      "native_sha256": "31a1848ca769b4cdae02970aa950031c13437383e5d29447a7d265eb98a3d4d0"
+    },
+    {
+      "case": "12_POLY_DUPLICATE_VERTICES",
+      "focus": "连续及非连续重复环顶点",
+      "features": 1,
+      "geometry_types": {
+        "Polygon": 1
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "12_POLY_DUPLICATE_VERTICES.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "12_POLY_DUPLICATE_VERTICES.dbf",
+          "bytes": 85,
+          "sha256": "4479d7a24ac6fb609943f8a89499c040dcdcb3483a8859cabc627d82f301e7b0"
+        },
+        {
+          "file": "12_POLY_DUPLICATE_VERTICES.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "12_POLY_DUPLICATE_VERTICES.shp",
+          "bytes": 316,
+          "sha256": "df9a199ba74f5a920f9887f49099f1ea6d2518bca7d3a77a9515b670eebca7c5"
+        },
+        {
+          "file": "12_POLY_DUPLICATE_VERTICES.shx",
+          "bytes": 108,
+          "sha256": "c1b986d56745ad5a64eac205d7901ffd5887031e36b09a7a5543b3c16fe458f2"
+        }
+      ],
+      "native_file": "12_POLY_DUPLICATE_VERTICES.WP",
+      "native_sha256": "1117904d2f1e900e34959e647942519f0f5c59641d92c0d67771e5dc32495858"
+    },
+    {
+      "case": "13_POLY_BOWTIE",
+      "focus": "自交蝴蝶结无效面",
+      "features": 1,
+      "geometry_types": {
+        "Polygon": 1
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "13_POLY_BOWTIE.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "13_POLY_BOWTIE.dbf",
+          "bytes": 85,
+          "sha256": "4479d7a24ac6fb609943f8a89499c040dcdcb3483a8859cabc627d82f301e7b0"
+        },
+        {
+          "file": "13_POLY_BOWTIE.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "13_POLY_BOWTIE.shp",
+          "bytes": 236,
+          "sha256": "f5e6845f0c98855237a82c463944b439b5d5aab39b98fe7631ee66021732adc4"
+        },
+        {
+          "file": "13_POLY_BOWTIE.shx",
+          "bytes": 108,
+          "sha256": "f340ced3e0704034ac4e25ac4a1d74c595805d2930468d770d6f979bdd1575f9"
+        }
+      ],
+      "native_file": "13_POLY_BOWTIE.WP",
+      "native_sha256": "b095c25a014adaa2d47625237f384a03453baddb826cc414519700551cc26c43"
+    },
+    {
+      "case": "14_POLY_DEGENERATE",
+      "focus": "全部顶点相同的退化环",
+      "features": 1,
+      "geometry_types": {
+        "Polygon": 1
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "14_POLY_DEGENERATE.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "14_POLY_DEGENERATE.dbf",
+          "bytes": 85,
+          "sha256": "4479d7a24ac6fb609943f8a89499c040dcdcb3483a8859cabc627d82f301e7b0"
+        },
+        {
+          "file": "14_POLY_DEGENERATE.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "14_POLY_DEGENERATE.shp",
+          "bytes": 236,
+          "sha256": "9a5c0ec84844d62d990e0b84bf6abdfa55a5296ae9a0b0ab55199c4d99a335ef"
+        },
+        {
+          "file": "14_POLY_DEGENERATE.shx",
+          "bytes": 108,
+          "sha256": "d3b182c81a652588be6c4daf38a126358ba13a29c9bd67cc83bf45d828953efa"
+        }
+      ],
+      "native_file": "14_POLY_DEGENERATE.WP",
+      "native_sha256": "e378d3af3fb57fe9c391ffb63f0a161eeca54e2237963d6d060bba1d02917272"
+    },
+    {
+      "case": "15_POLY_EMPTY",
+      "focus": "正常面、null和空面混合",
+      "features": 3,
+      "geometry_types": {
+        "Polygon": 2
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "15_POLY_EMPTY.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "15_POLY_EMPTY.dbf",
+          "bytes": 123,
+          "sha256": "8afb2a0acfaa4c7fdf0a6d587fbba066f9458adaea5ff0e77f73fa92a15f78df"
+        },
+        {
+          "file": "15_POLY_EMPTY.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "15_POLY_EMPTY.shp",
+          "bytes": 244,
+          "sha256": "860c2a8a1e5ee48f26db90fccbfe8d505ca8c727a8facf304868938a9609e132"
+        },
+        {
+          "file": "15_POLY_EMPTY.shx",
+          "bytes": 124,
+          "sha256": "67b7c397dc2f4bbcef43d7935b9961711a6ec63f8e7fe6a884702d24a70d46df"
+        }
+      ],
+      "native_file": "15_POLY_EMPTY.WP",
+      "native_sha256": "7ad0f5c103da8d260dabad310b3bf37463872a11bb6c5b671ea132160ff30908"
+    },
+    {
+      "case": "16_POLY_80_FIELDS",
+      "focus": "80个附加字段及中文字段",
+      "features": 3,
+      "geometry_types": {
+        "Polygon": 3
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "16_POLY_80_FIELDS.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "16_POLY_80_FIELDS.dbf",
+          "bytes": 8715,
+          "sha256": "3b97addbe2e9c13813c6833c17adea81cce83007d8762d65e11a905ed7d50a3b"
+        },
+        {
+          "file": "16_POLY_80_FIELDS.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "16_POLY_80_FIELDS.shp",
+          "bytes": 460,
+          "sha256": "3cbf48fc2f9d90becbca4042753af21b427e9b6ac5a795024db4e89adbe37f3d"
+        },
+        {
+          "file": "16_POLY_80_FIELDS.shx",
+          "bytes": 124,
+          "sha256": "c12564a88a0b50f46341f8df08f2ab2da567a75549ef4b2de32b40e99c70fdf4"
+        }
+      ],
+      "native_file": "16_POLY_80_FIELDS.WP",
+      "native_sha256": "409683083a8179d428d62240f5bed6e132ee39072f16498ac7fc37f07dc2aa27"
+    },
+    {
+      "case": "17_POLY_LARGE_RING",
+      "focus": "5001点外环和101点孔洞",
+      "features": 1,
+      "geometry_types": {
+        "Polygon": 1
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "17_POLY_LARGE_RING.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "17_POLY_LARGE_RING.dbf",
+          "bytes": 85,
+          "sha256": "4479d7a24ac6fb609943f8a89499c040dcdcb3483a8859cabc627d82f301e7b0"
+        },
+        {
+          "file": "17_POLY_LARGE_RING.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "17_POLY_LARGE_RING.shp",
+          "bytes": 81808,
+          "sha256": "8aa375b6405ee3cae74900c0e01d6ac42b8ab6248d8eeb45a87f9e78ab50a500"
+        },
+        {
+          "file": "17_POLY_LARGE_RING.shx",
+          "bytes": 108,
+          "sha256": "093411cd47d068681f2cf06be6b631dffafd64aeabdd1eceb1c25d96061967f1"
+        }
+      ],
+      "native_file": "17_POLY_LARGE_RING.WP",
+      "native_sha256": "e3f775bf0d520223b51af9f7e3d5104cb2a9fafa296af372e5f8a2b0567fd1ee"
+    },
+    {
+      "case": "18_POLY_DUPLICATE_ATTRIBUTES",
+      "focus": "相同几何、不同属性及原生参数归属",
+      "features": 2,
+      "geometry_types": {
+        "Polygon": 2
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "18_POLY_DUPLICATE_ATTRIBUTES.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "18_POLY_DUPLICATE_ATTRIBUTES.dbf",
+          "bytes": 364,
+          "sha256": "4015d83d4a7d29c69a4fa6552e58c2342b45c8ced7ccd33d31e11a440a3a1e4d"
+        },
+        {
+          "file": "18_POLY_DUPLICATE_ATTRIBUTES.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "18_POLY_DUPLICATE_ATTRIBUTES.shp",
+          "bytes": 372,
+          "sha256": "a12999bf55a5298b17ac9dc35affee32005669d1c3ad0f1506d6141b2b2c2f13"
+        },
+        {
+          "file": "18_POLY_DUPLICATE_ATTRIBUTES.shx",
+          "bytes": 116,
+          "sha256": "847f512ff44ac38e23ccd97f7c7ae2af43dc8ada54f200245692a39cdcb54e04"
+        }
+      ],
+      "native_file": "18_POLY_DUPLICATE_ATTRIBUTES.WP",
+      "native_sha256": "2dfeeecd8a4a209b04997824167a0b5abe32cc686cfcf8b0afba52771799f0ef"
+    },
+    {
+      "case": "19_POLY_LONG_TEXT",
+      "focus": "长中文、控制码与属性宽度",
+      "features": 1,
+      "geometry_types": {
+        "Polygon": 1
+      },
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "19_POLY_LONG_TEXT.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "19_POLY_LONG_TEXT.dbf",
+          "bytes": 715,
+          "sha256": "81a022a1fe2d1e35209d9cdded6eee0bb1cdb551e9234138fa669856fd56e299"
+        },
+        {
+          "file": "19_POLY_LONG_TEXT.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "19_POLY_LONG_TEXT.shp",
+          "bytes": 220,
+          "sha256": "e48a703ddfa1386928ba03720f329e3750fae02747c38bf7bb9cef1b23d43dc2"
+        },
+        {
+          "file": "19_POLY_LONG_TEXT.shx",
+          "bytes": 108,
+          "sha256": "7079662f464d6f9cdfa5532c3288f17c845ac60ca4ca259ea20984a59aa09b1b"
+        }
+      ],
+      "native_file": "19_POLY_LONG_TEXT.WP",
+      "native_sha256": "2254a2ae7890132abf6ec3961affb3d3cf469e1a5c623539cbee7affb64432c4"
+    },
+    {
+      "case": "20_EMPTY_FILE",
+      "focus": "零要素文件及几何类型显式处理",
+      "features": 0,
+      "geometry_types": {},
+      "crs": "+proj=tmerc +lat_0=0 +lon_0=75 +k=1 +x_0=500000 +y_0=0 +ellps=krass +units=m +no_defs",
+      "files": [
+        {
+          "file": "20_EMPTY_FILE.cpg",
+          "bytes": 3,
+          "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+        },
+        {
+          "file": "20_EMPTY_FILE.dbf",
+          "bytes": 98,
+          "sha256": "04b7ca2a9b59191eef533aafe03ceae532d00d66e4ad7d5f929fa42b27537e89"
+        },
+        {
+          "file": "20_EMPTY_FILE.prj",
+          "bytes": 407,
+          "sha256": "5de0ab3a02b7dc64ebf140dc78b52e0275a62f768148f76930a029a32702bb94"
+        },
+        {
+          "file": "20_EMPTY_FILE.shp",
+          "bytes": 100,
+          "sha256": "926401bfc2997f7c001f827859a1281ceb6f688660720f605f14f3e54207568e"
+        },
+        {
+          "file": "20_EMPTY_FILE.shx",
+          "bytes": 100,
+          "sha256": "926401bfc2997f7c001f827859a1281ceb6f688660720f605f14f3e54207568e"
+        }
+      ],
+      "native_file": null,
+      "native_sha256": null
+    }
+  ],
+  "layout": "flat",
+  "source_layout": "case_subdirectories",
+  "native_conversion": {
+    "producer": "MapGIS native software supplied by the user",
+    "version_and_settings": "not provided",
+    "native_file_count": 18,
+    "missing_native_cases": [
+      "03_POINT_MULTIPOINT",
+      "20_EMPTY_FILE"
+    ],
+    "note": "Native outputs are comparison evidence, not a source of desired behaviour for topology loss, null coercion or incorrect metric fields."
+  }
+}

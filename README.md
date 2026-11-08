@@ -957,6 +957,8 @@ Unknown field-type descriptors are skipped without shifting the retained raw des
 
 ### Unreleased manuscript-regression updates
 
+- Use original open-edition JWD/SLIB for current regression and examples, stop new JWD-derived synthetic variants, and strengthen dataset, companion-article and SLIB attribution in `DATA_ATTRIBUTION.md`
+- Add the fourth domestic Gauss-Kruger Writer batch (20 SHP cases and 18 native MapGIS outputs); preserve multipart geometry, valid topology, metric fields and null semantics while matching native point/line defaults, and reject native topology/empty-geometry defects instead of inheriting them
 - Add twelve third-batch Writer cases for large 24-bit ring-index offsets, projected UTM input, long attributes, null geometry and degenerate rings; reproject UTM to Gauss-Kruger (k=1) with the correct central meridian instead of writing UTM coordinates with incorrect metadata
 - Add eleven native SHP-to-MapGIS Writer cases with provenance manifests and source/wheel fixture access; align default WT point size 0.1 mm, colour 6 and pen width 0.1 mm, and default WL width 0.05 mm, X/Y coefficients 1.0 and `aux_flag=1` with the supplied native conversion reference
 - Normalize the two bundled WP backup filenames to `.WP`, and add a compatibility loader that still handles the published V2.7.1 `.WP~` layout through `Reader`
@@ -1068,7 +1070,20 @@ PYTHONPATH=src python3 examples/geological_workflow.py
 ```
 
 The twelve-layer JWD vectors and all five matching SLIB libraries are also
-bundled under `tests/fixtures/jwd/` and `tests/fixtures/slib/`. The real
+bundled under `tests/fixtures/jwd/` and `tests/fixtures/slib/`. They originate
+from the public V1 *Spatial database of serial suite-tectonic map-sheets of
+mainland China (1:250,000)*, sheet **J43C001002**, produced by the Development
+and Research Center of China Geological Survey and distributed by the National
+Geological Archives of China. Cite the dataset with DOI
+**10.23650/data.A.2018.NGA131703.K1.1.1.V1** and its companion article with DOI
+**10.12029/gc2018Z101**. See [DATA_ATTRIBUTION.md](DATA_ATTRIBUTION.md) for the
+full citation, SLIB attribution and usage boundary. Current regression and
+examples use the original open-edition files only; new coordinate-warped or
+virtual-geological-unit derivatives are no longer generated or recommended.
+Public, non-classified and test-only status does not by itself grant arbitrary
+redistribution rights, and the software licence does not relicense JWD or SLIB.
+
+The real
 rendering and colour-parser tests use them by default, with no absolute paths
 or environment variables required:
 

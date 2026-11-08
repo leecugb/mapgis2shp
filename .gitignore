@@ -74,6 +74,9 @@ src/pymapgis/semantics/
 !tests/fixtures/writer_batch3/*.WT
 !tests/fixtures/writer_batch3/*.WL
 !tests/fixtures/writer_batch3/*.WP
+!tests/fixtures/writer_batch4/*.WT
+!tests/fixtures/writer_batch4/*.WL
+!tests/fixtures/writer_batch4/*.WP
 
 # MapGIS project / raster overlay files
 *.MPJ
