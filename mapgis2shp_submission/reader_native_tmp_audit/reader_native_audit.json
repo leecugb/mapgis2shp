@@ -1,0 +1,921 @@
+{
+  "source": "F:\\tmp",
+  "inventory": [
+    {
+      "file": "LDLYAAA005.WL",
+      "bytes": 25742,
+      "sha256": "9fc2692a21c05a166cad898d730d823e06bbf9cd7cb1b809cde5f8742e45952f",
+      "kind": "LINE",
+      "features": 16,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDLYAAE001.WL",
+      "bytes": 833885,
+      "sha256": "827e7d8acfa0b3c4458b37f2f04a6311bd42fd3d9d11e8671ec5ed668d90b014",
+      "kind": "LINE",
+      "features": 1143,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDLYAAE002.WP",
+      "bytes": 319715,
+      "sha256": "af20d8d06126695156066bd97def6fc5a3301ad4b58c095b8ed872f9c56b9f9c",
+      "kind": "POLYGON",
+      "features": 128,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDLYAAI002.WT",
+      "bytes": 56859,
+      "sha256": "14021019ec279feee7e3a2f9551b37a09340158fdb715a62e414f7cea6c0a0af",
+      "kind": "POINT",
+      "features": 242,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBA002.WL",
+      "bytes": 2166050,
+      "sha256": "bdc156aa842f373aa48a390d21c7a23ab88b9c4a5e4f871b00b1f91a3692b045",
+      "kind": "LINE",
+      "features": 2222,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBA003.WL",
+      "bytes": 444675,
+      "sha256": "8cd3c147e97d7fb0da39c09f2dd8b9e87f7a5b740111e37a8d79d4ee57dd68a6",
+      "kind": "LINE",
+      "features": 310,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBA005.WL",
+      "bytes": 8547,
+      "sha256": "ef2bfc4d4c4a3ef5130f126bade4ea5782efe09e4b499b9d1ae4717bed6123e9",
+      "kind": "LINE",
+      "features": 4,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBA016.WT",
+      "bytes": 75185,
+      "sha256": "f57b0a88eda1e7ef66b7e313f5a8a6ab644299bad6bd481f61a5734c3c8c8e51",
+      "kind": "POINT",
+      "features": 305,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBB001.WP",
+      "bytes": 2166438,
+      "sha256": "8d80883847761968957ffd294247214623210e86a3b460449f9dcb29bec0f099",
+      "kind": "POLYGON",
+      "features": 608,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBB002.WP",
+      "bytes": 93953,
+      "sha256": "26b70111b8ed1328d59a5f8c5974cf44209892a5d645e28f0ed474ffe967aefa",
+      "kind": "POLYGON",
+      "features": 10,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBB003.WP",
+      "bytes": 194676,
+      "sha256": "a7772079963b5be3606054d50c40b7b3b9a0c02ddca04391ff2b9ca75b810d8a",
+      "kind": "POLYGON",
+      "features": 46,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBB004.WP",
+      "bytes": 330259,
+      "sha256": "6bb1518fce30603dcad9fa479ae22ba363cce4828e44918a4ed59ab0efce89ce",
+      "kind": "POLYGON",
+      "features": 49,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBB009.WP",
+      "bytes": 73085,
+      "sha256": "513b358f9dab97f08beb1914d83d034faf8e7b76886632e72edcde81ee37eb57",
+      "kind": "POLYGON",
+      "features": 20,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBB010.WP",
+      "bytes": 48365,
+      "sha256": "1ac912ea3d87fe7ea8448b1e5eb33dfb45055426dc1afa1af8d3aac483df3955",
+      "kind": "POLYGON",
+      "features": 4,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBB098.WL",
+      "bytes": 55097,
+      "sha256": "1a463e2317f89dde7bad13d1a0b64ff2edacd418acb1e499b6b293bf1fabd29c",
+      "kind": "LINE",
+      "features": 245,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LDZOFBB099.WT",
+      "bytes": 403809,
+      "sha256": "8444cf8bab1ad60aee39fa5cc6405b4fb976c75575fa40eafa7ce064210deb09",
+      "kind": "POINT",
+      "features": 2024,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LFZYBAA002.WL",
+      "bytes": 17250,
+      "sha256": "831f47bf67f6336bfeec5ea70d00119cec36726d32332579e0d2e46fc0b8c784",
+      "kind": "LINE",
+      "features": 5,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LFZYBAB002.WL",
+      "bytes": 6638,
+      "sha256": "3ab648e12412c06f4dc7bc17608ea3bdf3e9fffc6adf203b440d9be6811791a2",
+      "kind": "LINE",
+      "features": 24,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LFZYBCBA01.WT",
+      "bytes": 2472,
+      "sha256": "c759439aad51a8f333cbfbaa358e7fc32f119c21758c15164d0ce5f47f0f52cc",
+      "kind": "POINT",
+      "features": 6,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LFZYBCBA02.WL",
+      "bytes": 3894,
+      "sha256": "51ac1489040e2aef4c692697c99cc2a2b8cbef19b6188df32ea50b37740e4e6c",
+      "kind": "LINE",
+      "features": 10,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LFZYBCT001.WT",
+      "bytes": 1369986,
+      "sha256": "b2e2659a7bb2c5702c3a19c98ec8cdcb6c50230fa65e213063a1c146fb95029e",
+      "kind": "POINT",
+      "features": 6981,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LFZYBCT002.WL",
+      "bytes": 578675,
+      "sha256": "879cb046bd078f301d0f563ea66af389735d80853182344d5c05add3ea1d704e",
+      "kind": "LINE",
+      "features": 2331,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LHCPGDAC01.WL",
+      "bytes": 4276,
+      "sha256": "7097b4aa410f3b4d93a74009b0bcc17b002e0bdd06d527cd2b82a8bb57c33dfb",
+      "kind": "LINE",
+      "features": 3,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LHCPGDAC05.WP",
+      "bytes": 8803,
+      "sha256": "622b66fb8158e79d2ddf71b11dea070915c4460a51d5848e6aef3ed974958639",
+      "kind": "POLYGON",
+      "features": 2,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LHCPGDAC06.WL",
+      "bytes": 6070,
+      "sha256": "59f54a8e39b4ac0a4d74409155fccb447fb6578c77fa2c93a8daba8af6892b91",
+      "kind": "LINE",
+      "features": 2,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LHCPGDAC08.WP",
+      "bytes": 21497,
+      "sha256": "fe56d08056d2280aae1f813af3eae5e6756fa2c73a21144e6f8838433d16cd22",
+      "kind": "POLYGON",
+      "features": 4,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LHCPGDAC09.WL",
+      "bytes": 17598,
+      "sha256": "a06927089ccb71e622025fe025e8c7890f1327240e450d1ff45ed36a8fedf7b3",
+      "kind": "LINE",
+      "features": 4,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LHCPGDAC11.WP",
+      "bytes": 33365,
+      "sha256": "c604da7505e6c458f7cf7db96eb242cf241786b5fbb50c15ae57ea26fad5c68f",
+      "kind": "POLYGON",
+      "features": 8,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LHCPGDAC12.WL",
+      "bytes": 25494,
+      "sha256": "d2cd57d7f78a08bc78560b2187dc6540f7d4ed28557d3e5a5cb99e7154f60738",
+      "kind": "LINE",
+      "features": 10,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LHTQGTA001.WL",
+      "bytes": 4777,
+      "sha256": "053794199551ce3eaf98e86a37f8df5393927c30e742f48fb74c8642958b8528",
+      "kind": "LINE",
+      "features": 4,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LYGREBA001.WL",
+      "bytes": 147448,
+      "sha256": "508e0a03ef0506bca204aadceec0adb3172e1b3d7b71003bd8290055805fb669",
+      "kind": "LINE",
+      "features": 71,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LYGREBA004.WL",
+      "bytes": 33134,
+      "sha256": "be5c55d2726fa7f97a28e0fe60629cbcadc25008abf01592860907d7f137433a",
+      "kind": "LINE",
+      "features": 25,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LZLPGDJ002.WL",
+      "bytes": 5028,
+      "sha256": "cd57d9a8b5cc53aed47446d7367940ba8922854729e9d79e0c0100ac652558ce",
+      "kind": "LINE",
+      "features": 3,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LZLPGDJ004.WP",
+      "bytes": 11848,
+      "sha256": "91f40d3cfb903d76f3aef7b5bb6ff1a3fa9b130d17923e54f17e721130b280ee",
+      "kind": "POLYGON",
+      "features": 2,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LZLPGDJ006.WP",
+      "bytes": 6642,
+      "sha256": "d4b1aa1b6bae1e9df2f9ce907ee304cb87ee6221f5f431d9e52973e5603d622a",
+      "kind": "POLYGON",
+      "features": 1,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    },
+    {
+      "file": "LZLPGDJ009.WP",
+      "bytes": 9726,
+      "sha256": "4b5688943b7f48acfb244fb77fff8d568b6d21b0597f2f9ac8de83bb6886f96f",
+      "kind": "POLYGON",
+      "features": 2,
+      "invalid": 0,
+      "crs": "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs +no_defs +type=crs"
+    }
+  ],
+  "groups": {
+    "LDLYAAI002": {
+      "native_features": 242,
+      "plain_features": 242,
+      "shp_features": 242,
+      "plain_geometry_errors": [],
+      "plain_style_errors": [],
+      "text_byte_evidence": [],
+      "shp_geometry_errors": [],
+      "shp_attribute_comparison": {
+        "shared_fields": [
+          "ID",
+          "FEATUREID",
+          "CHFCAC",
+          "CODE",
+          "GB",
+          "TN",
+          "NAME"
+        ],
+        "compared_values": 1694,
+        "mismatch_count": 0,
+        "mismatches": []
+      },
+      "shp_crs": "None"
+    },
+    "LDZOFBA002": {
+      "native_features": 2222,
+      "plain_features": 2222,
+      "shp_features": 2222,
+      "plain_geometry_errors": [],
+      "plain_style_errors": [],
+      "shp_geometry_errors": [],
+      "shp_attribute_comparison": {
+        "shared_fields": [
+          "ID",
+          "长度",
+          "FEATUREID",
+          "CHFCAC",
+          "GZBD",
+          "PKIGJ"
+        ],
+        "compared_values": 13332,
+        "mismatch_count": 0,
+        "mismatches": []
+      },
+      "shp_crs": "None"
+    },
+    "LDZOFBB001": {
+      "native_polygons": 608,
+      "native_arcs": 2036,
+      "plain_arcs": 2036,
+      "plain_trailing_lines": 24683,
+      "plain_trailing_examples": [
+        "7651",
+        "74.837375,40.523088",
+        "0N",
+        "74.828088,40.515061",
+        "0N",
+        "74.861599,40.494648",
+        "0N",
+        "75.000000,40.458348",
+        "0N",
+        "75.000000,40.428873",
+        "0N",
+        "75.000000,40.393087"
+      ],
+      "shp_features": 608,
+      "plain_arc_geometry_errors": [],
+      "plain_topology_errors": [],
+      "plain_style_errors": [],
+      "shp_geometry_comparison": {
+        "shp_empty_geometries": [],
+        "empty_geometry_examples": [],
+        "geometry_deviations": [],
+        "representation_differences": 586,
+        "representation_examples": [
+          {
+            "row": 0,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 1,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 2,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 3,
+            "native_type": "MultiPolygon",
+            "shp_type": "MultiPolygon",
+            "native_parts": 4,
+            "shp_parts": 2,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 4,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 6,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 7,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 8,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 10,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 12,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 13,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 3,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 14,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 15,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 16,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 3,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 17,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 18,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 19,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 3,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 20,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 21,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 22,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          }
+        ],
+        "native_invalid": 0,
+        "shp_invalid": 87,
+        "shp_invalid_reason_categories": {
+          "Self-intersection": 73,
+          "Nested shells": 14
+        }
+      },
+      "shp_attribute_comparison": {
+        "shared_fields": [
+          "ID",
+          "周长",
+          "面积",
+          "FEATUREID",
+          "CHFCAC",
+          "DDCDJH",
+          "DDCDII",
+          "QDUECD",
+          "QDUECC",
+          "QDFCCB",
+          "GZEKG",
+          "DDCDJO",
+          "MDLHL",
+          "MDBRS",
+          "DDCDIL",
+          "YSPDAD"
+        ],
+        "compared_values": 9728,
+        "mismatch_count": 0,
+        "mismatches": []
+      },
+      "shp_crs": "None"
+    },
+    "LDZOFBB004": {
+      "native_polygons": 49,
+      "native_arcs": 315,
+      "plain_arcs": 315,
+      "plain_trailing_lines": 2056,
+      "plain_trailing_examples": [
+        "618",
+        "74.639211,40.160477",
+        "0N",
+        "74.852993,40.156513",
+        "0N",
+        "74.670043,40.150863",
+        "0N",
+        "74.691222,40.118003",
+        "0N",
+        "74.859438,40.104277",
+        "0N",
+        "74.830287,40.102673"
+      ],
+      "shp_features": 49,
+      "plain_arc_geometry_errors": [],
+      "plain_topology_errors": [],
+      "plain_style_errors": [],
+      "shp_geometry_comparison": {
+        "shp_empty_geometries": [
+          48
+        ],
+        "empty_geometry_examples": [
+          {
+            "row": 48,
+            "native_type": "Polygon",
+            "native_area": 3.583744306070041e-05,
+            "native_valid": true
+          }
+        ],
+        "geometry_deviations": [],
+        "representation_differences": 48,
+        "representation_examples": [
+          {
+            "row": 0,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 1,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 2,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 3,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 3,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 4,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 5,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 6,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 7,
+            "native_type": "MultiPolygon",
+            "shp_type": "MultiPolygon",
+            "native_parts": 4,
+            "shp_parts": 7,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 8,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 9,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 10,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 11,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 2,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 12,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 13,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 14,
+            "native_type": "MultiPolygon",
+            "shp_type": "MultiPolygon",
+            "native_parts": 2,
+            "shp_parts": 5,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 15,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 16,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 17,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 18,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          },
+          {
+            "row": 19,
+            "native_type": "MultiPolygon",
+            "shp_type": "Polygon",
+            "native_parts": 1,
+            "shp_parts": 1,
+            "hausdorff": 0.0
+          }
+        ],
+        "native_invalid": 0,
+        "shp_invalid": 15,
+        "shp_invalid_reason_categories": {
+          "Self-intersection": 14
+        }
+      },
+      "shp_attribute_comparison": {
+        "shared_fields": [
+          "ID",
+          "周长",
+          "面积",
+          "FEATUREID",
+          "CHFCAC",
+          "YSX",
+          "QDIAA",
+          "GCJFLP",
+          "QDUECD",
+          "QDUECC",
+          "GZEKG",
+          "MDLHL",
+          "KWBED",
+          "YSC",
+          "YSD",
+          "YSADAB",
+          "QDIAB",
+          "YSWA",
+          "YSVA",
+          "QDIBE",
+          "YSVAD",
+          "DDCDS",
+          "QDIMD"
+        ],
+        "compared_values": 1127,
+        "mismatch_count": 0,
+        "mismatches": []
+      },
+      "shp_crs": "None"
+    },
+    "LDZOFBB099": {
+      "native_features": 2024,
+      "plain_features": 2024,
+      "shp_features": 2024,
+      "plain_geometry_errors": [],
+      "plain_style_errors": [
+        {
+          "row": 988,
+          "field": "CHFCED",
+          "native": "D",
+          "plain": "D#-1"
+        },
+        {
+          "row": 989,
+          "field": "CHFCED",
+          "native": "ι",
+          "plain": "O"
+        },
+        {
+          "row": 991,
+          "field": "CHFCED",
+          "native": "D",
+          "plain": "D#-1"
+        },
+        {
+          "row": 992,
+          "field": "CHFCED",
+          "native": "ι",
+          "plain": "O"
+        }
+      ],
+      "text_byte_evidence": [
+        {
+          "row": 988,
+          "field": "CHFCED",
+          "native": "D",
+          "plain": "D#-1",
+          "native_field_hex": "44000000000000000000000000000000",
+          "shp_value": "D",
+          "interpretation": "binary and SHP agree; native WAT text differs"
+        },
+        {
+          "row": 989,
+          "field": "CHFCED",
+          "native": "ι",
+          "plain": "O",
+          "native_field_hex": "a6c90000000000000000000000000000",
+          "shp_value": "ι",
+          "interpretation": "binary and SHP agree; native WAT text differs"
+        },
+        {
+          "row": 991,
+          "field": "CHFCED",
+          "native": "D",
+          "plain": "D#-1",
+          "native_field_hex": "44000000000000000000000000000000",
+          "shp_value": "D",
+          "interpretation": "binary and SHP agree; native WAT text differs"
+        },
+        {
+          "row": 992,
+          "field": "CHFCED",
+          "native": "ι",
+          "plain": "O",
+          "native_field_hex": "a6c90000000000000000000000000000",
+          "shp_value": "ι",
+          "interpretation": "binary and SHP agree; native WAT text differs"
+        }
+      ],
+      "shp_geometry_errors": [],
+      "shp_attribute_comparison": {
+        "shared_fields": [
+          "ID",
+          "FEATUREID",
+          "CHFCAC",
+          "CHFCEC",
+          "CHFCED"
+        ],
+        "compared_values": 10120,
+        "mismatch_count": 0,
+        "mismatches": []
+      },
+      "shp_crs": "None"
+    }
+  },
+  "native_read_errors": []
+}

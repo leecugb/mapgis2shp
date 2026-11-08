@@ -6,6 +6,23 @@
     "vectors": "E:/AFH0.3米数据/JWD",
     "libraries": "D:/SLIB/SLIB"
   },
+  "dataset": {
+    "title": "Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000) (V1)",
+    "title_zh": "中国陆域1∶25万分幅建造构造图空间数据库（V1）",
+    "sheet": "J43C001002",
+    "sheet_zh": "库尔干幅",
+    "producer": "Development and Research Center of China Geological Survey",
+    "distributor": "National Geological Archives of China",
+    "released": "2018-09-10",
+    "doi": "10.23650/data.A.2018.NGA131703.K1.1.1.V1",
+    "companion_article_doi": "10.12029/gc2018Z101",
+    "access_url": "http://dcc.cgs.gov.cn",
+    "slib_provenance": "Five graphic libraries accompanying the same source dataset package",
+    "current_use": "Original open-edition JWD vectors and SLIB only, for software testing and validation",
+    "synthetic_derivatives": "No new coordinate-warped or virtual-geological-unit derivatives are generated or recommended as of 2026-11-08",
+    "attribution_file": "DATA_ATTRIBUTION.md",
+    "licence_note": "Public, non-classified and test-only status does not itself grant arbitrary redistribution; original terms apply."
+  },
   "fixture_roots": {
     "vectors": "tests/fixtures/jwd",
     "libraries": "tests/fixtures/slib"
