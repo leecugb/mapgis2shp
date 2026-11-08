@@ -1,0 +1,1332 @@
+{
+  "input_directory": "F:\\writer_shp_batch2_20261107",
+  "output_directory": "mapgis2shp_submission\\writer_batch2_audit",
+  "case_count": 11,
+  "write_errors": 0,
+  "attribute_matches": 11,
+  "topological_matches": 10,
+  "exact_coordinate_matches": 2,
+  "results": [
+    {
+      "case": "01_minimal_triangle",
+      "source_file": "01_minimal_triangle.shp",
+      "native_file": "01_MINIMAL_TRIANGLE.WP",
+      "output_file": "01_minimal_triangle.wp",
+      "source": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 5.0000000000015635e-05,
+        "length_sum": 0.03236067977500174,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 5.0000000000015635e-05,
+        "length_sum": 0.03236067977500174,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 5.0000000000015635e-05,
+        "length_sum": 0.03236067977500174,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 5.0000000000015635e-05,
+        "length_sum": 0.03236067977500174,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "native_standard_values": [
+        {
+          "class": 2,
+          "fill_color": 1,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 66,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 66,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "POLYGON ((76 35.9, 76.01 35.9, 76.005 35.91, 76 35.9))"
+      ],
+      "ours_wkt": [
+        "POLYGON ((76 35.9, 76.01 35.9, 76.005 35.91, 76 35.9))"
+      ],
+      "expected_wkt": [
+        "POLYGON ((76 35.9, 76.005 35.91, 76.01 35.9, 76 35.9))"
+      ],
+      "source_wkt": [
+        "POLYGON ((76 35.9, 76.005 35.91, 76.01 35.9, 76 35.9))"
+      ]
+    },
+    {
+      "case": "02_two_sizes",
+      "source_file": "02_two_sizes.shp",
+      "native_file": "02_TWO_SIZES.WP",
+      "output_file": "02_two_sizes.wp",
+      "source": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.0006999999999999346,
+        "length_sum": 0.14000000000000057,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 2,
+        "types": {
+          "MultiPolygon": 1,
+          "Polygon": 1
+        },
+        "valid": 2,
+        "area_sum": 0.001299999999999838,
+        "length_sum": 0.23999999999999488,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.0006999999999999346,
+        "length_sum": 0.14000000000000057,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.0006999999999999346,
+        "length_sum": 0.14000000000000057,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": false,
+        "exact_coordinate_match": false,
+        "expected_count": 2,
+        "actual_count": 2
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 2,
+        "actual_count": 2
+      },
+      "native_standard_values": [
+        {
+          "class": 4,
+          "fill_color": 2,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 162,
+          "field6": 0,
+          "field7": 0
+        },
+        {
+          "class": 2,
+          "fill_color": 2,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 178,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 162,
+          "field6": 0,
+          "field7": 0
+        },
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 174,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "MULTIPOLYGON (((76.03 35.9, 76.03 35.91, 76.02 35.91, 76.02 35.9, 76.03 35.9)), ((76.07 35.9, 76.07 35.93, 76.05 35.93, 76.05 35.9, 76.07 35.9)))",
+        "POLYGON ((76.07 35.9, 76.05 35.9, 76.05 35.93, 76.07 35.93, 76.07 35.9))"
+      ],
+      "ours_wkt": [
+        "POLYGON ((76.03 35.9, 76.03 35.91, 76.02 35.91, 76.02 35.9, 76.03 35.9))",
+        "POLYGON ((76.07 35.9, 76.07 35.93, 76.05 35.93, 76.05 35.9, 76.07 35.9))"
+      ],
+      "expected_wkt": [
+        "POLYGON ((76.03 35.9, 76.02 35.9, 76.02 35.91, 76.03 35.91, 76.03 35.9))",
+        "POLYGON ((76.07 35.9, 76.05 35.9, 76.05 35.93, 76.07 35.93, 76.07 35.9))"
+      ],
+      "source_wkt": [
+        "POLYGON ((76.03 35.9, 76.02 35.9, 76.02 35.91, 76.03 35.91, 76.03 35.9))",
+        "POLYGON ((76.07 35.9, 76.05 35.9, 76.05 35.93, 76.07 35.93, 76.07 35.9))"
+      ]
+    },
+    {
+      "case": "03_three_holes",
+      "source_file": "03_three_holes.shp",
+      "native_file": "03_THREE_HOLES.WP",
+      "output_file": "03_three_holes.wp",
+      "source": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.00129999999999998,
+        "length_sum": 0.280000000000058,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 1,
+        "types": {
+          "MultiPolygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.00129999999999998,
+        "length_sum": 0.280000000000058,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 1,
+        "types": {
+          "MultiPolygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.00129999999999998,
+        "length_sum": 0.280000000000058,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.00129999999999998,
+        "length_sum": 0.280000000000058,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "native_standard_values": [
+        {
+          "class": 8,
+          "fill_color": 1,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 66,
+          "field6": 1,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 66,
+          "field6": 1,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "MULTIPOLYGON (((76.04 35.92, 76.04 35.96, 76 35.96, 76 35.92, 76.04 35.92), (76.015 35.925, 76.005 35.925, 76.005 35.935, 76.015 35.935, 76.015 35.925), (76.03 35.925, 76.02 35.925, 76.02 35.935, 76.03 35.935, 76.03 35.925), (76.03 35.945, 76.02 35.945, 76.02 35.955, 76.03 35.955, 76.03 35.945)))"
+      ],
+      "ours_wkt": [
+        "MULTIPOLYGON (((76.04 35.92, 76.04 35.96, 76 35.96, 76 35.92, 76.04 35.92), (76.015 35.925, 76.015 35.935, 76.005 35.935, 76.005 35.925, 76.015 35.925), (76.03 35.925, 76.03 35.935, 76.02 35.935, 76.02 35.925, 76.03 35.925), (76.03 35.945, 76.03 35.955, 76.02 35.955, 76.02 35.945, 76.03 35.945)))"
+      ],
+      "expected_wkt": [
+        "POLYGON ((76.04 35.92, 76 35.92, 76 35.96, 76.04 35.96, 76.04 35.92), (76.015 35.925, 76.015 35.935, 76.005 35.935, 76.005 35.925, 76.015 35.925), (76.03 35.925, 76.03 35.935, 76.02 35.935, 76.02 35.925, 76.03 35.925), (76.03 35.945, 76.03 35.955, 76.02 35.955, 76.02 35.945, 76.03 35.945))"
+      ],
+      "source_wkt": [
+        "POLYGON ((76.04 35.92, 76 35.92, 76 35.96, 76.04 35.96, 76.04 35.92), (76.015 35.925, 76.015 35.935, 76.005 35.935, 76.005 35.925, 76.015 35.925), (76.03 35.925, 76.03 35.935, 76.02 35.935, 76.02 35.925, 76.03 35.925), (76.03 35.945, 76.03 35.955, 76.02 35.955, 76.02 35.945, 76.03 35.945))"
+      ]
+    },
+    {
+      "case": "04_multipart_with_holes",
+      "source_file": "04_multipart_with_holes.shp",
+      "native_file": "04_MULTIPART_WITH_HOLES.WP",
+      "output_file": "04_multipart_with_holes.wp",
+      "source": {
+        "count": 1,
+        "types": {
+          "MultiPolygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.0005999999999996192,
+        "length_sum": 0.23999999999998067,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 1,
+        "types": {
+          "MultiPolygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.0005999999999996192,
+        "length_sum": 0.23999999999998067,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 1,
+        "types": {
+          "MultiPolygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.0005999999999996192,
+        "length_sum": 0.23999999999998067,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 1,
+        "types": {
+          "MultiPolygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.0005999999999996192,
+        "length_sum": 0.23999999999998067,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "native_standard_values": [
+        {
+          "class": 8,
+          "fill_color": 1,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 66,
+          "field6": 1,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 66,
+          "field6": 1,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "MULTIPOLYGON (((76.07 35.92, 76.07 35.94, 76.05 35.94, 76.05 35.92, 76.07 35.92), (76.065 35.925, 76.055 35.925, 76.055 35.935, 76.065 35.935, 76.065 35.925)), ((76.1 35.92, 76.1 35.94, 76.08 35.94, 76.08 35.92, 76.1 35.92), (76.095 35.925, 76.085 35.925, 76.085 35.935, 76.095 35.935, 76.095 35.925)))"
+      ],
+      "ours_wkt": [
+        "MULTIPOLYGON (((76.07 35.92, 76.07 35.94, 76.05 35.94, 76.05 35.92, 76.07 35.92), (76.065 35.925, 76.065 35.935, 76.055 35.935, 76.055 35.925, 76.065 35.925)), ((76.1 35.92, 76.1 35.94, 76.08 35.94, 76.08 35.92, 76.1 35.92), (76.095 35.925, 76.095 35.935, 76.085 35.935, 76.085 35.925, 76.095 35.925)))"
+      ],
+      "expected_wkt": [
+        "MULTIPOLYGON (((76.07 35.92, 76.05 35.92, 76.05 35.94, 76.07 35.94, 76.07 35.92), (76.065 35.925, 76.065 35.935, 76.055 35.935, 76.055 35.925, 76.065 35.925)), ((76.1 35.92, 76.08 35.92, 76.08 35.94, 76.1 35.94, 76.1 35.92), (76.095 35.925, 76.095 35.935, 76.085 35.935, 76.085 35.925, 76.095 35.925)))"
+      ],
+      "source_wkt": [
+        "MULTIPOLYGON (((76.07 35.92, 76.05 35.92, 76.05 35.94, 76.07 35.94, 76.07 35.92), (76.065 35.925, 76.065 35.935, 76.055 35.935, 76.055 35.925, 76.065 35.925)), ((76.1 35.92, 76.08 35.92, 76.08 35.94, 76.1 35.94, 76.1 35.92), (76.095 35.925, 76.095 35.935, 76.085 35.935, 76.085 35.925, 76.095 35.925)))"
+      ]
+    },
+    {
+      "case": "05_touching_point",
+      "source_file": "05_touching_point.shp",
+      "native_file": "05_TOUCHING_POINT.WP",
+      "output_file": "05_touching_point.wp",
+      "source": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.00019999999999992043,
+        "length_sum": 0.07999999999998408,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 2,
+        "types": {
+          "MultiPolygon": 1,
+          "Polygon": 1
+        },
+        "valid": 2,
+        "area_sum": 0.0002999999999998096,
+        "length_sum": 0.11999999999996191,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.00019999999999992043,
+        "length_sum": 0.07999999999998408,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.00019999999999992043,
+        "length_sum": 0.07999999999998408,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": false,
+        "exact_coordinate_match": false,
+        "expected_count": 2,
+        "actual_count": 2
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 2,
+        "actual_count": 2
+      },
+      "native_standard_values": [
+        {
+          "class": 4,
+          "fill_color": 2,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 162,
+          "field6": 0,
+          "field7": 0
+        },
+        {
+          "class": 2,
+          "fill_color": 2,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 178,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 162,
+          "field6": 0,
+          "field7": 0
+        },
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 174,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "MULTIPOLYGON (((76.12 35.92, 76.12 35.93, 76.11 35.93, 76.11 35.92, 76.12 35.92)), ((76.13 35.93, 76.13 35.94, 76.12 35.94, 76.12 35.93, 76.13 35.93)))",
+        "POLYGON ((76.13 35.93, 76.12 35.93, 76.12 35.94, 76.13 35.94, 76.13 35.93))"
+      ],
+      "ours_wkt": [
+        "POLYGON ((76.12 35.92, 76.12 35.93, 76.11 35.93, 76.11 35.92, 76.12 35.92))",
+        "POLYGON ((76.13 35.93, 76.13 35.94, 76.12 35.94, 76.12 35.93, 76.13 35.93))"
+      ],
+      "expected_wkt": [
+        "POLYGON ((76.12 35.92, 76.11 35.92, 76.11 35.93, 76.12 35.93, 76.12 35.92))",
+        "POLYGON ((76.13 35.93, 76.12 35.93, 76.12 35.94, 76.13 35.94, 76.13 35.93))"
+      ],
+      "source_wkt": [
+        "POLYGON ((76.12 35.92, 76.11 35.92, 76.11 35.93, 76.12 35.93, 76.12 35.92))",
+        "POLYGON ((76.13 35.93, 76.12 35.93, 76.12 35.94, 76.13 35.94, 76.13 35.93))"
+      ]
+    },
+    {
+      "case": "06_shared_edge",
+      "source_file": "06_shared_edge.shp",
+      "native_file": "06_SHARED_EDGE.WP",
+      "output_file": "06_shared_edge.wp",
+      "source": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.00019999999999992043,
+        "length_sum": 0.07999999999998408,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 2,
+        "types": {
+          "GeometryCollection": 1,
+          "Polygon": 1
+        },
+        "valid": 2,
+        "area_sum": 0.0002999999999998096,
+        "length_sum": 0.1099999999999639,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.00019999999999992043,
+        "length_sum": 0.07999999999998408,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.00019999999999992043,
+        "length_sum": 0.07999999999998408,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": false,
+        "exact_coordinate_match": false,
+        "expected_count": 2,
+        "actual_count": 2
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 2,
+        "actual_count": 2
+      },
+      "native_standard_values": [
+        {
+          "class": 4,
+          "fill_color": 2,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 162,
+          "field6": 0,
+          "field7": 0
+        },
+        {
+          "class": 2,
+          "fill_color": 2,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 178,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 162,
+          "field6": 0,
+          "field7": 0
+        },
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 174,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "GEOMETRYCOLLECTION (POLYGON ((76.14 35.93, 76.15 35.93, 76.16 35.93, 76.16 35.92, 76.15 35.92, 76.14 35.92, 76.14 35.93)), LINESTRING (76.15 35.92, 76.15 35.93))",
+        "POLYGON ((76.16 35.92, 76.15 35.92, 76.15 35.93, 76.16 35.93, 76.16 35.92))"
+      ],
+      "ours_wkt": [
+        "POLYGON ((76.15 35.92, 76.15 35.93, 76.14 35.93, 76.14 35.92, 76.15 35.92))",
+        "POLYGON ((76.16 35.92, 76.16 35.93, 76.15 35.93, 76.15 35.92, 76.16 35.92))"
+      ],
+      "expected_wkt": [
+        "POLYGON ((76.15 35.92, 76.14 35.92, 76.14 35.93, 76.15 35.93, 76.15 35.92))",
+        "POLYGON ((76.16 35.92, 76.15 35.92, 76.15 35.93, 76.16 35.93, 76.16 35.92))"
+      ],
+      "source_wkt": [
+        "POLYGON ((76.15 35.92, 76.14 35.92, 76.14 35.93, 76.15 35.93, 76.15 35.92))",
+        "POLYGON ((76.16 35.92, 76.15 35.92, 76.15 35.93, 76.16 35.93, 76.16 35.92))"
+      ]
+    },
+    {
+      "case": "07_hole_and_island",
+      "source_file": "07_hole_and_island.shp",
+      "native_file": "07_HOLE_AND_ISLAND.WP",
+      "output_file": "07_hole_and_island.wp",
+      "source": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.0008360000000001818,
+        "length_sum": 0.1839999999999833,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 2,
+        "types": {
+          "MultiPolygon": 1,
+          "Polygon": 1
+        },
+        "valid": 2,
+        "area_sum": 0.0008720000000001845,
+        "length_sum": 0.2079999999999842,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 2,
+        "types": {
+          "MultiPolygon": 1,
+          "Polygon": 1
+        },
+        "valid": 2,
+        "area_sum": 0.0008360000000001818,
+        "length_sum": 0.1839999999999833,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 2,
+        "types": {
+          "Polygon": 2
+        },
+        "valid": 2,
+        "area_sum": 0.0008360000000001818,
+        "length_sum": 0.1839999999999833,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": false,
+        "exact_coordinate_match": false,
+        "expected_count": 2,
+        "actual_count": 2
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 2,
+        "actual_count": 2
+      },
+      "native_standard_values": [
+        {
+          "class": 6,
+          "fill_color": 2,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 242,
+          "field6": 0,
+          "field7": 0
+        },
+        {
+          "class": 2,
+          "fill_color": 2,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 10,
+          "field6": 1,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 242,
+          "field6": 0,
+          "field7": 0
+        },
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 6,
+          "field6": 1,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "MULTIPOLYGON (((76.2 35.92, 76.2 35.95, 76.17 35.95, 76.17 35.92, 76.2 35.92), (76.19 35.93, 76.18 35.93, 76.18 35.94, 76.19 35.94, 76.19 35.93)), ((76.188 35.932, 76.188 35.938, 76.182 35.938, 76.182 35.932, 76.188 35.932)))",
+        "POLYGON ((76.188 35.932, 76.182 35.932, 76.182 35.938, 76.188 35.938, 76.188 35.932))"
+      ],
+      "ours_wkt": [
+        "MULTIPOLYGON (((76.2 35.92, 76.2 35.95, 76.17 35.95, 76.17 35.92, 76.2 35.92), (76.19 35.93, 76.19 35.94, 76.18 35.94, 76.18 35.93, 76.19 35.93)))",
+        "POLYGON ((76.188 35.932, 76.188 35.938, 76.182 35.938, 76.182 35.932, 76.188 35.932))"
+      ],
+      "expected_wkt": [
+        "POLYGON ((76.2 35.92, 76.17 35.92, 76.17 35.95, 76.2 35.95, 76.2 35.92), (76.19 35.93, 76.19 35.94, 76.18 35.94, 76.18 35.93, 76.19 35.93))",
+        "POLYGON ((76.188 35.932, 76.182 35.932, 76.182 35.938, 76.188 35.938, 76.188 35.932))"
+      ],
+      "source_wkt": [
+        "POLYGON ((76.2 35.92, 76.17 35.92, 76.17 35.95, 76.2 35.95, 76.2 35.92), (76.19 35.93, 76.19 35.94, 76.18 35.94, 76.18 35.93, 76.19 35.93))",
+        "POLYGON ((76.188 35.932, 76.182 35.932, 76.182 35.938, 76.188 35.938, 76.188 35.932))"
+      ]
+    },
+    {
+      "case": "08_duplicate_vertices",
+      "source_file": "08_duplicate_vertices.shp",
+      "native_file": "08_DUPLICATE_VERTICES.WP",
+      "output_file": "08_duplicate_vertices.wp",
+      "source": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.00010000000000003127,
+        "length_sum": 0.04000000000000625,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.00010000000000003127,
+        "length_sum": 0.04000000000000625,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.00010000000000003127,
+        "length_sum": 0.04000000000000625,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 1,
+        "area_sum": 0.00010000000000003127,
+        "length_sum": 0.04000000000000625,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "native_standard_values": [
+        {
+          "class": 2,
+          "fill_color": 1,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 114,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 114,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "POLYGON ((76.21 35.92, 76.21 35.92, 76.22 35.92, 76.22 35.93, 76.21 35.93, 76.21 35.92, 76.21 35.92))"
+      ],
+      "ours_wkt": [
+        "POLYGON ((76.21 35.92, 76.21 35.92, 76.22 35.92, 76.22 35.93, 76.21 35.93, 76.21 35.92, 76.21 35.92))"
+      ],
+      "expected_wkt": [
+        "POLYGON ((76.21 35.92, 76.21 35.92, 76.21 35.93, 76.22 35.93, 76.22 35.92, 76.21 35.92, 76.21 35.92))"
+      ],
+      "source_wkt": [
+        "POLYGON ((76.21 35.92, 76.21 35.92, 76.21 35.93, 76.22 35.93, 76.22 35.92, 76.21 35.92, 76.21 35.92))"
+      ]
+    },
+    {
+      "case": "09_invalid_bowtie",
+      "source_file": "09_invalid_bowtie.shp",
+      "native_file": "09_INVALID_BOWTIE.WP",
+      "output_file": "09_invalid_bowtie.wp",
+      "source": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 0,
+        "area_sum": 0.0,
+        "length_sum": 0.04828427124744225,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 1,
+        "types": {
+          "MultiPolygon": 1
+        },
+        "valid": 1,
+        "area_sum": 4.999999999994458e-05,
+        "length_sum": 0.04828427124744225,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 1,
+        "types": {
+          "MultiPolygon": 1
+        },
+        "valid": 1,
+        "area_sum": 4.999999999994458e-05,
+        "length_sum": 0.04828427124744225,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 1,
+        "types": {
+          "Polygon": 1
+        },
+        "valid": 0,
+        "area_sum": 0.0,
+        "length_sum": 0.04828427124744225,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": false,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "source_ours_geometry": {
+        "topological_match": false,
+        "exact_coordinate_match": false,
+        "expected_count": 1,
+        "actual_count": 1
+      },
+      "native_standard_values": [
+        {
+          "class": 2,
+          "fill_color": 1,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 82,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "class": 1,
+          "fill_color": 0,
+          "pattern": 0,
+          "pattern_height": 0,
+          "pattern_width": 0,
+          "pattern_color": 0,
+          "layer": 0,
+          "field5": 82,
+          "field6": 0,
+          "field7": 0
+        }
+      ],
+      "native_wkt": [
+        "MULTIPOLYGON (((76.235 35.925, 76.23 35.92, 76.23 35.93, 76.235 35.925)), ((76.24 35.92, 76.235 35.925, 76.24 35.93, 76.24 35.92)))"
+      ],
+      "ours_wkt": [
+        "MULTIPOLYGON (((76.235 35.925, 76.23 35.92, 76.23 35.93, 76.235 35.925)), ((76.24 35.92, 76.235 35.925, 76.24 35.93, 76.24 35.92)))"
+      ],
+      "expected_wkt": [
+        "POLYGON ((76.23 35.92, 76.24 35.93, 76.24 35.92, 76.23 35.93, 76.23 35.92))"
+      ],
+      "source_wkt": [
+        "POLYGON ((76.23 35.92, 76.24 35.93, 76.24 35.92, 76.23 35.93, 76.23 35.92))"
+      ]
+    },
+    {
+      "case": "10_points",
+      "source_file": "10_points.shp",
+      "native_file": "10_POINTS.WT",
+      "output_file": "10_points.wt",
+      "source": {
+        "count": 3,
+        "types": {
+          "Point": 3
+        },
+        "valid": 3,
+        "area_sum": 0.0,
+        "length_sum": 0.0,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 3,
+        "types": {
+          "Point": 3
+        },
+        "valid": 3,
+        "area_sum": 0.0,
+        "length_sum": 0.0,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 3,
+        "types": {
+          "Point": 3
+        },
+        "valid": 3,
+        "area_sum": 0.0,
+        "length_sum": 0.0,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 3,
+        "types": {
+          "Point": 3
+        },
+        "valid": 3,
+        "area_sum": 0.0,
+        "length_sum": 0.0,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": true,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": true,
+        "expected_count": 3,
+        "actual_count": 3
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": true,
+        "expected_count": 3,
+        "actual_count": 3
+      },
+      "native_standard_values": [
+        {
+          "layer": 0,
+          "point_type": 1,
+          "symbol_no": 1,
+          "height": 0.10000000149011612,
+          "width": 0.10000000149011612,
+          "spacing": null,
+          "angle": 0,
+          "color": 6,
+          "pen_width": 0.10000000149011612
+        },
+        {
+          "layer": 0,
+          "point_type": 1,
+          "symbol_no": 1,
+          "height": 0.10000000149011612,
+          "width": 0.10000000149011612,
+          "spacing": null,
+          "angle": 0,
+          "color": 6,
+          "pen_width": 0.10000000149011612
+        },
+        {
+          "layer": 0,
+          "point_type": 1,
+          "symbol_no": 1,
+          "height": 0.10000000149011612,
+          "width": 0.10000000149011612,
+          "spacing": null,
+          "angle": 0,
+          "color": 6,
+          "pen_width": 0.10000000149011612
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "layer": 0,
+          "point_type": 1,
+          "symbol_no": 1,
+          "height": 0.10000000149011612,
+          "width": 0.10000000149011612,
+          "spacing": null,
+          "angle": 0,
+          "color": 6,
+          "pen_width": 0.10000000149011612
+        },
+        {
+          "layer": 0,
+          "point_type": 1,
+          "symbol_no": 1,
+          "height": 0.10000000149011612,
+          "width": 0.10000000149011612,
+          "spacing": null,
+          "angle": 0,
+          "color": 6,
+          "pen_width": 0.10000000149011612
+        },
+        {
+          "layer": 0,
+          "point_type": 1,
+          "symbol_no": 1,
+          "height": 0.10000000149011612,
+          "width": 0.10000000149011612,
+          "spacing": null,
+          "angle": 0,
+          "color": 6,
+          "pen_width": 0.10000000149011612
+        }
+      ],
+      "native_wkt": [
+        "POINT (76 35.9)",
+        "POINT (76.01 35.91)",
+        "POINT (76.02 35.92)"
+      ],
+      "ours_wkt": [
+        "POINT (76 35.9)",
+        "POINT (76.01 35.91)",
+        "POINT (76.02 35.92)"
+      ],
+      "expected_wkt": [
+        "POINT (76 35.9)",
+        "POINT (76.01 35.91)",
+        "POINT (76.02 35.92)"
+      ],
+      "source_wkt": [
+        "POINT (76 35.9)",
+        "POINT (76.01 35.91)",
+        "POINT (76.02 35.92)"
+      ]
+    },
+    {
+      "case": "11_multiline_and_duplicate",
+      "source_file": "11_multiline_and_duplicate.shp",
+      "native_file": "11_MULTILINE_AND_DUPLICATE.WL",
+      "output_file": "11_multiline_and_duplicate.wl",
+      "source": {
+        "count": 2,
+        "types": {
+          "MultiLineString": 1,
+          "LineString": 1
+        },
+        "valid": 2,
+        "area_sum": 0.0,
+        "length_sum": 0.04242640687118944,
+        "crs": "EPSG:4326"
+      },
+      "native": {
+        "count": 2,
+        "types": {
+          "LineString": 2
+        },
+        "valid": 2,
+        "area_sum": 0.0,
+        "length_sum": 0.028284271247466325,
+        "crs": null
+      },
+      "write_error": null,
+      "ours": {
+        "count": 3,
+        "types": {
+          "LineString": 3
+        },
+        "valid": 3,
+        "area_sum": 0.0,
+        "length_sum": 0.04242640687118944,
+        "crs": "+proj=longlat +datum=WGS84 +no_defs +type=crs"
+      },
+      "expected_source": {
+        "count": 3,
+        "types": {
+          "LineString": 3
+        },
+        "valid": 3,
+        "area_sum": 0.0,
+        "length_sum": 0.04242640687118944,
+        "crs": "EPSG:4326"
+      },
+      "source_native_attributes_match": false,
+      "source_ours_attributes_match": true,
+      "source_native_geometry": {
+        "topological_match": false,
+        "exact_coordinate_match": false,
+        "expected_count": 3,
+        "actual_count": 2
+      },
+      "source_ours_geometry": {
+        "topological_match": true,
+        "exact_coordinate_match": true,
+        "expected_count": 3,
+        "actual_count": 3
+      },
+      "native_standard_values": [
+        {
+          "layer": 0,
+          "width": 0.05000000074505806,
+          "color": 1,
+          "linetype": 1,
+          "aux_linetype": 0,
+          "aux_flag": 1,
+          "x_coef": 1,
+          "y_coef": 1,
+          "aux_color": 0,
+          "transparent": 0
+        },
+        {
+          "layer": 0,
+          "width": 0.05000000074505806,
+          "color": 1,
+          "linetype": 1,
+          "aux_linetype": 0,
+          "aux_flag": 1,
+          "x_coef": 1,
+          "y_coef": 1,
+          "aux_color": 0,
+          "transparent": 0
+        }
+      ],
+      "ours_standard_values": [
+        {
+          "layer": 0,
+          "width": 0.05000000074505806,
+          "color": 1,
+          "linetype": 1,
+          "aux_linetype": 0,
+          "aux_flag": 1,
+          "x_coef": 1,
+          "y_coef": 1,
+          "aux_color": 0,
+          "transparent": 0
+        },
+        {
+          "layer": 0,
+          "width": 0.05000000074505806,
+          "color": 1,
+          "linetype": 1,
+          "aux_linetype": 0,
+          "aux_flag": 1,
+          "x_coef": 1,
+          "y_coef": 1,
+          "aux_color": 0,
+          "transparent": 0
+        },
+        {
+          "layer": 0,
+          "width": 0.05000000074505806,
+          "color": 1,
+          "linetype": 1,
+          "aux_linetype": 0,
+          "aux_flag": 1,
+          "x_coef": 1,
+          "y_coef": 1,
+          "aux_color": 0,
+          "transparent": 0
+        }
+      ],
+      "native_wkt": [
+        "LINESTRING (76 35.9, 76.01 35.91)",
+        "LINESTRING (76.02 35.9, 76.03 35.91)"
+      ],
+      "ours_wkt": [
+        "LINESTRING (76 35.9, 76.01 35.91)",
+        "LINESTRING (76.02 35.9, 76.03 35.91)",
+        "LINESTRING (76.04 35.9, 76.04 35.9, 76.05 35.91)"
+      ],
+      "expected_wkt": [
+        "LINESTRING (76 35.9, 76.01 35.91)",
+        "LINESTRING (76.02 35.9, 76.03 35.91)",
+        "LINESTRING (76.04 35.9, 76.04 35.9, 76.05 35.91)"
+      ],
+      "source_wkt": [
+        "MULTILINESTRING ((76 35.9, 76.01 35.91), (76.02 35.9, 76.03 35.91))",
+        "LINESTRING (76.04 35.9, 76.04 35.9, 76.05 35.91)"
+      ]
+    }
+  ]
+}

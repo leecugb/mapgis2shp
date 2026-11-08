@@ -17,7 +17,7 @@
     "pcolor": "PYMAPGIS_PCOLOR"
   },
   "vectors": {
-    "LDLYAAE002.WP~": {
+    "LDLYAAE002.WP": {
       "kind": "wp",
       "role": "hydrology polygons",
       "bytes": 319715,
@@ -35,7 +35,7 @@
       "bytes": 93953,
       "sha256": "26b70111b8ed1328d59a5f8c5974cf44209892a5d645e28f0ed474ffe967aefa"
     },
-    "LDZOFBB003.WP~": {
+    "LDZOFBB003.WP": {
       "kind": "wp",
       "role": "intrusive polygons",
       "bytes": 194676,

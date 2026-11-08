@@ -1,0 +1,139 @@
+{
+  "summary": {
+    "layers": 12,
+    "features": 7094,
+    "drawn": 5732,
+    "polygon_labels": 713,
+    "excluded_text": 1362,
+    "unknown_colour_codes": [],
+    "unknown_colour_occurrences": 0,
+    "solid_fallbacks": 0,
+    "unknown_fills": 0,
+    "unresolved_symbols": 0,
+    "unknown_fonts": []
+  },
+  "layers": [
+    {
+      "source": "LDLYAAE002.WP",
+      "kind": "wp",
+      "features": 128,
+      "drawn": 128,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "holes": 5,
+      "pattern": 128
+    },
+    {
+      "source": "LDZOFBB001.WP",
+      "kind": "wp",
+      "features": 608,
+      "drawn": 608,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "holes": 27,
+      "polygon_label": 608
+    },
+    {
+      "source": "LDZOFBB002.WP",
+      "kind": "wp",
+      "features": 10,
+      "drawn": 10,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "holes": 10,
+      "polygon_label": 10
+    },
+    {
+      "source": "LDZOFBB003.WP",
+      "kind": "wp",
+      "features": 46,
+      "drawn": 46,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "holes": 13,
+      "polygon_label": 46,
+      "pattern": 37
+    },
+    {
+      "source": "LDZOFBB004.WP",
+      "kind": "wp",
+      "features": 49,
+      "drawn": 49,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "holes": 13,
+      "polygon_label": 49
+    },
+    {
+      "source": "LDLYAAE001.WL",
+      "kind": "wl",
+      "features": 1143,
+      "drawn": 1143,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "solid": 609,
+      "pattern": 534
+    },
+    {
+      "source": "LDZOFBA002.WL",
+      "kind": "wl",
+      "features": 2222,
+      "drawn": 2222,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "solid": 1977,
+      "pattern": 245,
+      "aux_pattern": 5
+    },
+    {
+      "source": "LDZOFBA003.WL",
+      "kind": "wl",
+      "features": 310,
+      "drawn": 310,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "solid": 249,
+      "pattern": 61
+    },
+    {
+      "source": "LDZOFBA005.WL",
+      "kind": "wl",
+      "features": 4,
+      "drawn": 4,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "pattern": 4
+    },
+    {
+      "source": "LDZOFBB098.WL",
+      "kind": "wl",
+      "features": 245,
+      "drawn": 245,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "solid": 245
+    },
+    {
+      "source": "LDZOFBA016.WT",
+      "kind": "wt",
+      "features": 305,
+      "drawn": 305,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "symbols": 305
+    },
+    {
+      "source": "LDZOFBB099.WT",
+      "kind": "wt",
+      "features": 2024,
+      "drawn": 662,
+      "unknown_colors": {},
+      "overridden_colors": {},
+      "excluded_text": 1362,
+      "unknown_fonts": {},
+      "text": 386,
+      "spaced_text": 386,
+      "symbols": 276
+    }
+  ]
+}

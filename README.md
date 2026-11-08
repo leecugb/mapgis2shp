@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/mapgis2shp.svg)](https://pypi.org/project/mapgis2shp/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21487339-blue.svg)](https://doi.org/10.5281/zenodo.21487339)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.24036158-blue.svg)](https://doi.org/10.5281/zenodo.24036158)
 
 Read **and write** MapGIS 6.x/67 vector files (`.wt`, `.wl`, `.wp`) with [GeoPandas](https://geopandas.org/) GeoDataFrames.
 
@@ -441,6 +441,22 @@ result = renderer.render(
 )
 print(result.reports)  # drawn features, fallbacks, unresolved colours, ...
 ```
+
+To run the same renderer against the bundled twelve-layer JWD dataset and its
+five matching SLIB files, use:
+
+```bash
+python examples/render_bundled_jwd.py --output-dir jwd_render
+```
+
+The example writes `jwd_map.png`, `jwd_map.pdf`, `jwd_map.svg` and
+`jwd_render_reports.json`. Its `regression_layers()` helper pre-reads `.WP~`
+backup polygons with `Reader`, so both the published V2.7.1 fixture layout and
+the normalized current WP layout follow the same rendering path. Its regression case contains 12 layers and 7,094
+input features, with 5,732 original features drawn and no unresolved colours,
+unknown fills, solid fallbacks or unresolved symbols. The JSON separates input
+features from drawn features and excluded annotations. These values are
+internal regression evidence, not native MapGIS visual acceptance.
 
 By default, complete geological-unit labels come from polygon attributes and
 are drawn at each geometry's `representative_point()` with Mathtext, 4.5 pt
@@ -901,6 +917,16 @@ Unknown field-type descriptors are skipped without shifting the retained raw des
 
 ## Changelog
 
+### Unreleased manuscript-regression updates
+
+- Add twelve third-batch Writer cases for large 24-bit ring-index offsets, projected UTM input, long attributes, null geometry and degenerate rings; reproject UTM to Gauss-Kruger (k=1) with the correct central meridian instead of writing UTM coordinates with incorrect metadata
+- Add eleven native SHP-to-MapGIS Writer cases with provenance manifests and source/wheel fixture access; align default WT point size 0.1 mm, colour 6 and pen width 0.1 mm, and default WL width 0.05 mm, X/Y coefficients 1.0 and `aux_flag=1` with the supplied native conversion reference
+- Normalize the two bundled WP backup filenames to `.WP`, and add a compatibility loader that still handles the published V2.7.1 `.WP~` layout through `Reader`
+- Add `examples/render_bundled_jwd.py` with PNG/PDF/SVG output and sanitized JSON reports, and run it in CI
+- Assert all 782 38|2 source vertices and `max_deviation == 0.0`, pin `drawn + excluded_text == 7094`, cover the published WP-backup layout, and add direct Subgraph/LINESTY/Fillgrph/Colorlib/Pcolor structural-census assertions
+- Select `geopandas<1.2` only in the `dev` reference environment because GeoPandas 1.2 changes edge pixels in the optional legacy rendering reference path; ordinary runtime requirements are unchanged
+- Synchronize the citation title and 2.7.1 Zenodo DOI, and clarify the SoftwareX validation artifacts and native-acceptance boundary
+
 ### 2.7.1 (2026-11-07)
 
 - Document original-library rendering in the package introduction and project metadata; clarify the complete vector / graphic-library / rendering scope
@@ -967,6 +993,12 @@ Run the test suite:
 pytest
 ```
 
+The `dev` extra currently selects `geopandas<1.2` for the test reference
+environment. GeoPandas 1.2 changes edge pixels in the old reference plotting
+path of the optional `pymapgis.rendering` module, which is excluded from release
+archives. The ordinary runtime requirement remains `geopandas>=0.12`; the
+public original-library JWD regression also passed with GeoPandas 1.2.0.
+
 Run the smoke-test regression against all local MapGIS files:
 
 ```bash
@@ -1029,7 +1061,7 @@ separate real-data provenance and licensing note.
 
 The workflow in `.github/workflows/test-and-build.yml` is configured to run
 lint, tests with the bundled synthetic and real fixtures, and the public
-example on Linux, Windows, and macOS. Its build job additionally checks wheel and source-archive
+examples on Linux, Windows, and macOS. Its build job additionally checks wheel and source-archive
 contents with `tests/inspect_dist.py` and retains the artifacts for review.
 The optional Matplotlib extra is required only for rendering tests.
 
