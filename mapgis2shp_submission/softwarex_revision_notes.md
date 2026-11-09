@@ -27,6 +27,8 @@
 ### 模板与编译
 
 - 用户已明确授权运行 Tectonic 官方 GitHub `tectonic-typesetting/tectonic` 的 `tectonic@0.17.0` Windows release。下载 ZIP 为 21,060,223 字节，SHA-256 `f61ce51f0b0ade1015b7de7ef368541c5424e9756ecbd0d7af97d6d48030845f`。
+- 用户提供的 `elsarticle.zip` 为真实 Elsevier 官方类包，SHA-256 `0b093093e84db49f99bcc9a7c3f69ed1fb61b0147c6d296427aff7963e7f50f6`。已从 DTX 的 class 区段确定性提取 `elsarticle.cls`，最终编译日志明确为 **Document Class: elsarticle 2024/04/04, 3.4**，并成功生成 PDF。
+- 已按 LaTeX 提交说明生成 `paper_softwarex_latex_source_20261109.zip`，包含 `paper_softwarex.tex`、官方 `elsarticle.cls`、两张图和构建说明，不含原始 JWD/SLIB 或临时文件。ZIP 为 3,966,599 字节，SHA-256 `4cd8beab430bcb8171d8a06b478bd770baad36b5a73f31e0d1305d04f31b388d`。
 - 首次编译发现 `authoryear` 与手工 bibliography 不兼容，已改为 `numbers` 并执行三轮编译。后续加入 T1 编码、6 处 `\textbar`、行号、`tabularx` 和简化 Quickstart，最终生成 17 页 PDF，交叉引用和参考文献可解析。
 - 逐页渲染检查后，摘要已收回首页，表 1 不再越界，Quickstart 长导入路径已缩短，代码元数据表改为 footnotesize。编译日志仍有若干 overfull/underfull 警告，未将其写成零警告。
 - 按 SoftwareX 口径估算约 **2,992 词、2 张图**。用户提供的 `D:\intro.pdf` 为真实 13 页官方指南，文件为 6,191,726 字节，SHA-256 `693870930050f13bac58fe8fe4d6c11990f297fe8fc08c045be7236ee1da9e51`。指南确认上限是 **4,000 词和 6 图**，不是此前二手检索的 3,000 词；摘要 194 词符合 250 词上限，关键词 6 个符合 1–7 个要求。已按首次出现顺序重排参考文献，改用标准 CRediT 角色，并在参考文献前加入实际 AI 使用声明。历史 Reader 性能段已删除。
@@ -126,7 +128,7 @@
 
 ## 投稿前待办
 
-- [x] 使用获授权的 Tectonic 编译并逐页检查版式（17 页 PDF，仍保留非零排版警告）。
+- [x] 使用获授权的 Tectonic 与官方 elsarticle 3.4 编译并逐页检查版式，生成 PDF 和 LaTeX 源文件 ZIP（仍保留非零排版警告）。
 - [ ] 使用 SoftwareX 官方专用模板复核结构、行号和最终版式；真实模板尚未取得。
 - [x] 源码结构已迁移到 `elsarticle` / SoftwareX frontmatter，不能据此替代官方专用模板合规。
 - [x] 将图 1 占位框替换为正式的软件架构图（`softwarex_architecture.pdf/.png`）。
@@ -154,4 +156,5 @@
 - 图件审计：`softwarex_architecture.source-audit.json`、`.text-audit.json`、`.svg-audit.json`、`.collision-audit.json`，以及 `jwd_map.source-audit.json`、`.text-audit.json`、`.svg-structure-audit.json`、`.collision-audit.json`；文本与终端日志保留在本地审计工作区
 - 公共示例：`../examples/render_bundled_jwd.py`
 - 编译稿：`compiled_20261109/paper_softwarex.pdf`
+- LaTeX 源文件包：`paper_softwarex_latex_source_20261109.zip`
 - 四闸门材料：`softwarex_template_request_draft.md`、`ngac_redistribution_request_draft.md`、`ngac_distribution_remediation_plan.md`、`author_confirmation_package.md`、`color_anchor_capture_package.md`
