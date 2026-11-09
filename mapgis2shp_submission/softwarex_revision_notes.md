@@ -29,7 +29,7 @@
 - 用户已明确授权运行 Tectonic 官方 GitHub `tectonic-typesetting/tectonic` 的 `tectonic@0.17.0` Windows release。下载 ZIP 为 21,060,223 字节，SHA-256 `f61ce51f0b0ade1015b7de7ef368541c5424e9756ecbd0d7af97d6d48030845f`。
 - 首次编译发现 `authoryear` 与手工 bibliography 不兼容，已改为 `numbers` 并执行三轮编译。后续加入 T1 编码、6 处 `\textbar`、行号、`tabularx` 和简化 Quickstart，最终生成 17 页 PDF，交叉引用和参考文献可解析。
 - 逐页渲染检查后，摘要已收回首页，表 1 不再越界，Quickstart 长导入路径已缩短，代码元数据表改为 footnotesize。编译日志仍有若干 overfull/underfull 警告，未将其写成零警告。
-- 按 SoftwareX 口径估算约 **2,953 词、2 张图**，低于 3,000 词和 6 图上限。历史 Reader 性能段已删除。
+- 按 SoftwareX 口径估算约 **2,992 词、2 张图**。用户提供的 `D:\intro.pdf` 为真实 13 页官方指南，文件为 6,191,726 字节，SHA-256 `693870930050f13bac58fe8fe4d6c11990f297fe8fc08c045be7236ee1da9e51`。指南确认上限是 **4,000 词和 6 图**，不是此前二手检索的 3,000 词；摘要 194 词符合 250 词上限，关键词 6 个符合 1–7 个要求。已按首次出现顺序重排参考文献，改用标准 CRediT 角色，并在参考文献前加入实际 AI 使用声明。历史 Reader 性能段已删除。
 - 官方 SoftwareX 专用模板仍未取得，现有编译只证明 `elsarticle` 可编译。`softwarex_template_request_draft.md` 已准备，需通过浏览器人机校验或编辑部回复取得真实模板后再核对。此闸门尚未完全关闭。
 
 ### NGAC 外部数据方案
