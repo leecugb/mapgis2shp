@@ -8,6 +8,7 @@
     "usage": "Original open-edition data for software testing and validation only; original terms apply."
   },
   "conversion": "MapGIS native SHP exports supplied by the user; MapGIS version and settings not provided",
+  "current_distribution": "Native SHP exports are not bundled in the current Git tree, wheel or source archive. Set PYMAPGIS_READER_NATIVE to a legally obtained local directory and verify these hashes.",
   "shp_crs": "No .prj files were supplied; CRS is not inferred from SHP",
   "files": [
     {

@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""Render the bundled twelve-layer JWD dataset with its five matching SLIB files.
+"""Render twelve user-supplied JWD layers with five matching SLIB files.
 
-The generated reports provide internal regression evidence, not native MapGIS
-visual acceptance. The JWD and SLIB files retain their original data terms.
+Original NGAC JWD/SLIB files are not bundled. Obtain them through the official
+channel and set PYMAPGIS_JWD and PYMAPGIS_SLIB, or use a source checkout that
+already contains a legally obtained local fixture copy. The generated reports
+provide internal regression evidence, not native MapGIS visual acceptance.
+The JWD and SLIB files retain their original data terms.
 """
 from __future__ import annotations
 
@@ -100,7 +103,13 @@ def main() -> None:
         "--input-dir",
         type=Path,
         default=None,
-        help="Optional directory of twelve JWD-compatible layers; defaults to bundled data",
+        help="Optional directory of twelve JWD layers; defaults to PYMAPGIS_JWD",
+    )
+    parser.add_argument(
+        "--slib-dir",
+        type=Path,
+        default=None,
+        help="Optional directory of five matching SLIB files; defaults to PYMAPGIS_SLIB",
     )
     parser.add_argument(
         "--target-crs",
@@ -120,7 +129,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    libraries = GraphicLibraries.from_directory(slib_path())
+    try:
+        slib_dir = args.slib_dir if args.slib_dir is not None else slib_path()
+        libraries = GraphicLibraries.from_directory(slib_dir)
+        input_dir = args.input_dir if args.input_dir is not None else jwd_path()
+        raw_layers = regression_layers(input_dir)
+    except FileNotFoundError as exc:
+        parser.exit(2, f"error: {exc}\n")
+
     renderer = GraphicRenderer(
         libraries,
         scale=250000,
@@ -133,8 +149,6 @@ def main() -> None:
         font_zh_map={1: "SimSun", 4: "SimHei"},
         font_en_map={0: "DejaVu Sans"},
     )
-    input_dir = args.input_dir if args.input_dir is not None else jwd_path()
-    raw_layers = regression_layers(input_dir)
     layers = []
     for layer in raw_layers:
         if hasattr(layer, "to_crs"):

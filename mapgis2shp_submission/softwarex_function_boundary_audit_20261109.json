@@ -1,0 +1,466 @@
+{
+  "reviews": [
+    {
+      "criteria_assessment": "按 SoftwareX 的软件影响与可复用性导向评估（非 Nature 式科学新颖性）。可复现性方面，420 项本地回归、四平台 CI、发行物内容检查与清单校验构成强证据链，捆绑示例可由公开入口复现。功能边界方面，Reader/Writer 的能力与限制在代码与稿件中基本一致，反例未被当作继承目标。软件质量方面，模块化清晰、错误分类学系统、公共 API 完整。文档方面，README/docs/稿件/示例齐备。需要作者落实的形式项均为小修级，即 36 文件冒烟证据的可复现性说明（R1-M1）与 UTM 改写披露（R2-M2 属本报告 R1-M2），外加一组 minor 级测试补强与打包修正。数据再分发的条目级确认、原生显示验收与 14 个色锚的版本化采集史属于材料包已披露的未决项，不属于 Reader/Writer 功能边界轴的缺陷，本报告不重复计入。无任何一项构成形式或实质的投稿阻断。",
+      "interested_readers": "存量 MapGIS 6.x/67 地质矢量数据的科研与地质调查用户；需要可审计、可测试的闭源格式互操作工具的开源 GIS 社区；关注科学数据长期保存与格式逆向工程方法学的读者；以及需要把 SHP/GeoJSON/GeoPackage 回写为 MapGIS 原生文件以供后续原生验收的工作流用户。",
+      "major_concerns": [
+        {
+          "axis": "可复现性与证据自洽",
+          "blocking": "No",
+          "claim_pointer": "mapgis2shp_submission/paper_softwarex.tex 第 209 行，The 36-file Reader-Writer-Reader smoke suite also passed with zero area relative difference",
+          "concern": "稿件在 Validation and reproducibility 一节把该冒烟套件与可由发行物复现的 pytest 证据并列陈述，但未说明其输入边界。执行脚本 verify_pymapxis.py 对应 verify_pymapgis.py 第 76-91 行，按当前目录 glob 全部 WT/WL/WP。日志 mapgis2shp_submission/reader_writer_roundtrip_20261108.log 列出 36 个文件，其中仅 12 个是随 wheel 与 sdist 捆绑的 JWD 夹具（tests/fixtures/jwd，由 test_testing_fixtures.py 第 17 行锁定数量为 12），其余 24 个文件（LFZYBAA002.WL、LFZYBCT001.WT、LHCPGDAC05.WP 等）不随发行物提供。读者仅凭发行包无法复现该 36 文件证据，且断言强度（计数、外接框 atol 1e-9、面积相对差 1e-9，见 verify_pymapgis.py 第 55-64 行）弱于 43 例原生套件的逐几何等值断言。",
+          "evidence_pointer": "verify_pymapgis.py 第 76-91 行与第 55-64 行；mapgis2shp_submission/reader_writer_roundtrip_20261108.log 第 1-29 行；tests/fixtures/jwd 目录仅 12 个文件；tests/test_testing_fixtures.py 第 17 行",
+          "id": "R1-M1",
+          "resolution_test": "在 §5.1 增加一句说明，列出 36 个输入文件来源（同幅开放版 JWD 的其余图层）、指出 24 个文件未随发行物再分发、指明复现方式（获取同幅数据后运行 verify_pymapgis.py），或把该句改写为明确标注其非捆绑属性。",
+          "why_it_matters": "SoftwareX 以可复现性为核心评审维度。该证据出现在验证小节且措辞与 CI 级证据并列，若不标明输入可得性，评审人无法判断它是发行物内证据还是外部日志证据，影响证据分级而非主张真伪。"
+        },
+        {
+          "axis": "功能边界披露",
+          "blocking": "No",
+          "claim_pointer": "mapgis2shp_submission/paper_softwarex.tex 第 85 行（CRS 覆盖 longlat/tmerc/aea/lcc）与第 209 行（43 例验证 UTM round-trips）",
+          "concern": "Writer._prepare_crs（writer.py 第 545-575 行）把 UTM 输入重投影为 k=1 的 tmerc 并在运行时告警，原因是 MapGIS 6x 头部无法存储 UTM 的 0.9996 比例因子。该行为经 tests/test_writer_native_batch3.py 第 52-60 行（07_projected_utm，lon_0=75、k=1.0、Hausdorff 1e-5）验证，处理方式是正确且诚实的，但稿件正文与 Limitations 均未提及这一静默改写语义。对把 UTM 数据写入 MapGIS 的用户而言，存储坐标系实为高斯克吕格而非 UTM，地面尺度相对真 UTM 放大约 0.04%。",
+          "evidence_pointer": "src/pymapgis/writer.py 第 545-575 行（含第 571-574 行运行时警告）；tests/test_writer_native_batch3.py 第 52-60 行",
+          "id": "R1-M2",
+          "resolution_test": "在 §2.2 或 Limitations 增加一句，说明 UTM 输入会被重投影为 k=1 的高斯克吕格并发出警告，往返坐标经 CRS 元数据可逆，且 MapGIS 6x 不能表示 UTM 比例因子。",
+          "why_it_matters": "稿件宣称不经静默改写地交换几何与属性。UTM 分支存在坐标系语义改写，虽有运行时警告且可逆，但属于用户需要知晓的功能边界。一行披露即可消除主张与行为之间的叙述缝隙。"
+        }
+      ],
+      "minor_comments": [
+        {
+          "affected_element": "tests/test_writer_native_batch2.py 与 tests/test_writer_native_batch3.py 的环指针断言",
+          "evidence_pointer": "tests/test_writer_native_batch2.py 第 77-81 行；tests/test_writer_native_batch3.py 第 65-68 行；src/pymapgis/writer.py 第 1245-1253 行",
+          "id": "R1-m1",
+          "issue": "两个批次对 field5/6/7 的断言上界写作 0xFFFFFFFF，但这三个字段各自是 uint8，取值天然不超过 255，合成指针天然不超过 0xFFFFFF，故该断言恒真，不能验证稿件第 209 行宣称的 24-bit ring-index bounds。writer.py 第 1247-1250 行的超限抛错分支也没有任何测试触达。",
+          "required_correction": "把逐字段断言收紧到 0..255 或删除该恒真断言；新增一个直接调用 _encode_polygon_params 并传入伪造 ring_index_offsets（如 {1: 0x1000000}）的单元测试，断言抛出 WriterError，无需真实构造 16 MB 坐标段。"
+        },
+        {
+          "affected_element": "aea/lcc 投影读取的正路径测试空缺",
+          "evidence_pointer": "src/pymapgis/reader.py 第 513-534 行；tests/test_pure.py 第 176-195 行",
+          "id": "R1-m2",
+          "issue": "TestCrsRobustness 仅覆盖 aea/lcc 的失败路径（非有限标准纬线回退空 CRS），没有有效 lat_0/lat_1/lat_2/x_0/y_0 组合下 CRS 字符串正确构造的正路径断言，稿件第 85 行宣称的四约定覆盖中，Albers 与 Lambert 两条只有故障注入证据。",
+          "required_correction": "用合成头部字节构造一组有效 aea 与一组有效 lcc 参数，断言 _read_crs 返回的 CRS 含有预期的 proj、lat_1、lat_2 与 lon_0。"
+        },
+        {
+          "affected_element": "Reader 属性与几何计数不一致保护无测试",
+          "evidence_pointer": "src/pymapgis/reader.py 第 1485-1493 行",
+          "id": "R1-m3",
+          "issue": "_build_geodataframe 对属性行数与几何数不一致抛 MapGISError 的保护分支无回归测试。仓库已有同类二进制补丁测试范式（test_pure.py TestPolygonActiveIdAlignment 直接改写拓扑表字节），补一条并不昂贵。",
+          "required_correction": "参照 TestPolygonActiveIdAlignment 的做法，用二进制补丁构造属性计数与几何计数不一致的文件，断言抛出 MapGISError 且信息含两个计数。"
+        },
+        {
+          "affected_element": "空 GeoDataFrame 未指定 geometry_type 的拒绝路径无直接测试",
+          "evidence_pointer": "src/pymapgis/writer.py 第 1516-1519 行；tests/test_writer.py 第 890-896 行（仅覆盖显式类型路径）",
+          "id": "R1-m4",
+          "issue": "_detect_shape_type 对空帧抛 WriterError(cannot detect the geometry type) 的分支无 pytest.raises 用例，现有测试只断言显式 geometry_type 时可正常写空文件。",
+          "required_correction": "增加一条空 GeoDataFrame 不传 geometry_type 时抛出 WriterError 的用例。"
+        },
+        {
+          "affected_element": "jwd_slib_manifest.json 的 attribution_file 引用在发行物内落空",
+          "evidence_pointer": "tests/fixtures/jwd_slib_manifest.json 的 attribution_file 字段；pyproject.toml 第 60-70 行 sdist include 列表；仓库根 DATA_ATTRIBUTION.md",
+          "id": "R1-m5",
+          "issue": "随 wheel 与 sdist 发布的清单把 attribution_file 指向 DATA_ATTRIBUTION.md，但 pyproject.toml 的 sdist include 列表未含该文件，wheel 的 force-include 也没有它，发行物内的清单引用了不存在的文件。",
+          "required_correction": "把 DATA_ATTRIBUTION.md 加入 sdist include 并在 wheel force-include 中映射到 pymapgis/testing/fixtures 下，或改写清单字段为稿件数据可用性一节的文字引用。"
+        },
+        {
+          "affected_element": "tests 跨模块导入依赖命名空间包解析",
+          "evidence_pointer": "tests/test_writer_native_batch3.py 第 10 行；tests 目录无 __init__.py",
+          "id": "R1-m6",
+          "issue": "test_writer_native_batch3.py 以 from tests.test_writer_native_batch2 import ... 导入共享助手，但 tests 目录缺少 __init__.py。该写法仅在从仓库根以 python -m pytest 调用时可靠解析，从其他工作目录或使用部分 IDE 内嵌 runner 时可能失败。",
+          "required_correction": "添加 tests/__init__.py，或把 _records、_expected_source、_read_native 移入 tests/conftest.py 或独立的 tests/_native_helpers.py。"
+        }
+      ],
+      "overall_assessment": "mapgis2shp 的 Reader/Writer 功能边界主张与代码、测试证据高度一致。二进制几何解码（93/57/24/40 字节记录、16 项物理段索引）、弧-节点拓扑重建与壳/洞分类、CRS 推断的四种约定与失败回退、属性表八种类型的容错解码、空值/空几何/多部件的显式策略、24 位环索引指针与原始段透传，每一项稿件主张均能在 src/pymapgis/reader.py、src/pymapgis/writer.py 与 tests/ 中找到直接对应的实现与断言。43 个原生 SHP 转换用例（11+12+20）与 5 组原生导出 Reader 对照真实存在、带 SHA-256 清单、并在测试中被锁定数量。尤其值得肯定的是，原生转换缺陷被显式作为反例钉在测试里（batch4 的 09 拓扑合并缺陷、07 异源几何串档、06 多部件丢失、空值被原生归零等），而不是被当作需要继承的目标行为，这与稿件的诚实边界叙述完全一致。我自行在线核验了 GitHub Actions run 42574990251，五个作业（含冻结时仍挂起的 Build and inspect release archives，覆盖 python -m build、tests/inspect_dist.py 与 twine check）现已全部成功，材料包中唯一的未决构建项已闭环。在 R1 的 Reader/Writer 功能边界轴上没有阻断性问题。两处披露性缺口（36 文件冒烟套件的输入可得性、UTM 到高斯克吕格的 k 因子改写）和一组测试/打包级小修建议在吸收后即可达到 SoftwareX 投稿状态。",
+      "recommendation": "建议小修后接收。Reader/Writer 轴无阻断项。两处 major 修订均为一句级披露（36 文件输入清单与 UTM 改写说明），minor 项为低成本测试补强与打包修正。修订完成后无需再次全面评审，编辑层面核对即可。",
+      "reviewer": "R1",
+      "strengths": [
+        "错误分类学与畸形输入防护系统化。2026-10-30 审计回归把负 record_length、单点弧、负头偏移、拓扑表长于弧段索引、截断头部、非有限 CRS 参数等损坏输入统一收敛为 MapGISError 或空 CRS 回退，不泄漏原生 ValueError/IndexError/CRSError（tests/test_pure.py 的 TestMalformedStructureErrors 第 329-360 行与 TestCrsRobustness 第 145-196 行，对应 reader.py 第 367-372、493-503、535-538 行）。",
+        "孤立拓扑 ID 的一致过滤有专门的二进制补丁回归测试。TestPolygonActiveIdAlignment（test_pure.py 第 362-400 行）把弧的右区号改写为无属性行的 400，验证属性行、几何与区参数由同一 filtered ID 集驱动（reader.py 第 1463-1479 行与第 1438-1440 行），稿件第 85 行的主张有直接证据。",
+        "原生转换缺陷被显式作为反例而非继承目标。batch4 断言 Writer 不继承 09_POLY_BASIC 的原生拓扑合并缺陷（原生面积 15000，本库 5000 与源一致）、07_LINE_EMPTY 的异源几何串档、06_LINE_MULTI_DUPLICATE 的多部件丢失，并断言面积/周长字段跟随真实几何而非原生错误值（tests/test_writer_native_batch4.py 第 154-214 行）。这是稿件 counterexamples 主张的直接测试级证据。",
+        "43 个原生 SHP 转换用例（11+12+20）带逐文件 SHA-256 清单、非空清单断言与原生对照文件，数量与字节级校验由测试锁定（tests/test_writer_fixture_manifests.py 第 25-78 行），夹具目录实测 11/12/20 与之一致。",
+        "Reader 原生导出对照五组真实存在，含 SHP 缺面的恢复（LDZOFBB004 第 48 行原生几何有效而导出为 None）与 SHP 87 个无效面未被继承的断言（tests/test_reader_native_exports.py 第 79-93 行），与稿件第 209 行叙述一致。",
+        "透传设计诚实且经回归锁定。未修改几何复用原始段字节，修改后回退独立重建；投影坐标先按存储单位比较的缺陷已修复并由 test_projected_polygon_passthrough_compares_map_units 锁定（tests/test_writer.py 第 557-585 行，对应 writer.py 第 2029-2110 行）。",
+        "field5/6/7 从早期误读为岩性代码到确认为 24 位环索引偏移的纠正留有书面痕迹（tests/test_reader.py 第 325-342 行的 docstring），新建文件布局被字节级断言锁定（tests/test_writer.py 第 250-283 行的 178/190/82 偏移）。",
+        "默认保真策略与稿件一致。Writer 的 make_valid 默认 False 保留原生环（writer.py 第 1616 行），on_empty 默认 error 且报告行位置（writer.py 第 1532-1547 行），MultiPolygon 保持单要素而 MultiPoint/MultiLineString 显式爆炸并告警，全部有测试（test_writer.py 第 111-120、203-214、392-406、434-442 行）。",
+        "CRS 处理双向对称且有测试。地理文件 scale 为 0 或 NaN 不丢 CRS，投影文件零比例回退空 CRS，DMS 编解码互逆（test_pure.py 第 145-196、2302-2315 行），Writer 侧 none/geographic/tmerc/不支持投影各有断言（第 2542-2570 行）。",
+        "我已在线核验 GitHub Actions run 42574990251 五个作业全部成功，包括材料包冻结时仍挂起的 Build and inspect release archives（含 python -m build、tests/inspect_dist.py dist 与 twine check dist/*），未决构建项已闭环。"
+      ],
+      "technical_failings": [
+        "make_valid=True 且某面经 shapely.make_valid 退化为非面几何时，_iter_shells 返回空表（writer.py 第 184-197 行），该面不产生任何弧段，_encode_polygon_coordinates 的 ring_index_offsets 缺少对应 pid，随后 _encode_polygon_params 在 writer.py 第 1246 行以原生 KeyError 退出，早于 _sections 第 1874-1880 行预期抛出的 WriterError。这是项目自身 2026-10-30 审计标准（不泄漏原生异常）尚未覆盖到的一处遗漏。触发条件为可选标志加退化输入，无数据损坏风险，但与既定错误分类学不一致，且无测试触达。",
+        "tests/test_writer_native_batch2.py 第 77-81 行与 tests/test_writer_native_batch3.py 第 65-68 行的环指针上界断言恒真（uint8 字段对 0xFFFFFFFF 永真），不能验证任何边界；writer.py 第 1247-1250 行的 24 位超限拒绝分支无测试。稿件第 209 行把这些用例列为 24-bit ring-index bounds 的证据，实际证据强度低于叙述。"
+      ]
+    },
+    {
+      "criteria_assessment": "按 SoftwareX 的功能适配与实际投稿就绪标准评估。软件质量方面，五个图形库解析器与原库渲染器实现一致、降级诚实、回归严格，本组未发现虚构功能或伪造通过。可复现性方面，fixture 清单、机器可读 reports、公开示例与已核验的全绿 CI 形成完整证据链。文档方面，README、docs/ 解析文档与手稿 Quickstart 基本一致，但 wheel 安装态 import 路径说明需要补一句。影响与复用价值面向存量 MapGIS 数据迁移与制图审查，定位清晰。需要区分的是，原生视觉验收缺失、Subgraph 全量 decode 证据粒度、图 2 可读性和 NGAC 条目级再分发确认属于诚实披露的限制或待办，而非证据造假。前三项建议修改后更稳，第四项是正式风险但手稿已声明。LaTeX 未本地编译与作者确认待办属于流程项，不在本组重点但应在投稿前完成。",
+      "interested_readers": "使用 MapGIS 6.x/67 存量矢量数据的地质调查与GIS研究人员，关注封闭格式逆向与科学数据长期保存的开源地学软件社区，以及需要可审计制图复现管道的图件质量管理人员。",
+      "major_concerns": [
+        {
+          "axis": "图件证据与可读性",
+          "blocking": "No",
+          "claim_pointer": "mapgis2shp_submission/paper_softwarex.tex 图 2（jwd_map）及图注，行 156-161",
+          "concern": "作为原库渲染核心证据的图 2，其 PDF 全部 1,597 个文本运行小于 5 pt，最小 1.70 pt；碰撞审计 1,249 FAIL、1,059 WARN，作者自审计判定为 FIX BEFORE DELIVERY。",
+          "evidence_pointer": "mapgis2shp_submission/jwd_map.text-audit.json（minimum_found_pt 1.7007874，below_minimum_count 1597/1597）；mapgis2shp_submission/jwd_map.collision-audit.json（summary.fail 1249，verdict FIX BEFORE DELIVERY）",
+          "id": "R2-M1",
+          "resolution_test": "在不伪装原生注记的前提下增加一个原生比例放大 inset 或第二面板，使至少该面板文本达到常规期刊可读下限；或在正文中明确说明放大阅读路径并保留矢量图。复跑文本审计与碰撞审计并归档。",
+          "why_it_matters": "该图是“original-library rendering”主张的唯一整幅视觉证据。矢量 PDF/SVG 可放大阅读且限制已披露，故不阻断；但印刷尺度不可读与大量注记压线削弱了证据的直观说服力，审稿人与读者很可能就此提问。"
+        },
+        {
+          "axis": "图形库解析主张与证据粒度",
+          "blocking": "No",
+          "claim_pointer": "mapgis2shp_submission/paper_softwarex.tex 表 1 Subgraph.lib 行，行 102",
+          "concern": "表 1 称 Subgraph.lib “7,360/7,360 symbols decoded”，但自动普查测试只断言 symbol_count == 7360 这一结构走查计数，未逐符号断言 decode 成功；LINESTY 与 Fillgrph 则有全量 decode 断言，二者证据粒度不一致。",
+          "evidence_pointer": "tests/test_graphic_real_jwd.py 行 324-344（Subgraph 仅断言 symbol_count，行 328；LINESTY 行 330-334 与 Fillgrph 行 336-340 均全量 decode）；src/pymapgis/slib.py 行 294-300 的 symbol_count 为走查计数属性",
+          "id": "R2-M2",
+          "resolution_test": "为 SubgraphLib 增加全量 decode 普查断言（7360 条全部 decode 非 None 或明确列出例外），或将表 1 措辞改为结构性覆盖表述。",
+          "why_it_matters": "措辞略超出已钉住的自动化证据。模块文档自述尾段 5,364 条 100% 字节覆盖走查，支持结构覆盖，但“decoded”一词在表 1 与其他库的逐记录解码并列时容易被读成同等强度。"
+        },
+        {
+          "axis": "原生视觉验收与颜色锚溯源",
+          "blocking": "No",
+          "claim_pointer": "mapgis2shp_submission/paper_softwarex.tex 摘要行 37 与表 2 行 201；限制节行 237-239",
+          "concern": "原生 MapGIS 显示、编辑与另存验收以及 859 条非空线型的系统原生视觉比对仍未完成；14 个原生对话框颜色锚缺少带版本的采集溯源（MapGIS 版本、采集路径、截图或日志）。",
+          "evidence_pointer": "手稿行 237-239 明确披露；tests/test_pure.py 行 1658-1670 的 14 锚测试仅断言记录值；mapgis2shp_submission/softwarex_revision_notes.md 待办清单列有锚溯源条目",
+          "id": "R2-M3",
+          "resolution_test": "补充 14 个锚的采集溯源材料（版本、日期、截图或日志及英文摘要）；如可行，附一幅原生输出与开源渲染的代表性对照图及差异说明。",
+          "why_it_matters": "中心视觉主张目前依赖内部回归加 14 个无完整溯源的颜色锚。手稿已诚实界定，不夸大，故不阻断；但锚溯源是作者自列的投稿要求，缺它会让颜色正确性证据停留在自证层面。"
+        },
+        {
+          "axis": "fixture 再分发合规",
+          "blocking": "No",
+          "claim_pointer": "mapgis2shp_submission/paper_softwarex.tex 数据可用性节，行 274-278",
+          "concern": "12 个 JWD 图层与 5 个 SLIB 库已随 PyPI wheel/sdist 实际再分发，而 NGAC 条目级再分发确认仍未取得；手稿声明公开、非涉密、仅测试用途不等于明示再分发许可。",
+          "evidence_pointer": "手稿行 278 的许可边界声明；pyproject.toml 行 85-99 的 wheel force-include 将 JWD/SLIB 打入发布件；mapgis2shp_submission/softwarex_revision_notes.md 待办清单列有条目级条款复核",
+          "id": "R2-M4",
+          "resolution_test": "取得 NGAC 条目级书面确认或等效许可证据并在数据可用性节引用；若无法取得，评估改用下载脚本加哈希校验替代随包分发。",
+          "why_it_matters": "这是最接近正式阻断项的问题，因为渲染证据链全部依赖这组随包分发的第三方数据。手稿已透明披露且作者自列为剩余工作，故本组评为非阻断，但编辑部很可能要求澄清。"
+        }
+      ],
+      "minor_comments": [
+        {
+          "affected_element": "Illustrative examples 的 Quickstart 清单",
+          "evidence_pointer": "mapgis2shp_submission/paper_softwarex.tex 行 127-147；tests/inspect_dist.py 行 143-145；pyproject.toml 行 97",
+          "id": "R2-m1",
+          "issue": "清单使用 from examples.render_bundled_jwd import regression_layers，该 import 仅在源码检出或 sdist 解包环境下可用；wheel 安装态中示例位于 pymapgis/testing/examples/，且 wheel 被强制排除顶层 examples/。",
+          "required_correction": "在清单附近加一句说明源码与安装态两种运行路径，或给出安装态可用的替代 import 提示。"
+        },
+        {
+          "affected_element": "图 2 源审计与输出审计的并存表述",
+          "evidence_pointer": "mapgis2shp_submission/jwd_map.source-audit.json（FONT-SIZE PASS，最小 5 pt）；mapgis2shp_submission/jwd_map.text-audit.json（minimum_found_pt 1.7007874）",
+          "id": "R2-m2",
+          "issue": "source-audit 的 FONT-SIZE PASS 是静态源码检查（polygon_label_fontsize=5.0），与 PDF 实测文本审计全部小于 5 pt 并存，容易被误读为输出合规。",
+          "required_correction": "在稿件材料或图件说明中注明 source-audit 仅覆盖静态源码设置，输出尺度以 PDF 文本审计为准，避免两处结果被混用。"
+        },
+        {
+          "affected_element": "表 2 颜色锚行",
+          "evidence_pointer": "mapgis2shp_submission/paper_softwarex.tex 行 201；tests/test_pure.py 行 1636-1670",
+          "id": "R2-m3",
+          "issue": "表 2 称“All 14 reference anchors”，实际测试分布为 test_extended_dialog_anchors 14 条加 test_native_node_layout_and_white 9 条，读者无法从表 2 看出 14 的具体构成。",
+          "required_correction": "在表 2 或正文补一句锚清单出处（测试名或文档 docs/color_parsing_logic.md），便于复核。"
+        },
+        {
+          "affected_element": "Data availability 段的 SLIB 描述",
+          "evidence_pointer": "mapgis2shp_submission/paper_softwarex.tex 行 276",
+          "id": "R2-m4",
+          "issue": "该段称 SLIB 是同一公开包的一部分，但未说明 SLIB 五库文件本身的字节级溯源（例如与公开包内对应文件的哈希一致）。",
+          "required_correction": "补充一句说明 jwd_slib_manifest.json 已记录五库 SHA-256 并随包分发，便于第三方核对与公开包一致性。"
+        }
+      ],
+      "overall_assessment": "本组从图形库解析与原库渲染边界复审。五个解析器（Subgraph、LINESTY、Fillgrph、Colorlib、Pcolor）结构规格显式、未决记录诚实返回非结果，渲染器以库内几何为准并给出机器可读 reports。本组独立复核了颜色锚与 Fillgrph 普查，结果与手稿一致；CI 运行 42574990251 的五个任务（含构建与 Twine）经在线核验全部成功。中心功能主张总体未超出证据，限制披露充分。主要改进点是图 2 的可读性、Subgraph “全量解码”措辞的证据粒度、颜色锚溯源与 fixture 再分发确认。建议小修后达到 SoftwareX 投稿要求。",
+      "recommendation": "小修后可投稿（minor revision）。功能边界与证据基本匹配，无伪造或夸大通过的迹象。建议作者在投稿前完成四项非阻断改进，即图 2 增加可读 inset、为 Subgraph 补全量 decode 普查或调整表 1 措辞、补齐 14 个颜色锚的采集溯源、以及澄清 NGAC 条目级再分发依据；同时完成 LaTeX 编译检查与全体作者确认等流程项。",
+      "reviewer": "R2",
+      "strengths": [
+        "五个图形库解析器的结构规格在模块文档串中显式记录，未决结构诚实返回 None 而非猜测几何，例如 Fillgrph 57 条非常规记录与 LINESTY 未裁定 aux 变体（src/pymapgis/fillgrph.py 行 107-145，src/pymapgis/linesty.py 行 118-121 白名单）。",
+        "真实数据回归精确钉住渲染账本：12 层 7,094 输入、5,732 绘制、1,362 排除碎片化注记、713 个面标注，且未解决色、未知填充、实线回退、未解决符号、未知字体全为零（tests/test_graphic_real_jwd.py 行 68-122；mapgis2shp_submission/jwd_render_reports.json 与本组逐层求和一致）。",
+        "颜色解码由原生对话框锚钉住且模型显式。本组用发布件解析器对 bundled SLIB 独立复核，Colorlib 6 锚与 Pcolor 11 锚全部匹配，Pcolor count 4098、trailing 28、Colorlib max_no 870 与普查断言一致（tests/test_pure.py 行 1590-1670）。",
+        "38|2 坐标保真测试逐顶点断言 37 个真实要素的 782 个源顶点全部保留，最大偏差不超过 1e-9（tests/test_graphic_real_jwd.py 行 274-309）。",
+        "结构普查测试直接钉住表 1 的全部数字，即 Subgraph 7,360、LINESTY 859 非空样式与 984 子线、Fillgrph 1,280/1,337、Colorlib 871、Pcolor 4,098（tests/test_graphic_real_jwd.py 行 324-344）。",
+        "图 1 架构图通过源审计、文本审计与碰撞审计，最小字号 6.8 pt，0 FAIL，并在图内主动标注原生视觉验收待做（mapgis2shp_submission/softwarex_architecture.*-audit.json）。",
+        "限制节对原生视觉验收缺失、57 条 Fillgrph 非结果、密集注记碰撞审计与字体小于期刊指南等逐项披露，未将内部回归伪装成厂商一致性验收（paper_softwarex.tex 行 235-241）。",
+        "在线核验 GitHub Actions 运行 42574990251（commit 575e80d）四个测试任务与构建检查任务全部成功，构建任务包含归档内容检查与 Twine 校验。"
+      ],
+      "technical_failings": [
+        "表 1“7,360/7,360 symbols decoded”的措辞超出自动化证据强度。普查测试仅断言 symbol_count 结构计数，未逐符号断言 decode 成功，与同表 LINESTY 与 Fillgrph 的全量解码断言不一致。",
+        "图 2 输出 PDF 的全部 1,597 个文本运行小于 5 pt，最小 1.70 pt，且碰撞审计 1,249 FAIL 被作者工具判为 FIX BEFORE DELIVERY。作为核心证据图，其印刷尺度不可读。",
+        "手稿 Quickstart 清单的 import 路径在 wheel 安装态不可直接运行，因为 wheel 被强制排除顶层 examples/，示例实际命名空间为 pymapgis/testing/examples/。",
+        "图 2 的 source-audit FONT-SIZE PASS 属静态源码检查，与 PDF 实测文本审计结果方向相反，两处审计结果并存而无显式区分，存在被误读的风险。",
+        "14 个原生对话框颜色锚缺少带版本的采集溯源，当前测试只能验证记录值本身，无法验证采集历史的完整性。"
+      ]
+    },
+    {
+      "criteria_assessment": "对照 SoftwareX 的投稿与评审关注点逐条评估。一、软件本体与复用价值。覆盖封闭 MapGIS 6.x/67 格式的读写、五库解析与原库渲染，公共 API 边界清晰，超出范围的地质解释被显式排除，复用价值论证充分。二、开放许可与公开可得性。Apache-2.0，GitHub 公开，PyPI 2.7.1 已发布（实测），Zenodo DOI 注册（重定向有效），符合开放性门槛。三、必需的 C1 至 C9 元数据表。完整存在且关键条目经我实测为真，但 C1 的版本基线与稿件描述的集成态存在张力（R3-M5）。四、可复现性。bundled fixture、fail-explicit 校验、wheel 安装态复跑、已发布 wheel 兼容性验证、历史证据永久指针，整体达到甚至超过 SoftwareX 的常见要求；颜色锚溯源缺口（R3-M4）是该轴的主要残余风险。五、测试与持续集成。本地 420 通过加 1 个环境相关跳过，远程四平台矩阵与构建任务我在线核实全绿，表述保守准确。六、文档。README、docs/、DATA_ATTRIBUTION.md、CITATION.cff 齐备，Quickstart 可执行且输出与稿件一致。七、数据许可与再分发。披露诚实，但条目级再分发确认未落实且再分发已实际发生（R3-M2），是合规轴的最大缺口。八、手稿格式与模板。结构符合 SoftwareX 章节惯例，但从未编译且官方指南全文未取得（R3-M1），我已发现两处确定存在的排版错误。九、作者声明。CRediT、利益冲突、基金齐备，但全体作者确认未完成（R3-M3）。综合判断，科学与可复现性证据已达到 SoftwareX 门槛，形式与合规要件尚未完成，稿件处于\"定点整改后可投\"状态。",
+      "interested_readers": "地质调查与矿产勘查信息化从业者，需要迁移或质检 MapGIS 6.x/67 存量矢量数据的科研人员，关注封闭格式逆向工程、开放科学生态与可复现出版物的 GIS 互操作研究者，以及 SoftwareX 读者群中关心证据分级验证与发行包审计的软件工程读者。",
+      "major_concerns": [
+        {
+          "axis": "投稿形式与模板合规",
+          "blocking": "Yes",
+          "claim_pointer": "paper_softwarex.tex 第 2 行声明 elsarticle 与 SoftwareX 结构，revision notes 第 100 行将编译列为未完成待办",
+          "concern": "稿件从未本地编译，官方 SoftwareX 投稿指南全文与官方模板获取未完成，且我能指出两处确定存在的排版错误。正文竖线记号 16|1、65|4、48|0、38|2 在未加载 fontenc 的 elsarticle 默认 OT1 编码下会排版为破折号而非竖线。第 265 行 url 内的 \\# 会在输出 URL 中打印多余反斜杠并使锚点链接错误。",
+          "evidence_pointer": "mapgis2shp_submission/paper_softwarex.tex 第 171、175、202、265 行；mapgis2shp_submission/softwarex_revision_notes.md 第 100 至 101 行；softwarex_guide_for_authors.html 与 softwarex_guide_elsevier.html 均为 832,981 字节且标题仅为 ScienceDirect，不含 Guide for authors 正文（我实测 grep 计数为 0）；softwarex_template/elsarticle-template.zip 为 111 字节 S3 AccessDenied XML；softwarex_template/elsarticle.cls 顶层文件为 GitHub 404 JSON",
+          "id": "R3-M1",
+          "resolution_test": "安装 LaTeX 工具链或使用官方在线编译服务，用 elsarticle 编译 paper_softwarex.tex，肉眼核对 PDF 全文并取得官方 SoftwareX Guide for Authors 全文对照结构要件",
+          "why_it_matters": "未编译的稿件无法确认版式与链接正确性，我已发现的竖线与反斜杠错误证明这一缺口有实际后果，属于投稿前的形式阻断项"
+        },
+        {
+          "axis": "数据许可与再分发",
+          "blocking": "Yes",
+          "claim_pointer": "paper_softwarex.tex 第 276 至 278 行的数据可用性与许可边界声明",
+          "concern": "全国地质资料馆条目级下载与再分发条款的书面确认仍未取得，而再分发已经实际发生。公开 PyPI wheel 与 GitHub 仓库均内含 12 个真实 JWD 图层与 5 个配套 SLIB 库。稿件自述公开、非涉密与测试用途不构成任意再分发的显式授权，revision notes 中条目级条款复核与许可误解防范两项仍未勾选。",
+          "evidence_pointer": "mapgis2shp_submission/paper_softwarex.tex 第 245、278 行；mapgis2shp_submission/softwarex_revision_notes.md 第 105 至 106 行（未勾选）；PyPI JSON 显示 mapgis2shp-2.7.1-py3-none-any.whl 于 2026-11-07T07:18:07 上传且 6,761,384 字节；我已下载该 wheel 并实测内含全部 12 个 JWD 文件与 5 个 SLIB 库",
+          "id": "R3-M2",
+          "resolution_test": "取得全国地质资料馆对 12 层与 5 库测试用途再分发的条目级书面确认或等效条款文本并随投稿材料附上，或改用不随发行包再分发原始数据的替代方案",
+          "why_it_matters": "再分发权利未确认而分发行为已发生，编辑部在版权合规审查中可能要求立即整改甚至暂停流程，这是投稿前必须落地的合规项"
+        },
+        {
+          "axis": "作者声明完整性",
+          "blocking": "Yes",
+          "claim_pointer": "paper_softwarex.tex 第 283 至 294 行的 CRediT、利益冲突与基金声明",
+          "concern": "全体作者对作者贡献、基金、致谢及版本描述的确认尚未完成，revision notes 相应待办未勾选。Elsevier 投稿流程要求全体作者知情并同意稿件内容与作者顺序。",
+          "evidence_pointer": "mapgis2shp_submission/softwarex_revision_notes.md 第 109 行（未勾选）；paper_softwarex.tex 第 285 行仅声明全体作者已审阅并批准 previous manuscript version",
+          "id": "R3-M3",
+          "resolution_test": "取得七位作者对当前 paper_softwarex.tex 版本的书面确认记录，并在投稿系统中完成全体作者认可",
+          "why_it_matters": "缺少全体作者确认的稿件在 Editorial Manager 提交环节无法合规完成，属于明确的形式阻断项"
+        },
+        {
+          "axis": "证据链与可复现性",
+          "blocking": "Yes",
+          "claim_pointer": "paper_softwarex.tex 第 167 行关于 14 个原生颜色锚复现的论述及第 201 行验证表行",
+          "concern": "14 个原生颜色锚缺少版本化采集溯源，即采集所用 MapGIS 版本、采集路径、截图或日志。稿件第 239 行自述这仍是 submission requirement，当前测试只核验记录的 RGB 值而不核验采集历史的完整性。",
+          "evidence_pointer": "mapgis2shp_submission/paper_softwarex.tex 第 239 行；mapgis2shp_submission/softwarex_revision_notes.md 第 107 行（未勾选）",
+          "id": "R3-M4",
+          "resolution_test": "补充颜色锚的 MapGIS 版本、采集日期、采集路径与截图或日志，提供英文证据摘要，并明确标注为作者记录的原生对话框观察值",
+          "why_it_matters": "作者自己将其列为投稿要求，且颜色锚是 Pcolor 节点模型的核心外部证据，缺少溯源会削弱 Implementation 一节的可信度"
+        },
+        {
+          "axis": "版本与归档一致性",
+          "blocking": "No",
+          "claim_pointer": "paper_softwarex.tex 第 258 至 259 行 C1 与 C2",
+          "concern": "C1 指向已发布 2.7.1 的提交 823a5da，而稿件描述的 420 项回归、323/360 项归档、examples/render_bundled_jwd.py、reader_native 与 writer batch4 fixture 均只存在于未发布的集成提交。已发布 PyPI 2.7.1 wheel 仅 40 项且不含示例与新 fixture。稿件通过兼容加载路径与 validate_published_quickstart.py 诚实处理了这一差距，C2 也给出集成提交永久链接，revision notes 第 111 行已把后续发布同步列为待办，因此不构成阻断，但元数据表述仍可能让编辑误解版本对应关系。",
+          "evidence_pointer": "我实测下载 PyPI mapgis2shp-2.7.1-py3-none-any.whl 得 40 个条目，无 render_bundled_jwd、无 reader_native、无 writer_batch2/3/4，JWD 中两个文件仍为 .WP~ 命名；pyproject.toml 第 85 至 99 行的 force-include 仅存在于集成态；mapgis2shp_submission/softwarex_revision_notes.md 第 111 行（未勾选）",
+          "id": "R3-M5",
+          "resolution_test": "在 C1 或脚注中明确稿件描述的是发布后集成提交状态并给出该提交与发布版的差异说明，或发布 2.7.2 并同步 C1 至 C3 与 preferred-citation",
+          "why_it_matters": "SoftwareX 要求稿件描述与可得软件版本严格对应，当前依赖读者自行拼接 C1 与 C2 两条记录才能还原真实状态"
+        },
+        {
+          "axis": "可复现材料管理",
+          "blocking": "No",
+          "claim_pointer": "paper_softwarex.tex 第 204 行归档验证表行所称 323 wheel 项与 360 sdist 项",
+          "concern": "工作区遗留的 dist_softwarex/ 是批次三时期的陈旧归档，wheel 184 项、sdist 219 项，我实测运行当前 tests/inspect_dist.py 对其失败，报 required release modules missing。该目录未被 git 跟踪，因此不污染仓库，但任何复现者若直接对它运行检查脚本会得到与稿件数字矛盾的结果。当前归档证据的权威来源是 CI 构建任务，我已在线核实 run 42574990251 的 Build and inspect release archives 任务成功。",
+          "evidence_pointer": "dist_softwarex/mapgis2shp-2.7.1-py3-none-any.whl 实测 184 项，dist_softwarex/mapgis2shp-2.7.1.tar.gz 实测 219 项；python -I tests/inspect_dist.py dist_softwarex 实测抛出 RuntimeError；GitHub Actions run 42574990251 构建任务步骤 Inspect archive contents 与 Check long descriptions 均 success（我于 2026-11-09 经 API 实时核实）",
+          "id": "R3-M6",
+          "resolution_test": "删除或重建 dist_softwarex 使本地归档与 323/360 数字一致，或在 revision notes 中明确标注该目录为过期快照",
+          "why_it_matters": "陈旧归档与稿件数字直接矛盾，属于容易消除的可复现性噪声"
+        }
+      ],
+      "minor_comments": [
+        {
+          "affected_element": "paper_softwarex.tex 正文竖线记号",
+          "evidence_pointer": "paper_softwarex.tex 第 171、175、202 行",
+          "id": "R3-m1",
+          "issue": "16|1、65|4、48|0、38|2 共五处竖线在默认 OT1 编码下会排版为破折号",
+          "required_correction": "改用 texttt 包裹或 \\textbar，或加载 \\usepackage[T1]{fontenc}"
+        },
+        {
+          "affected_element": "paper_softwarex.tex C8 行 URL",
+          "evidence_pointer": "paper_softwarex.tex 第 265 行",
+          "id": "R3-m2",
+          "issue": "\\url 内的 \\# 会输出多余反斜杠并使锚点链接错误",
+          "required_correction": "去掉反斜杠，直接写 # readme 锚点"
+        },
+        {
+          "affected_element": "C2 集成提交指针",
+          "evidence_pointer": "paper_softwarex.tex 第 259 行指向 f12fb9d7380fca0b94cdba74032128096759cb65；git show 575e80d --stat 显示 HEAD 仅在 paper_softwarex.tex 变更 1 行",
+          "id": "R3-m3",
+          "issue": "稿件自身位于 575e80d，比 C2 指向的集成提交晚一个提交，二者仅差该指针行",
+          "required_correction": "在投稿版中说明该自引用关系，或在最终提交中自洽处理"
+        },
+        {
+          "affected_element": "Quickstart 代码清单",
+          "evidence_pointer": "paper_softwarex.tex 第 127 至 147 行；tests/inspect_dist.py 第 144 行禁止 wheel 顶层 examples/；pyproject.toml 第 97 行将示例命名空间化为 pymapgis/testing/examples/；wheel_quickstart_target_20261109 布局显示验证时把 examples/ 副本放在安装 target 旁",
+          "id": "R3-m4",
+          "issue": "from examples.render_bundled_jwd import regression_layers 仅在源码检出或示例副本就位时可用，纯 wheel 安装态下该导入路径不存在",
+          "required_correction": "在稿件中写明两种使用路径，或让 pymapgis.testing 直接导出 regression_layers"
+        },
+        {
+          "affected_element": "pyproject.toml 作者字段",
+          "evidence_pointer": "pyproject.toml 第 12 至 14 行对比 CITATION.cff 的七位具名作者与 paper_softwarex.tex 第 20 至 26 行",
+          "id": "R3-m5",
+          "issue": "包元数据作者为通用名称 pymapgis contributors，与稿件及 CITATION.cff 的具名作者不一致",
+          "required_correction": "将 pyproject authors 对齐为具名作者列表"
+        },
+        {
+          "affected_element": "投稿目录旧图文件",
+          "evidence_pointer": "mapgis2shp_submission/figure1_format_layout.pdf/.png 与 figure2_architecture.pdf/.png 均为 7 月文件，当前 paper_softwarex.tex 引用 softwarex_architecture 与 jwd_map",
+          "id": "R3-m6",
+          "issue": "旧图文件不再被引用但仍在投稿目录中，可能造成投稿包混淆",
+          "required_correction": "移出投稿清单或在 revision notes 中注明其为废弃草稿图"
+        },
+        {
+          "affected_element": "摘要与验证表的 CI 表述",
+          "evidence_pointer": "paper_softwarex.tex 第 37、199、219 行；GitHub Actions run 42574990251 于提交 575e80d 全部成功（我于 2026-11-09 经 API 实时核实，含构建、归档检查与 Twine 步骤）",
+          "id": "R3-m7",
+          "issue": "稿件只声称 pre-revision 公开运行通过且本轮无新远程运行，该表述在成文时准确但已过时",
+          "required_correction": "投稿前更新为当前修订工作流在 575e80d 的远程证据，并保留表述的证据日期"
+        }
+      ],
+      "overall_assessment": "mapgis2shp 稿件与代码库在软件功能、测试与可复现性证据链方面已基本达到 SoftwareX 的门槛。C1 至 C9 元数据表齐备，版本号 2.7.1 在 pyproject.toml 第 7 行、src/pymapgis/_version.py 第 5 行、CITATION.cff 与稿件第 258 行之间一致，V2.7.1 标签经我实测指向稿件所称的提交 823a5daf059c91d2a5ec90a685219d108519ae22，PyPI 2.7.1 的 wheel 与 sdist 于 2026-11-07 实际上传，GitHub Release V2.7.1 存在，Zenodo DOI 10.5281/zenodo.24036158 经 doi.org 302 重定向确认已注册（本环境无法解析 zenodo.org，记录内容未直接核对）。持续集成证据保守且准确，我于 2026-11-09 经 GitHub API 实时核实 run 42574990251（提交 575e80d）四个测试任务与构建任务全部成功，其中构建任务包含归档内容检查与 Twine 检查；稿件只声称 pre-revision 公开运行通过，run 42345384161（823a5daf）我也核实为成功，未夸大。发行包边界经我实测执行良好，公开 PyPI wheel 不含投稿材料、不含被排除的 rendering 与 semantics 实验模块，fixture 校验为显式失败而非静默跳过。安装的 wheel 快速起步产物 wheel_quickstart_render_20261109/jwd_render_reports.json 的数字与稿件逐字一致。真正的缺口集中在投稿形式与合规要件上，即稿件从未本地编译且官方指南全文未取得，数据再分发条目级确认未落实而再分发已实际发生，全体作者确认未完成，14 个原生颜色锚的版本化采集溯源缺失。我的结论是有条件的投稿就绪，科学内容无需返工，但四个形式阻断项必须在投稿前闭环。",
+      "recommendation": "修改后可投（conditional go）。建议作者在投稿前闭环四个形式阻断项，即完成 LaTeX 编译与官方指南核对（R3-M1），取得全国地质资料馆条目级再分发确认或等效文件（R3-M2），完成全体作者对当前版本的书面确认（R3-M3），补齐 14 个颜色锚的版本化采集溯源（R3-M4）。建议同步处理版本基线表述（R3-M5）与陈旧归档清理（R3-M6），并采纳全部次要意见。科学内容、测试证据与可复现性基础无需返工，完成上述清单后即可向 SoftwareX 投稿。",
+      "reviewer": "R3（SoftwareX 出版与可复现性方向）",
+      "strengths": [
+        "C1 至 C9 元数据表完整且关键条目可外部验证。V2.7.1 标签经 git rev-list 实测指向 823a5daf059c91d2a5ec90a685219d108519ae22 与 C1 一致，PyPI mapgis2shp 2.7.1 的 wheel 与 sdist 于 2026-11-07T07:18 上传，GitHub Release V2.7.1 于 2026-11-07T13:11 发布，doi.org 对 10.5281/zenodo.24036158 返回 302 重定向确认 DOI 已注册。",
+        "持续集成声明保守且经实时核实为真。稿件第 199 行仅声称 pre-revision 公开运行通过，我经 GitHub API 核实 run 42345384161（823a5daf）成功，且当前 HEAD 575e80d 的 run 42574990251 四个测试矩阵任务与构建任务（含 tests/inspect_dist.py 归档检查和 Twine 检查）于 2026-11-09 全部成功，稿件不存在夸大。",
+        "发行包边界执行严格并可机器核验。tests/inspect_dist.py 第 90、144、147 至 151 行禁止投稿目录内容、rendering/semantics 实验模块与 linesty_adjudicated 进入发行包，我实测公开 PyPI wheel（40 项）不含上述内容，且 src/pymapgis/linesty.py 第 133 行对缺席的裁定表有显式降级路径，tests/test_pure.py 第 431 与 441 行分别覆盖仓内可用与发布缺席两种情形。",
+        "fixture 校验为显式失败而非静默跳过，与稿件第 179 行一致。tests/test_graphic_real_jwd.py 第 310 至 321 行逐文件断言 JWD/SLIB 的字节数与 SHA-256 并锁定总字节数 19,381,767，tests/test_writer_fixture_manifests.py 对 batch2/3/4 与 reader_native 逐项断言哈希、目录项数（120 与 16）并非空集合，tests/test_testing_fixtures.py 锁定 12 层 JWD 与 5 个 SLIB 清单。",
+        "稿件核心性能数字有独立产物佐证。wheel_quickstart_render_20261109/jwd_render_reports.json 记录 12 layers、7094 features、5732 drawn、1362 excluded_text、713 polygon_labels，未解决色、填充、回退、符号、字体均为零，与稿件第 149、159 行逐字一致；jwd_map.collision-audit.json 的 1249 FAIL、1059 WARN 与 jwd_map.text-audit.json 的 1597 个低于 5 pt 文本运行、最小 1.70079 pt 与审计包披露一致，且均作为限制诚实披露而非伪称通过（paper_softwarex.tex 第 239 行，revision notes 第 38、41 行）。",
+        "版本与许可元数据一致。pyproject.toml 第 7 行、src/pymapgis/_version.py 第 5 行、CITATION.cff version 字段与稿件 C1 均为 2.7.1，LICENSE 为 Apache-2.0 全文，CITATION.cff 与 pyproject classifier 一致。",
+        "数据溯源处理诚实。DATA_ATTRIBUTION.md 与 jwd_slib_manifest.json 记录数据集 DOI 10.23650/data.A.2018.NGA131703.K1.1.1.V1 及配套文章 DOI 10.12029/gc2018Z101，并明确公开、非涉密与测试用途不构成任意再分发授权，与稿件第 278 行一致，未把源数据误述为 Apache-2.0。",
+        "历史证据边界清晰。稿件第 215 行给出提交 d0d464d05166ab97978a01ce8cc5cc8480f05500 的永久指针，我实测该提交存在；历史 36 层与 400 MB 结果被明确标注为 Reader 历史证据而非当前渲染器验收，符合证据分级原则。"
+      ],
+      "technical_failings": [
+        "paper_softwarex.tex 从未编译通过验证，且存在两处确定性的排版错误。五处竖线记号在默认 OT1 编码下排为破折号（第 171、175、202 行），C8 行 \\url 内的 \\# 会输出多余反斜杠（第 265 行）。",
+        "官方 SoftwareX 指南与模板获取不完整。两个指南 HTML 均为 ScienceDirect 壳页且不含指南正文，elsarticle-template.zip 是 S3 AccessDenied 错误体，顶层 elsarticle.cls 是 GitHub 404 JSON；仅嵌套的 CTAN elsarticle.zip 为真实模板包。revision notes 第 34 行对此处理诚实，未将错误页面冒充官方模板。",
+        "工作区遗留陈旧归档 dist_softwarex/（wheel 184 项、sdist 219 项）未通过当前 tests/inspect_dist.py，我实测抛出 RuntimeError: required release modules missing；该目录未被 git 跟踪，权威归档证据来自 CI 构建任务。",
+        "未发现功能性代码缺陷。公共 API 边界、排除模块的降级路径、fixture 校验逻辑与归档检查脚本之间未发现矛盾；测试环境缺失（本机 Python 3.14 无 pytest）使本地 420 项全量复跑未执行，该数字依赖审计包记录与远程 CI 佐证。"
+      ]
+    }
+  ],
+  "forensic": {
+    "aggregation_ambiguities": [
+      "'14 reference anchors'（稿件表2 第 201 行）只等于 test_extended_dialog_anchors 的 14 条；仓内锚断言总数实为 29（Colorlib 6 + Pcolor 节点 9 + Pcolor 扩展对话框 14，tests/test_pure.py:1590/1636/1658），读者无法从表 2 重建 14 的构成（R2-m3 已要求澄清但冻结稿未改）。",
+      "323/360 归档计数本地只与 dist_softwarex_ci 和 dist_softwarex_clean 吻合；同工作区另有 184/219 与 324/361 两组数字，复现者无法从材料判断哪一个目录是'稿件修订构建'。",
+      "表 1 'Subgraph.lib 7,360/7,360 symbols decoded' 的聚合强度与同表 LINESTY/Fillgrph 的逐记录全量 decode 断言不一致：Subgraph 仅断言 symbol_count==7360（tests/test_graphic_real_jwd.py:328），措辞与证据粒度错配（即 R2-M2，此处作为聚合口径问题重列）。",
+      "稿件第 213 行 '95,006 compared cells' 未直接见于存档报告 paper/validation/cross_validation_report.md（d0d464d）首部指标区；其组成量（36 层、16,874 要素、99.9995%、2 处失配）均已核实，但单元格总数未能从存档件独立复算。",
+      "'76 targeted tests' 的组成清单未在材料中枚举：revision notes 第 32 行仅称'目标渲染、Reader 和 Writer 回归共 76 项'，未列出入选测试标识，无法核对 76 的构成。",
+      "R2 报告内部聚合口径不一：strengths 称 'Pcolor 11 锚'，minor R2-m3 称 '14+9'，两处数字彼此不一致且只有后者与仓内证据吻合。"
+    ],
+    "confirmed_internal_errors": [
+      "R3-m1/R3-M1 的竖线计数错误：报告称'16|1、65|4、48|0、38|2 共五处竖线（第 171、175、202 行）'，实测 grep 计数为 6 处出现（16|1×1、65|4×1 在 171 行；48|0×1、38|2×2 在 175 行；38|2×1 在 202 行）。'五处'只有把已引用的 202 行排除在外才成立，与其自身证据指针矛盾。底层 LaTeX 问题（OT1 下 | 排为破折号、preamble 无 fontenc）属实，仅计数有误。",
+      "R2 strengths 的锚计数错误：'Colorlib 6 锚与 Pcolor 11 锚全部匹配'中的 11 与任何可见测试分组不符——Pcolor 锚为 test_native_node_layout_and_white 9 条加 test_extended_dialog_anchors 14 条（tests/test_pure.py:1636-1670），且与 R2 自己的 minor R2-m3（'test_extended_dialog_anchors 14 条加 test_native_node_layout_and_white 9 条'）直接冲突。",
+      "R3-M6 对陈旧归档范围的低估：不止 dist_softwarex（wheel 184/sdist 219，实测 inspect_dist.py 抛 RuntimeError: required release modules missing）；dist_softwarex_final、dist_softwarex_release、dist_softwarex_submission、dist_softwarex_submission_final 四个目录的归档为 324/361 项，且 wheel 内含 inspect_dist 明令禁止的顶层 entries（examples/render_bundled_jwd.py、mapgis2shp_submission/validate_published_quickstart.py），缺 pymapgis/testing/examples/render_bundled_jwd.py，同样不能通过当前检查；dist/ 还存有 2.5.0 旧归档。全部 git-ignored、不污染仓库，但与稿件 323/360 矛盾的本地归档是五处而非一处。",
+      "mapgis2shp_submission/softwarex_revision_notes.md 第 112 行复选框'推送后运行更新后的 CI'仍未勾选，但我 2026-11-09 经 GitHub API 实测 run 42574990251（575e80d）五个任务全部 success——材料中的状态行已过时（R3-m7 覆盖了稿件侧，未覆盖 notes 侧）。"
+    ],
+    "not_assessable": [
+      "420 passed/1 skip 与 76 passed 无法在本地复跑：本机只有 Python 3.14.3 且无 pytest/geopandas（与 R3 披露的环境限制一致）；静态计数 349 个 def test_ 加参数化扩张与 420 相容但不构成证明；采信 revision notes 记录与四平台 CI 结论。",
+      "CI 各任务的 pytest 计数：GitHub API 匿名下载 job logs 返回 403（Must have admin rights），只能核实任务级 conclusion，无法核对远端测试计数。",
+      "原生 MapGIS 显示/编辑/另存验收：无专有软件环境，不可评估（稿件已披露为未完成项）。",
+      "36 个 F:/tmp 原生二进制本体：本机无 F: 盘可读内容；只能核实存档提交 d0d464d 的 paper/validation 报告存在且数字自洽。",
+      "Zenodo 记录页字段：仅 doi.org 302 重定向可达，zenodo.org 内容未直接读取。",
+      "各评审自称的独立复算过程（如 R2 对 bundled SLIB 锚的复核、R3 对 PyPI wheel 的实测）：其过程不可回放，但其结论中可对照仓库的部分（wheel 40 项、12 JWD、5 SLIB、.WP~ 两名、无投稿内容）经我独立下载实测全部属实。"
+    ],
+    "passed": [
+      "稿件行号引用全部准确：CRS 四约定（L85）、表 1 五库计数（L102）、Quickstart import（L127-147）、渲染账本 7094/5732/1362/713（L149/159/200）、14 锚与 25 码/418 回退（L167）、竖线记号（L171/175/202）、表 2 各行（L199-205）、36 文件冒烟句（L209）、历史 36 层与 400MB 数字（L213-215）、限制披露（L235-241）、C1-C9（L256-267）、数据可用性（L274-278）、作者声明（L283-294）。",
+      "代码引用全部准确：writer.py:545-575 UTM→tmerc k=1 含运行时警告、1246-1251 二十四位环指针检查、1516-1519 空帧拒绝、1616 make_valid=False、1532-1547 on_empty、184-197 _iter_shells 空表、2029+ 透传指纹；reader.py:367-372/493-503/535-538 畸形输入收敛、513-534 aea/lcc、1438-1440/1463-1479 孤立 ID 过滤、1485-1493 计数不一致保护。",
+      "R1 全部 major/minor/技术缺陷核实成立：36=12+24 拆分与 verify_pymapgis.py 行为属实；batch2:77-81 与 batch3:65-68 的 0xFFFFFFFF 断言恒真；aea/lcc 仅故障注入测试（test_pure.py:182-193）；三项保护分支（attr/geom 计数、空帧无类型、环指针超限）确无测试；jwd_slib_manifest.json 的 DATA_ATTRIBUTION.md 引用在发行物内落空；tests/__init__.py 缺席；make_valid 退化面经 _iter_shells 空表→ring_index_offsets 缺键→1246 行 KeyError 的推理链与代码一致。",
+      "R2 全部 major/minor 核实成立：text-audit 1597/1597<5pt、min 1.7007874pt；collision-audit 1249 FAIL/1059 WARN/FIX BEFORE DELIVERY（1249+1059=2308 与 findings 长度一致）；Subgraph 仅结构计数断言；source-audit FONT-SIZE PASS（静态）与 PDF 实测并存；14 锚溯源与 NGAC 确认为未勾选项；表 2 '14' 的测试构成属实。",
+      "R3 全部 major/minor 核实成立：elsarticle.cls=141 字节 GitHub 404 JSON、elsarticle-template.zip=111 字节 S3 AccessDenied、两个指南 HTML 各 832,981 字节且 'guide for authors' grep 计数为 0、标题仅 ScienceDirect；V2.7.1 tag→823a5daf；575e80d 仅改 C2 指针 1 行（4206919→f12fb9d）；PyPI wheel 6,761,384 字节 2026-11-07T07:18:07 上传、实测 40 项含 12 JWD（2 个 .WP~）+5 SLIB、无投稿目录内容、fixture 哈希与 manifest 一致；GitHub Release V2.7.1 于 2026-11-07T13:11:56Z 发布；Zenodo DOI 302 重定向；run 42345384161（823a5daf）success；dist_softwarex 184/219 实测检查失败。",
+      "CI 实时状态：run 42574990251（head_sha=575e80deb2cb…）status=completed、conclusion=success；五个任务（ubuntu-24.04/3.9、ubuntu-latest/3.13、windows-latest/3.13、macos-latest/3.13、Build and inspect release archives）全部 success；构建任务含 Build wheel and source archive、Inspect archive contents（tests/inspect_dist.py dist）、Check long descriptions（twine check dist/*）三个关键步骤均 success。冻结时的唯一未决项已闭环。",
+      "发行边界机器核验：dist_softwarex_ci 通过 tests/inspect_dist.py（WHEEL_OK 323 entries / SDIST_OK 360 entries），与稿件第 204 行一致；公开 PyPI wheel 实测不含 mapgis2shp_submission、rendering/semantics、linesty_adjudicated。",
+      "渲染账本双侧一致：mapgis2shp_submission/jwd_render_reports.json 与 wheel_quickstart_ci_render/jwd_render_reports.json 逐层求和均为 12 层、7094 输入、5732 绘制、1362 排除、713 面标注，unknown_colors/unknown_fill/fallback/symbols_unresolved/unknown_fonts 全零；5732+1362=7094 算术自洽。",
+      "fixture 锁定属实：tests/fixtures/jwd 12 文件（5 WP/5 WL/2 WT）、slib 5 库、writer batch 11/12/20、reader_native 5 组（manifest 16 项）、batch4 manifest 20 例 100 文件 120 目录项、jwd_slib_manifest totals.bytes=19381767，均与测试断言一致。",
+      "历史证据链属实：d0d464d 提交存在，paper/validation/cross_validation_report.md 记录 36 层 16,874 要素双侧计数一致、等值率均值 0.999995、2 处失配；cross_validate_large_report.md 记录 78,873 要素、IoU 0.99733、面积和 +1.66%、并集差异 0.27%、0 对 3 无效几何，与稿件第 213-215 行一致。",
+      "架构图证据属实：text-audit min 6.8pt/24 runs/0 below、collision-audit PASS 0 FAIL 0 WARN、source-audit 21 PASS 0 FAIL；SVG 含 'Native MapGIS visual acceptance pending.' 标注（make_softwarex_architecture.py:136）。",
+      "版本与元数据一致：pyproject.toml:7、src/pymapgis/_version.py:5、CITATION.cff、稿件 C1 均为 2.7.1；pyproject authors 为通用名（R3-m5 属实）；LICENSE Apache-2.0。",
+      "23 条 Pcolor 锚与 6 条 Colorlib 锚的测试存在且与 docs/color_parsing_logic.md 记载一致；'25 未知码/418 回退' 在该文档 §4.3 有出处。",
+      "三份冻结报告对 CI 的主张（四测试任务+构建任务全部成功）经我独立在线核验为真；无一夸大。",
+      "fillgrph.py decode 对异型记录诚实返回 None（1337-1280=57 与表 1 一致）；linesty.py 白名单与裁定表 ImportError 降级路径（约 133 行）属实；test_pure.py:430-445 覆盖仓内/发布两种情形。"
+    ],
+    "provenance_gaps": [
+      "14 个原生对话框色锚无版本化采集溯源（MapGIS 版本、采集路径、截图/日志）：tests/test_pure.py:1658-1670 只断言记录值；revision notes 第 107 行未勾选——三方报告一致，属实未决。",
+      "NGAC 条目级再分发确认未取得而再分发已实际发生：公开 PyPI wheel（mapgis2shp-2.7.1-py3-none-any.whl，6,761,384 字节）实测内含 12 个 JWD 与 5 个 SLIB，LDZOFBB001.WP 哈希与 tests/fixtures/jwd_slib_manifest.json 逐字节一致；revision notes 第 105-106 行未勾选。",
+      "Reader 原生证据的 36 个 F:/tmp 二进制不在仓内：历史证据仅存于提交 d0d464d05166ab97978a01ce8cc5cc8480f05500 的 paper/validation/（存在性已核实），本机无 F: 盘可读内容。",
+      "Zenodo 记录内容仅核到 doi.org 302 重定向（10.5281/zenodo.24036158 已注册）；记录字段未直接读取（与 R3 披露一致）。",
+      "发行物内 tests/fixtures/jwd_slib_manifest.json 的 attribution_file 指向 DATA_ATTRIBUTION.md，但 pyproject.toml 的 sdist include（60-70 行）与 wheel force-include（85-99 行）均不含该文件——发行物内引用落空。",
+      "'25 个未知色号、418 次灰色回退'（稿件 L167）的出处在 docs/color_parsing_logic.md §4.3 的叙述性记录，无对应机器断言钉住这两个历史数字。",
+      "CI 任务日志不可匿名获取（API 403），各任务的 pytest 计数明细无法核对；只有任务级 conclusion 可证。"
+    ],
+    "suspected_duplications": [
+      "R2-M3 与 R3-M4 是同一问题（14 色锚版本化采集溯源缺失），证据指针相同（稿件 L239、notes L107、test_pure.py:1658-1670），但定级分歧：R2 判 non-blocking，R3 判 blocking（作者自列 submission requirement）。",
+      "R2-M4 与 R3-M2 是同一问题（NGAC 条目级再分发确认缺失而再分发已发生），证据相同（pyproject 85-99、notes 105-106、稿件 274-278），定级分歧：R2 non-blocking，R3 blocking。同一证据的两种严重度结论需要编辑层面显式裁决而非默认并存。",
+      "R2-m1 与 R3-m4 是同一问题（Quickstart 的 examples import 在纯 wheel 安装态不可用），证据完全重叠（inspect_dist.py:143-145、pyproject.toml:97）。",
+      "R1-M1（36 文件冒烟套件输入不可得）与 R3 的可复现材料轴部分重叠，但 R1 聚焦验证小节的证据分级、R3-M6 聚焦陈旧归档，属不同缺口；列出以防后续整合时误并。",
+      "R2-m2（source-audit 与 text-audit 并存易误读）与 R2-M1（图 2 印刷尺度不可读）共享同一证据对（jwd_map.source-audit.json 与 jwd_map.text-audit.json），前者是表述风险、后者是图件质量，属同族两发。"
+    ],
+    "unresolved_inputs": [
+      "冻结时挂起的构建任务现已闭环：2026-11-09 经 GitHub API 实测 run 42574990251（commit 575e80d）五个任务全部 completed/success，构建任务的 Build wheel and source archive、Inspect archive contents、Check long descriptions（即 twine check dist/*）逐步 success——冻结包中唯一标注的未决 CI 项解除。",
+      "本地 Twine 不可用的问题由 CI 的 twine check 步骤 success 代为闭环。",
+      "LaTeX 本地编译与官方 Guide for Authors 全文获取仍未完成：elsarticle.cls 顶层文件为 141 字节 GitHub 404 JSON，elsarticle-template.zip 为 111 字节 S3 AccessDenied XML，两个指南 HTML 各 832,981 字节均为 ScienceDirect 壳页（'guide for authors' grep 计数 0）；仅嵌套 CTAN elsarticle.zip 为真模板。revision notes 第 100 行未勾选。",
+      "全体作者确认未完成（notes 第 109 行未勾选）。",
+      "NGAC 条目级书面确认未取得（notes 第 105-106 行未勾选）。",
+      "工作区陈旧归档仍在：dist_softwarex（184/219）、dist_softwarex_final/release/submission/submission_final（324/361，且含禁止内容）、dist/（2.5.0）——均未跟踪，但与稿件数字矛盾的本地噪声未清理。",
+      "稿件 CI 表述（L199 'pre-revision public release run passed'、L219 'No new remote CI run is claimed'）在 42574990251 全绿后已过时，投稿前需更新（R3-m7 的整改仍未落到稿件）。"
+    ]
+  },
+  "synthesis": {
+    "broad_interest": "潜在读者群足够支撑 SoftwareX 的复用导向定位：存量 MapGIS 6.x/67 地质矢量数据的地质调查、矿产勘查与科研用户；关注闭源格式互操作与逆向工程方法学的开源 GIS 社区；关注科学数据长期保存的读者；需要可审计制图复现管道的图件质量管理人员；以及关心证据分级验证与发行包审计的软件工程读者。开放性门槛已满足：Apache-2.0、GitHub 公开、PyPI 2.7.1 已发布（2026-11-07 上传，6,761,384 字节 wheel 经独立实测）、GitHub Release V2.7.1 存在、Zenodo DOI 10.5281/zenodo.24036158 已注册（302 重定向可达）。三份报告一致认为功能主张未超出证据、无伪造通过、限制披露诚实。对 SoftwareX 而言，广泛兴趣与复用价值论证充分，不构成投稿障碍。",
+    "consensus_blocking_concerns": [
+      "NGAC 条目级再分发确认未取得而再分发已实际发生（R2-M4 与 R3-M2 同一问题，证据指针重叠：pyproject.toml 第 85-99 行 wheel force-include、revision notes 第 105-106 行未勾选、稿件第 274-278 行；公开 PyPI wheel 经独立实测内含全部 12 个 JWD 图层与 5 个 SLIB 库）。定级分歧（R2 非阻断 vs R3 阻断）经编辑裁决为投稿闸门：公开、非涉密、测试用途的自述不等于明示再分发授权，编辑部版权合规审查很可能要求整改，且分发行为不可逆。",
+      "14 个原生对话框颜色锚缺少版本化采集溯源（R2-M3 与 R3-M4 同一问题：稿件第 239 行、revision notes 第 107 行未勾选、tests/test_pure.py:1658-1670 只断言记录值）。定级分歧（R2 非阻断 vs R3 阻断）经编辑裁决为投稿闸门：作者自己将其列为 submission requirement，且颜色锚是 Pcolor 节点模型与颜色正确性主张的核心外部证据，缺溯源则该证据停留在自证层面。",
+      "稿件从未本地编译且官方 SoftwareX Guide for Authors 全文未取得（R3-M1 判阻断；R2 在 criteria_assessment 中将其列为投稿前必须完成的流程项，定级较轻）。底层事实经独立核实成立：elsarticle.cls 顶层文件为 141 字节 GitHub 404 JSON、elsarticle-template.zip 为 111 字节 S3 AccessDenied、两个指南 HTML 各 832,981 字节均为 ScienceDirect 壳页；且存在确定性排版错误（竖线记号在 OT1 下排为破折号、第 265 行 \\url 内 \\#）。未编译稿件无法确认版式与链接正确性，属形式阻断。",
+      "全体作者对当前版本的书面确认未完成（R3-M3 判阻断；R2 同样列为投稿前流程项）。revision notes 第 109 行未勾选，稿件第 285 行仅声明对 previous manuscript version 的批准。Elsevier Editorial Manager 提交流程要求全体作者知情同意，缺此项无法合规完成提交。"
+    ],
+    "consensus_strengths": [
+      "CI 证据链经三方独立在线核验且我本人今日复核属实：GitHub Actions run 42574990251（commit 575e80d）五个任务（Ubuntu 3.9、Ubuntu 3.13、Windows 3.13、macOS 3.13、Build and inspect release archives）全部 success，构建任务含 python -m build、tests/inspect_dist.py 归档内容检查与 twine check——冻结包中唯一未决项已闭环；三份报告无一夸大（稿件仅声称 pre-revision 公开运行通过，表述保守）。",
+      "功能边界主张与代码/测试证据高度一致且经取证审计全量复核成立：R1 的全部 major/minor/技术缺陷、R2 的全部 major/minor、R3 的全部 major/minor 所引稿件行号与代码行号经 forensic audit 逐条核实准确；原生转换缺陷被显式作为反例钉在测试中而非继承目标（batch4 的 09 拓扑合并、07 异源串档、06 多部件丢失），诚实边界叙述三报告一致认可。",
+      "发行包边界机器可核验且执行严格：dist_softwarex_ci 通过 tests/inspect_dist.py（WHEEL_OK 323 / SDIST_OK 360 与稿件第 204 行一致）；公开 PyPI wheel（40 项）实测不含 mapgis2shp_submission、rendering/semantics 实验模块与 linesty_adjudicated；fixture 校验为显式失败而非静默跳过。",
+      "渲染账本双侧一致且与稿件逐字吻合：jwd_render_reports.json 与 wheel 安装态复跑产物均为 12 层、7094 输入、5732 绘制、1362 排除、713 面标注，未解决色/填充/回退/符号/字体全零，5732+1362=7094 算术自洽；图 2 的 1249 碰撞 FAIL 与 1597 个 <5pt 文本作为限制诚实披露而非伪称通过。",
+      "版本与元数据一致：pyproject.toml、_version.py、CITATION.cff 与稿件 C1 均为 2.7.1；V2.7.1 标签实测指向 823a5daf 与 C1 一致；PyPI/GitHub Release/Zenodo DOI 注册均经外部核实。",
+      "软件功能适合 SoftwareX 投稿这一判断三方一致：R1（Reader/Writer 轴无阻断）、R2（无虚构功能或伪造通过）、R3（科学与可复现性证据已达门槛，无需返工）——功能适配性无分歧，分歧仅在形式与合规要件。"
+    ],
+    "emphasis_differences": [
+      "严重度裁决分歧一：NGAC 再分发确认，R2 判非阻断（透明披露+作者自列待办），R3 判阻断（分发已发生、合规风险现实）。编辑裁决：投稿闸门。理由：分发行为不可逆且编辑部可据此暂停流程；解决路径明确（书面确认或改用下载脚本+哈希校验）。",
+      "严重度裁决分歧二：14 色锚溯源，R2 判非阻断，R3 判阻断。编辑裁决：投稿闸门。理由：作者自述其为 submission requirement，自列标准应自我适用。",
+      "三份报告的评审轴互不重叠：R1 聚焦 Reader/Writer 功能边界的证据分级（一切缺口归为一句级披露，可小修吸收）；R2 聚焦图形库解析与渲染证据的直观说服力（图 2 可读性是其独有 major）；R3 聚焦出版形式与合规（四个阻断项全部来自形式轴）。事实层面无矛盾，差异全在权重。",
+      "R1-M1（36 文件冒烟套件输入可得性）与 R3-M6（陈旧归档）同属可复现材料轴但为不同缺口：前者是验证小节的证据分级问题，后者是本地归档与稿件数字矛盾；forensic audit 明确提示不可误并。",
+      "R2 报告内部存在已被 forensic audit 证实的口径不一：strengths 称 'Pcolor 11 锚'，其自身 minor R2-m3 称 '14+9'，后者才与仓内证据吻合。此属 forensic 发现而非评审共识，整合时以 14+9（加 Colorlib 6，锚断言总数 29）为准。",
+      "R3-m1 的竖线计数 '五处' 经 forensic audit 与我本人实测更正为 6 处出现（171 行 2 处、175 行 3 处、202 行 1 处）；底层 LaTeX 问题属实，仅计数有误。R3-M6 的陈旧归档范围被 forensic audit 更正为五处以上目录（我本人列目录确认 dist、dist_softwarex、dist_softwarex_final/release/submission/submission_final 等并存），且部分含 inspect_dist 明令禁止的内容。"
+    ],
+    "minor_revision_checklist": [
+      "修正竖线记号排版：6 处出现（第 171、175、202 行），改用 \\texttt 包裹或 \\textbar，或加载 \\usepackage[T1]{fontenc}（计数按 forensic 更正，非 R3 所称五处）[R3-m1]",
+      "去掉第 265 行 \\url 内的反斜杠，直接写 # readme 锚点 [R3-m2]",
+      "Quickstart 清单补充 wheel 安装态与源码检出两种运行路径说明，或让 pymapgis.testing 直接导出 regression_layers（wheel 强制排除顶层 examples/）[R2-m1=R3-m4 合并]",
+      "表 2 'All 14 reference anchors' 补一句构成出处（test_extended_dialog_anchors 14 条 + test_native_node_layout_and_white 9 条，另 Colorlib 6 锚，仓内锚断言总数 29）[R2-m3，采纳 forensic 口径]",
+      "图 2 材料注明 source-audit 的 FONT-SIZE PASS 仅覆盖静态源码设置，输出尺度以 PDF 文本审计（1597/1597 <5pt）为准，防止两处审计结果被混用 [R2-m2]",
+      "Data availability 段补一句 jwd_slib_manifest.json 已记录五库 SHA-256 并随包分发，便于与公开包核对一致性 [R2-m4]",
+      "收紧 batch2/batch3 环指针断言上界至 0..255 或删除恒真断言；新增伪造 ring_index_offsets（如 0x1000000）直接调用 _encode_polygon_params 断言抛 WriterError 的单元测试 [R1-m1]",
+      "补 aea/lcc 投影读取正路径测试：合成有效 lat_0/lat_1/lat_2 参数断言 _read_crs 返回的 CRS 字符串正确 [R1-m2]",
+      "参照 TestPolygonActiveIdAlignment 的二进制补丁范式，补属性计数与几何计数不一致时抛 MapGISError 的回归测试 [R1-m3]",
+      "补空 GeoDataFrame 未指定 geometry_type 时抛 WriterError 的用例 [R1-m4]",
+      "修复发行物内 jwd_slib_manifest.json 的 attribution_file 落空：把 DATA_ATTRIBUTION.md 加入 sdist include 并映射进 wheel，或改写清单字段为文字引用 [R1-m5]",
+      "添加 tests/__init__.py，或把共享助手移入 conftest.py/tests/_native_helpers.py，消除跨模块导入对调用目录的依赖 [R1-m6]",
+      "C2 自引用关系说明：稿件位于 575e80d，比 C2 指向的 f12fb9d 晚一个提交且仅差该指针行，投稿版需自洽处理 [R3-m3]",
+      "pyproject.toml 作者字段从通用名 pymapgis contributors 对齐为 CITATION.cff 与稿件的七位具名作者 [R3-m5]",
+      "移出或标注投稿目录中不再被引用的旧图文件 figure1_format_layout.* 与 figure2_architecture.* [R3-m6]",
+      "更新稿件第 199/219 行 CI 表述与 revision notes 第 112 行复选框：run 42574990251 已于 2026-11-09 全部成功（本人今日在线复核属实），保留证据日期 [R3-m7 + forensic 补充 notes 侧]"
+    ],
+    "other_major_concerns": [
+      "R1-M1（单报告，非阻断）：36 文件 Reader-Writer-Reader 冒烟套件与发行物可复现证据并列陈述但未说明输入边界——仅 12 个文件随发行物捆绑，其余 24 个需获取同幅数据；§5.1 加一句来源与复现方式说明即可。",
+      "R1-M2（单报告，非阻断）：Writer._prepare_crs 把 UTM 输入静默改写为 k=1 高斯克吕格（有运行时警告且可逆，行为正确且诚实），但稿件正文与 Limitations 均未提及；§2.2 或 Limitations 加一句披露即可。",
+      "R2-M1（单报告，非阻断）：图 2 作为原库渲染核心整幅证据，PDF 全部 1597 个文本运行 <5pt（最小 1.70pt）、碰撞审计 1249 FAIL/1059 WARN 被判 FIX BEFORE DELIVERY；矢量图可放大且限制已披露故不阻断，但建议增加原生比例放大 inset 或第二面板并复跑审计归档。",
+      "R2-M2（单报告，非阻断；本人已复核属实）：表 1 称 Subgraph.lib '7,360/7,360 symbols decoded'，但普查测试仅断言 symbol_count==7360 结构走查计数，与同表 LINESTY/Fillgrph 的逐记录全量 decode 断言粒度不一致；补全量 decode 普查断言或改表 1 措辞为结构性覆盖表述。",
+      "R3-M5（单报告，非阻断）：C1 指向已发布 2.7.1（823a5da）而稿件描述的 420 项回归、323/360 归档、新示例与 fixture 均只在未发布集成提交；稿件已通过兼容路径与 validate_published_quickstart.py 诚实处理，但建议在 C1 或脚注明确版本对应关系，或发布 2.7.2 同步 C1-C3。",
+      "R3-M6（单报告，非阻断，forensic 更正范围）：与稿件 323/360 数字矛盾的本地陈旧归档不止 dist_softwarex（184/219）一处，而是至少五处目录（dist_softwarex_final/release/submission/submission_final 为 324/361 且含 inspect_dist 禁止内容，dist/ 存 2.5.0 旧档；本人列目录确认并存）；均未 git 跟踪不污染仓库，权威归档证据为 CI 构建任务，删除/重建或在 notes 标注即可。",
+      "R1 技术缺陷（单报告，非阻断）：make_valid=True 且面退化为非面几何时，_iter_shells 返回空表导致 ring_index_offsets 缺键，writer.py:1246 以原生 KeyError 退出，早于预期的 WriterError——与项目自身不泄漏原生异常的审计标准不一致，需代码修正加测试（可选标志加退化输入触发，无数据损坏风险）。"
+    ],
+    "readiness_verdict": "两项判定分别如下。（一）软件功能是否适合投 SoftwareX：是，三方一致且无保留。Reader/Writer 功能边界、图形库解析与原库渲染、打包与可复现性三条轴均未发现虚构功能、伪造通过或超出证据的主张；原生转换缺陷被显式钉为反例；限制披露诚实完整；CI 证据经三方独立核验加我本人今日复核全绿。（二）当前稿件与材料是否可立即投稿：否，属 conditional go。四个投稿闸门必须闭环：LaTeX 编译与官方指南核对、NGAC 条目级再分发确认、全体作者书面确认、14 色锚版本化采集溯源。四项均为形式/合规项而非科学返工——科学内容、测试证据与可复现性基础无需返工。其中仅 NGAC 确认存在外部依赖的时间不确定性（分发已发生，无法靠自身行动单方面闭环，若无法取得需改用下载脚本+哈希校验的替代发行方案）；其余三项与全部非阻断改进均为作者侧可在数日内完成的工作。一句话：功能达标，材料定点整改后可投。",
+    "resolution_gates": [
+      "闸门 1（形式）：安装 LaTeX 工具链或用官方在线编译服务，以 elsarticle 编译 paper_softwarex.tex 并肉眼核对 PDF 全文；修复 6 处竖线记号（171/175/202 行）与第 265 行 \\url 内 \\#；取得官方 SoftwareX Guide for Authors 全文并对照结构要件。验收：编译产物无此类排版缺陷，指南核对记录归档。",
+      "闸门 2（合规）：取得全国地质资料馆对 12 个 JWD 图层与 5 个 SLIB 库测试用途再分发的条目级书面确认或等效条款文本，随投稿材料附上并在数据可用性节引用；若无法取得，改用下载脚本+哈希校验替代随包分发并同步改造 pyproject force-include 与 fixture 校验路径。验收：书面确认文件归档，或替代方案落地且发行物不再内含原始数据。",
+      "闸门 3（流程）：取得七位作者对当前 paper_softwarex.tex 版本的书面确认记录，并在投稿系统中完成全体作者认可。验收：确认记录归档，notes 第 109 行勾选。",
+      "闸门 4（证据）：补齐 14 个原生对话框颜色锚的 MapGIS 版本、采集日期、采集路径与截图或日志，提供英文证据摘要，并明确标注为作者记录的原生对话框观察值。验收：溯源材料入投稿材料包，notes 第 107 行勾选。",
+      "闸门 5（披露，一句级×5）：§5.1 说明 36 文件冒烟套件的输入来源与 24 个非捆绑文件的复现方式；§2.2 或 Limitations 披露 UTM→k=1 高斯克吕格改写语义；表 1 Subgraph 措辞对齐证据粒度或补全量 decode 普查；C1/C2 补版本对应关系说明；Quickstart 补双路径 import 说明。验收：五处文字落入稿件。",
+      "闸门 6（图件）：为图 2 增加原生比例放大 inset 或第二面板使该面板文本达到期刊可读下限，或在正文明确放大阅读路径；复跑文本审计与碰撞审计并归档。验收：新审计 JSON 归档且图注/正文引用一致。",
+      "闸门 7（环境整洁）：删除或重建 dist_softwarex、dist_softwarex_final、dist_softwarex_release、dist_softwarex_submission、dist_softwarex_submission_final 与 dist/ 旧档（或明确标注为过期快照），消除与 323/360 矛盾的本地噪声；更新稿件与 revision notes 两侧的 CI 表述至 run 42574990251 并保留证据日期。验收：工作区仅剩与稿件数字一致的归档或明确标注。",
+      "闸门 8（小修吸收）：完成 minor_revision_checklist 全部 16 项与 R1 的 make_valid KeyError 分类学修正（代码+测试）。此项可在闸门 1-7 之后、投稿前一并完成；编辑层面核对即可，无需再次全面评审。"
+    ],
+    "unsupported_or_not_assessable": [
+      "420 passed/1 skip 与 76 passed 无法在审计环境本地复跑（本机仅 Python 3.14 且无 pytest/geopandas）；静态计数 349 个 def test_ 与参数化扩张同 420 相容但不构成证明；采信 revision notes 记录与四平台 CI 结论（任务级 conclusion 已核实）。",
+      "CI 各任务的 pytest 计数明细不可核：GitHub API 匿名下载 job logs 返回 403，只能核实任务级 conclusion。",
+      "原生 MapGIS 显示/编辑/另存为再打开验收：无专有软件环境，不可评估（稿件已披露为未完成项，属诚实限制而非缺陷）。",
+      "36 个 F:/tmp 原生二进制本体不可得：只能核实存档提交 d0d464d 的 paper/validation 报告存在且数字自洽。",
+      "Zenodo 记录页字段未直接读取：仅 doi.org 302 重定向确认 DOI 10.5281/zenodo.24036158 已注册。",
+      "稿件第 213 行 '95,006 compared cells' 未能从存档报告首部指标区独立复算（组成量 36 层、16,874 要素、99.9995%、2 处失配均已核实）。",
+      "'76 targeted tests' 的入选测试标识清单未在材料中枚举，无法核对 76 的构成。",
+      "各评审自称的独立复算过程（R2 对 bundled SLIB 锚的复核、R3 对 PyPI wheel 的实测）不可回放；其结论中可对照仓库的部分（wheel 40 项、12 JWD+5 SLIB、无投稿内容等）经独立实测属实。",
+      "'25 个未知色号、418 次灰色回退'（稿件 L167）仅有 docs/color_parsing_logic.md §4.3 的叙述性出处，无机器断言钉住这两个历史数字。",
+      "SoftwareX 政策条文与评审人身份：按任务边界未做虚构或推断，本综合仅基于三份冻结报告、forensic audit 与本人明确的现场核查。"
+    ]
+  }
+}

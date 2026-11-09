@@ -1572,7 +1572,17 @@ def _slib_library_path(name: str, env_var: str) -> Path:
     from pymapgis.testing import slib_path
 
     configured = os.environ.get(env_var)
-    path = Path(configured) if configured else slib_path(name)
+    if configured:
+        path = Path(configured)
+        if not path.is_file():
+            raise FileNotFoundError(f"Required SLIB test library is unavailable: {path}")
+        return path
+    try:
+        path = slib_path(name)
+    except FileNotFoundError as exc:
+        if os.environ.get("PYMAPGIS_SLIB"):
+            raise
+        pytest.skip(f"Optional user-supplied SLIB integration is unavailable: {exc}")
     if not path.is_file():
         raise FileNotFoundError(f"Required SLIB test library is unavailable: {path}")
     return path

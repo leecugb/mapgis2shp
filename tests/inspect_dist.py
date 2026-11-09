@@ -7,14 +7,6 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-JWD_FIXTURE_NAMES = (
-    "LDLYAAE002.WP", "LDZOFBB001.WP", "LDZOFBB002.WP", "LDZOFBB003.WP",
-    "LDZOFBB004.WP", "LDLYAAE001.WL", "LDZOFBA002.WL", "LDZOFBA003.WL",
-    "LDZOFBA005.WL", "LDZOFBB098.WL", "LDZOFBA016.WT", "LDZOFBB099.WT",
-)
-SLIB_FIXTURE_NAMES = (
-    "Subgraph.lib", "LINESTY.lib", "Fillgrph.lib", "Colorlib.lib", "Pcolor.lib",
-)
 SYNTHETIC_FIXTURE_NAMES = (
     "synthetic_points.wt", "synthetic_lines.wl", "synthetic_polygons.wp",
 )
@@ -71,11 +63,6 @@ WRITER_BATCH4_NAMES = tuple(
             ".WL" if stem.startswith(("05", "06", "07", "08")) else ".WP")
     for stem in WRITER_BATCH4_NATIVE_STEMS
 ) + ("README_转换说明.md",)
-READER_NATIVE_NAMES = ("LDLYAAI002.WT",) + tuple(
-    name + suffix
-    for name in ("LDLYAAI002", "LDZOFBA002", "LDZOFBB001", "LDZOFBB004", "LDZOFBB099")
-    for suffix in (".SHP", ".SHX", ".DBF")
-)
 
 
 def _require(condition: bool, message: str) -> None:
@@ -90,6 +77,20 @@ def _check_common(names: list[str], artifact: str, *, allow_slib_fixtures: bool 
         not any("mapgis2shp_submission" in name.replace("\\", "/") for name in names),
         f"{artifact}: manuscript submission content is included",
     )
+    ngac_prefixes = (
+        "/tests/fixtures/jwd/",
+        "/tests/fixtures/slib/",
+        "/tests/fixtures/reader_native/",
+        "/pymapgis/testing/fixtures/jwd/",
+        "/pymapgis/testing/fixtures/slib/",
+        "/pymapgis/testing/fixtures/reader_native/",
+    )
+    for name in names:
+        normalised = "/" + name.lower().replace("\\", "/")
+        _require(
+            not any(prefix in normalised for prefix in ngac_prefixes),
+            f"{artifact}: user-supplied NGAC data must not be packaged: {name}",
+        )
     library_names = {"colorlib.lib", "pcolor.lib", "subgraph.lib", "linesty.lib", "fillgrph.lib"}
     bundled = []
     for name in names:
@@ -123,6 +124,7 @@ def _check_wheel(path: Path) -> None:
         "pymapgis/testing/fixtures/writer_batch3_manifest.json",
         "pymapgis/testing/fixtures/writer_batch4_manifest.json",
         "pymapgis/testing/fixtures/reader_native_manifest.json",
+        "pymapgis/testing/fixtures/DATA_ATTRIBUTION.md",
         "pymapgis/testing/examples/render_bundled_jwd.py",
     }
     for name in WRITER_BATCH2_NAMES:
@@ -131,12 +133,6 @@ def _check_wheel(path: Path) -> None:
         required.add("pymapgis/testing/fixtures/writer_batch3/" + name)
     for name in WRITER_BATCH4_NAMES:
         required.add("pymapgis/testing/fixtures/writer_batch4/" + name)
-    for name in READER_NATIVE_NAMES:
-        required.add("pymapgis/testing/fixtures/reader_native/" + name)
-    for name in JWD_FIXTURE_NAMES:
-        required.add("pymapgis/testing/fixtures/jwd/" + name)
-    for name in SLIB_FIXTURE_NAMES:
-        required.add("pymapgis/testing/fixtures/slib/" + name)
     for name in SYNTHETIC_FIXTURE_NAMES:
         required.add("pymapgis/testing/fixtures/mapgis/" + name)
     _require(required.issubset(names), f"{path.name}: required release modules missing")
@@ -158,6 +154,8 @@ def _check_sdist(path: Path) -> None:
         names = archive.getnames()
     required_suffixes = (
         "/CITATION.cff",
+        "/DATA_ATTRIBUTION.md",
+        "/tests/fixtures/DATA_ATTRIBUTION.md",
         "/examples/geological_workflow.py",
         "/examples/render_bundled_jwd.py",
         "/tests/test_graphic.py",
@@ -179,23 +177,6 @@ def _check_sdist(path: Path) -> None:
         "/tests/fixtures/mapgis/synthetic_lines.wl",
         "/tests/fixtures/mapgis/synthetic_polygons.wp",
         "/tests/fixtures/jwd_slib_manifest.json",
-        "/tests/fixtures/jwd/LDLYAAE002.WP",
-        "/tests/fixtures/jwd/LDZOFBB001.WP",
-        "/tests/fixtures/jwd/LDZOFBB002.WP",
-        "/tests/fixtures/jwd/LDZOFBB003.WP",
-        "/tests/fixtures/jwd/LDZOFBB004.WP",
-        "/tests/fixtures/jwd/LDLYAAE001.WL",
-        "/tests/fixtures/jwd/LDZOFBA002.WL",
-        "/tests/fixtures/jwd/LDZOFBA003.WL",
-        "/tests/fixtures/jwd/LDZOFBA005.WL",
-        "/tests/fixtures/jwd/LDZOFBB098.WL",
-        "/tests/fixtures/jwd/LDZOFBA016.WT",
-        "/tests/fixtures/jwd/LDZOFBB099.WT",
-        "/tests/fixtures/slib/Subgraph.lib",
-        "/tests/fixtures/slib/LINESTY.lib",
-        "/tests/fixtures/slib/Fillgrph.lib",
-        "/tests/fixtures/slib/Colorlib.lib",
-        "/tests/fixtures/slib/Pcolor.lib",
     )
     required_suffixes += tuple(
         "/tests/fixtures/writer_batch2/" + name for name in WRITER_BATCH2_NAMES
@@ -205,9 +186,6 @@ def _check_sdist(path: Path) -> None:
     )
     required_suffixes += tuple(
         "/tests/fixtures/writer_batch4/" + name for name in WRITER_BATCH4_NAMES
-    )
-    required_suffixes += tuple(
-        "/tests/fixtures/reader_native/" + name for name in READER_NATIVE_NAMES
     )
     for suffix in required_suffixes:
         _require(any(name.endswith(suffix) for name in names),
