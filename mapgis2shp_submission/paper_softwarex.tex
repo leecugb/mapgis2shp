@@ -38,7 +38,7 @@
 \cortext[cor2]{Co-corresponding author. Email: hehaiyangcugb@foxmail.com}
 
 \begin{abstract}
-Legacy MapGIS 6.x/67 files preserve geological mapping products, but their binary geometry, attributes and cartographic definitions are difficult to reuse. Geometry-only conversion also loses symbols, line styles, fill patterns and colours stored in separate libraries. Here we present \textbf{mapgis2shp} (import name \texttt{pymapgis}), an Apache-2.0 toolkit combining bidirectional vector interoperability, five-library parsing and original-library rendering. An external-fixture example pairs twelve user-supplied JWD layers with five matching SLIB files and produces PNG, PDF and SVG maps with machine-readable reports. It draws 5{,}732 original features from 7{,}094 inputs, excludes 1{,}362 fragmented annotations and reports zero unresolved colours, fills, fallbacks or symbols. A coordinate test retains all 782 source vertices in 37 real features, with maximum deviation $\leq 10^{-9}$ in source units. With external fixtures, local regression comprises 423 passing tests and one environment-dependent skip; continuous integration covers four platforms and release checks. Version 2.7.1 is available through PyPI, GitHub and Zenodo. Historical Reader comparisons cover 36 survey layers and a 400~MB polygon dataset. The result is an auditable route from closed MapGIS binaries to open vector processing and original-library rendering, without treating internal regression as vendor-identical visual acceptance.
+Legacy MapGIS 6.x/67 files preserve geological mapping products, but their binary geometry, attributes and cartographic definitions are difficult to reuse. Geometry-only conversion also loses symbols, line styles, fill patterns and colours stored in separate libraries. Here we present \textbf{mapgis2shp} (import name \texttt{pymapgis}), an Apache-2.0 toolkit combining bidirectional vector interoperability, five-library parsing and original-library rendering. An external-fixture example produces PNG, PDF and SVG maps with reports from twelve user-supplied JWD layers and five matching SLIB files. It draws 5{,}732 original features from 7{,}094 inputs, excludes 1{,}362 fragmented annotations and reports zero unresolved colours, fills, fallbacks, symbols or fonts. A coordinate test retains all 782 source vertices in 37 real features, with maximum deviation $\leq 10^{-9}$ in source units. With external fixtures, 423 tests pass with one environment-dependent skip; continuous integration covers four platforms and release checks. Historical Reader comparisons reached 99.9995\% mean attribute equivalence on 36 survey layers and 99.73\% coverage intersection-over-union on a 400~MB dataset. Version 2.7.1 is available through PyPI, GitHub and Zenodo. The result is an auditable route from closed MapGIS binaries to open vector processing and original-library rendering, without treating internal regression as vendor-identical visual acceptance.
 \end{abstract}
 
 \begin{keyword}
@@ -56,7 +56,7 @@ This work addresses two linked requirements. First, researchers need reliable ve
 
 \subsection{From a reader to an auditable open mapping stack}
 
-Earlier versions of mapgis2shp concentrated on the reader path and native-export comparison. Version 2.7.1 extends that core with native writing, five-library parsing, original-library rendering and documented regression fixtures. The intended result is not a pixel-identical replacement for the MapGIS application. It is an open and inspectable implementation whose assumptions can be tested: binary offsets are explicit, colour channels are selected deliberately, unresolved structures remain non-results, and rendered coordinates can be compared with the source vertices.
+The intended result is not a pixel-identical replacement for the MapGIS application. It is an open and inspectable implementation whose assumptions can be tested: binary offsets are explicit, colour channels are selected deliberately, unresolved structures remain non-results, and rendered coordinates can be compared with the source vertices. Version 2.7.1 realises this principle by extending the earlier reader and native-export comparison with native writing, five-library parsing, original-library rendering and documented regression fixtures.
 
 Figure~\ref{fig:architecture} summarises this transition from an opaque source package to vector conversion, library interpretation and evidence-based validation.
 
@@ -86,7 +86,7 @@ Geological interpretation, contact or fault classification, GeoSciML conversion~
 
 \subsection{Vector Reader and Writer}
 
-The Reader consumes 16 physical section-index entries and reconstructs attributes, geometries and optional graphic parameters in an aligned GeoPandas GeoDataFrame~\cite{geopandas}. Coordinate-reference inference uses pyproj~\cite{pyproj} and covers longitude/latitude, Transverse Mercator, Albers and Lambert conventions, with non-finite or invalid projection parameters falling back to an empty CRS rather than plausible-looking but corrupted coordinates. Polygon reconstruction uses Shapely~\cite{shapely} to assemble shells and holes from arc--node topology while filtering orphan topology identifiers consistently across attributes, geometry and graphic parameters.
+The Reader parses the 16 physical section-index entries and reconstructs attributes, geometries and optional graphic parameters in an aligned GeoPandas GeoDataFrame~\cite{geopandas}. Coordinate-reference inference uses pyproj~\cite{pyproj} and covers longitude/latitude, Transverse Mercator, Albers and Lambert conventions, with non-finite or invalid projection parameters falling back to an empty CRS rather than plausible-looking but corrupted coordinates. Polygon reconstruction uses Shapely~\cite{shapely} to assemble shells and holes from arc--node topology while filtering orphan topology identifiers consistently across attributes, geometry and graphic parameters.
 
 The Writer supports native point, line and polygon output. Unchanged geometry and metadata from a Reader can reuse original sections verbatim. Freshly authored polygons use independently closed rings and native 24-bit ring-index pointers; raw-ring preservation is the default, with \texttt{shapely.make\_valid} available only on request. Because MapGIS 6.x cannot encode the UTM scale factor, UTM input is reprojected to Gauss--Kruger with $k=1$ and a runtime warning; round-trip checks transform back to the original CRS. Reader--Writer--Reader checks are treated as internal regression, not as proof of native MapGIS acceptance.
 
@@ -114,9 +114,9 @@ Pcolor.lib & WP fills and extended colours & 4{,}098 32-byte colour nodes \\
 
 \subsection{Original-library rendering}
 
-The Matplotlib-based renderer~\cite{matplotlib} preserves polygon holes, instantiates fill-pattern tiles, stamps line-style elements along original vector geometry, instantiates Subgraph symbols and renders text annotations. WP fills use Pcolor by default when available; other colour roles continue to use Colorlib. Main and independent auxiliary line records are decoded separately, while in-range auxiliary values select main-record variants rather than producing an extra line.
+The Matplotlib-based renderer~\cite{matplotlib} preserves polygon holes, instantiates fill-pattern tiles, stamps line-style elements along original vector geometry, places Subgraph symbols and renders text annotations. WP fills use Pcolor by default when available; other colour roles continue to use Colorlib. Main and independent auxiliary line records are decoded separately, while in-range auxiliary values select main-record variants rather than producing an extra line.
 
-Complete geological-unit labels can be generated from polygon attributes at \texttt{representative\_point()}, using MapGIS control codes and Mathtext for subscripts and superscripts. This presentation choice avoids duplicating fragmented WT \texttt{CHFCEC=unit-code} annotations. Other annotation categories, native text advances, negative spacing and native font-number mappings remain supported.
+Complete geological-unit labels can be generated from polygon attributes, positioned at each polygon's \texttt{representative\_point()} and typeset through MapGIS control codes and Mathtext sub- and superscripts. This presentation choice avoids duplicating fragmented WT \texttt{CHFCEC=unit-code} annotations. Other annotation categories, native text advances, negative spacing and native font-number mappings remain supported.
 
 \section{Illustrative examples}
 
@@ -127,7 +127,7 @@ The package is available on PyPI; Matplotlib is required only for the rendering 
 python -m pip install "mapgis2shp[render]"
 \end{lstlisting}
 
-Obtain the original vectors and libraries through their official channel and set \texttt{PYMAPGIS\_JWD} and \texttt{PYMAPGIS\_SLIB} before running the example. In the current wheel, replace \texttt{examples} with \texttt{pymapgis.testing.examples} in the first import below; the source archive retains the shown \texttt{examples/} layout. The published V2.7.1 wheel is checked separately through \texttt{validate\_published\_quickstart.py}, which reads the fixtures directly with \texttt{Reader}.
+Obtain the original vectors and libraries through their official channel and set \texttt{PYMAPGIS\_JWD} and \texttt{PYMAPGIS\_SLIB} before running the example. On the current wheel the first import below is provided as \texttt{pymapgis.testing.examples} instead of \texttt{examples}; the source archive retains the shown \texttt{examples/} layout. The published V2.7.1 wheel is checked separately through \texttt{validate\_published\_quickstart.py}, which reads the fixtures directly with \texttt{Reader}.
 \begin{lstlisting}[language=Python]
 import examples.render_bundled_jwd as jwd
 from pymapgis import GraphicLibraries, GraphicRenderer
@@ -150,7 +150,7 @@ result = renderer.render(layers, "map.png", figsize=(12, 7.5), dpi=600)
 print(result.reports)
 \end{lstlisting}
 
-Here \texttt{jwd\_path()} and \texttt{slib\_path()} resolve external user-supplied Kurgan-sheet vectors (JWD) and graphic-library directories (SLIB) without hard-coded absolute paths. Reports distinguish 5{,}732 drawn original features from 1{,}362 excluded fragmented WT unit-code annotations, totalling 7{,}094 inputs. Users should check \texttt{unknown\_colors}, \texttt{symbols\_unresolved} and \texttt{unknown\_fonts}, together with \texttt{unknown\_fill}, \texttt{fallback}, \texttt{empty\_pattern} and \texttt{cycle\_limit} and their emitted \texttt{aux\_} counterparts, for empty or zero results. Chinese annotations require a CJK-capable font.
+Here \texttt{jwd\_path()} and \texttt{slib\_path()} resolve external user-supplied Kurgan-sheet vectors (JWD) and graphic-library directories (SLIB) without hard-coded absolute paths. Reports distinguish 5{,}732 drawn original features from 1{,}362 excluded fragmented WT unit-code annotations, totalling 7{,}094 inputs. Users should confirm that \texttt{unknown\_colors}, \texttt{symbols\_unresolved}, \texttt{unknown\_fonts}, \texttt{unknown\_fill}, \texttt{fallback}, \texttt{empty\_pattern}, \texttt{cycle\_limit} and their emitted \texttt{aux\_} counterparts are all empty or zero. Chinese annotations require a CJK-capable font.
 
 The executable \texttt{examples/render\_bundled\_jwd.py} additionally writes PDF and SVG maps and \texttt{jwd\_render\_reports.json}. Figure~\ref{fig:rendered-example} shows the resulting map.
 
@@ -160,7 +160,7 @@ The executable \texttt{examples/render\_bundled\_jwd.py} additionally writes PDF
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{jwd_map}
-\caption{Original-library output from user-supplied JWD/SLIB regression data. The public example drew 5{,}732 features and generated 713 polygon labels from 7{,}094 inputs, excluding 1{,}362 fragmented annotations, with zero unresolved colours, fills, fallbacks, symbols or fonts. No scale bar, north arrow, graticule or legend is drawn. The tightly cropped vector PDF/SVG supports enlargement; dense native annotations and label--line-work overlaps remain. This is internal regression output, not native MapGIS visual acceptance.}
+\caption{Original-library rendering of the Kurgan sheet (J43C001002) from user-supplied JWD/SLIB regression data. The public example drew 5{,}732 features and generated 713 polygon labels from 7{,}094 inputs, excluding 1{,}362 fragmented annotations, with zero unresolved colours, fills, fallbacks, symbols or fonts. No scale bar, north arrow, graticule or legend is drawn. The tightly cropped vector PDF/SVG supports enlargement; dense native annotations and label--line-work overlaps remain. This is internal regression output, not native MapGIS visual acceptance.}
 \label{fig:rendered-example}
 \end{figure}
 
@@ -168,27 +168,27 @@ The executable \texttt{examples/render\_bundled\_jwd.py} additionally writes PDF
 
 \subsection{Pcolor node recovery and colour-role separation}
 
-Colour decoding follows physical 32-byte nodes rather than inferred slots. Colour number $N$ maps to node $N+3$, with K/C/M/Y channels at node offset 28. Only out-of-range numbers return no colour, because all-zero KCMY can represent valid white. This model reproduces 14 reference anchors recorded from the native colour dialogue and resolves all 25 previously unresolved colour codes and their 418 fallback occurrences without unit-specific overrides. WP fills use Pcolor by default, while other colour roles use Colorlib with an explicit KCMY or YMCK model rather than automatic channel switching.
+Colour decoding follows physical 32-byte nodes rather than inferred slots. Colour number $N$ maps to node $N+3$, with K/C/M/Y channels at node offset 28. Only out-of-range numbers return no colour, because all-zero KCMY can represent valid white. This model reproduces 14 reference anchors recorded from the native colour dialogue and resolves all 25 previously unresolved colour codes, eliminating their 418 fallback occurrences without unit-specific overrides. WP fills use Pcolor by default, while other colour roles use Colorlib with an explicit KCMY or YMCK model rather than automatic channel switching.
 
 \subsection{LINESTY variants and auxiliary semantics}
 
-Line-style decoding uses element templates and f32 payload offsets rather than line numbers alone. An in-range auxiliary style number selects a main-record subline variant, whereas an out-of-range value identifies an independent auxiliary record, with a documented exception for the style-2 equivalent-dash family. This prevents 16\textbar1 from acquiring an unintended baseline and selects subline four for 65\textbar4 with six fill units and a 30.4~mm period. Unsupported variants remain unresolved rather than being replaced by guessed geometry.
+Line-style decoding uses element templates and f32 payload offsets rather than line numbers alone. Here and below, $A$\textbar$B$ denotes linetype $A$ with auxiliary style number $B$. An in-range auxiliary style number selects a main-record subline variant, whereas an out-of-range value identifies an independent auxiliary record, with a documented exception for the style-2 equivalent-dash family. This prevents 16\textbar1 from acquiring an unintended baseline and selects subline four for 65\textbar4 with six fill units and a 30.4~mm period. Unsupported variants remain unresolved rather than being replaced by guessed geometry.
 
 \subsection{Coordinate-faithful line rendering}
 
-Zero-offset strokes are clipped by source chainage, retaining every original vertex in the clipped interval. Constant-offset strokes use complete offset curves, with rhythm phase measured on the original line rather than on the longer or shorter offset curve. A dedicated path preserves the continuous baseline and actual library intervals for the 48\textbar0 parallel-unconformity style, while zero-longitudinal-length ticks use a half-open interval $[0,\mathrm{total})$. A direct source-coordinate test checks 37 real 38\textbar2 features, where 38\textbar2 denotes linetype 38 with auxiliary style number 2.
+Zero-offset strokes are clipped by source chainage, retaining every original vertex in the clipped interval. Constant-offset strokes use complete offset curves, with rhythm phase measured on the original line rather than on the longer or shorter offset curve. A dedicated path preserves the continuous baseline and actual library intervals for the 48\textbar0 parallel-unconformity style, while zero-longitudinal-length ticks use a half-open interval $[0,\mathrm{total})$. A direct source-coordinate test checks 37 real 38\textbar2 features.
 
-\subsection{Validation fixtures and reproducibility}
+\section{Validation and reproducibility}
+
+\subsection{External fixtures and redistribution boundaries}
 
 The distribution includes synthetic and Writer interoperability fixtures, attribution files and SHA-256 manifests, but not the original JWD, SLIB or native SHP data. Users supply those external datasets through \texttt{PYMAPGIS\_JWD}, \texttt{PYMAPGIS\_SLIB} and \texttt{PYMAPGIS\_READER\_NATIVE}. Missing external data produces an explicit optional-integration skip with acquisition guidance; missing required Writer fixtures or any checksum mismatch fails the test. Archive inspection rejects the original data files.
 
 The twelve-layer fixture is a subset of the public, non-classified \emph{Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000)} (V1), produced by the Development and Research Center of China Geological Survey and distributed by the National Geological Archives of China~\cite{dataset2018,datasetpaper2018}. Its accompanying SLIB supplies the original symbol, line-style, fill-pattern and colour definitions; no unrelated MapGIS installation library is substituted. Current regression and the rendered example use only the original open-edition JWD and SLIB, not coordinate-warped or virtual-geological-unit derivatives.
 
-\section{Validation and reproducibility}
-
 \subsection{Current regression evidence}
 
-Table~\ref{tab:validation} separates current structural and rendering checks from historical Reader evidence. The example runs from a source checkout and the current wheel with external fixtures, and Figure~\ref{fig:rendered-example} is generated by that public example. The workflow runs it when external fixture directories are configured and otherwise prints an explicit optional-data skip.
+Table~\ref{tab:validation} separates current structural and rendering checks from historical Reader evidence. The example runs from a source checkout and the current wheel with external fixtures, and Figure~\ref{fig:rendered-example} is generated by that public example. The manuscript-validation workflow runs it when external fixture directories are configured and otherwise prints an explicit optional-data skip.
 
 \begin{table}[htbp]
 \centering
@@ -200,25 +200,25 @@ Table~\ref{tab:validation} separates current structural and rendering checks fro
 Evidence & Result and interpretation \\
 \midrule
 Full package regression & With external fixtures, 423 passed and 1 environment-dependent skip; without them, 394 passed and 13 optional skips locally with Python 3.12.7, GeoPandas 1.1.3 and Matplotlib 3.9.2 \\
-Continuous integration & Run \href{https://github.com/leecugb/mapgis2shp/actions/runs/42613725710}{42613725710} passed on Python 3.9 on Ubuntu and Python 3.13 on Ubuntu, Windows and macOS at commit \texttt{95ecc53}; archive building, content inspection and Twine checks also passed. Real JWD rendering was optional-skipped on runners without external data \\
-Real twelve-layer rendering & 7{,}094 inputs; 5{,}732 drawn and 1{,}362 excluded; no unresolved colours, unknown fills or solid fallbacks \\
+Continuous integration & Run \href{https://github.com/leecugb/mapgis2shp/actions/runs/42634593828}{42634593828} passed on Python 3.9 on Ubuntu and Python 3.13 on Ubuntu, Windows and macOS at commit \texttt{fe12768}; archive building, content inspection and Twine checks also passed. Real JWD rendering was optional-skipped on runners without external data \\
+Real twelve-layer rendering & 7{,}094 inputs; 5{,}732 drawn and 1{,}362 excluded; no unresolved colours, fills, fallbacks, symbols or fonts \\
 Native dialogue reference anchors & All 14 reference anchors recorded from the native colour dialogue match; all 25 previous unknown colour codes resolved \\
 38\textbar2 coordinate fidelity & All 37 features and all 782 source vertices retained; maximum vertex deviation $\leq 10^{-9}$ in source coordinate units (geographic degrees for this dataset) \\
-Execution states & Published PyPI V2.7.1 Quickstart passed; with external fixtures, 79 targeted rendering, Reader and Writer tests passed in source and current wheel states \\
+Source and wheel execution states & Published PyPI V2.7.1 Quickstart passed; with external fixtures, 79 targeted rendering, Reader and Writer tests passed in source and current wheel states \\
 Archive verification & 291 wheel entries and 329 source-archive entries pass content inspection in the external-fixture revision build \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Current tests cover topology, auxiliary rhythms, symbols, text layout, fonts, Mathtext, DPI conversion and unresolved variants. A census test asserts the totals in Table~\ref{tab:libraries}. Forty-three native SHP cases verify Writer attributes, polygon topology, default styles, UTM round-trips, null/degenerate inputs and 24-bit ring-index bounds. Native anomalies are counterexamples, not behaviour to inherit. Five additional export groups test Reader coverage, attribute fidelity and validity, including recovery of a polygon absent from SHP. Manifest and non-empty-inventory checks fail for missing, empty or altered fixtures. The 36-file Reader--Writer--Reader smoke suite also passed with zero area relative difference. It used the 12 original JWD layers and 24 additional layers from the same open sheet. All 36 are external and none is redistributed in the current package; they must be obtained separately. These checks establish internal consistency rather than vendor-identical rendering.
+Current tests cover topology, auxiliary rhythms, symbols, text layout, fonts, Mathtext, DPI conversion and unresolved variants. A census test asserts the totals in Table~\ref{tab:libraries}. Forty-three native SHP cases verify Writer attributes, polygon topology, default styles, UTM round-trips, null/degenerate inputs and 24-bit ring-index bounds. Native anomalies are counterexamples, not behaviour to inherit. Five additional export groups test Reader coverage, attribute fidelity and validity, including recovery of a polygon absent from SHP. Manifest and non-empty-inventory checks fail for missing, empty or altered fixtures. The 36-file Reader--Writer--Reader smoke suite also passed with zero relative area difference. It used the 12 original JWD layers and 24 additional layers from the same open sheet. All 36 are external and none is redistributed in the current package; they must be obtained separately. This write-back check is distinct from the historical native-export comparison below. These checks establish internal consistency rather than vendor-identical rendering.
 
 \subsection{Historical native-export validation}
 
-Earlier Reader-only experiments covered 36 real survey layers containing 16{,}874 features. Feature counts and attribute schemas matched, aligned geometries met the type-specific coincidence criteria, and mean layer-level attribute equivalence was 99.9995\%. Two mismatches among 95{,}006 compared cells were consistent with coarse native-export rounding. A separate 400~MB dataset with 78{,}873 features achieved 99.73\% coverage intersection-over-union and zero invalid geometries, compared with three in the post-processed reference export. Reconstruction overlaps increased summed polygon areas by 1.66\%, whereas union-level coverage differed by 0.27\%. These remain historical Reader results, not renderer validation. Scripts and reports are preserved under \texttt{paper/validation/} at commit \texttt{d0d464d0}, with a permanent entry point at \url{https://github.com/leecugb/mapgis2shp/tree/d0d464d05166ab97978a01ce8cc5cc8480f05500}.
+Earlier Reader-only experiments covered 36 real survey layers containing 16{,}874 features. Feature counts and attribute schemas matched, aligned geometries met type-specific coincidence criteria, and mean layer-level attribute equivalence was 99.9995\%. Two mismatches among 95{,}006 compared cells were consistent with coarse native-export rounding. A separate 400~MB dataset with 78{,}873 features achieved 99.73\% coverage intersection-over-union and zero invalid geometries, compared with three in the post-processed reference export. Reconstruction overlaps increased summed polygon areas by 1.66\%, whereas union-level coverage differed from the reference export by 0.27\%. These remain historical Reader results, not renderer validation. Scripts and reports are preserved under \texttt{paper/validation/} at commit \texttt{d0d464d0}, with a permanent entry point at \url{https://github.com/leecugb/mapgis2shp/tree/d0d464d05166ab97978a01ce8cc5cc8480f05500}.
 
 \section{Impact}
 
-The package supports several research workflows:
+The primary users are geological surveys, research groups and data archives that hold MapGIS 6.x/67 vectors and must migrate, audit or re-render them outside the originating software. For these users, the package supports several research workflows:
 \begin{itemize}
   \item migrating legacy vectors to open formats and writing native files for subsequent MapGIS acceptance checks;
   \item reconstructing original cartography and comparing colours, line styles, patterns and labels with reference evidence;
@@ -226,7 +226,7 @@ The package supports several research workflows:
   \item teaching binary-format interoperability and evidence-guided reverse engineering through reproducible examples.
 \end{itemize}
 
-Externally supplied vectors and SLIB make the complete parser and rendering path reproducible after official acquisition. For other datasets, users must supply libraries from the originating installation. The original SLIB remains a regression reference, not a redistributed universal replacement for library-local definitions.
+Externally supplied vectors and SLIB make the end-to-end parsing and rendering path reproducible after official acquisition. For other datasets, users must supply libraries from the originating installation. The original SLIB remains a regression reference, not a redistributed universal replacement for library-local definitions.
 
 \section{Limitations and verification boundaries}
 
@@ -234,11 +234,11 @@ Structural coverage does not imply pixel-identical MapGIS output. A full native 
 
 The historical 36-layer and 400~MB native-export results must not be extrapolated to every producer, object type or export configuration. Polygon reconstruction can still require repair for topological gaps. Native MapGIS opening, editing and save/reopen acceptance of newly written files remains a separate verification step. Versioned capture provenance for the 14 native-dialogue colour anchors also remains a submission requirement; current tests verify the recorded RGB values, not the completeness of their capture history. Text script metrics, font substitution and \texttt{representative\_point()} labels are display-level choices rather than proof of identical native layout. The dense JWD sheet retains native annotation placement, including label--line-work overlaps, so its automated collision audit remains a diagnostic rather than a passed production-layout check. Some native annotation sizes fall below common journal figure guidelines, so the vector PDF/SVG should be used for enlargement rather than raster downsampling.
 
-The original Beijing-54 coordinate system and 1956 elevation datum used by the dataset also require attention in downstream research. Conversion to CGCS2000 and the 1985 national elevation datum may be necessary, and the source material is limited to data available through 2013 with only basic national coverage.
+The original Beijing-54 coordinate system and 1956 elevation datum used by the dataset also require attention in downstream research. Conversion to CGCS2000 and the 1985 national elevation datum may be necessary, and the source material is limited to data available through 2013 and to the national 1:250{,}000 map-sheet series.
 
 \section{Conclusions}
 
-Mapgis2shp connects legacy MapGIS binaries to an inspectable open-source workflow for vector conversion, original-library parsing and cartographic rendering. The original JWD/SLIB example, native conversion counterexamples and explicit non-results make the implementation and its boundaries reproducible rather than implicit. Remaining work includes native MapGIS visual acceptance, fuller library-version coverage and item-level redistribution confirmation; these tasks are kept separate from the evidence already established.
+The mapgis2shp toolkit connects legacy MapGIS binaries to an inspectable open-source workflow for vector conversion, original-library parsing and cartographic rendering. The original JWD/SLIB example, native conversion counterexamples and explicit non-results make the implementation and its boundaries reproducible rather than implicit. Remaining work includes native MapGIS visual acceptance, fuller library-version coverage and remediation of historical data distribution; these tasks are kept separate from the evidence already established.
 
 \section{Availability and requirements}
 
@@ -252,8 +252,8 @@ Mapgis2shp connects legacy MapGIS binaries to an inspectable open-source workflo
 Item & Metadata field & Value \\
 \midrule
 C1 & Current code version & 2.7.1 public release commit \texttt{823a5daf059c91d2a5ec90a685219d108519ae22}; manuscript validation uses the post-release integration state in C2 \\
-C2 & Permanent link to code/repository used for this version & \url{https://github.com/leecugb/mapgis2shp/releases/tag/V2.7.1}; \url{https://doi.org/10.5281/zenodo.24036158}; regression example and hash manifests at \url{https://github.com/leecugb/mapgis2shp/tree/f9ca6a6675b899d282f1f5c407056c0e83f634c2} \\
-C3 & Permanent link to reproducible capsule & The example, hash manifests and generated reports accompanying this manuscript serve as the capsule; original JWD/SLIB data are obtained separately through the official channel. \texttt{examples/render\_bundled\_jwd.py} and \texttt{mapgis2shp\_submission/validate\_published\_quickstart.py} are available from the integration commit in C2; generated maps and JSON reports also accompany the manuscript. \\
+C2 & Permanent link to code/repository used for this version & \url{https://github.com/leecugb/mapgis2shp/releases/tag/V2.7.1}; \url{https://doi.org/10.5281/zenodo.24036158}; regression example and hash manifests at \url{https://github.com/leecugb/mapgis2shp/tree/f9ca6a6675b899d282f1f5c407056c0e83f634c2}; manuscript validation and official LaTeX build at \url{https://github.com/leecugb/mapgis2shp/tree/fe12768fc43dcec0f7416ef0fbc3524ba9d079fd} \\
+C3 & Permanent link to reproducible capsule & The example, hash manifests and generated reports accompanying this manuscript serve as the capsule; original JWD/SLIB data are obtained separately through the official channel. \texttt{examples/render\_bundled\_jwd.py} and \texttt{mapgis2shp\_submission/validate\_published\_quickstart.py} are available from the fe12768 integration state in C2; generated maps and JSON reports also accompany the manuscript. \\
 C4 & Legal code license & Apache-2.0 for the software; source vectors and SLIB retain their original terms \\
 C5 & Code versioning system & Git and GitHub \\
 C6 & Languages, tools and services & Python; GeoPandas, Shapely, NumPy, pandas, pyproj, pyogrio and Matplotlib; PyPI and GitHub Actions \\
@@ -278,7 +278,7 @@ Public access, non-classified status and test-only use do not grant redistributi
 
 \subsection*{CRediT author statement}
 
-S.L.: Conceptualization, Methodology, Software, Validation, Visualization, Writing--original draft. H.H.: Validation, Writing--review \& editing. X.S., H.Q., X.L., Y.F. and Z.Z.: Investigation, Data curation, Writing--review \& editing. All authors reviewed and approved the previous manuscript version.
+S.L.: Conceptualization, Methodology, Software, Validation, Visualization, Writing--original draft. H.H.: Validation, Writing--review \& editing. X.S., H.Q., X.L., Y.F. and Z.Z.: Investigation, Data curation, Writing--review \& editing.
 
 
 \subsection*{Declaration of competing interests}

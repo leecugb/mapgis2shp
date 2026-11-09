@@ -20,6 +20,16 @@
 9. 新增可执行 `examples/render_bundled_jwd.py`，输出 PNG/PDF/SVG 与 `jwd_render_reports.json`，论文图 2 使用真实输出。
 10. Availability 改为 C1–C9 元数据表，CITATION.cff 的版本、标题和 DOI 已同步。
 
+# Nature-writing 复审优化（2026-11-10）
+
+- 按 trust/audit bridge 重排 Motivation，先说明可检验、非厂商替代的实现原则，再交代版本历史。摘要历史 Reader 结果补入 99.9995% 平均属性等值率和 99.73% coverage IoU 两个锚点，并将可用性声明移到验证证据之后。
+- 摘要、图 2 和验证表统一为五类零未解决项，即 colours、fills、fallbacks、symbols、fonts；不删除 5,732/1,362/7,094 这组必要账本。Impact 新增明确用户群，图 2 图注补出 Kurgan 图幅号。
+- C2 同时保留 manifest 生成点 `f9ca6a66` 与最终验证及官方 LaTeX 构建点 `fe12768`，C3 明确脚本位于 `fe12768`。CI 表更新为全部成功的 `42634593828`。
+- 删除当前版本未获七位作者确认时的批准句，保留标准 CRediT 角色。作者确认仍按外部签署流程处理，不用文字代替批准。
+- 将外部 fixture 与再分发边界移到 Validation and reproducibility 下的独立小节，首次使用处解释 `A|B` 线型记号，区分 write-back 与 historical native-export 两类分析，并完成若干动词、长句和表意不清修正。
+- 最终摘要 **200 词**，全文估算 **3,049 词**，满足官方 250/4,000 词限制。使用官方 elsarticle 3.4 编译后无未解析引用或 LaTeX 错误，首页摘要与通讯作者页脚不再重叠；排版日志仍有非零 overfull/underfull 警告。
+- 本轮不关闭外部事项：七位作者实际确认、14 个原生色锚截图或日志、历史数据副本许可或清理仍分别按既有计划处理。
+
 ## 四闸门处置与外部 fixture 迁移（2026-11-09）
 
 本节记录当前执行状态，不能据此声称四个闸门已全部关闭。
@@ -143,7 +153,7 @@
 - [x] 核实并引用现有 2.7.1 的 Zenodo 版本 DOI。
 - [ ] 后续 Release/Zenodo 应纳入 WP 文件名规范化、新示例、外部 fixture 获取说明、Reader/Writer 原生审计 manifest、加强断言和当前 291/329 项无原始数据归档，并同步 C1–C3。公开 V2.7.1 的中心 Quickstart 已通过兼容路径验证；当前 wheel 也已在配置外部数据后验证。发布件自身的旧 preferred-citation、历史数据副本与新回归制品仍待处理。
 - [x] 既有提交 `575e80d` 的运行 `42574990251` 已全部成功，包括四测试环境、归档检查和 Twine。
-- [x] 外部 fixture 迁移后的运行 `42613725710` 已全部成功，包括四测试环境、无原始数据归档检查和 Twine；无外部数据的 runner 明确可选跳过真实 JWD 渲染，不将其写成已完成真实渲染。
+- [x] 最新运行 `42634593828`（提交 `fe12768`）已全部成功，包括四测试环境、无原始数据归档检查和 Twine；无外部数据的 runner 明确可选跳过真实 JWD 渲染，不将其写成已完成真实渲染。
 - [x] 已安装 PyMuPDF 并完成碰撞审计。架构图通过；JWD 原生密集注记存在未清除的碰撞，已作为限制保留，不标记为通过生产版式验收。
 
 ## 文件
