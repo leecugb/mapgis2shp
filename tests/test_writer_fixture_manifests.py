@@ -8,9 +8,18 @@ import pytest
 
 from pymapgis.testing import fixture_path
 
+TEXT_SUFFIXES = {".cpg", ".prj", ".csv", ".md", ".json"}
+
 
 def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def manifest_file_bytes(path):
+    data = path.read_bytes()
+    if path.suffix.lower() in TEXT_SUFFIXES:
+        return data.replace(b"\r\n", b"\n").replace(b"\r", b"\n"), True
+    return data, False
 
 
 @pytest.mark.parametrize("batch", [2, 3])
@@ -26,8 +35,11 @@ def test_writer_manifest_bytes_and_sha256(batch):
     for name, expected in manifest["files"].items():
         path = root / name
         assert path.is_file(), name
-        assert path.stat().st_size == expected["bytes"], name
-        assert sha256(path) == expected["sha256"], name
+        data, is_text = manifest_file_bytes(path)
+        expected_size = expected["lf_bytes"] if is_text else expected["bytes"]
+        expected_hash = expected["lf_sha256"] if is_text else expected["sha256"]
+        assert len(data) == expected_size, name
+        assert hashlib.sha256(data).hexdigest() == expected_hash, name
 
 
 def test_writer_batch4_manifest_bytes_and_sha256():

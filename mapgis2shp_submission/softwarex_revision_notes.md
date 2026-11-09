@@ -27,16 +27,17 @@
 - Reader 审计使用 `F:\tmp` 的 36 个 MapGIS 二进制、原生明码与 SHP。36 个二进制均可读取；5 组原生 SHP 对照未发现需要修改 Reader 的缺陷。SHP 的自交面、空几何和部件组织差异没有被误判为 Reader 错误；`LDZOFBB004` 第 48 个空 SHP 面可由原生 WP 恢复。4 处 WAT 文本异常与二进制及 SHP 对照后确认不是 Reader 解码错误。可复现脚本和中文报告为 `audit_reader_native_tmp.py`、`reader_native_tmp_audit/`。
 - `tests/fixtures/reader_native/` 含 16 个文件并配套 SHA-256 manifest；新增 `test_reader_native_exports.py` 8 项测试，覆盖点线几何、共享属性、CRS 边界、面有效性和缺失面恢复。
 - Writer 第四批含 20 个 SHP 用例、18 个 MapGIS 原生转换结果及目录内 manifest，共 120 个文件。`test_writer_native_batch4.py` 28 项测试通过。原生 09 的错误面合并、07 的跨文件几何复用、06 的多部件丢失，以及量算错误、NaN/Inf/null 转 0 和 CRS 缺失均作为反例，不作为 Writer 应继承的行为。
-- 新增 `test_writer_fixture_manifests.py` 5 项测试（含 batch2/3 参数化两项），逐文件核验 Writer batch2/3/4 和 Reader native 的字节数及 SHA-256；batch4 还交叉核验根级与目录内 manifest 字节一致并锁定 120 个目录项，Reader native 锁定恰好 16 个目录项，防止额外文件随 force-include 混入。batch2/3/4 显式断言用例集合非空，避免空目录造成静默通过。
+- 新增 `test_writer_fixture_manifests.py` 5 项测试（含 batch2/3 参数化两项），逐文件核验 Writer batch2/3/4 和 Reader native 的字节数及 SHA-256；batch2/3 的文本条目同时保留原始 `bytes`/`sha256` 与 LF 规范化 `lf_bytes`/`lf_sha256`，避免 Git 换行策略造成跨平台误判，二进制仍严格按原始字节核验。batch4 还交叉核验根级与目录内 manifest 字节一致并锁定 120 个目录项，Reader native 锁定恰好 16 个目录项，防止额外文件随 force-include 混入。batch2/3/4 显式断言用例集合非空，避免空目录造成静默通过。
 - wheel 内只将软件示例放在 `pymapgis/testing/examples/`，不占用通用顶层 `examples/` 命名空间。按用户要求，论文与 `mapgis2shp_submission/` 审计材料不进入 wheel 或 sdist；`validate_published_quickstart.py` 仅保留在仓库和稿件材料中，归档检查会拒绝任何投稿目录内容。
-- 当前目标渲染、Reader 和 Writer 回归共 76 项，已在最终 wheel 安装态复跑为 **76 passed**（43.17 s）；同一 76 项也包含在源码完整套件中。完整套件在 Python 3.12.7、GeoPandas 1.1.3、Matplotlib 3.9.2 下复跑为 **420 passed, 1 environment-dependent skip**（47.85 s）。当前构建 wheel **323 项**、sdist **360 项**，均通过 `tests/inspect_dist.py`。
+- 当前目标渲染、Reader 和 Writer 回归共 76 项，已在最终 wheel 安装态复跑为 **76 passed**（84.97 s）；同一 76 项也包含在源码完整套件中。完整套件在 Python 3.12.7、GeoPandas 1.1.3、Matplotlib 3.9.2 下复跑为 **420 passed, 1 environment-dependent skip**（52.76 s）。当前构建 wheel **323 项**、sdist **360 项**，均通过 `tests/inspect_dist.py`。
 - `examples/render_bundled_jwd.py` 已加入 wheel/sdist；`validate_published_quickstart.py` 不进入发行包。最终 wheel 在独立 target 中实际安装并运行示例，得到 12 layers、7,094 features、5,732 drawn、713 polygon labels、1,362 excluded_text；未知色、未知填充、实线回退、未解决符号、空 pattern、循环上限和未知字体均为 0。
 - 论文已从普通 `article` 迁移为 `elsarticle` frontmatter 和 SoftwareX 结构，包含 C1–C9、Illustrative examples、Impact 与 Conclusions。当前没有可用 LaTeX 编译器，因此只完成源码结构迁移，未声称编译通过；未将 404、AccessDenied 或 Cloudflare 页面当作官方模板。
 - 架构图改为三列处理路径和 2×2 证据区，修正证据框越界、页脚碰撞及 Pcolor 文本触框。独立图件复核后，图内进一步改为明确 `420 passed · 1 environment-dependent skip`、`Public-release CI`，并将 57 个 explicit non-results 明确归于 Fillgrph。最终导出 PDF/PNG/SVG/TIFF，画布宽 182.9 mm，栅格 600 dpi，SVG 保留可编辑文本。
 - 架构图最终源预检 **21 PASS, 0 WARN, 0 FAIL**；PDF 文本审计最小 6.8 pt；渲染碰撞审计 **0 FAIL, 0 WARN**；SVG 审计可执行且无 FAIL，仅保留标题大于 7 pt 的样式 WARN。最终 PNG 已逐区视觉检查。
 - JWD 输出新增紧边界裁切，PNG 从 7200×4500 变为 4032×3489，去除大面积空白但不改变地图内容、原始注记位置或渲染 reports；论文内有效显示尺寸因此提高。
 - 最终裁剪版 JWD 碰撞审计已完成并保存 JSON 与文本日志：**1,249 FAIL、1,059 WARN**，主要为原生注记与线划相交。该结果明确为 `FIX BEFORE DELIVERY`，没有声称通过；诊断 overlay 不作为交付图件。论文 Limitations 已明确保留 label–line-work overlaps。
-- GitHub Actions 运行 `42503245112` 已复核：Windows/Python 3.13、macOS/Python 3.13 和 Ubuntu/Python 3.13 通过，Ubuntu/Python 3.9 因 `test_multi_part_offset_curves_are_supported` 错把 GEOS 版本相关的偏移返回类型当成固定行为而失败，构建任务因此被跳过。测试已改为显式构造两段 MultiLineString，保留多部件切片、部件数和总长断言，不增加跳过；新的远程 CI 仍待本次推送后核验。
+- GitHub Actions 运行 `42503245112` 已复核：Windows/Python 3.13、macOS/Python 3.13 和 Ubuntu/Python 3.13 通过，Ubuntu/Python 3.9 因 `test_multi_part_offset_curves_are_supported` 错把 GEOS 版本相关的偏移返回类型当成固定行为而失败，构建任务因此被跳过。测试已改为显式构造两段 MultiLineString，保留多部件切片、部件数和总长断言，不增加跳过。
+- 推送 `75c8fb8` 后的运行 `42569772303` 进一步暴露跨平台换行问题：四个环境均为 409 passed、10 skipped、2 failed，失败仅来自 batch2/3 `manifest.csv` 的 CRLF/LF 字节差异。manifest 已增加 LF 规范化字段且保留原始哈希，修复后的新远程 CI 仍待核验。
 - 当前 JWD PDF 文本审计检出 1,597 个低于 5 pt 的文本运行，最小约 1.70079 pt。该图保留原始注记尺度，不通过放大字体或删注记伪装合规；论文继续要求用矢量 PDF/SVG 放大阅读，并将其列为图件限制。JWD 源预检为 18 PASS、3 WARN、0 FAIL，WARN 是未导出 TIFF、静态规则未识别栅格 DPI 和 304.8 mm 整图宽度。
 
 ## 第二轮复审与自动修复（2026-11-08）
