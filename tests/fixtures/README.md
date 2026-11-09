@@ -86,6 +86,8 @@ python -m pytest -q tests/test_writer_native_batch3.py
 
 UTM inputs are reprojected to Gauss-Kruger (k=1) before encoding because MapGIS 6x does not store the UTM zone scale factor. The tests reproject the written result back to EPSG:32643 and use an explicit 1e-5 m Hausdorff tolerance for projection round-trips. Null geometry must be rejected by default and is retained only through an explicit `on_empty="drop"` request; fully degenerate rings are rejected rather than silently written as empty polygons.
 
+For writer batch2/3, each manifest retains the originally supplied `bytes` and `sha256`. Text files also carry `lf_bytes` and `lf_sha256`, computed after CRLF/CR to LF normalization, so Git checkout line-ending policy does not cause cross-platform false failures. Binary SHP components and native WT/WL/WP files are always checked against their original raw byte counts and SHA-256 values.
+
 ## Native SHP Reader robustness fixtures
 
 `reader_native/` contains native SHP exports from the same open J43C001002 source dataset and the WT required by the LDLYAAI002 point case. `reader_native_manifest.json` records the dataset and companion-article DOIs, file hashes and native export caveats. SHP files have no `.prj`, so tests do not infer CRS from SHP.

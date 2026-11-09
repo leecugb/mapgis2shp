@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "origin": "User-supplied synthetic SHP fixtures and native MapGIS conversion outputs",
   "purpose": "Writer large-offset, projected-CRS, attribute, null and degenerate-input regression",
   "mapgis_version": "not provided",
@@ -10,7 +10,9 @@
   "files": {
     "01_reference_triangle.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "01_reference_triangle.dbf": {
       "bytes": 477,
@@ -18,7 +20,9 @@
     },
     "01_reference_triangle.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "01_reference_triangle.shp": {
       "bytes": 220,
@@ -34,7 +38,9 @@
     },
     "02_identical_polygons.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "02_identical_polygons.dbf": {
       "bytes": 760,
@@ -42,7 +48,9 @@
     },
     "02_identical_polygons.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "02_identical_polygons.shp": {
       "bytes": 372,
@@ -58,7 +66,9 @@
     },
     "03_shared_edge_duplicate.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "03_shared_edge_duplicate.dbf": {
       "bytes": 760,
@@ -66,7 +76,9 @@
     },
     "03_shared_edge_duplicate.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "03_shared_edge_duplicate.shp": {
       "bytes": 388,
@@ -82,7 +94,9 @@
     },
     "04_nested_hole_island.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "04_nested_hole_island.dbf": {
       "bytes": 760,
@@ -90,7 +104,9 @@
     },
     "04_nested_hole_island.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "04_nested_hole_island.shp": {
       "bytes": 456,
@@ -106,7 +122,9 @@
     },
     "05_large_ring_over_64k.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "05_large_ring_over_64k.dbf": {
       "bytes": 477,
@@ -114,7 +132,9 @@
     },
     "05_large_ring_over_64k.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "05_large_ring_over_64k.shp": {
       "bytes": 81792,
@@ -130,7 +150,9 @@
     },
     "06_large_then_small.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "06_large_then_small.dbf": {
       "bytes": 760,
@@ -138,7 +160,9 @@
     },
     "06_large_then_small.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "06_large_then_small.shp": {
       "bytes": 80308,
@@ -154,7 +178,9 @@
     },
     "07_projected_utm.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "07_projected_utm.dbf": {
       "bytes": 760,
@@ -162,7 +188,9 @@
     },
     "07_projected_utm.prj": {
       "bytes": 401,
-      "sha256": "58368ff5825675f291b623e0132d25ce8d7e56c478dfb5431f84247fe1a80bd2"
+      "sha256": "58368ff5825675f291b623e0132d25ce8d7e56c478dfb5431f84247fe1a80bd2",
+      "lf_bytes": 401,
+      "lf_sha256": "58368ff5825675f291b623e0132d25ce8d7e56c478dfb5431f84247fe1a80bd2"
     },
     "07_projected_utm.shp": {
       "bytes": 372,
@@ -178,7 +206,9 @@
     },
     "08_attribute_types.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "08_attribute_types.dbf": {
       "bytes": 2049,
@@ -186,7 +216,9 @@
     },
     "08_attribute_types.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "08_attribute_types.shp": {
       "bytes": 508,
@@ -202,7 +234,9 @@
     },
     "09_null_geometry.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "09_null_geometry.dbf": {
       "bytes": 760,
@@ -210,7 +244,9 @@
     },
     "09_null_geometry.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "09_null_geometry.shp": {
       "bytes": 248,
@@ -226,7 +262,9 @@
     },
     "10_points.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "10_points.dbf": {
       "bytes": 1043,
@@ -234,7 +272,9 @@
     },
     "10_points.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "10_points.shp": {
       "bytes": 184,
@@ -250,7 +290,9 @@
     },
     "11_multiline.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "11_multiline.dbf": {
       "bytes": 760,
@@ -258,7 +300,9 @@
     },
     "11_multiline.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "11_multiline.shp": {
       "bytes": 328,
@@ -274,7 +318,9 @@
     },
     "12_degenerate_ring.cpg": {
       "bytes": 3,
-      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
+      "sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591",
+      "lf_bytes": 3,
+      "lf_sha256": "33251177a22e1f69e95c670a1e82a465b0d42a51bbfcc06ac794d0ffdc816591"
     },
     "12_degenerate_ring.dbf": {
       "bytes": 477,
@@ -282,7 +328,9 @@
     },
     "12_degenerate_ring.prj": {
       "bytes": 145,
-      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
+      "sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4",
+      "lf_bytes": 145,
+      "lf_sha256": "a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4"
     },
     "12_degenerate_ring.shp": {
       "bytes": 220,
@@ -298,11 +346,16 @@
     },
     "manifest.csv": {
       "bytes": 1320,
-      "sha256": "ca6d3cd42e99cd3f5b1258154a6baf7156961c7ed4a8a3ff55cbb0b509fe4abb"
+      "sha256": "ca6d3cd42e99cd3f5b1258154a6baf7156961c7ed4a8a3ff55cbb0b509fe4abb",
+      "lf_bytes": 1307,
+      "lf_sha256": "5e8f80131f9ef753fb4b753146d31320086789f38f4b19fda458a6b1f301be01"
     },
     "README_转换说明.md": {
       "bytes": 1951,
-      "sha256": "1ec9b4542dec62da5ab3f3a2d0bb180e24eb437c8b8e0ce5b6595be7e1245da2"
+      "sha256": "1ec9b4542dec62da5ab3f3a2d0bb180e24eb437c8b8e0ce5b6595be7e1245da2",
+      "lf_bytes": 1951,
+      "lf_sha256": "1ec9b4542dec62da5ab3f3a2d0bb180e24eb437c8b8e0ce5b6595be7e1245da2"
     }
-  }
+  },
+  "text_normalization": "For .cpg, .prj, .csv, .md and .json files, lf_bytes and lf_sha256 are computed after converting CRLF and CR line endings to LF. The original bytes and sha256 fields are retained as supplied."
 }
