@@ -2,8 +2,14 @@
 (paper_softwarex.tex
 LaTeX2e <2021-11-15> patch level 1
 L3 programming layer <2022-02-24> (elsarticle.cls
-Document Class: elsarticle 2020/11/20, 3.3: Elsevier Ltd
-(expl3.sty
+Document Class: elsarticle 2024/04/04, 3.4: Elsevier Ltd
+(fontenc.sty
+Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 11
+2.
+ (t1lmr.fd
+File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)) (expl3.sty
 Package: expl3 2022-02-24 L3 programming layer (loader)
  (l3backend-xetex.def
 File: l3backend-xetex.def 2022-02-07 L3 backend support: XeTeX
@@ -17,7 +23,8 @@ File: l3backend-xetex.def 2022-02-07 L3 backend support: XeTeX
 \g__pdf_backend_link_int=\count187
 )) (xparse.sty
 Package: xparse 2022-01-12 L3 Experimental document command parser
-) (etoolbox.sty
+)
+(etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count188
 )
@@ -89,12 +96,7 @@ LaTeX Info: Redefining \cite on input line 694.
 \appnamewidth=\dimen145
 ) (fontenc.sty
 Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 11
-2.
- (t1lmr.fd
-File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-))
-(booktabs.sty
+) (booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \heavyrulewidth=\dimen146
 \lightrulewidth=\dimen147
@@ -436,10 +438,6 @@ File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 Overfull \vbox (6.78204pt too high) has occurred while \output is active []
 
 
-Overfull \hbox (2.61107pt too wide) has occurred while \output is active
-[]
- []
-
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\<def>-command' on input line 51.
@@ -476,7 +474,7 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 
 
 ]
-Overfull \hbox (2.4637pt too wide) in paragraph at lines 59--60
+Overfull \hbox (2.08844pt too wide) in paragraph at lines 59--60
 []\T1/lmr/m/n/12 Earlier ver-sions of mapgis2shp con-cen-trated on the reader p
 ath and native-
  []
@@ -489,13 +487,7 @@ Overfull \hbox (7.0386pt too wide) in paragraph at lines 71--72
 rtMapGIS deriva-
  []
 
-[2] [3]
-Overfull \hbox (0.64117pt too wide) in paragraph at lines 81--82
-[]\T1/lmr/bx/n/12 Original-library ren-der-ing. \T1/lmtt/m/n/12 GraphicLibrarie
-s\T1/lmr/m/n/12 , \T1/lmtt/m/n/12 GraphicRenderer\T1/lmr/m/n/12 ,
- []
-
-[4]
+[2] [3] [4]
 Underfull \hbox (badness 10000) in paragraph at lines 112--112
 []|\T1/lmr/m/n/10.95 7,360 struc-tural
  []
@@ -526,7 +518,7 @@ lmtt/m/n/12 validate_published_quickstart.py\T1/lmr/m/n/12 ,
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.95> not available
 (Font)              Font shape `T1/lmtt/b/n' tried instead on input line 132.
 [6]
-Overfull \hbox (4.61215pt too wide) in paragraph at lines 153--154
+Overfull \hbox (4.2369pt too wide) in paragraph at lines 153--154
 []\T1/lmr/m/n/12 Here \T1/lmtt/m/n/12 jwd_path() \T1/lmr/m/n/12 and \T1/lmtt/m/
 n/12 slib_path() \T1/lmr/m/n/12 re-solve ex-ter-nal user-supplied Kurgan-
  []
@@ -682,4 +674,4 @@ Underfull \hbox (badness 10000) in paragraph at lines 317--318
 Package rerunfilecheck Info: File `paper_softwarex.out' has not changed.
 (rerunfilecheck)             Checksum: 95F877512BF9D9F5A927FEFAE0AFA2CD;5258.
  )
-Output written on paper_softwarex.xdv (17 pages, 89780 bytes).
+Output written on paper_softwarex.xdv (17 pages, 89396 bytes).
