@@ -1069,54 +1069,58 @@ layers to EPSG:32643, and reports attribute-grouped lengths and areas:
 PYTHONPATH=src python3 examples/geological_workflow.py
 ```
 
-The twelve-layer JWD vectors and all five matching SLIB libraries are also
-bundled under `tests/fixtures/jwd/` and `tests/fixtures/slib/`. They originate
-from the public V1 *Spatial database of serial suite-tectonic map-sheets of
-mainland China (1:250,000)*, sheet **J43C001002**, produced by the Development
-and Research Center of China Geological Survey and distributed by the National
-Geological Archives of China. Cite the dataset with DOI
-**10.23650/data.A.2018.NGA131703.K1.1.1.V1** and its companion article with DOI
-**10.12029/gc2018Z101**. See [DATA_ATTRIBUTION.md](DATA_ATTRIBUTION.md) for the
-full citation, SLIB attribution and usage boundary. Current regression and
-examples use the original open-edition files only; new coordinate-warped or
-virtual-geological-unit derivatives are no longer generated or recommended.
-Public, non-classified and test-only status does not by itself grant arbitrary
-redistribution rights, and the software licence does not relicense JWD or SLIB.
+The original twelve-layer JWD vectors and five matching SLIB libraries are **not
+bundled** in the current Git tree, wheel or source archive. Obtain them through
+the official National Geological Archives of China channel and configure local
+directories before running the real integration tests. The source is the public
+V1 *Spatial database of serial suite-tectonic map-sheets of mainland China
+(1:250,000)*, sheet **J43C001002**, produced by the Development and Research
+Center of China Geological Survey and distributed by the National Geological
+Archives of China. Cite dataset DOI **10.23650/data.A.2018.NGA131703.K1.1.1.V1**
+and companion-article DOI **10.12029/gc2018Z101**. See
+[DATA_ATTRIBUTION.md](DATA_ATTRIBUTION.md) for citations, acquisition guidance
+and the usage boundary. Public, non-classified and test-only status does not
+by itself grant redistribution permission, and the software licence does not
+relicense JWD or SLIB.
 
-The real
-rendering and colour-parser tests use them by default, with no absolute paths
-or environment variables required:
+Configure the external data before running the real rendering and colour tests:
 
 ```bash
-python -m pytest -q tests/test_graphic_real_jwd.py
-python -m pytest -q tests/test_pure.py -k "ColorLib or PcolorLib"
+PYMAPGIS_JWD=/path/to/original/jwd PYMAPGIS_SLIB=/path/to/original/slib \
+  python -m pytest -q tests/test_graphic_real_jwd.py
+PYMAPGIS_JWD=/path/to/original/jwd PYMAPGIS_SLIB=/path/to/original/slib \
+  python -m pytest -q tests/test_pure.py -k "ColorLib or PcolorLib"
 ```
 
-`PYMAPGIS_JWD` and `PYMAPGIS_SLIB` remain optional external-directory overrides;
-`PYMAPGIS_COLORLIB` and `PYMAPGIS_PCOLOR` override individual colour libraries.
-`tests/fixtures/jwd_slib_manifest.json` records provenance and SHA-256 for every
-file. The real and synthetic fixtures are included in both the source archive
-and wheel. `pymapgis.testing` provides a single source/install-independent path
-API:
+`PYMAPGIS_COLORLIB` and `PYMAPGIS_PCOLOR` can override individual colour
+libraries. `PYMAPGIS_READER_NATIVE` points to optional native SHP exports.
+Missing external data produces an explicit optional-integration skip with
+acquisition guidance. An invalid configured path or checksum mismatch still
+fails loudly. `tests/fixtures/jwd_slib_manifest.json` remains as the provenance
+and SHA-256 registry; actual JWD, SLIB and native-SHP data are forbidden from
+both archive types. `pymapgis.testing` resolves configured external directories
+or a legally obtained local fixture copy:
 
 ```python
 from pymapgis.testing import fixture_path, jwd_path, slib_path
 
-print(jwd_path())                       # directory containing the twelve vectors
-print(slib_path("Pcolor.lib"))          # installed or source Pcolor.lib
-print(fixture_path("mapgis"))           # synthetic WT/WL/WP directory
+print(jwd_path())                       # external directory with twelve vectors
+print(slib_path("Pcolor.lib"))          # external Pcolor.lib
+print(fixture_path("mapgis"))           # bundled synthetic WT/WL/WP directory
 ```
 
-They verify library decoding, PNG/PDF generation, geometry and report
-invariants; they are not a substitute for MapGIS native-application visual,
-editing or save/reopen acceptance. See `tests/fixtures/README.md` for the
-separate real-data provenance and licensing note.
+The real tests verify library decoding, PNG/PDF generation, geometry and report
+invariants. They are not a substitute for MapGIS native-application visual,
+editing or save/reopen acceptance. See `tests/fixtures/README.md` for detailed
+acquisition and optional-integration behaviour.
 
-The workflow in `.github/workflows/test-and-build.yml` is configured to run
-lint, tests with the bundled synthetic and real fixtures, and the public
-examples on Linux, Windows, and macOS. Its build job additionally checks wheel and source-archive
-contents with `tests/inspect_dist.py` and retains the artifacts for review.
-The optional Matplotlib extra is required only for rendering tests.
+The workflow in `.github/workflows/test-and-build.yml` runs lint, tests with
+required synthetic and Writer fixtures, and public examples on Linux, Windows
+and macOS. Real JWD/SLIB rendering runs only when external fixture directories
+are configured; otherwise the workflow prints an explicit optional-data skip.
+Its build job checks wheel and source-archive contents with
+`tests/inspect_dist.py` and retains the artifacts for review. The optional
+Matplotlib extra is required only for rendering tests.
 
 ## Further documentation
 

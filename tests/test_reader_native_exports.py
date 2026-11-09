@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import math
+import os
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -12,7 +14,22 @@ import pytest
 from pymapgis import Reader
 from pymapgis.testing import fixture_path, jwd_path
 
-ROOT = fixture_path("reader_native")
+
+def _reader_native_root():
+    configured = os.environ.get("PYMAPGIS_READER_NATIVE")
+    if configured:
+        return Path(configured)
+    try:
+        return fixture_path("reader_native")
+    except FileNotFoundError as exc:
+        pytest.skip(
+            f"Optional native SHP integration is unavailable: {exc}. "
+            "Set PYMAPGIS_READER_NATIVE after obtaining the original exports.",
+            allow_module_level=True,
+        )
+
+
+ROOT = _reader_native_root()
 POINT_AND_LINE = ("LDLYAAI002", "LDZOFBA002", "LDZOFBB099")
 POLYGONS = ("LDZOFBB001", "LDZOFBB004")
 

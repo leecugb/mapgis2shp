@@ -140,7 +140,8 @@
     "library_count": 5,
     "native_visual_acceptance": "not replaced by these regression fixtures"
   },
-  "licence_note": "Bundled by explicit project-owner request for regression testing; no additional licence or public-domain dedication is inferred.",
+  "current_distribution": "Original JWD/SLIB data are not bundled in the current Git tree, wheel or source archive. Users obtain external copies through the official channel and verify them against this manifest.",
+  "licence_note": "Originally owner-supplied for regression testing; no additional licence or public-domain dedication is inferred. Current archives exclude the original data.",
   "totals": {
     "vector_bytes": 7092289,
     "library_bytes": 12289478,
