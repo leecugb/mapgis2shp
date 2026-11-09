@@ -44,8 +44,17 @@ jobs:
         run: python -m pytest -q
       - name: Run the public geological workflow
         run: python examples/geological_workflow.py
-      - name: Run the bundled original-library rendering example
-        run: python examples/render_bundled_jwd.py --output-dir "${{ runner.temp }}/jwd-render" --dpi 160
+      - name: Run optional user-supplied original-library rendering example
+        shell: bash
+        env:
+          PYMAPGIS_JWD: ${{ vars.PYMAPGIS_JWD }}
+          PYMAPGIS_SLIB: ${{ vars.PYMAPGIS_SLIB }}
+        run: |
+          if [[ -n "$PYMAPGIS_JWD" && -n "$PYMAPGIS_SLIB" ]]; then
+            python examples/render_bundled_jwd.py --output-dir "${{ runner.temp }}/jwd-render" --dpi 160
+          else
+            echo "Optional JWD/SLIB rendering skipped. Configure repository paths and legally obtained data to enable it."
+          fi
 
   build:
     name: Build and inspect release archives

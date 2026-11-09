@@ -54,21 +54,17 @@ src/pymapgis/semantics/
 *.WL~
 *.WP~
 
-# Real geological survey vectors remain ignored except for the explicitly
-# integrated owner-supplied regression datasets. Public synthetic fixtures and
-# the JWD and Writer-native batches are intended for source archives.
+# Synthetic fixtures and Writer-native batches are intended for source archives.
+# Optional user-supplied NGAC JWD/SLIB and derivative SHP files stay external.
 !tests/fixtures/mapgis/*.wt
 !tests/fixtures/mapgis/*.wl
 !tests/fixtures/mapgis/*.wp
 !tests/fixtures/mapgis/*.WT
 !tests/fixtures/mapgis/*.WL
 !tests/fixtures/mapgis/*.WP
-!tests/fixtures/jwd/*.WT
-!tests/fixtures/jwd/*.WL
-!tests/fixtures/jwd/*.WP
-!tests/fixtures/jwd/*.WT~
-!tests/fixtures/jwd/*.WL~
-!tests/fixtures/jwd/*.WP~
+!tests/fixtures/mapgis/*.WT~
+!tests/fixtures/mapgis/*.WL~
+!tests/fixtures/mapgis/*.WP~
 !tests/fixtures/writer_batch2/*.WT
 !tests/fixtures/writer_batch2/*.WL
 !tests/fixtures/writer_batch2/*.WP
@@ -78,7 +74,9 @@ src/pymapgis/semantics/
 !tests/fixtures/writer_batch4/*.WT
 !tests/fixtures/writer_batch4/*.WL
 !tests/fixtures/writer_batch4/*.WP
-!tests/fixtures/reader_native/*.WT
+tests/fixtures/jwd/
+tests/fixtures/slib/
+tests/fixtures/reader_native/
 
 # MapGIS project / raster overlay files
 *.MPJ

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+from pathlib import Path
 
 import pytest
 
@@ -79,7 +81,14 @@ def test_writer_case_lists_cannot_be_empty():
 
 
 def test_reader_native_manifest_bytes_and_sha256():
-    root = fixture_path("reader_native")
+    configured = os.environ.get("PYMAPGIS_READER_NATIVE")
+    if configured:
+        root = Path(configured)
+    else:
+        try:
+            root = fixture_path("reader_native")
+        except FileNotFoundError as exc:
+            pytest.skip(f"Optional native SHP fixture is unavailable: {exc}")
     manifest = json.loads(fixture_path("reader_native_manifest.json").read_text(encoding="utf-8"))
     assert len(manifest["files"]) == 16
     expected_names = {expected["file"] for expected in manifest["files"]}

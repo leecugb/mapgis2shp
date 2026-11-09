@@ -1,7 +1,8 @@
-"""Self-contained real-library rendering regression for twelve JWD layers.
+"""Optional real-library rendering regression for twelve user-supplied JWD layers.
 
-The vectors and five SLIB libraries are bundled under tests/fixtures. Explicit
-PYMAPGIS_JWD/PYMAPGIS_SLIB paths remain available for external-library checks.
+Obtain the original vectors and five SLIB files through their official channel and
+set PYMAPGIS_JWD/PYMAPGIS_SLIB. Missing external data produces an explicit
+integration skip, not a silent pass or a substituted synthetic dataset.
 These tests do not replace visual acceptance in the MapGIS application.
 """
 from __future__ import annotations
@@ -24,8 +25,12 @@ from pymapgis.testing import fixture_path, jwd_path, slib_path
 pytestmark = pytest.mark.integration
 
 FIXTURE_DIR = fixture_path()
-BUNDLED_JWD = jwd_path()
-BUNDLED_SLIB = slib_path()
+try:
+    BUNDLED_JWD = jwd_path()
+    BUNDLED_SLIB = slib_path()
+except FileNotFoundError as exc:
+    pytest.skip(f"Optional user-supplied JWD/SLIB integration is unavailable: {exc}",
+                allow_module_level=True)
 LIBRARY_NAMES = ("Subgraph.lib", "LINESTY.lib", "Fillgrph.lib", "Colorlib.lib", "Pcolor.lib")
 LAYER_NAMES = [
     "LDLYAAE002.WP",

@@ -127,7 +127,7 @@ def main():
         '12 JWD layers + 5 SLIB', 'SHA-256 manifest',
     ], AQUA, AQUA_FILL, title_size=9.4, body_size=8.2)
     box(ax, 6.35, 0.10, 5.3, 1.2, 'Release verification', [
-        '420 passed · 1 environment-dependent skip',
+        '423 passed · 1 environment-dependent skip',
         'Public-release CI · local archive inspection',
     ], AQUA, AQUA_FILL, title_size=9.4, body_size=8.2)
 
