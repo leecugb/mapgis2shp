@@ -200,7 +200,7 @@ Table~\ref{tab:validation} separates current structural and rendering checks fro
 Evidence & Result and interpretation \\
 \midrule
 Full package regression & With external fixtures, 423 passed and 1 environment-dependent skip; without them, 394 passed and 13 optional skips locally with Python 3.12.7, GeoPandas 1.1.3 and Matplotlib 3.9.2 \\
-Continuous integration & Pre-migration run \href{https://github.com/leecugb/mapgis2shp/actions/runs/42574990251}{42574990251} passed on Python 3.9 on Ubuntu and Python 3.13 on Ubuntu, Windows and macOS at commit \texttt{575e80d}; the external-fixture workflow retains those environments plus archive and Twine checks \\
+Continuous integration & Run \href{https://github.com/leecugb/mapgis2shp/actions/runs/42613725710}{42613725710} passed on Python 3.9 on Ubuntu and Python 3.13 on Ubuntu, Windows and macOS at commit \texttt{95ecc53}; archive building, content inspection and Twine checks also passed. Real JWD rendering was optional-skipped on runners without external data \\
 Real twelve-layer rendering & 7{,}094 inputs; 5{,}732 drawn and 1{,}362 excluded; no unresolved colours, unknown fills or solid fallbacks \\
 Native dialogue reference anchors & All 14 reference anchors recorded from the native colour dialogue match; all 25 previous unknown colour codes resolved \\
 38\textbar2 coordinate fidelity & All 37 features and all 782 source vertices retained; maximum vertex deviation $\leq 10^{-9}$ in source coordinate units (geographic degrees for this dataset) \\
