@@ -8,8 +8,12 @@ def test_fixture_access_api_and_dataset_inventory():
     assert fixture_path("jwd_slib_manifest.json").is_file()
     assert fixture_path("writer_batch2_manifest.json").is_file()
     assert fixture_path("writer_batch3_manifest.json").is_file()
+    assert fixture_path("writer_batch4_manifest.json").is_file()
+    assert fixture_path("reader_native_manifest.json").is_file()
     assert len(list(fixture_path("writer_batch2").glob("*.shp"))) == 11
     assert len(list(fixture_path("writer_batch3").glob("*.shp"))) == 12
+    assert len(list(fixture_path("writer_batch4").glob("*.shp"))) == 20
+    assert len(list(fixture_path("reader_native").glob("*.SHP"))) == 5
     assert len(list(jwd_path().iterdir())) == 12
     assert all(path.suffix.lower() in {".wt", ".wl", ".wp"} for path in jwd_path().iterdir())
     assert len(list(slib_path().iterdir())) == 5

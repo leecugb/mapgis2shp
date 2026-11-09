@@ -978,10 +978,12 @@ def test_library_directory_validation_and_loading(tmp_path, monkeypatch):
 def test_multi_part_offset_curves_are_supported():
     renderer = make_renderer()
     points = np.asarray([(0, 0), (1, 1), (2, 0), (1, 0.1), (0, 1)])
-    from shapely.geometry import LineString
+    from shapely.geometry import MultiLineString
 
-    curve = LineString(points).offset_curve(0.1)
-    assert curve.geom_type == "MultiLineString"
+    # Construct the multipart input explicitly: GEOS versions differ in whether
+    # offsetting this self-crossing source splits it into one or two line strings.
+    curve = MultiLineString([[(0, 0), (1, 1)], [(1, 1), (2, 0)]])
+    assert len(curve.geoms) == 2
     parts = renderer._substring_parts(curve, 0.0, curve.length)
     assert len(parts) == 2
     assert sum(part.length for part in parts) == pytest.approx(curve.length)

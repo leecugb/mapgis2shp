@@ -1,0 +1,86 @@
+{
+  "svg": "E:\\AFH0.3米数据\\JWD\\mapgis2shp_submission\\softwarex_architecture.svg",
+  "verdict": "PASS WITH WARNINGS",
+  "auditable": true,
+  "width_mm": 182.88,
+  "text_count": 42,
+  "minimum_found_pt": 5.1,
+  "maximum_found_pt": 10.5,
+  "thresholds": {
+    "min_pt": 5.0,
+    "max_pt": 7.0,
+    "max_width_mm": 183.0
+  },
+  "findings": [
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'a' is 10.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Processing paths' is 10.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'MapGIS 6.x/67 vectors' is 7.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Reader / Writer' is 7.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Open vectors & access' is 7.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Accompanying SLIB' is 7.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Five library parsers' is 7.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Original-library renderer' is 7.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'b' is 10.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Evidence, validation and repro' is 10.50 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Dialogue reference anchors' is 7.05 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Line coordinate fidelity' is 7.05 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Real regression fixtures' is 7.05 pt (> 7 pt)"
+    },
+    {
+      "severity": "WARN",
+      "kind": "text.large",
+      "message": "'Release verification' is 7.05 pt (> 7 pt)"
+    }
+  ]
+}
