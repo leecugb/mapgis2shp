@@ -13,6 +13,7 @@ from pymapgis.testing import fixture_path
 
 FIXTURE_ROOT = fixture_path("writer_batch4")
 CASES = sorted(FIXTURE_ROOT.glob("*.shp"))
+assert CASES, "writer_batch4 SHP fixtures are missing"
 GRAPHIC_FIELDS = {
     "class", "fill_color", "pattern", "pattern_height", "pattern_width",
     "pattern_color", "layer", "field5", "field6", "field7", "linetype",

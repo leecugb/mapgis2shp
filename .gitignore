@@ -12,6 +12,7 @@ env/
 # Distribution / packaging
 build/
 dist/
+dist_*/
 *.egg-info/
 *.egg
 
@@ -77,6 +78,7 @@ src/pymapgis/semantics/
 !tests/fixtures/writer_batch4/*.WT
 !tests/fixtures/writer_batch4/*.WL
 !tests/fixtures/writer_batch4/*.WP
+!tests/fixtures/reader_native/*.WT
 
 # MapGIS project / raster overlay files
 *.MPJ
@@ -94,6 +96,14 @@ src/pymapgis/semantics/
 # Exceptions: keep paper figures (publication assets)
 !paper/figures/*.png
 !paper/figures/*.pdf
+!mapgis2shp_submission/softwarex_architecture.png
+!mapgis2shp_submission/jwd_map.png
+
+# Local release and figure-audit work products
+mapgis2shp_submission/wheel_quickstart_*/
+mapgis2shp_submission/*.collision-audit.log
+mapgis2shp_submission/*.text-audit.log
+mapgis2shp_submission/*.collision-audit.pdf
 
 # Generated analysis artifacts (regenerated from scripts, not source)
 *_debug.png

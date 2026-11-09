@@ -164,9 +164,17 @@ def main() -> None:
     png = args.output_dir / "jwd_map.png"
     pdf = args.output_dir / "jwd_map.pdf"
     svg = args.output_dir / "jwd_map.svg"
-    result = renderer.render(layers, png, figsize=(12, 7.5), dpi=args.dpi)
-    result.figure.savefig(pdf, format="pdf")
-    result.figure.savefig(svg, format="svg")
+    result = renderer.render(layers, figsize=(12, 7.5), dpi=args.dpi)
+    save_options = {"bbox_inches": "tight", "pad_inches": 0.02}
+    result.figure.savefig(png, format="png", dpi=args.dpi, **save_options)
+    result.figure.savefig(pdf, format="pdf", **save_options)
+    result.figure.savefig(svg, format="svg", **save_options)
+    svg.write_text(
+        "\n".join(
+            line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()
+        ) + "\n",
+        encoding="utf-8",
+    )
     result.figure.clear()
 
     summary = summarise(result.reports)

@@ -10,6 +10,8 @@
     "solid_fallbacks": 0,
     "unknown_fills": 0,
     "unresolved_symbols": 0,
+    "empty_patterns": 0,
+    "cycle_limits": 0,
     "unknown_fonts": []
   },
   "layers": [

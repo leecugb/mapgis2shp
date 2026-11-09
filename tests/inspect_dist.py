@@ -71,6 +71,11 @@ WRITER_BATCH4_NAMES = tuple(
             ".WL" if stem.startswith(("05", "06", "07", "08")) else ".WP")
     for stem in WRITER_BATCH4_NATIVE_STEMS
 ) + ("README_转换说明.md",)
+READER_NATIVE_NAMES = ("LDLYAAI002.WT",) + tuple(
+    name + suffix
+    for name in ("LDLYAAI002", "LDZOFBA002", "LDZOFBB001", "LDZOFBB004", "LDZOFBB099")
+    for suffix in (".SHP", ".SHX", ".DBF")
+)
 
 
 def _require(condition: bool, message: str) -> None:
@@ -81,6 +86,10 @@ def _require(condition: bool, message: str) -> None:
 def _check_common(names: list[str], artifact: str, *, allow_slib_fixtures: bool = False) -> None:
     _require(not any("__pycache__" in name or name.endswith(".pyc") for name in names),
              f"{artifact}: Python cache files are included")
+    _require(
+        not any("mapgis2shp_submission" in name.replace("\\", "/") for name in names),
+        f"{artifact}: manuscript submission content is included",
+    )
     library_names = {"colorlib.lib", "pcolor.lib", "subgraph.lib", "linesty.lib", "fillgrph.lib"}
     bundled = []
     for name in names:
@@ -113,6 +122,8 @@ def _check_wheel(path: Path) -> None:
         "pymapgis/testing/fixtures/writer_batch2_manifest.json",
         "pymapgis/testing/fixtures/writer_batch3_manifest.json",
         "pymapgis/testing/fixtures/writer_batch4_manifest.json",
+        "pymapgis/testing/fixtures/reader_native_manifest.json",
+        "pymapgis/testing/examples/render_bundled_jwd.py",
     }
     for name in WRITER_BATCH2_NAMES:
         required.add("pymapgis/testing/fixtures/writer_batch2/" + name)
@@ -120,6 +131,8 @@ def _check_wheel(path: Path) -> None:
         required.add("pymapgis/testing/fixtures/writer_batch3/" + name)
     for name in WRITER_BATCH4_NAMES:
         required.add("pymapgis/testing/fixtures/writer_batch4/" + name)
+    for name in READER_NATIVE_NAMES:
+        required.add("pymapgis/testing/fixtures/reader_native/" + name)
     for name in JWD_FIXTURE_NAMES:
         required.add("pymapgis/testing/fixtures/jwd/" + name)
     for name in SLIB_FIXTURE_NAMES:
@@ -127,6 +140,10 @@ def _check_wheel(path: Path) -> None:
     for name in SYNTHETIC_FIXTURE_NAMES:
         required.add("pymapgis/testing/fixtures/mapgis/" + name)
     _require(required.issubset(names), f"{path.name}: required release modules missing")
+    _require(
+        not any(name.startswith(("examples/", "mapgis2shp_submission/")) for name in names),
+        f"{path.name}: unnamespaced example or submission files included",
+    )
     forbidden = ("pymapgis/rendering/", "pymapgis/semantics/")
     _require(not any(name.startswith(forbidden) for name in names),
              f"{path.name}: experimental rendering or semantics included")
@@ -148,6 +165,8 @@ def _check_sdist(path: Path) -> None:
         "/tests/test_writer_native_batch2.py",
         "/tests/test_writer_native_batch3.py",
         "/tests/test_writer_native_batch4.py",
+        "/tests/test_reader_native_exports.py",
+        "/tests/test_writer_fixture_manifests.py",
         "/tests/fixtures/build_mapgis_fixtures.py",
         # test_public_fixtures.py reads the manifest at module scope; an sdist
         # without it passes inspection but crashes the shipped tests.
@@ -155,6 +174,7 @@ def _check_sdist(path: Path) -> None:
         "/tests/fixtures/writer_batch2_manifest.json",
         "/tests/fixtures/writer_batch3_manifest.json",
         "/tests/fixtures/writer_batch4_manifest.json",
+        "/tests/fixtures/reader_native_manifest.json",
         "/tests/fixtures/mapgis/synthetic_points.wt",
         "/tests/fixtures/mapgis/synthetic_lines.wl",
         "/tests/fixtures/mapgis/synthetic_polygons.wp",
@@ -185,6 +205,9 @@ def _check_sdist(path: Path) -> None:
     )
     required_suffixes += tuple(
         "/tests/fixtures/writer_batch4/" + name for name in WRITER_BATCH4_NAMES
+    )
+    required_suffixes += tuple(
+        "/tests/fixtures/reader_native/" + name for name in READER_NATIVE_NAMES
     )
     for suffix in required_suffixes:
         _require(any(name.endswith(suffix) for name in names),
