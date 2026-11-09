@@ -7,8 +7,8 @@
 - Title: **mapgis2shp: open-source interoperability and original-library rendering for legacy MapGIS 6.x/67 vector data**
 - Target journal: **SoftwareX**
 - Article type: **Original Software Publication**
-- Submission-candidate commit: **[最终候选提交生成后填写]**
-- SHA-256 of final `paper_softwarex.tex`: **[最终候选稿生成后填写]**
+- Submission-candidate commit: **3548db2**（`Record external-fixture CI verification`）
+- SHA-256 of final `paper_softwarex.tex`: **0c89588fbb07559348264fe82df554ab70763a2936c723b5b96c054960cd2301**
 - Confirmation deadline: **[待填写]**
 
 只有最终候选稿的提交哈希和文件 SHA-256 均已填写后，本确认包才对应有效版本。后续实质修改需要重新确认。
