@@ -11,6 +11,7 @@ from tests.test_writer_native_batch2 import _expected_source, _read_native, _rec
 
 FIXTURE_ROOT = fixture_path("writer_batch3")
 CASES = sorted(FIXTURE_ROOT.glob("*.shp"))
+assert CASES, "writer_batch3 SHP fixtures are missing"
 
 
 def _ring_offset(row):

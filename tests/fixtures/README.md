@@ -86,6 +86,12 @@ python -m pytest -q tests/test_writer_native_batch3.py
 
 UTM inputs are reprojected to Gauss-Kruger (k=1) before encoding because MapGIS 6x does not store the UTM zone scale factor. The tests reproject the written result back to EPSG:32643 and use an explicit 1e-5 m Hausdorff tolerance for projection round-trips. Null geometry must be rejected by default and is retained only through an explicit `on_empty="drop"` request; fully degenerate rings are rejected rather than silently written as empty polygons.
 
+## Native SHP Reader robustness fixtures
+
+`reader_native/` contains native SHP exports from the same open J43C001002 source dataset and the WT required by the LDLYAAI002 point case. `reader_native_manifest.json` records the dataset and companion-article DOIs, file hashes and native export caveats. SHP files have no `.prj`, so tests do not infer CRS from SHP.
+
+`tests/test_reader_native_exports.py` verifies point/line attributes and geometry, polygon coverage and Reader validity, recovery of the polygon missing from SHP, and the four attribute values that differ from WAT text. It deliberately does not inherit SHP self-intersections or WAT/binary inconsistencies.
+
 ## Fourth native Writer batch
 
 `writer_batch4/` contains twenty domestic Gauss-Kruger SHP cases and eighteen MapGIS-native outputs supplied for Writer auditing. All cases use a 75°E central meridian, k=1 and metre units. The cases cover MultiPoint, MultiLineString, 257 point records, empty/null geometry, 10,001 line vertices, duplicate rings, a bowtie, a degenerate ring, 80 attribute fields, a 5,001-vertex exterior ring, duplicate geometry and a zero-feature file. `03_POINT_MULTIPOINT` and `20_EMPTY_FILE` have no native output and are recorded explicitly in `writer_batch4_manifest.json`.

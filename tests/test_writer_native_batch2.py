@@ -10,6 +10,7 @@ from pymapgis.testing import fixture_path
 
 FIXTURE_ROOT = fixture_path("writer_batch2")
 CASES = sorted(FIXTURE_ROOT.glob("*.shp"))
+assert CASES, "writer_batch2 SHP fixtures are missing"
 ATTRIBUTES = ("FID", "NAME", "CODE", "VALUE", "DATE")
 
 

@@ -91,7 +91,10 @@ exclude = [
 "tests/fixtures/writer_batch3" = "pymapgis/testing/fixtures/writer_batch3"
 "tests/fixtures/writer_batch3_manifest.json" = "pymapgis/testing/fixtures/writer_batch3_manifest.json"
 "tests/fixtures/writer_batch4" = "pymapgis/testing/fixtures/writer_batch4"
-"tests/fixtures/writer_batch4/writer_batch4_manifest.json" = "pymapgis/testing/fixtures/writer_batch4_manifest.json"
+"tests/fixtures/writer_batch4_manifest.json" = "pymapgis/testing/fixtures/writer_batch4_manifest.json"
+"tests/fixtures/reader_native" = "pymapgis/testing/fixtures/reader_native"
+"tests/fixtures/reader_native_manifest.json" = "pymapgis/testing/fixtures/reader_native_manifest.json"
+"examples/render_bundled_jwd.py" = "pymapgis/testing/examples/render_bundled_jwd.py"
 "tests/fixtures/jwd_slib_manifest.json" = "pymapgis/testing/fixtures/jwd_slib_manifest.json"
 "tests/fixtures/fixture_manifest.json" = "pymapgis/testing/fixtures/fixture_manifest.json"
 
