@@ -661,19 +661,19 @@ Overfull \hbox (4.80524pt too wide) in paragraph at lines 250--265
  []
 
 
-Overfull \hbox (53.45422pt too wide) in paragraph at lines 272--273
+Overfull \hbox (59.32921pt too wide) in paragraph at lines 272--273
 \T1/lmr/m/n/12 by DOI \T1/lmtt/m/n/12 10.23650/data.A.2018.NGA131703.K1.1.1.V1
 \T1/lmr/m/n/12 and \T1/lmtt/m/n/12 10.12029/gc2018Z101 \T1/lmr/m/n/12 [[],
  []
 
 [13] [14] [15]
-Underfull \hbox (badness 10000) in paragraph at lines 319--320
+Underfull \hbox (badness 10000) in paragraph at lines 314--315
 []\T1/lmr/m/n/12 MathsionYang (2019) MapGIS2ArcGIS. [][]$\T1/lmtt/m/n/12 https
 : / / github . com /
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 322--323
+Underfull \hbox (badness 10000) in paragraph at lines 317--318
 []\T1/lmr/m/n/12 BenChao1998 (2025) Con-vertMapGIS. [][]$\T1/lmtt/m/n/12 https
 : / / github . com /
  []
@@ -682,4 +682,4 @@ Underfull \hbox (badness 10000) in paragraph at lines 322--323
 Package rerunfilecheck Info: File `paper_softwarex.out' has not changed.
 (rerunfilecheck)             Checksum: 95F877512BF9D9F5A927FEFAE0AFA2CD;5258.
  )
-Output written on paper_softwarex.xdv (17 pages, 88924 bytes).
+Output written on paper_softwarex.xdv (17 pages, 89780 bytes).

@@ -31,9 +31,9 @@ Affiliation for all authors: Xi'an Mineral Resources Survey, China Geological Su
 
 ### CRediT
 
-- S.L. conceived and designed the study, developed the software, carried out the validation and wrote the main manuscript text; S.L. also prepared the original figures.
-- H.H. contributed to the validation and reviewed the manuscript.
-- X.S., H.Q., X.L., Y.F. and Z.Z. contributed to data investigation and reviewed the manuscript.
+- S.L.: Conceptualization, Methodology, Software, Validation, Visualization, Writing--original draft.
+- H.H.: Validation, Writing--review \& editing.
+- X.S., H.Q., X.L., Y.F. and Z.Z.: Investigation, Data curation, Writing--review \& editing.
 
 ### Competing interests
 
@@ -52,10 +52,11 @@ This work was supported by the Deep Earth Probe and Mineral Resources Exploratio
 
 ### Generative AI declaration / 生成式 AI 声明
 
-请按实际使用情况和期刊当时政策选择，不预选：
+当前候选稿在参考文献前加入以下实际声明，作者需确认事实和最终措辞，而不是选择“未使用 AI”：
 
-- [ ] No generative AI or AI-assisted technology was used in preparing this manuscript.
-- [ ] Generative AI or AI-assisted technology was used. The exact declaration and tool/process description are attached: **[填写]**
+> During the preparation of this work the authors used Kimi Code to audit source code and tests, revise manuscript text and LaTeX, generate architecture diagrams, and assist with local compilation and evidence checking. After using this service, the authors reviewed and edited the content as needed and take full responsibility for the content of the published article.
+
+请确认该声明准确覆盖实际使用的工具、用途和人工复核过程。如需补充其他工具或用途，请在确认邮件中明确写出，不能只删除披露。
 
 ### Current-version approval / 当前版本批准
 
