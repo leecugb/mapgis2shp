@@ -774,6 +774,44 @@ class TestHeaderCrsBlock:
         assert struct.unpack_from("<d", b, 252)[0] == 0.0
         assert struct.unpack_from("<d", b, 232)[0] == 1.0
 
+    def test_tmerc_projection_scale_roundtrip(self, tmp_path) -> None:
+        crs = (
+            "+proj=tmerc +lat_0=0 +lon_0=-117 +k=0.9996 "
+            "+x_0=500000 +y_0=0 +datum=WGS84 +units=m +no_defs"
+        )
+        gdf = gpd.GeoDataFrame(
+            {"n": [1]},
+            geometry=[shapely.geometry.Point(615530.802, 3735141.436)],
+            crs=crs,
+        )
+        path = tmp_path / "utm11.wt"
+        Writer(gdf, map_scale=1000, preserve_utm=True).to_file(path)
+        assert struct.unpack_from("<d", path.read_bytes(), 232)[0] == pytest.approx(0.9996)
+        reader = Reader(path)
+        assert reader.coordinate_scale_factor == 1.0
+        assert reader.crs.to_epsg() == 32611
+        assert reader.geom[0].x == pytest.approx(615530.802)
+        assert reader.geom[0].y == pytest.approx(3735141.436)
+
+    def test_preserve_utm_rejects_southern_hemisphere(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {"n": [1]}, geometry=[shapely.geometry.Point(500100, 100100)], crs="EPSG:32711"
+        )
+        with pytest.raises(WriterError, match="southern-hemisphere"):
+            Writer(gdf, preserve_utm=True).to_file(tmp_path / "south.wt")
+
+    def test_southern_utm_default_conversion_roundtrip(self, tmp_path) -> None:
+        source = gpd.GeoDataFrame(
+            {"n": [1]}, geometry=[shapely.geometry.Point(500100, 100100)], crs="EPSG:32711"
+        )
+        path = tmp_path / "south_default.wt"
+        Writer(source, map_scale=1000).to_file(path)
+        reader = Reader(path)
+        assert reader.geom[0].y < 0
+        roundtrip = gpd.GeoSeries([reader.geom[0]], crs=reader.crs).to_crs(source.crs).iloc[0]
+        assert roundtrip.x == pytest.approx(source.geometry.iloc[0].x, abs=1e-6)
+        assert roundtrip.y == pytest.approx(source.geometry.iloc[0].y, abs=1e-6)
+
 
 class TestLineAuxSections:
     """线辅助段原生布局（2026-10-17 J43C001002 定案）。

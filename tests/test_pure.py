@@ -149,11 +149,12 @@ class TestCrsRobustness:
 
     @staticmethod
     def _header(projection: int = 0, ellipsoid: int = 1, scale: float = 1.0,
-                central: float = None) -> io.BytesIO:
-        buf = bytearray(220)
+                central: float = None, projection_scale: float = 1.0) -> io.BytesIO:
+        buf = bytearray(240)
         buf[109] = projection
         buf[110] = ellipsoid
         struct.pack_into("<d", buf, 143, scale)
+        struct.pack_into("<d", buf, 232, projection_scale)
         if central is not None:
             struct.pack_into("<d", buf, 151, central)
         return io.BytesIO(bytes(buf))
@@ -190,6 +191,23 @@ class TestCrsRobustness:
         struct.pack_into("<d", stream.getbuffer(), 175, bad)
         crs, scale = _read_crs(stream)
         assert crs == "" and scale == 1.0
+
+    def test_tmerc_utm_projection_scale_and_unit_coordinate_factor(self) -> None:
+        crs, scale = _read_crs(self._header(
+            projection=5,
+            ellipsoid=7,
+            scale=1000.0,
+            central=-1170000.0,
+            projection_scale=0.9996,
+        ))
+        assert scale == 1.0
+        assert crs.to_epsg() == 32611
+        projection_scales = [
+            parameter.value
+            for parameter in crs.coordinate_operation.params
+            if "Scale factor" in parameter.name
+        ]
+        assert projection_scales == pytest.approx([0.9996])
 
     def test_truncated_header_raises_mapgis_error(self) -> None:
         with pytest.raises(MapGISError):
@@ -2419,11 +2437,11 @@ class TestFieldsFromDataFrame:
         codes = {s.source: s.type_code for s in specs}
         assert codes == {"b": 1, "s": 2, "i": 3, "big": 5, "f": 4, "d": 5, "txt": 0, "dt": 6}
 
-    def test_string_capacity_is_max_gbk_bytes_plus_one(self) -> None:
+    def test_string_capacity_uses_native_minimum_80(self) -> None:
         df = pd.DataFrame({"txt": ["中文", "abcd", None]})
         (spec,) = _fields_from_dataframe(df)
-        assert spec.declared == 4  # "中文" and "abcd" are both 4 GBK bytes
-        assert spec.storage == 5
+        assert spec.declared == 80
+        assert spec.storage == 81
 
     def test_offsets_are_compact_after_flag_byte(self) -> None:
         df = pd.DataFrame({"a": pd.array([1], dtype="int32"), "b": pd.array([2], dtype="int16")})

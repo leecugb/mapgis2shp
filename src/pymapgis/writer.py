@@ -48,6 +48,7 @@ from pymapgis.reader import (
     _CRS_CENTRAL_MERIDIAN_OFFSET,
     _CRS_ELLIPSOID_OFFSET,
     _CRS_PROJECTION_OFFSET,
+    _CRS_PROJECTION_SCALE_OFFSET,
     _CRS_SCALE_OFFSET,
     _CRS_STD_LAT_OFFSET,
     _ELLIPSOID_PROJ4,
@@ -556,35 +557,48 @@ def _projection_name(crs: Any) -> str:
     return ""
 
 
-def _prepare_crs(gdf: gpd.GeoDataFrame):
-    """Convert UTM geometry to a MapGIS-representable Gauss-Kruger CRS.
+def _prepare_crs(gdf: gpd.GeoDataFrame, preserve_utm: bool = False):
+    """Prepare UTM input for native storage, optionally preserving coordinates.
 
-    MapGIS 6x stores the Transverse Mercator family and central meridian but
-    not UTM's zone-specific scale factor. Writing UTM coordinates unchanged
-    with k=1 would move the data geographically, so reproject before encoding.
+    The default path retains the established Gauss-Kruger k=1 conversion.
+    With ``preserve_utm=True``, geometry remains unchanged and k=0.9996 is
+    written at offset 232 instead.
     """
     if gdf.crs in (None, ""):
         return gdf, gdf.crs
     crs = pyproj.CRS(gdf.crs)
     if _projection_name(crs) != "utm":
         return gdf, crs
-    zone = _proj4_params(crs).get("zone")
+    params = _proj4_params(crs)
+    zone = params.get("zone")
     if zone is None:
         raise WriterError("UTM input requires an explicit zone")
     lon_0 = int(zone) * 6 - 183
+    south = "+south" in crs.to_proj4().split()
     preserved = []
     for part in crs.to_proj4().split():
         if part.startswith(("+proj=", "+zone=", "+k=", "+lat_0=", "+lon_0=", "+x_0=", "+y_0=")):
             continue
+        if part == "+south":
+            continue
         preserved.append(part)
+    k = 0.9996 if preserve_utm else 1.0
+    if preserve_utm and south:
+        raise WriterError(
+            "preserve_utm=True currently supports only northern-hemisphere UTM; "
+            "the current native header mapping cannot preserve southern-hemisphere "
+            "false northing. Use the default Gauss-Kruger conversion instead"
+        )
     target_proj4 = " ".join(
-        ["+proj=tmerc", "+lat_0=0", f"+lon_0={lon_0}", "+k=1",
+        ["+proj=tmerc", "+lat_0=0", f"+lon_0={lon_0}", f"+k={k}",
          "+x_0=500000", "+y_0=0", *preserved]
     )
     target = pyproj.CRS.from_proj4(target_proj4)
+    if preserve_utm:
+        return gdf, target
     warnings.warn(
-        "UTM coordinates reprojected to Gauss-Kruger (k=1) before writing; "
-        "MapGIS 6x cannot store the UTM zone scale factor"
+        "UTM coordinates reprojected to Gauss-Kruger (k=1) using the default "
+        "Writer path; use preserve_utm=True to keep UTM coordinates and k=0.9996"
     )
     return gdf.to_crs(target), target
 
@@ -609,7 +623,7 @@ _HEADER_CRS_BLOCK_F32_BYTES = {
     195: bytes.fromhex("c0af1c41"),
 }
 _HEADER_CRS_NEG_ZERO_OFFSET = 220  # float32 -0.0 sentinel
-_HEADER_CRS_UNIT_DOUBLE_OFFSET = 232  # double 1.0
+# Projection scale factor at offset 232 is imported from reader.py.
 _HEADER_CRS_BLOCK_U8 = {240: 0x04, 242: 0x01}
 _HEADER_MM_DEG_X_OFFSET = 244  # double: degrees per millimetre, east-west
 _HEADER_MM_DEG_Y_OFFSET = 252  # double: degrees per millimetre, north-south
@@ -667,7 +681,14 @@ def _header_crs_block_fields(
             continue
         fields.update({off + i: ("B", byte) for i, byte in enumerate(raw)})
     fields[_HEADER_CRS_NEG_ZERO_OFFSET] = ("f", -0.0)
-    fields[_HEADER_CRS_UNIT_DOUBLE_OFFSET] = ("d", 1.0)
+    projection_name = _projection_name(crs)
+    projection_scale = (
+        0.9996 if projection_name == "utm"
+        else _proj4_params(crs).get("k", 1.0)
+        if projection_name == "tmerc"
+        else 1.0
+    )
+    fields[_CRS_PROJECTION_SCALE_OFFSET] = ("d", projection_scale)
     fields.update({off: ("B", val) for off, val in _HEADER_CRS_BLOCK_U8.items()})
     if crs not in (None, "") and pyproj.CRS(crs).is_geographic:
         x_coef, y_coef = _mm_to_degree_coefs(crs, map_scale, bbox)
@@ -705,15 +726,19 @@ def _crs_header_fields(crs: Any, map_scale: float) -> Dict[int, Tuple[str, Any]]
     fields[_CRS_PROJECTION_OFFSET] = ("B", code)
     fields[_CRS_SCALE_OFFSET] = ("d", float(map_scale))
     if code == 5:
-        if params.get("k", 1.0) != 1.0:
-            warnings.warn("Transverse Mercator with k != 1 (e.g. UTM) will be "
-                          "written as Gauss-Kruger (k=1)")
         if params.get("x_0", 500000.0) != 500000.0 or params.get("lat_0", 0.0) != 0.0:
             warnings.warn("tmerc with non-standard lat_0/x_0; MapGIS assumes "
                           "lat_0=0 and x_0=500000")
+    if proj == "utm":
+        zone = params.get("zone")
+        if zone is None:
+            raise WriterError("UTM input requires an explicit zone")
+        central_meridian = int(zone) * 6 - 183
+    else:
+        central_meridian = params.get("lon_0", 0.0)
     fields[_CRS_CENTRAL_MERIDIAN_OFFSET] = (
         "d",
-        _degrees_to_raw_dms(params.get("lon_0", 0.0)),
+        _degrees_to_raw_dms(central_meridian),
     )
     if code in (2, 3):
         fields[_CRS_STD_LAT_OFFSET] = ("d", _degrees_to_raw_dms(params.get("lat_0", 0.0)))
@@ -1639,6 +1664,13 @@ class Writer:
         as ``value * 1000 / map_scale`` (the reader's inverse).  Ignored for
         longitude/latitude data.  Set to e.g. 250000 to reproduce a 1:250000
         sheet's native millimetre storage.
+    preserve_utm : bool, default False
+        Keep UTM coordinates unchanged and store the UTM projection scale
+        ``k=0.9996`` at offset 232. The default False retains the established
+        Gauss-Kruger k=1 conversion. Set ``map_scale=1000`` when a Reader
+        coordinate scale factor of 1.0 is also required. This mode currently
+        supports northern-hemisphere UTM only; southern-hemisphere input must
+        use the default conversion because false northing is not preserved.
     snap_tolerance : float, default 0.0
         Coordinate quantisation step (map units) applied before topology
         construction so that shared boundaries coincide byte-exactly.  0
@@ -1667,6 +1699,7 @@ class Writer:
         make_valid: bool = False,
         on_empty: str = "error",
         map_scale: float = 1000.0,
+        preserve_utm: bool = False,
         snap_tolerance: float = 0.0,
         graphic_params: bool = True,
         geometry_type: Optional[str] = None,
@@ -1690,7 +1723,7 @@ class Writer:
             self.shapeType = _detect_shape_type(geodataframe)
 
         self._gdf = _normalise_geometries(geodataframe, self.shapeType, on_empty)
-        self._gdf, self._crs = _prepare_crs(self._gdf)
+        self._gdf, self._crs = _prepare_crs(self._gdf, preserve_utm=preserve_utm)
         self._params: Optional[pd.DataFrame] = None
         self._attr = self._split_param_columns(self._gdf)
         if self.shapeType == "POLYGON":
