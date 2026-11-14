@@ -91,7 +91,16 @@ class TestCliMain:
 
 
 class TestCliLib:
-    """pymapgis lib subcommand against synthetic libraries."""
+    """pymapgis lib subcommand against synthetic and optional real libraries."""
+
+    @staticmethod
+    def _real_library(name):
+        from pymapgis.testing import slib_path
+
+        try:
+            return slib_path(name)
+        except FileNotFoundError as exc:
+            pytest.skip(f"Optional user-supplied SLIB integration is unavailable: {exc}")
 
     def test_subgraph_summary(self, tmp_path: Path, capsys) -> None:
         lib = tmp_path / "Subgraph.lib"
@@ -123,7 +132,7 @@ class TestCliLib:
         assert "solid pen: color=6" in out
 
     def test_fillgrph_pattern(self, capsys) -> None:
-        library = Path(__file__).parent / "fixtures" / "slib" / "Fillgrph.lib"
+        library = self._real_library("Fillgrph.lib")
         code = main(["lib", str(library), "--pattern", "220"])
         assert code == 0
         out = capsys.readouterr().out
@@ -132,7 +141,7 @@ class TestCliLib:
         assert "polylines=" in out
 
     def test_colorlib_colour(self, capsys) -> None:
-        library = Path(__file__).parent / "fixtures" / "slib" / "Colorlib.lib"
+        library = self._real_library("Colorlib.lib")
         code = main(["lib", str(library), "--color", "602"])
         assert code == 0
         out = capsys.readouterr().out
@@ -140,7 +149,7 @@ class TestCliLib:
         assert "colour 602: channels=(38, 13, 0, 13) RGB=(206, 217, 206)" in out
 
     def test_pcolor_colour(self, capsys) -> None:
-        library = Path(__file__).parent / "fixtures" / "slib" / "Pcolor.lib"
+        library = self._real_library("Pcolor.lib")
         code = main(["lib", str(library), "--color", "602"])
         assert code == 0
         out = capsys.readouterr().out

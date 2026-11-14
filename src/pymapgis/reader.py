@@ -159,6 +159,7 @@ _CRS_ELLIPSOID_OFFSET = 110
 _CRS_SCALE_OFFSET = 143
 _CRS_CENTRAL_MERIDIAN_OFFSET = 151
 _CRS_STD_LAT_OFFSET = 175
+_CRS_PROJECTION_SCALE_OFFSET = 232  # double: tmerc k (Gauss-Kruger 1, UTM 0.9996)
 
 # Which of the 16 physical header sections holds the attribute table.
 _ATTR_HEADER_INDEX = {
@@ -504,9 +505,17 @@ def _read_crs(file_obj: BinaryIO) -> Tuple[Any, float]:
 
     try:
         if projection_code == 5:  # Transverse Mercator
+            file_obj.seek(_CRS_PROJECTION_SCALE_OFFSET)
+            raw_projection_scale = file_obj.read(8)
+            projection_scale = 1.0
+            if len(raw_projection_scale) == 8:
+                candidate = struct.unpack("<d", raw_projection_scale)[0]
+                if np.isfinite(candidate) and candidate > 0:
+                    projection_scale = candidate
             crs = pyproj.CRS(
-                f"+proj={proj_name} +lat_0=0 +lon_0={central_meridian} +k=1 "
-                f"+x_0=500000 +y_0=0 {ellipsoid} +units=m +no_defs"
+                f"+proj={proj_name} +lat_0=0 +lon_0={central_meridian} "
+                f"+k={projection_scale} +x_0=500000 +y_0=0 "
+                f"{ellipsoid} +units=m +no_defs"
             )
             return crs, scale
 
@@ -1334,6 +1343,7 @@ class Reader:
         self._read_graphic_params = read_graphic_params
         self.shapeType: Optional[str] = None
         self.crs: Any = ""
+        self.coordinate_scale_factor: float = 1.0
         self.bbox: Optional[np.ndarray] = None
         self.fields: List[Tuple[str, str, int]] = []
         self.data: pd.DataFrame = pd.DataFrame()
@@ -1406,6 +1416,7 @@ class Reader:
         )
 
         self.crs, scale = _read_crs(file_obj)
+        self.coordinate_scale_factor = float(scale)
 
         geom_start, geom_size = header_entries[0]
         coord_start, coord_size = header_entries[1]
@@ -1509,6 +1520,9 @@ class Reader:
                 axis=1,
             )
         self.geodataframe = gpd.GeoDataFrame(data, crs=self.crs, geometry=self.geom)
+        self.geodataframe.attrs["mapgis_coordinate_scale_factor"] = (
+            self.coordinate_scale_factor
+        )
         if getattr(self, "_field_meta", None):
             self.geodataframe.attrs["mapgis_field_meta"] = self._field_meta
         if self.shapeType in ("POINT", "LINE", "POLYGON"):

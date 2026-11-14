@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "integrated_at": "2026-11-13",
+  "description": "Five generic MapGIS graphic libraries required by Reader/Renderer integration tests",
+  "source": "D:/SLIB/SLIB",
+  "current_distribution": "Bundled under tests/fixtures/slib and pymapgis/testing/fixtures/slib in source archives and wheels",
+  "spatial_data": "No geological spatial features, coordinates, map sheets, attributes or geological units are stored in these files",
+  "licence_note": "Supplied by the user as a generic graphic library suitable for packaging. No additional licence or public-domain dedication is inferred.",
+  "libraries": {
+    "Subgraph.lib": {
+      "role": "WT point symbols",
+      "bytes": 9133990,
+      "sha256": "c1b5c81c48e42814e478d74d7a888f0e200c3901a6410a12db477c2cd99294ee"
+    },
+    "LINESTY.lib": {
+      "role": "WL line styles",
+      "bytes": 519050,
+      "sha256": "1f6c7462882ac83f25787e07f11f5860336d3e16c988ca62b607b397ae4f537f"
+    },
+    "Fillgrph.lib": {
+      "role": "WP fill patterns",
+      "bytes": 2501678,
+      "sha256": "6038d35e2c5d98f50dd7592b37d46cc579b628aa6db596715c2d81345a555171"
+    },
+    "Colorlib.lib": {
+      "role": "pattern, line and point colours",
+      "bytes": 3500,
+      "sha256": "ee7d841116835b2b01236c178a8d657d5e31733d2782c3673415451ee3eee6d4"
+    },
+    "Pcolor.lib": {
+      "role": "WP fill colours",
+      "bytes": 131260,
+      "sha256": "7911bc7ae16a72d2d19372ef710754bc24145b2ebb0234c874abb72776c84fd3"
+    }
+  },
+  "validation": {
+    "library_count": 5,
+    "native_visual_acceptance": "PENDING: library parsing and pymapgis rendering do not replace native MapGIS visual acceptance"
+  },
+  "totals": {
+    "bytes": 12289478
+  }
+}
