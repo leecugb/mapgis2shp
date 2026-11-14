@@ -24,6 +24,7 @@ class FakeColorLib:
             1: (0.0, 0.0, 0.0),
             4: (1.0, 1.0, 0.0),
             6: (1.0, 0.0, 0.0),
+            9: (1.0, 1.0, 1.0),
         }.get(number)
 
 
@@ -66,6 +67,15 @@ def make_renderer(symbols=None, styles=None, **kwargs):
     )
     kwargs.setdefault("map_units_per_mm", 0.25)
     return GraphicRenderer(libraries, **kwargs)
+
+
+def _make_axes():
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+
+    fig = Figure()
+    FigureCanvasAgg(fig)
+    return fig, fig.add_subplot(111)
 
 
 def filled_symbol():
@@ -195,6 +205,34 @@ def test_symbol_pen_width_uses_native_value():
     ax = fig.add_subplot(111)
     renderer.draw_layer(ax, wt)
     assert ax.lines[-1].get_linewidth() == pytest.approx(3.0 * graphic.MM_TO_PT)
+    fig.clear()
+
+
+def test_symbol_uniform_scale_preserves_arrowhead_symmetry():
+    shaft = SubPath(points=[(-0.00018, -0.50126), (-0.00018, 0.49874)])
+    head = SubPath(points=[
+        (-0.25018, 0.12374),
+        (-0.00018, 0.49874),
+        (0.24982, 0.12374),
+    ])
+    symbol = Symbol(
+        no=1894,
+        type=2,
+        n=10,
+        header_len=8,
+        header_u16=[2, 10, 0, 2],
+        subpaths=[shaft, head],
+    )
+    renderer = make_renderer(symbols={1894: symbol})
+    fig, ax = _make_axes()
+    report = {"unknown_colors": {}, "overridden_colors": {}}
+    assert renderer._draw_symbol(
+        ax, 0, 0, 1894, 2.2502, 1.4885, 56.841, (0, 0, 0), 1, report
+    )
+    shaft_xy = ax.lines[0].get_xydata()
+    assert np.linalg.norm(np.diff(shaft_xy, axis=0)[0]) == pytest.approx(1.4885)
+    left, tip, right = ax.lines[-1].get_xydata()
+    assert np.linalg.norm(left - tip) == pytest.approx(np.linalg.norm(right - tip))
     fig.clear()
 
 
@@ -530,6 +568,35 @@ def test_stamp_clips_partial_cycle_at_original_endpoint():
     assert not np.any(np.linalg.norm(np.diff(segments, axis=1), axis=-1) == 0)
 
 
+def test_stamp_clips_partial_fill_at_original_endpoint():
+    renderer = make_renderer()
+    buffer = _StampBuffer()
+    rhythm = {
+        "kind": "payload",
+        "period_mm": 1.0,
+        "lines": [],
+        "polylines": [],
+        "dots": [],
+        "fills": [[(0.0, 0.0), (1.0, 0.2), (1.0, -0.2)]],
+    }
+    renderer._stamp_along(
+        np.asarray([(0.0, 0.0), (0.75, 0.0)]),
+        rhythm,
+        xc=1.0,
+        yc=1.0,
+        unit=1.0,
+        color=(0, 0, 0),
+        line_width=1.0,
+        min_radius=0.001,
+        buffer=buffer,
+    )
+    assert buffer.fills
+    vertices = np.concatenate(buffer.fills)
+    assert vertices[:, 0].min() >= 0.0
+    assert vertices[:, 0].max() <= 0.75
+    assert np.any(np.isclose(vertices[:, 0], 0.75))
+
+
 def test_stamp_retains_origin_tick_without_end_seam_duplicate():
     renderer = make_renderer()
     buffer = _StampBuffer()
@@ -654,6 +721,56 @@ def test_native_text_advance_and_compression(spacing, compressed):
     fig.clear()
 
 
+def test_attitude_text_scale_compounds_with_category_scale():
+    wt = gpd.GeoDataFrame(
+        {
+            "point_type": [0, 0, 0, 0],
+            "CHFCED": ["60", "60", "60", "60"],
+            "CHFCEC": ["产状", "断层产状", "注记", "断层辅助点"],
+            "height": [5.0, 5.0, 5.0, 5.0],
+            "width": [2.0, 2.0, 2.0, 2.0],
+            "spacing": [0.5, 0.5, 0.5, 0.5],
+            "angle": [0.0, 0.0, 0.0, 0.0],
+            "color": [1, 1, 1, 1],
+        },
+        geometry=[Point(0, 0), Point(0, 1), Point(0, 2), Point(0, 3)],
+        crs="EPSG:32643",
+    )
+    renderer = make_renderer(text_category_scales={"产状": 0.5})
+    fig, ax = _make_axes()
+    renderer.draw_layer(ax, wt)
+    base = 5.0 * graphic.MM_TO_PT
+    assert ax.texts[0].get_fontsize() == pytest.approx(base * 0.5 * 0.3)
+    assert ax.texts[2].get_fontsize() == pytest.approx(base * 0.3)
+    assert ax.texts[4].get_fontsize() == pytest.approx(base)
+    assert ax.texts[6].get_fontsize() == pytest.approx(base * 0.3)
+    assert ax.texts[1].get_position()[0] == pytest.approx(2.5 * 0.25 * 0.5 * 0.3)
+    assert ax.texts[3].get_position()[0] == pytest.approx(2.5 * 0.25 * 0.3)
+    assert ax.texts[5].get_position()[0] == pytest.approx(2.5 * 0.25)
+    assert ax.texts[7].get_position()[0] == pytest.approx(2.5 * 0.25 * 0.3)
+    fig.clear()
+
+
+def test_polygon_label_scale_applies_to_caller_base_fontsize():
+    wp = gpd.GeoDataFrame(
+        {
+            "fill_color": [6],
+            "pattern": [0],
+            "pattern_color": [0],
+            "pattern_height": [0.0],
+            "pattern_width": [0.0],
+            "QDUECC": ["Qh"],
+        },
+        geometry=[Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])],
+        crs="EPSG:32643",
+    )
+    renderer = make_renderer(polygon_label_fontsize=5.0)
+    fig, ax = _make_axes()
+    renderer.draw_layer(ax, wp)
+    assert ax.texts[0].get_fontsize() == pytest.approx(3.5)
+    fig.clear()
+
+
 def test_geosciml_polygon_labels_replace_wt_unit_annotations():
     wp = gpd.GeoDataFrame(
         {
@@ -686,7 +803,7 @@ def test_geosciml_polygon_labels_replace_wt_unit_annotations():
     label = ax.texts[0]
     assert label.get_text() == r"$\mathrm{Qp_{3}pal}$"
     assert label.get_position() == (0.5, 0.5)
-    assert label.get_fontsize() == 4.5
+    assert label.get_fontsize() == pytest.approx(4.5 * 0.7)
     assert label.get_bbox_patch().get_alpha() == 0.5
     fig.clear()
 
@@ -831,8 +948,9 @@ def test_unit_color_override_precedes_numeric_fill_override():
     ax = fig.add_subplot(111)
     report = renderer.draw_layer(ax, wp)
     assert report["unit_overrides"] == {"Qp3pal": 1}
-    assert ax.patches[0].get_facecolor()[:3] == (1.0, 217 / 255, 102 / 255)
-    assert ax.patches[1].get_facecolor()[:3] == (0.0, 0.0, 1.0)
+    facecolors = ax.collections[0].get_facecolor()
+    assert np.allclose(facecolors[0][:3], (1.0, 217 / 255, 102 / 255))
+    assert np.allclose(facecolors[1][:3], (0.0, 0.0, 1.0))
     fig.clear()
 
 
@@ -846,7 +964,7 @@ def test_library_directory_validation_and_loading(tmp_path, monkeypatch):
 
     for class_name in ("LinestyLib", "SubgraphLib", "FillgrphLib", "ColorLib", "PcolorLib"):
         monkeypatch.setattr(
-            graphic, class_name, lambda path, name=class_name: (name, Path(path).name)
+            graphic, class_name, lambda path, name=class_name, **kwargs: (name, Path(path).name)
         )
     libraries = GraphicLibraries.from_directory(tmp_path)
     assert libraries.linesty == ("LinestyLib", "LINESTY.lib")
@@ -855,6 +973,536 @@ def test_library_directory_validation_and_loading(tmp_path, monkeypatch):
     assert libraries.color == ("ColorLib", "Colorlib.lib")
     assert libraries.pcolor == ("PcolorLib", "Pcolor.lib")
     assert libraries.directory == tmp_path
+
+
+def test_multi_part_offset_curves_are_supported():
+    renderer = make_renderer()
+    points = np.asarray([(0, 0), (1, 1), (2, 0), (1, 0.1), (0, 1)])
+    from shapely.geometry import MultiLineString
+
+    # Construct the multipart input explicitly: GEOS versions differ in whether
+    # offsetting this self-crossing source splits it into one or two line strings.
+    curve = MultiLineString([[(0, 0), (1, 1)], [(1, 1), (2, 0)]])
+    assert len(curve.geoms) == 2
+    parts = renderer._substring_parts(curve, 0.0, curve.length)
+    assert len(parts) == 2
+    assert sum(part.length for part in parts) == pytest.approx(curve.length)
+
+    rhythm = {"period_mm": 1.0, "lines": [(0.0, 1.0, 0.1)]}
+    fig, ax = _make_axes()
+    renderer._draw_raised_parallel(ax, points, rhythm, (0, 0, 0), 1, 1, 1, 1)
+    assert ax.lines
+    fig.clear()
+
+    buffer = _StampBuffer()
+    renderer._stamp_along(
+        points,
+        {
+            "kind": "parallel",
+            "period_mm": 1.0,
+            "polylines": [[(0.0, 0.1), (1.0, 0.1)]],
+            "dots": [],
+            "fills": [],
+        },
+        1,
+        1,
+        1,
+        (0, 0, 0),
+        1,
+        0.01,
+        buffer,
+    )
+    assert buffer.segments
+
+
+def test_annotation_special_characters_survive_mathtext_and_save(tmp_path):
+    from matplotlib.mathtext import MathTextParser
+
+    raw = "a_b^{}$%\\#&~#-1"
+    MathTextParser("agg").parse(_annotation_to_mathtext(raw))
+    wt = gpd.GeoDataFrame(
+        {
+            "point_type": [0],
+            "CHFCED": [raw],
+            "CHFCEC": ["注记"],
+            "height": [2.0],
+            "width": [2.0],
+            "spacing": [0.0],
+            "angle": [0.0],
+            "color": [1],
+        },
+        geometry=[Point(0, 0)],
+        crs="EPSG:32643",
+    )
+    output = tmp_path / "special-text.png"
+    result = make_renderer().render([wt], output)
+    assert output.is_file()
+    result.figure.clear()
+
+
+def test_symbol_fill_uses_descriptor_for_triangle_and_arc():
+    triangle = SubPath(points=[(0, 0), (0.2, 0), (0, 0.2)])
+    arc = SubPath(points=[(0, 0), (0.5, 0), (180, 360)])
+    arc.arc = (0, 0, 0.5, 180, 360)
+    symbol = Symbol(
+        no=42,
+        type=2,
+        n=6,
+        header_len=8,
+        header_u16=[2, 6, 0, 2],
+        subpaths=[triangle, arc],
+        elements=[Element(mode=0, fill_color=6, w2=0, w3=0, sub_start=0, sub_count=2)],
+    )
+    renderer = make_renderer(symbols={42: symbol})
+    fig, ax = _make_axes()
+    report = {"unknown_colors": {}, "overridden_colors": {}}
+    assert renderer._draw_symbol(ax, 0, 0, 42, 1, 1, 0, (0, 0, 0), 1, report)
+    assert len(ax.patches) == 2
+    assert all(np.allclose(patch.get_facecolor()[:3], (1, 0, 0)) for patch in ax.patches)
+    fig.clear()
+
+
+def test_circle_dots_keep_shape_and_fill_state():
+    mixed = GraphicRenderer._normalise_rhythm(
+        {"kind": "mixed_dash", "period_mm": 1, "dots": [(0.25, -0.1, 0.05)]}
+    )
+    assert mixed["dots"] == [(0.25, -0.1, 0.05)]
+    assert mixed["polylines"] == []
+
+    rhythm = GraphicRenderer._normalise_rhythm(
+        {
+            "kind": "filled_rect_dot_bars",
+            "period_mm": 1,
+            "dots": [(0.25, 0, 0.05, False), (0.75, 0, 0.05, True)],
+        }
+    )
+    assert [dot[3] for dot in rhythm["dots"]] == [False, True]
+    renderer = make_renderer()
+    buffer = _StampBuffer()
+    renderer._stamp_along(
+        np.asarray([(0, 0), (1, 0)]),
+        rhythm,
+        1,
+        1,
+        1,
+        (1, 0, 0),
+        0.5,
+        0.01,
+        buffer,
+    )
+    assert buffer.dot_filled == [False, True]
+    fig, ax = _make_axes()
+    renderer._flush_stamps(ax, buffer, 100)
+    dots = ax.collections[0]
+    assert dots.get_facecolors()[:, 3].tolist() == [0, 1]
+    assert dots.get_edgecolors()[:, 3].tolist() == [1, 0]
+    fig.clear()
+
+
+def test_payload_period_includes_negative_extent():
+    from types import SimpleNamespace
+
+    subline = SimpleNamespace(
+        is_solid=False,
+        period_mm=None,
+        parameter_geometry=lambda: [("polyline", [(-2.0, 0.0), (3.0, 0.0)])],
+    )
+    style = SimpleNamespace(sublines=[subline])
+    rhythm = GraphicRenderer._payload_rhythm(style)
+    assert rhythm["period_mm"] == pytest.approx(5.0)
+
+
+def test_zero_width_and_coefficients_are_not_replaced(monkeypatch):
+    solid = LineStyle(
+        no=1,
+        n_subs=1,
+        sublines=[SubLine(n=1, length=24, f32_zone=[0.0, 0.0, 1.0, 0.0])],
+    )
+    renderer = make_renderer(styles={1: solid}, line_min_pt=0.05)
+    wl = gpd.GeoDataFrame(
+        {
+            "linetype": [1],
+            "aux_linetype": [0],
+            "color": [1],
+            "width": [0.0],
+            "x_coef": [1.0],
+            "y_coef": [1.0],
+        },
+        geometry=[LineString([(0, 0), (1, 0)])],
+        crs="EPSG:32643",
+    )
+    fig, ax = _make_axes()
+    renderer.draw_layer(ax, wl)
+    assert ax.lines[0].get_linewidth() == pytest.approx(0.05)
+    fig.clear()
+
+    patterned = wl.copy()
+    patterned["x_coef"] = [0.0]
+    patterned["y_coef"] = [0.0]
+    monkeypatch.setattr(
+        renderer,
+        "_rhythm",
+        lambda number, aux=0: {
+            "kind": "payload",
+            "period_mm": 1.0,
+            "polylines": [[(0, 0), (1, 0)]],
+            "dots": [],
+            "fills": [],
+        },
+    )
+    fig, ax = _make_axes()
+    report = renderer.draw_layer(ax, patterned)
+    assert report["empty_pattern"] == 1
+    assert "pattern" not in report
+    assert not ax.lines and not ax.collections
+    fig.clear()
+
+
+def test_tile_mask_has_exact_requested_size(monkeypatch):
+    monkeypatch.setattr(
+        graphic,
+        "pattern_geometry",
+        lambda library, number: {
+            "fill_polygons": [[(0.1, 0.1), (0.9, 0.1), (0.9, 0.9)]],
+            "polylines": [],
+            "circles": [],
+            "arcs": [],
+        },
+    )
+    renderer = make_renderer(tile_pixels=29)
+    assert renderer._tile_mask(1).shape == (29, 29)
+
+
+def test_pattern_byte_limit_prevents_large_allocation(monkeypatch):
+    monkeypatch.setattr(
+        graphic,
+        "pattern_geometry",
+        lambda library, number: {
+            "fill_polygons": [[(0.1, 0.1), (0.9, 0.1), (0.9, 0.9)]],
+            "polylines": [],
+            "circles": [],
+            "arcs": [],
+        },
+    )
+    renderer = make_renderer(tile_pixels=4, max_pattern_bytes=1)
+    fig, ax = _make_axes()
+    outcome = renderer._draw_pattern(
+        ax,
+        Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+        1,
+        (0, 0, 0),
+        1,
+        1,
+    )
+    assert outcome == "too_large"
+    assert not ax.images
+    fig.clear()
+
+
+def test_bare_string_parameters_are_single_values():
+    renderer = make_renderer(
+        exclude_text_categories="代号",
+        unit_code_fields="QDUECC",
+        polygon_label_fields="QDUECC_eff",
+    )
+    assert renderer.exclude_text_categories == {"代号"}
+    assert renderer.unit_code_fields == ("QDUECC",)
+    assert renderer.polygon_label_fields == ("QDUECC_eff",)
+
+
+def test_aux_flag_disables_residual_auxiliary_style(monkeypatch):
+    renderer = make_renderer()
+    calls = []
+    monkeypatch.setattr(
+        renderer,
+        "_rhythm",
+        lambda number, aux=0: calls.append((number, aux)) or {"kind": "solid_pen"},
+    )
+    wl = gpd.GeoDataFrame(
+        {
+            "linetype": [1],
+            "aux_linetype": [7],
+            "aux_flag": [1],
+            "color": [1],
+            "width": [0.1],
+            "x_coef": [1.0],
+            "y_coef": [1.0],
+        },
+        geometry=[LineString([(0, 0), (1, 0)])],
+        crs="EPSG:32643",
+    )
+    fig, ax = _make_axes()
+    report = renderer.draw_layer(ax, wl)
+    assert calls == [(1, 0)]
+    assert "aux_pattern" not in report
+    fig.clear()
+
+
+@pytest.mark.parametrize(
+    "color,transparent,expected_collections", [(9, 0, 1), (9, 1, 0), (6, 1, 1)]
+)
+def test_transparent_output_skips_only_white_fills(
+    monkeypatch, color, transparent, expected_collections
+):
+    renderer = make_renderer()
+    monkeypatch.setattr(
+        renderer,
+        "_rhythm",
+        lambda number, aux=0: {
+            "kind": "payload",
+            "period_mm": 1.0,
+            "polylines": [],
+            "dots": [],
+            "fills": [[(0, 0), (0.5, 0), (0, 0.5)]],
+            "unknown_fills": 0,
+        },
+    )
+    wl = gpd.GeoDataFrame(
+        {
+            "linetype": [1],
+            "aux_linetype": [0],
+            "color": [color],
+            "width": [0.1],
+            "x_coef": [1.0],
+            "y_coef": [1.0],
+            "transparent": [transparent],
+        },
+        geometry=[LineString([(0, 0), (1, 0)])],
+        crs="EPSG:32643",
+    )
+    fig, ax = _make_axes()
+    renderer.draw_layer(ax, wl)
+    assert len(ax.collections) == expected_collections
+    fig.clear()
+
+
+def test_library_directory_forwards_channel_order(tmp_path, monkeypatch):
+    for name in ("LINESTY.lib", "Subgraph.lib", "Fillgrph.lib", "Colorlib.lib", "Pcolor.lib"):
+        (tmp_path / name).touch()
+    for name in ("LinestyLib", "SubgraphLib", "FillgrphLib"):
+        monkeypatch.setattr(graphic, name, lambda path: object())
+    seen = {}
+
+    def fake_color(path, **kwargs):
+        seen["color"] = kwargs["channel_order"]
+        return object()
+
+    def fake_pcolor(path, **kwargs):
+        seen["pcolor"] = kwargs["channel_order"]
+        return object()
+
+    monkeypatch.setattr(graphic, "ColorLib", fake_color)
+    monkeypatch.setattr(graphic, "PcolorLib", fake_pcolor)
+    GraphicLibraries.from_directory(tmp_path, channel_order="YMCK")
+    assert seen == {"color": "YMCK", "pcolor": "YMCK"}
+
+
+def test_plain_dollar_text_never_enters_mathtext_mode(tmp_path):
+    raw = "a$b$c"
+    wt = gpd.GeoDataFrame(
+        {
+            "point_type": [0],
+            "CHFCED": [raw],
+            "CHFCEC": ["注记"],
+            "height": [3.0],
+            "width": [3.0],
+            "spacing": [0.0],
+            "angle": [0.0],
+            "color": [1],
+        },
+        geometry=[Point(0, 0)],
+        crs="EPSG:32643",
+    )
+    renderer = make_renderer(native_text_layout=False)
+    result = renderer.render([wt], tmp_path / "plain-dollar.png")
+    assert result.axes.texts[0].get_text() == raw
+    assert not result.axes.texts[0].get_parse_math()
+    result.figure.clear()
+
+    native = make_renderer(native_text_layout=True)
+    result = native.render([wt], tmp_path / "native-dollar.png")
+    assert all(not text.get_parse_math() for text in result.axes.texts)
+    result.figure.clear()
+
+
+def test_one_shot_forwards_channel_order(monkeypatch, tmp_path):
+    wp, _, _ = sample_layers()
+    libraries = make_renderer().libraries
+    seen = {}
+
+    def from_directory(path, **kwargs):
+        seen.update(kwargs)
+        return libraries
+
+    monkeypatch.setattr(GraphicLibraries, "from_directory", from_directory)
+    result = render_graphic_map(
+        [wp],
+        "ignored",
+        tmp_path / "channel.png",
+        channel_order="YMCK",
+        map_units_per_mm=0.25,
+    )
+    assert seen == {"channel_order": "YMCK"}
+    result.figure.clear()
+    with pytest.raises(ValueError, match="only valid"):
+        render_graphic_map([wp], libraries, channel_order="YMCK")
+
+
+def test_nonpositive_text_scales_are_rejected():
+    with pytest.raises(ValueError, match="text_scale"):
+        make_renderer(text_scale=0)
+    with pytest.raises(ValueError, match="text_category_scales"):
+        make_renderer(text_category_scales={"产状": -1})
+
+
+def test_pattern_cycle_limit_prevents_unbounded_work():
+    renderer = make_renderer(max_pattern_cycles=2)
+    points = np.asarray([(0.0, 0.0), (100.0, 0.0)])
+    rhythm = {
+        "kind": "payload",
+        "period_mm": 1.0,
+        "polylines": [[(0, 0), (1, 0)]],
+        "dots": [],
+        "fills": [],
+    }
+    buffer = _StampBuffer()
+    outcome = renderer._stamp_along(
+        points, rhythm, 1, 1, 1, (0, 0, 0), 1, 0.01, buffer
+    )
+    assert outcome == "too_many_cycles"
+    assert not buffer.segments
+
+    fig, ax = _make_axes()
+    outcome = renderer._draw_raised_parallel(
+        ax,
+        points,
+        {"period_mm": 1.0, "lines": [(0.0, 1.0, 0.1)]},
+        (0, 0, 0),
+        1,
+        1,
+        1,
+        1,
+    )
+    assert outcome == "too_many_cycles"
+    report = {}
+    renderer._draw_wl_line(
+        ax,
+        points,
+        rhythm,
+        (0, 0, 0),
+        1,
+        1,
+        1,
+        1,
+        1,
+        _StampBuffer(),
+        report,
+        prefix="",
+    )
+    assert report["cycle_limit"] == 1
+    assert "pattern" not in report
+    fig.clear()
+
+
+def test_zero_symbol_dimension_does_not_collapse_geometry():
+    symbol = Symbol(
+        no=99,
+        type=1,
+        n=2,
+        header_len=4,
+        header_u16=[1, 2],
+        subpaths=[SubPath(points=[(0, -1), (0, 1)])],
+    )
+    renderer = make_renderer(symbols={99: symbol})
+    fig, ax = _make_axes()
+    report = {"unknown_colors": {}, "overridden_colors": {}}
+    assert renderer._draw_symbol(ax, 0, 0, 99, 2, 0, 0, (0, 0, 0), 1, report)
+    assert np.ptp(ax.lines[0].get_xydata()[:, 1]) == pytest.approx(4.0)
+    assert renderer._draw_symbol(ax, 0, 0, 99, 0, 0, 0, (0, 0, 0), 1, report)
+    assert np.ptp(ax.lines[-1].get_xydata()[:, 1]) == pytest.approx(2.0)
+    fig.clear()
+
+
+def test_line_style_decode_is_cached():
+    class CountingLinesty:
+        def __init__(self):
+            self.calls = 0
+
+        def decode(self, number):
+            self.calls += 1
+            return None
+
+    linesty = CountingLinesty()
+    libraries = GraphicLibraries(
+        linesty=linesty,
+        subgraph=FakeSubgraphLib(),
+        fillgrph=FakeFillgrphLib(),
+        color=FakeColorLib(),
+    )
+    renderer = GraphicRenderer(libraries)
+    for _ in range(4):
+        assert renderer._line_style(7) is None
+    assert linesty.calls == 1
+
+
+def test_fill_clipping_handles_covering_and_degenerate_rings():
+    renderer = make_renderer()
+    points = np.asarray([(0.0, 0.0), (0.75, 0.0)])
+    covering = {
+        "kind": "payload",
+        "period_mm": 1.0,
+        "polylines": [],
+        "dots": [],
+        "fills": [[(-1.0, 0.2), (2.0, 0.2), (2.0, -0.2), (-1.0, -0.2)]],
+    }
+    buffer = _StampBuffer()
+    renderer._stamp_along(points, covering, 1, 1, 1, (0, 0, 0), 1, 0.01, buffer)
+    assert buffer.fills
+    vertices = np.concatenate(buffer.fills)
+    assert vertices[:, 0].min() >= 0.0
+    assert vertices[:, 0].max() <= 0.75
+
+    degenerate = dict(covering)
+    degenerate["fills"] = [[(-1.0, 0.0), (2.0, 0.0), (2.0, 0.0), (-1.0, 0.0)]]
+    buffer = _StampBuffer()
+    renderer._stamp_along(points, degenerate, 1, 1, 1, (0, 0, 0), 1, 0.01, buffer)
+    assert not buffer.fills
+
+
+def test_geodataframe_metadata_supports_attribution_and_empty_layers():
+    empty = gpd.GeoDataFrame(
+        {"point_type": []},
+        geometry=[],
+        crs="EPSG:32643",
+    )
+    empty.attrs["source"] = "empty.wt"
+    empty.attrs["kind"] = "wt"
+    renderer = make_renderer()
+    fig, ax = _make_axes()
+    report = renderer.draw_layer(ax, empty)
+    assert report["source"] == "empty.wt"
+    assert report["kind"] == "wt"
+    assert report["features"] == 0
+    assert report["drawn"] == 0
+    fig.clear()
+
+
+def test_nonfinite_label_scales_are_rejected():
+    with pytest.raises(ValueError, match="polygon_label_scale"):
+        make_renderer(polygon_label_scale=float("nan"))
+    with pytest.raises(ValueError, match="attitude_text_scale"):
+        make_renderer(attitude_text_scale=float("nan"))
+
+
+def test_numpy_bool_dot_fill_state_is_preserved():
+    rhythm = GraphicRenderer._normalise_rhythm(
+        {
+            "kind": "filled_rect_dot_bars",
+            "period_mm": 1,
+            "dots": [(0.5, 0.0, 0.1, np.True_)],
+        }
+    )
+    assert rhythm["dots"][0][3] is True
 
 
 def test_invalid_output_and_missing_graphic_fields(tmp_path):

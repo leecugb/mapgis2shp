@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "mapgis2shp: an open-source Python reader and writer for the MapGIS 6.x/67 binary vector formats, validated against the native export"
+title: "mapgis2shp: open-source interoperability and original-library rendering for legacy MapGIS 6.x/67 vector data"
 message: "If you use this software, please cite it as below."
 abstract: >-
   mapgis2shp (import name pymapgis) is an open-source Python reader and
@@ -11,11 +11,11 @@ abstract: >-
   GeoDataFrames / shapefiles, enabling Chinese
   geological-survey data locked in the proprietary MapGIS format to enter
   the open-source geospatial stack and return to it.
-version: "2.7.1"
-date-released: 2026-11-07
+version: "2.7.2"
+date-released: 2026-11-14
 license: Apache-2.0
 repository-code: https://github.com/leecugb/mapgis2shp
-url: https://doi.org/10.5281/zenodo.21487339
+url: https://doi.org/10.5281/zenodo.24036158
 keywords:
   - MapGIS
   - GIS
@@ -48,7 +48,7 @@ authors:
     affiliation: Xi'an Mineral Resources Survey, China Geological Survey
 preferred-citation:
   type: software
-  title: "mapgis2shp: an open-source Python reader and writer for the MapGIS 6.x/67 binary vector formats, validated against the native export"
+  title: "mapgis2shp: open-source interoperability and original-library rendering for legacy MapGIS 6.x/67 vector data"
   authors:
     - given-names: Shijie
       family-names: Li
@@ -71,11 +71,11 @@ preferred-citation:
     - given-names: Zengyun
       family-names: Zuo
       affiliation: Xi'an Mineral Resources Survey, China Geological Survey
-  version: "2.6.0"
-  date-released: 2026-10-26
+  version: "2.7.1"
+  date-released: 2026-11-07
   license: Apache-2.0
   repository-code: https://github.com/leecugb/mapgis2shp
-  url: https://doi.org/10.5281/zenodo.21487339
+  url: https://doi.org/10.5281/zenodo.24036158
   keywords:
     - MapGIS
     - GIS
@@ -84,3 +84,44 @@ preferred-citation:
     - shapefile
     - reverse-engineering
     - geology
+references:
+  - type: dataset
+    title: "Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000) (V1)"
+    authors:
+      - given-names: Qunqiang
+        family-names: Zuo
+      - given-names: Tianzhu
+        family-names: Ye
+      - given-names: Yanli
+        family-names: Feng
+      - given-names: Zuo
+        family-names: Ge
+      - given-names: Yanggang
+        family-names: Wang
+    year: 2018
+    url: https://doi.org/10.23650/data.A.2018.NGA131703.K1.1.1.V1
+    notes: >-
+      Original source of the J43C001002 JWD layers and accompanying SLIB used
+      for software testing and validation. Produced by the Development and
+      Research Center of China Geological Survey and distributed by the
+      National Geological Archives of China. Original data terms apply.
+  - type: article
+    title: "Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000)"
+    authors:
+      - given-names: Qunqiang
+        family-names: Zuo
+      - given-names: Tianzhu
+        family-names: Ye
+      - given-names: Yanli
+        family-names: Feng
+      - given-names: Zuo
+        family-names: Ge
+      - given-names: Yanggang
+        family-names: Wang
+    year: 2018
+    journal: Geology in China
+    volume: 45
+    issue: S1
+    pages: 1-26
+    url: https://doi.org/10.12029/gc2018Z101
+    notes: "Companion article for the JWD/SLIB source dataset."

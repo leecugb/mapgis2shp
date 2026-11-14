@@ -6,6 +6,23 @@
     "vectors": "E:/AFH0.3米数据/JWD",
     "libraries": "D:/SLIB/SLIB"
   },
+  "dataset": {
+    "title": "Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000) (V1)",
+    "title_zh": "中国陆域1∶25万分幅建造构造图空间数据库（V1）",
+    "sheet": "J43C001002",
+    "sheet_zh": "库尔干幅",
+    "producer": "Development and Research Center of China Geological Survey",
+    "distributor": "National Geological Archives of China",
+    "released": "2018-09-10",
+    "doi": "10.23650/data.A.2018.NGA131703.K1.1.1.V1",
+    "companion_article_doi": "10.12029/gc2018Z101",
+    "access_url": "http://dcc.cgs.gov.cn",
+    "slib_provenance": "Five graphic libraries accompanying the same source dataset package",
+    "current_use": "Original open-edition JWD vectors and SLIB only, for software testing and validation",
+    "synthetic_derivatives": "No new coordinate-warped or virtual-geological-unit derivatives are generated or recommended as of 2026-11-08",
+    "attribution_file": "DATA_ATTRIBUTION.md",
+    "licence_note": "Public, non-classified and test-only status does not itself grant arbitrary redistribution; original terms apply."
+  },
   "fixture_roots": {
     "vectors": "tests/fixtures/jwd",
     "libraries": "tests/fixtures/slib"
@@ -17,7 +34,7 @@
     "pcolor": "PYMAPGIS_PCOLOR"
   },
   "vectors": {
-    "LDLYAAE002.WP~": {
+    "LDLYAAE002.WP": {
       "kind": "wp",
       "role": "hydrology polygons",
       "bytes": 319715,
@@ -35,7 +52,7 @@
       "bytes": 93953,
       "sha256": "26b70111b8ed1328d59a5f8c5974cf44209892a5d645e28f0ed474ffe967aefa"
     },
-    "LDZOFBB003.WP~": {
+    "LDZOFBB003.WP": {
       "kind": "wp",
       "role": "intrusive polygons",
       "bytes": 194676,
@@ -123,7 +140,8 @@
     "library_count": 5,
     "native_visual_acceptance": "not replaced by these regression fixtures"
   },
-  "licence_note": "Bundled by explicit project-owner request for regression testing; no additional licence or public-domain dedication is inferred.",
+  "current_distribution": "Original JWD vectors are not bundled in the current Git tree, wheel or source archive. The five generic SLIB libraries are bundled under tests/fixtures/slib and pymapgis/testing/fixtures/slib. Users obtain original JWD vectors through the official channel and verify them against this manifest.",
+  "licence_note": "Original JWD vectors remain external. Generic SLIB is packaged with user authorization for rendering tests; no additional licence or public-domain dedication is inferred.",
   "totals": {
     "vector_bytes": 7092289,
     "library_bytes": 12289478,

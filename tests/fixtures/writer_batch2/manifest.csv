@@ -1,0 +1,12 @@
+﻿file,geometry_type,features,outer_rings,interior_rings,consecutive_duplicates,invalid_geometries,note
+01_minimal_triangle.shp,POLYGON,1,1,0,0,0,Minimum valid three-vertex ring
+02_two_sizes.shp,POLYGON,2,2,0,0,0,Two disjoint polygons with different sizes
+03_three_holes.shp,POLYGON,1,1,3,0,0,One outer ring and three interior rings
+04_multipart_with_holes.shp,POLYGON,1,2,2,0,0,"Two outer rings, each with one hole, under one FID"
+05_touching_point.shp,POLYGON,2,2,0,0,0,Two polygons touching at one vertex only
+06_shared_edge.shp,POLYGON,2,2,0,0,0,Two polygons sharing one exact edge
+07_hole_and_island.shp,POLYGON,2,2,1,0,0,A hole and a separate island inside it
+08_duplicate_vertices.shp,POLYGON,1,1,0,2,0,Consecutive duplicates at the beginning and closure
+09_invalid_bowtie.shp,POLYGON,1,1,0,0,1,Intentionally invalid self-intersecting ring
+10_points.shp,POINT,3,,,0,0,Three points with Chinese names and nullable dates
+11_multiline_and_duplicate.shp,LINE,2,,,1,0,One MultiLineString and one line with a consecutive duplicate
