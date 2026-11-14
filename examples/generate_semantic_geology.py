@@ -17,10 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 SRC = ROOT / "src"
-G4C = ROOT / "_pypi_verify6"
-for path in (SRC, G4C):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 from geosciml4china.convert import config, mapping, model, validate  # noqa: E402
 from geosciml4china.convert.emit import document, features  # noqa: E402

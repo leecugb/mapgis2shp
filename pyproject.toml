@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mapgis2shp"
-version = "2.7.2"
+version = "2.7.3"
 description = "Open-source MapGIS vector interoperability, graphic-library parsing and original-library rendering with GeoPandas."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -55,6 +55,9 @@ dev = [
     "ruff>=0.1.0",
     "twine>=4.0",
     "matplotlib>=3.5",
+    "pymupdf>=1.24,<1.27; python_version < '3.10'",
+    "pymupdf>=1.24; python_version >= '3.10'",
+    "lxml>=4.0",
 ]
 [project.scripts]
 pymapgis = "pymapgis.cli:main"
@@ -118,6 +121,7 @@ exclude = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 markers = [
     "integration: tests that read real MapGIS files",
 ]

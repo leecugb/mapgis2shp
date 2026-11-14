@@ -3,20 +3,24 @@ import os
 from pathlib import Path
 
 import pytest
-from lxml import etree
 
-from examples.generate_semantic_geology import (
+pytest.importorskip("geosciml4china")
+
+from examples.generate_semantic_geology import (  # noqa: E402
     build_semantics,
     emit_gml,
     enrich_layers,
 )
-from examples.generate_synthetic_geology import (
+from examples.generate_synthetic_geology import (  # noqa: E402
     generate_layers,
     read_layers,
     render_layers,
     write_layers,
 )
-from examples.render_bundled_jwd import summarise
+from examples.render_bundled_jwd import summarise  # noqa: E402
+
+etree = pytest.importorskip("lxml.etree")
+pytest.importorskip("geosciml4china")
 
 NS = {"gsmlb": "http://www.opengis.net/gsml/4.1/GeoSciML-Basic"}
 
