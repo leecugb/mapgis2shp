@@ -9,7 +9,9 @@ from pymapgis.testing import usgs_conejo_path
 def test_usgs_conejo_fixture_manifest_and_files():
     root = usgs_conejo_path()
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["distribution"] == "USGS source fixture; optional native six-layer comparison data"
+    assert manifest["distribution"] == (
+        "USGS source fixture; optional native six-layer comparison data"
+    )
     assert "public-domain" in manifest["rights_note"]
     assert "Generic SLIB is bundled separately" in manifest["rights_note"]
     assert len(manifest["native_files"]) == 6

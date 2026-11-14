@@ -144,11 +144,17 @@ def test_vector_geopdf_has_no_raster_and_exact_page_scale(tmp_path):
     assert readback["text_character_count"] >= len("Vector")
     assert readback["page_width_pt"] == pytest.approx(written["page_width_pt"])
     assert readback["page_height_pt"] == pytest.approx(written["page_height_pt"])
-    actual_x_scale = abs(written["page_transform"][1]) * written["page_width_pt"] * written["metres_per_unit"] / (
-        written["page_width_mm"] / 1000.0
+    actual_x_scale = (
+        abs(written["page_transform"][1])
+        * written["page_width_pt"]
+        * written["metres_per_unit"]
+        / (written["page_width_mm"] / 1000.0)
     )
-    actual_y_scale = abs(written["page_transform"][5]) * written["page_height_pt"] * written["metres_per_unit"] / (
-        written["page_height_mm"] / 1000.0
+    actual_y_scale = (
+        abs(written["page_transform"][5])
+        * written["page_height_pt"]
+        * written["metres_per_unit"]
+        / (written["page_height_mm"] / 1000.0)
     )
     assert actual_x_scale == pytest.approx(1000, rel=1e-9)
     assert actual_y_scale == pytest.approx(1000, rel=1e-9)
@@ -170,7 +176,8 @@ def test_example_help_does_not_import_pymupdf_when_geopdf_is_disabled():
     script = root / "examples/render_bundled_jwd.py"
     code = (
         "import runpy,sys; sys.modules['pymupdf']=None; "
-        f"sys.argv=['render_bundled_jwd.py','--help']; runpy.run_path({str(script)!r},run_name='__main__')"
+        f"sys.argv=['render_bundled_jwd.py','--help']; "
+        f"runpy.run_path({str(script)!r},run_name='__main__')"
     )
     completed = subprocess.run(
         [sys.executable, "-c", code],
