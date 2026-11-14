@@ -161,9 +161,9 @@ should use both:
   header fields, section layouts, display gates, and an evidence appendix
   cross-referencing code constants, native files, and the official plain-text
   exports
-- [Plaintext-pair audit report](docs/plaintext_pairs_audit.md) and the
-  `_audit_plaintext_pairs.py` tool — field-by-field cross-validation against
-  official `.wat` / `.wal` / `.wap` exports
+- [Plaintext-pair audit report](docs/plaintext_pairs_audit.md) — historical
+  field-by-field cross-validation against official `.wat` / `.wal` / `.wap`
+  exports
 
 Native-verification lessons learned the hard way (treat these as protocol):
 
