@@ -9,6 +9,8 @@ from pymapgis.testing import (
     fixture_path,
     jwd_path,
     slib_path,
+)
+from pymapgis.testing import (
     testdata_path as standard_testdata_path,
 )
 
@@ -51,7 +53,9 @@ def test_bundled_testdata_and_slib_inventory():
 
     libraries = json.loads(fixture_path("slib/manifest.json").read_text(encoding="utf-8"))
     assert libraries["validation"]["library_count"] == 5
-    assert libraries["totals"]["bytes"] == sum(item["bytes"] for item in libraries["libraries"].values())
+    assert libraries["totals"]["bytes"] == sum(
+        item["bytes"] for item in libraries["libraries"].values()
+    )
     for name, item in libraries["libraries"].items():
         path = slib_path(name)
         assert path.is_file()

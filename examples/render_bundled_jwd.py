@@ -139,7 +139,10 @@ def main() -> None:
         nargs=2,
         default=(12.0, 7.5),
         metavar=("WIDTH_IN", "HEIGHT_IN"),
-        help="Initial figure size used for layout before exact-scale GeoPDF sizing (default: 12 7.5)",
+        help=(
+            "Initial figure size used for layout before exact-scale GeoPDF sizing "
+            "(default: 12 7.5)"
+        ),
     )
     parser.add_argument(
         "--axes-rect",
@@ -190,7 +193,10 @@ def main() -> None:
     parser.add_argument(
         "--native-attitude-annotations",
         action="store_true",
-        help="Keep independent native dip annotations instead of deriving them from attitude points",
+        help=(
+            "Keep independent native dip annotations instead of deriving them "
+            "from attitude points"
+        ),
     )
     parser.add_argument(
         "--legacy-label-layout",
@@ -227,7 +233,10 @@ def main() -> None:
     )
     args = parser.parse_args()
     if args.attribute_dip_labels and args.native_attitude_annotations:
-        parser.error("--attribute-dip-labels and --native-attitude-annotations are mutually exclusive")
+        parser.error(
+            "--attribute-dip-labels and --native-attitude-annotations "
+            "are mutually exclusive"
+        )
     if args.axes_rect is not None:
         rect = [float(v) for v in args.axes_rect]
         if (any(not math.isfinite(v) for v in rect)
@@ -391,10 +400,18 @@ def main() -> None:
         )
         if (not math.isclose(actual_scale_x, args.scale, rel_tol=1e-9, abs_tol=1e-6)
                 or not math.isclose(actual_scale_y, args.scale, rel_tol=1e-9, abs_tol=1e-6)):
-            parser.exit(3, f"GeoPDF scale mismatch: X={actual_scale_x}, Y={actual_scale_y}, expected={args.scale}\n")
+            parser.exit(
+                3,
+                f"GeoPDF scale mismatch: X={actual_scale_x}, "
+                f"Y={actual_scale_y}, expected={args.scale}\n",
+            )
         readback = geopdf_info["readback"]
         if readback["image_count"] or readback["image_xobject_count"]:
-            parser.exit(3, "GeoPDF contains raster image objects; vector-only delivery is required\n")
+            parser.exit(
+                3,
+                "GeoPDF contains raster image objects; "
+                "vector-only delivery is required\n",
+            )
         geopdf_info["actual_scale_x"] = actual_scale_x
         geopdf_info["actual_scale_y"] = actual_scale_y
     # Audit after the GeoPDF sizing: write_vector_geopdf rescales the figure to

@@ -1,5 +1,4 @@
 import geopandas as gpd
-import pyproj
 import pytest
 from shapely.geometry import Point
 
