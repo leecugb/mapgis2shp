@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "integrated_at": "2026-11-13",
+  "description": "Seven user-processed MapGIS test vectors derived from public-domain USGS data, encoded using the Chinese suite-tectonic database attribute structure and SLIB styles",
+  "source": {
+    "dataset": "Geologic map and digital database of the Conejo Well 7.5 minute quadrangle, Riverside County, California",
+    "authors": "Powell, Robert E., and Cossette, Pamela M. (digital cartography)",
+    "year": 2001,
+    "series": "U.S. Geological Survey Open-File Report 01-031",
+    "url": "https://pubs.usgs.gov/of/2001/of01-031/",
+    "access_constraints": "None",
+    "note": "These are user-processed test files derived from public-domain USGS data, not the unencoded USGS native conversion files and not original NGAC JWD vectors"
+  },
+  "current_distribution": "Bundled under tests/fixtures/testdata and pymapgis/testing/fixtures/testdata in source archives and wheels",
+  "distribution_clearance": "User confirmed no intellectual-property risk and eligible for bundled distribution on 2026-11-13",
+  "native_crs": "EPSG:32611",
+  "native_storage_scale": 1000,
+  "ground_metres_per_mapgis_unit": 1.0,
+  "projection_scale_factor": 0.9996,
+  "render_scale_for_reference": 24000,
+  "style_note": "The package preserves the user's current colour and Fillgrph parameters. These display choices are not represented as original USGS cartography.",
+  "licence_note": "User confirmed on 2026-11-13 that the processed seven-file testdata has no intellectual-property risk and is eligible for bundled distribution. USGS attribution and 'as is' notices are retained; no original NGAC JWD vectors are redistributed and no independent legal determination is made by this package.",
+  "native_mapgis_visual_acceptance": "PENDING: bundled Reader/Writer and rendering regressions do not replace native MapGIS visual acceptance",
+  "vectors": {
+    "LDZOFBA002.WL": {
+      "role": "geological contacts and map boundary",
+      "records": 5327,
+      "bytes": 6405449,
+      "sha256": "120afd623c772cf84f6ff3d42278d2b2e9154ec59667b5ada968e35d35924768"
+    },
+    "LDZOFBA003.WL": {
+      "role": "faults",
+      "records": 664,
+      "bytes": 622129,
+      "sha256": "bb28d82f862f3bd9508e30d9d29c96c507e26c7d7cc383cc9f1e7d484ec6cc5f"
+    },
+    "LDZOFBA016.WT": {
+      "role": "attitudes and lineations",
+      "records": 23,
+      "bytes": 27660,
+      "sha256": "fb7106b7216f115d2c853e74306c7f73fe4cb8bbd53765ee4248475d79a6997b"
+    },
+    "LDZOFBB001.WP": {
+      "role": "sedimentary, Quaternary and Proterozoic polygons",
+      "records": 1932,
+      "bytes": 5427508,
+      "sha256": "ce0a135d406fc455caf072a10d9506bf0eb5801c789ae7ba964cb8b6ce684161"
+    },
+    "LDZOFBB002.WP": {
+      "role": "basalt polygons",
+      "records": 9,
+      "bytes": 21426,
+      "sha256": "b4350f354e77f7cebcc8d90c97022e7534e8f4fea6e77126df0ffb00e16f5433"
+    },
+    "LDZOFBB003.WP": {
+      "role": "intrusive polygons with native Fillgrph patterns",
+      "records": 461,
+      "bytes": 882134,
+      "sha256": "b79d53bd4d5905e8b2408fa8ba3f0b59d264d537a2bf5dba65f4ef55c45aaf82"
+    },
+    "LDZOFBB004.WP": {
+      "role": "metamorphic polygons",
+      "records": 96,
+      "bytes": 339640,
+      "sha256": "99223e14ea920dd1acc349494aa51f035c648cf0d232a952930b99846a8397d1"
+    }
+  },
+  "validation": {
+    "file_count": 7,
+    "feature_count": 8512,
+    "patterned_polygon_features": 457,
+    "attitude_points": 21,
+    "lineation_points": 2
+  },
+  "totals": {
+    "bytes": 13725946
+  }
+}

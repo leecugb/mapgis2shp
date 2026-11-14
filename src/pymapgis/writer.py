@@ -7,9 +7,8 @@ Encodes a :class:`geopandas.GeoDataFrame` back into the MapGIS 6x binary
 layout, mirroring :mod:`pymapgis.reader` so that ``Reader`` can re-read the
 output losslessly (round-trip).
 
-Known degradation: text annotations stored in auxiliary sections of native
-.wt files are not produced, so written .wt files carry no label text in
-MapGIS (symbol points are unaffected).  The .wl auxiliary sections (node
+Known limitation: auxiliary text-pool annotations are not generated;
+CHFCED-based text points are supported.  The .wl auxiliary sections (node
 table, 55-byte block, 392-byte metadata block, bounding-box table, per-line
 flags) follow the native J43C001002 layout pinned 2026-10-17.  Polygon
 field5/6/7 are computed as 24-bit ring-index offsets; fresh native display
@@ -49,6 +48,7 @@ from pymapgis.reader import (
     _CRS_CENTRAL_MERIDIAN_OFFSET,
     _CRS_ELLIPSOID_OFFSET,
     _CRS_PROJECTION_OFFSET,
+    _CRS_PROJECTION_SCALE_OFFSET,
     _CRS_SCALE_OFFSET,
     _CRS_STD_LAT_OFFSET,
     _ELLIPSOID_PROJ4,
@@ -99,28 +99,30 @@ _FIELD_DESCRIPTOR_WRITE_STRUCT = struct.Struct("<20sBihhih4x")
 # name(20s) type(B) offset(i) storage(h) declared(h) flags(i) index(h) pad(4x)
 assert _FIELD_DESCRIPTOR_WRITE_STRUCT.size == 39
 _ATTR_FLAG_STRING = 256
-_ATTR_FLAG_NUMERIC_BASE = 512
 
-# File-header stamp bytes shared by every native 6x file inspected (unknown
-# semantics; MapGIS may validate them).
-_HEADER_STAMPS = {16: 16, 91: 1, 92: 4}
-_HEADER_STAMP_BYTES = {99: 0x59, 100: 0x40, 107: 0x59, 108: 0x40}
+# Fresh SHP-import headers retain only the structural stamp at byte 16.
+# The legacy JWD bytes at 91/92/99/100/107/108 are zero in fresh native files.
+_HEADER_STAMPS = {16: 16}
 
 # Type stamp stored at offset 12 of the 322-byte attribute-table prefix.
 _ATTR_TYPE_STAMP = {"POINT": 621, "LINE": 1011, "POLYGON": 972}
 
-# Per-point auxiliary constants (native values observed in J43C001002).
-_POINT_FLAG_INT = 65539  # head5 4-byte record value
+# Per-point auxiliary constants (native SHP-import references).
+_POINT_FLAG_INT = 65536  # head5 4-byte record value used by MapGIS SHP import
 
-# Graphic-parameter defaults (validated against native J43C001002 files).
+# Graphic-parameter defaults (validated against native J43C001002 files and
+# the second native SHP-conversion batch dated 2026-11-07).
 _DEFAULT_POINT_TYPE = POINT_TYPE_SYMBOL
 _DEFAULT_SYMBOL_NO = 1
-_DEFAULT_POINT_SIZE = 1.0  # mm
+_DEFAULT_POINT_SIZE = 0.1  # mm
+_DEFAULT_POINT_COLOR = 6
+_DEFAULT_POINT_PEN_WIDTH = 0.1  # mm
 _DEFAULT_LINETYPE = 1
 _DEFAULT_AUX_LINETYPE = 0
+_DEFAULT_AUX_FLAG = 1
 _DEFAULT_LINE_COLOR = 1  # int16 @26 (Colorlib 1-based); 1 in all inspected native files
-_DEFAULT_LINE_WIDTH = 0.1  # mm
-_DEFAULT_LINE_COEF = 5.0  # x/y pattern coefficient (MapGIS 重存规范值)
+_DEFAULT_LINE_WIDTH = 0.05  # mm
+_DEFAULT_LINE_COEF = 1.0  # x/y pattern coefficient
 
 
 # ---------------------------------------------------------------------------
@@ -229,33 +231,45 @@ def _series_max_gbk_bytes(series: pd.Series) -> int:
 
 
 def _field_spec_for_column(series: pd.Series) -> Tuple[int, int, int, int]:
-    """Map a pandas Series to (type_code, storage, declared, decimals)."""
+    """Map a Series to native storage and SHP-import display declarations.
+
+    Ordinary numeric declarations are 20, automatic ID is 8, and text is at
+    least 80 bytes, matching MapGIS's native SHP converter.  ``storage`` is the
+    physical field width; ``declared`` is the display width in the descriptor.
+    """
     dtype = series.dtype
     if pd.api.types.is_bool_dtype(dtype) or (
         pd.api.types.is_integer_dtype(dtype) and dtype.itemsize == 1
     ):
         return _ATTR_TYPE_BYTE, 1, 3, 0
+    if pd.api.types.is_integer_dtype(dtype) and series.name == "ID":
+        # MapGIS's automatic ID uses a special declaration; ordinary numeric
+        # DBF fields use the native SHP-import width of 20.
+        return _ATTR_TYPE_INT, 4, 8, 0
     if pd.api.types.is_integer_dtype(dtype):
         if dtype.itemsize == 2:
             return _ATTR_TYPE_SHORT, 2, 6, 0
         if dtype.itemsize <= 4:
-            return _ATTR_TYPE_INT, 4, 8, 0
+            return _ATTR_TYPE_INT, 4, 20, 0
         # 64-bit integers: keep int32 when values fit, else degrade to double.
         non_null = series.dropna()
         if len(non_null) == 0 or (
             non_null.min() >= np.iinfo(np.int32).min
             and non_null.max() <= np.iinfo(np.int32).max
         ):
-            return _ATTR_TYPE_INT, 4, 8, 0
+            return _ATTR_TYPE_INT, 4, 20, 0
         warnings.warn(
             f"column {series.name!r}: int64 values exceed int32 range; "
             "stored as double"
         )
+        return _ATTR_TYPE_DOUBLE, 8, 20, 6
+    if pd.api.types.is_float_dtype(dtype) and series.name in {"长度", "面积", "周长"}:
+        # Automatically computed metrics have their own native declaration.
         return _ATTR_TYPE_DOUBLE, 8, 15, 6
     if pd.api.types.is_float_dtype(dtype):
         if dtype.itemsize == 4:
-            return _ATTR_TYPE_FLOAT, 4, 15, 6
-        return _ATTR_TYPE_DOUBLE, 8, 15, 6
+            return _ATTR_TYPE_FLOAT, 4, 20, 6
+        return _ATTR_TYPE_DOUBLE, 8, 20, 6
     if pd.api.types.is_datetime64_any_dtype(dtype):
         if (series.dt.hour.any() or series.dt.minute.any() or series.dt.second.any()):
             warnings.warn(
@@ -277,7 +291,9 @@ def _field_spec_for_column(series: pd.Series) -> Tuple[int, int, int, int]:
                 f"unsupported value type in column {series.name!r}; "
                 "convert it to string/number/date first"
             )
-        capacity = max(1, _series_max_gbk_bytes(series))
+        # MapGIS SHP import declares at least 80 bytes for text, expanding
+        # further only when the source actually needs it.
+        capacity = max(80, _series_max_gbk_bytes(series))
         return _ATTR_TYPE_STRING, capacity + 1, capacity, 0
     raise WriterError(
         f"unsupported dtype {dtype!r} for column {series.name!r}; "
@@ -392,12 +408,12 @@ def _pack_field_descriptor(index: int, spec: _FieldSpec) -> bytes:
     """
     if spec.raw is not None:
         return spec.raw
-    flags = (
-        _ATTR_FLAG_STRING
-        if spec.type_code == _ATTR_TYPE_STRING
-        or (spec.name == "ID" and spec.type_code == _ATTR_TYPE_INT)
-        else _ATTR_FLAG_NUMERIC_BASE + spec.decimals
-    )
+    if spec.name in {"长度", "面积", "周长"}:
+        flags = 518
+    elif spec.type_code in (_ATTR_TYPE_FLOAT, _ATTR_TYPE_DOUBLE):
+        flags = 271
+    else:
+        flags = _ATTR_FLAG_STRING
     return _FIELD_DESCRIPTOR_WRITE_STRUCT.pack(
         _encode_gbk_field(spec.name, 20),
         spec.type_code,
@@ -420,15 +436,18 @@ def _build_attribute_section(
 
     Records are assembled at each spec's record offset so round-tripped
     files keep the native (possibly sparse) field layout; *record_length*
-    defaults to the dense packing length.
+    defaults to the dense packing length.  The legacy *type_stamp* argument is
+    retained for API compatibility; the native @12 value is computed from the
+    actual descriptor count rather than from geometry type.
     """
     prefix = bytearray(_ATTR_PREFIX_SIZE)
     prefix[0:2] = _ATTR_PREFIX_SIGNATURE
     today = datetime.date.today()
     struct.pack_into("<hBB", prefix, 2, today.year, today.month, today.day)
-    struct.pack_into("<i", prefix, 12, type_stamp)
-    if prefix_count is not None:
-        struct.pack_into("<i", prefix, 16, prefix_count)
+    struct.pack_into("<i", prefix, 12, 348 + 39 * len(specs))
+    # Native main tables point past the 39-byte field descriptors and store
+    # the feature count (excluding the empty first record) at @16.
+    struct.pack_into("<i", prefix, 16, len(df) if prefix_count is None else prefix_count)
     prefix[320:322] = _ATTR_PREFIX_SIGNATURE
 
     if record_length is None:
@@ -455,7 +474,7 @@ def _build_attribute_section(
 # Coordinate reference system
 # ---------------------------------------------------------------------------
 
-_PROJ_CODE_FOR = {"tmerc": 5, "aea": 2, "lcc": 3}
+_PROJ_CODE_FOR = {"tmerc": 5, "utm": 5, "aea": 2, "lcc": 3}
 
 # Lazily built inverse of ``_ELLIPSOID_PROJ4``:
 # (a, 1/f, has_towgs84) -> ellipsoid code.
@@ -530,6 +549,60 @@ def _proj4_params(crs: pyproj.CRS) -> Dict[str, float]:
     return params
 
 
+def _projection_name(crs: Any) -> str:
+    """Return the PROJ projection identifier, or an empty string."""
+    for part in pyproj.CRS(crs).to_proj4().split():
+        if part.startswith("+proj="):
+            return part.split("=", 1)[1]
+    return ""
+
+
+def _prepare_crs(gdf: gpd.GeoDataFrame, preserve_utm: bool = False):
+    """Prepare UTM input for native storage, optionally preserving coordinates.
+
+    The default path retains the established Gauss-Kruger k=1 conversion.
+    With ``preserve_utm=True``, geometry remains unchanged and k=0.9996 is
+    written at offset 232 instead.
+    """
+    if gdf.crs in (None, ""):
+        return gdf, gdf.crs
+    crs = pyproj.CRS(gdf.crs)
+    if _projection_name(crs) != "utm":
+        return gdf, crs
+    params = _proj4_params(crs)
+    zone = params.get("zone")
+    if zone is None:
+        raise WriterError("UTM input requires an explicit zone")
+    lon_0 = int(zone) * 6 - 183
+    south = "+south" in crs.to_proj4().split()
+    preserved = []
+    for part in crs.to_proj4().split():
+        if part.startswith(("+proj=", "+zone=", "+k=", "+lat_0=", "+lon_0=", "+x_0=", "+y_0=")):
+            continue
+        if part == "+south":
+            continue
+        preserved.append(part)
+    k = 0.9996 if preserve_utm else 1.0
+    if preserve_utm and south:
+        raise WriterError(
+            "preserve_utm=True currently supports only northern-hemisphere UTM; "
+            "the current native header mapping cannot preserve southern-hemisphere "
+            "false northing. Use the default Gauss-Kruger conversion instead"
+        )
+    target_proj4 = " ".join(
+        ["+proj=tmerc", "+lat_0=0", f"+lon_0={lon_0}", f"+k={k}",
+         "+x_0=500000", "+y_0=0", *preserved]
+    )
+    target = pyproj.CRS.from_proj4(target_proj4)
+    if preserve_utm:
+        return gdf, target
+    warnings.warn(
+        "UTM coordinates reprojected to Gauss-Kruger (k=1) using the default "
+        "Writer path; use preserve_utm=True to keep UTM coordinates and k=0.9996"
+    )
+    return gdf.to_crs(target), target
+
+
 # Header CRS-block constants observed in every inspected native J43C001002
 # file (2026-10-17, WT/WL/WP alike): small fixed stamps between the scale
 # field and the millimetre-to-degree coefficients.  Reproduced verbatim.
@@ -550,7 +623,7 @@ _HEADER_CRS_BLOCK_F32_BYTES = {
     195: bytes.fromhex("c0af1c41"),
 }
 _HEADER_CRS_NEG_ZERO_OFFSET = 220  # float32 -0.0 sentinel
-_HEADER_CRS_UNIT_DOUBLE_OFFSET = 232  # double 1.0
+# Projection scale factor at offset 232 is imported from reader.py.
 _HEADER_CRS_BLOCK_U8 = {240: 0x04, 242: 0x01}
 _HEADER_MM_DEG_X_OFFSET = 244  # double: degrees per millimetre, east-west
 _HEADER_MM_DEG_Y_OFFSET = 252  # double: degrees per millimetre, north-south
@@ -602,9 +675,20 @@ def _header_crs_block_fields(
         off: ("B", val) for off, val in _HEADER_CRS_BLOCK_BYTES.items()
     })
     for off, raw in _HEADER_CRS_BLOCK_F32_BYTES.items():
+        # AEA/LCC lat_2 occupies @191-198, so the generic f32 stamp at
+        # @195 would overwrite its high four bytes (e.g. 45° -> 47°).
+        if _projection_name(crs) in {"aea", "lcc"} and off == 195:
+            continue
         fields.update({off + i: ("B", byte) for i, byte in enumerate(raw)})
     fields[_HEADER_CRS_NEG_ZERO_OFFSET] = ("f", -0.0)
-    fields[_HEADER_CRS_UNIT_DOUBLE_OFFSET] = ("d", 1.0)
+    projection_name = _projection_name(crs)
+    projection_scale = (
+        0.9996 if projection_name == "utm"
+        else _proj4_params(crs).get("k", 1.0)
+        if projection_name == "tmerc"
+        else 1.0
+    )
+    fields[_CRS_PROJECTION_SCALE_OFFSET] = ("d", projection_scale)
     fields.update({off: ("B", val) for off, val in _HEADER_CRS_BLOCK_U8.items()})
     if crs not in (None, "") and pyproj.CRS(crs).is_geographic:
         x_coef, y_coef = _mm_to_degree_coefs(crs, map_scale, bbox)
@@ -631,12 +715,8 @@ def _crs_header_fields(crs: Any, map_scale: float) -> Dict[int, Tuple[str, Any]]
         return fields
 
     params = _proj4_params(crs)
-    proj = None
-    for part in crs.to_proj4().split():
-        if part.startswith("+proj="):
-            proj = part.split("=", 1)[1]
-            break
-    code = _PROJ_CODE_FOR.get(proj or "")
+    proj = _projection_name(crs)
+    code = _PROJ_CODE_FOR.get(proj)
     if code is None:
         raise WriterError(
             f"unsupported projection {proj!r}; MapGIS 6x files only carry "
@@ -646,15 +726,19 @@ def _crs_header_fields(crs: Any, map_scale: float) -> Dict[int, Tuple[str, Any]]
     fields[_CRS_PROJECTION_OFFSET] = ("B", code)
     fields[_CRS_SCALE_OFFSET] = ("d", float(map_scale))
     if code == 5:
-        if params.get("k", 1.0) != 1.0:
-            warnings.warn("Transverse Mercator with k != 1 (e.g. UTM) will be "
-                          "written as Gauss-Kruger (k=1)")
         if params.get("x_0", 500000.0) != 500000.0 or params.get("lat_0", 0.0) != 0.0:
             warnings.warn("tmerc with non-standard lat_0/x_0; MapGIS assumes "
                           "lat_0=0 and x_0=500000")
+    if proj == "utm":
+        zone = params.get("zone")
+        if zone is None:
+            raise WriterError("UTM input requires an explicit zone")
+        central_meridian = int(zone) * 6 - 183
+    else:
+        central_meridian = params.get("lon_0", 0.0)
     fields[_CRS_CENTRAL_MERIDIAN_OFFSET] = (
         "d",
-        _degrees_to_raw_dms(params.get("lon_0", 0.0)),
+        _degrees_to_raw_dms(central_meridian),
     )
     if code in (2, 3):
         fields[_CRS_STD_LAT_OFFSET] = ("d", _degrees_to_raw_dms(params.get("lat_0", 0.0)))
@@ -680,10 +764,9 @@ def _assemble_file(
     header[0:8] = _MAGIC_FOR[shape_type]
     struct.pack_into("<i", header, 8, _FILE_ID_FOR[shape_type])
     struct.pack_into("<i", header, 12, _DATA_START)
-    # Native header stamps (constant across all inspected files).
+    # Fresh native header stamps; source-specific legacy bytes are preserved
+    # only through explicit source-section passthrough.
     for offset, value in _HEADER_STAMPS.items():
-        header[offset] = value
-    for offset, value in _HEADER_STAMP_BYTES.items():
         header[offset] = value
     for offset, (fmt, value) in crs_fields.items():
         struct.pack_into(f"<{fmt}", header, offset, value)
@@ -743,7 +826,11 @@ def _encode_points(gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame], factor
         # 2026-10-15 wat 明码补齐（reader.py 对称）：颜色@75/图层@83 两类点
         # 共用；@49 按 kind 分写——字符串点=中文字体 u8(+西文字体@51/字形@53)，
         # 子图点=笔宽 f32。
-        color = int(row["color"]) if (row is not None and "color" in row.index) else 1
+        color = (
+            int(row["color"])
+            if (row is not None and "color" in row.index)
+            else _DEFAULT_POINT_COLOR
+        )
         layer = int(row["layer"]) if (row is not None and "layer" in row.index) else 0
         struct.pack_into("<B", record, 75, color & 0xFF)
         struct.pack_into("<B", record, 83, layer & 0xFF)
@@ -751,7 +838,7 @@ def _encode_points(gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame], factor
             pen = (float(row["pen_width"])
                    if (row is not None and "pen_width" in row.index
                        and np.isfinite(row["pen_width"]))
-                   else 0.05)
+                   else _DEFAULT_POINT_PEN_WIDTH)
             struct.pack_into("<f", record, 49, pen)
         else:
             fzh = int(row["font_zh"]) if (row is not None and "font_zh" in row.index) else 1
@@ -795,7 +882,11 @@ def _encode_lines(
         struct.pack_into("<h", record, 22, linetype)
         # 2026-10-15 修复：aux 写 u8@24 + 标志字节 @25（原 int16 写两字节，
         # 会把 0 写进 @25 覆盖标志位；现按 reader 对称拆 u8 对）。
-        aux_flag = int(row["aux_flag"]) if (row is not None and "aux_flag" in row.index) else 0
+        aux_flag = (
+            int(row["aux_flag"])
+            if (row is not None and "aux_flag" in row.index)
+            else _DEFAULT_AUX_FLAG
+        )
         struct.pack_into("<B", record, 24, aux & 0xFF)
         struct.pack_into("<B", record, 25, aux_flag & 0xFF)
         struct.pack_into("<h", record, 26, color)
@@ -819,28 +910,48 @@ def _encode_lines(
 
 
 def _encode_point_aux(
-    gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame]
+    gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame], factor: float = 1.0
 ) -> Tuple[bytes, bytes, bytes]:
     """Encode the native .wt auxiliary sections.
 
     head2 (index 1): GBK annotation text pool (written empty; symbol points
     carry no text).  head4 (index 3): per-point label box, 32 bytes = four
-    doubles (xmin, ymin, xmax, ymax).  head5 (index 4): 4-byte flags per
-    point (native value 65539).
+    doubles (xmin, ymin, xmax, ymax), with width/height expressed in the
+    layer's native coordinate units and left-aligned for text annotations.
+    head5 (index 4): 4-byte flags per point (default 65536; optional
+    ``annotation_flag`` values such as 65537 for unit labels and 65538 for
+    attitude annotations).
     """
-    n = len(gdf)
     pool = b"\x00" * 2
     boxes = bytearray(32)
+    flags = bytearray(4)
     for i, geom in enumerate(gdf.geometry):
         row = params.iloc[i] if params is not None else None
+        source = gdf.iloc[i]
+        point_type = int(
+            row["point_type"] if row is not None
+            else source.get("point_type", POINT_TYPE_SYMBOL)
+        )
         height = float(row["height"]) if row is not None else _DEFAULT_POINT_SIZE
         width = float(row["width"]) if row is not None else _DEFAULT_POINT_SIZE
-        # Millimetres to degrees at the sheet's 1:250000 latitude (0.0013 deg/mm,
-        # calibrated on native J43C001002 label boxes).
-        hx = width * 0.0013
-        hy = height * 0.0013
-        boxes += struct.pack("<4d", geom.x - hx, geom.y - hy, geom.x + hx, geom.y + hy)
-    flags = b"\x00" * 4 + struct.pack("<i", _POINT_FLAG_INT) * n
+        x = geom.x * factor
+        y = geom.y * factor
+        hy = height * factor
+        if point_type == POINT_TYPE_SYMBOL:
+            hx = width * factor
+            xmin, xmax = x - hx, x + hx
+        else:
+            # JWD annotation boxes follow the text rather than forming a
+            # square around the anchor.  The width is an approximation in
+            # native coordinate units, left-aligned at the text anchor.
+            text = str(source.get("CHFCED", "") or "").strip()
+            text_width = max(width, 0.65 * len(text) * height)
+            xmin, xmax = x, x + text_width * factor
+        boxes += struct.pack("<4d", xmin, y - hy, xmax, y + hy)
+        flag = source.get("annotation_flag", _POINT_FLAG_INT)
+        if _is_missing(flag):
+            flag = _POINT_FLAG_INT
+        flags += struct.pack("<i", int(flag))
     return pool, bytes(boxes), flags
 
 
@@ -1147,6 +1258,7 @@ def _encode_polygon_params(
     params: Optional[pd.DataFrame],
     count: int,
     ring_index_offsets: Optional[Dict[int, int]] = None,
+    ring_counts: Optional[List[int]] = None,
 ) -> bytes:
     """Encode the head_9 polygon-parameter section (40 bytes, first record
     mirrors the native 0x04 marker).
@@ -1154,7 +1266,8 @@ def _encode_polygon_params(
     布局 v2（2026-10-22 对话框锚定，与 reader._read_polygon_params 同源）：
     u8@1 class；u8@5/6/7 field5/6/7 组成 24 位环索引偏移；
     u16@9 填充颜色；u16@13 填充图案号；u16@17/@21 图案高/宽（f32 位型高16位）；
-    u8@23 图案颜色；u8@30 图层。缺失列按默认 0（class 默认 1）。
+    u8@23 图案颜色；u8@30 图层。缺失列按默认 0；未显式给出 class 时，
+    新建文件使用 MapGIS SHP 导入的 2×环数类码。
     field5/6/7 不是样式值：必须指向该面环索引在坐标 section 内的起始
     字节，由 _encode_polygon_coordinates 同步计算，不能默认置零。
     数据丢失教训（2026-03-12 jws 三幅）：旧版只写 @5/@6/@9、@12-39
@@ -1165,11 +1278,14 @@ def _encode_polygon_params(
     for i in range(count):
         record = bytearray(_POLYGON_PARAM_RECORD_SIZE)
         record[0] = 1
-        record[1] = 1
+        default_class = 2 * (ring_counts[i] if ring_counts is not None else 1)
+        record[1] = _uint8_parameter(default_class, "class", 2)
+        # MapGIS SHP import cycles fresh fill colours through 2..255,0,1.
+        struct.pack_into("<H", record, 9, (i + 2) & 0xFF)
         if params is not None:
             row = params.iloc[i]
             if "class" in row.index:
-                record[1] = _uint8_parameter(row["class"], "class", 1)
+                record[1] = _uint8_parameter(row["class"], "class", record[1])
             for col, off in (("field5", 5), ("field6", 6), ("field7", 7)):
                 if col in row.index:
                     record[off] = int(row[col]) & 0xFF
@@ -1304,8 +1420,17 @@ def _encode_polygons(
         polygons = [
             shapely.make_valid(g) if not g.is_valid else g for g in polygons
         ]
+    ring_counts = [
+        sum(1 + len(shell.interiors) for shell in _iter_shells(geom))
+        for geom in polygons
+    ]
     decomposer = _PolygonArcDecomposer(polygons, snap_tolerance)
     decomposer.build()
+    if any(count == 0 for count in ring_counts):
+        raise WriterError(
+            "Polygon validation produced no polygonal geometry for at least one feature; "
+            "cannot encode a .wp file"
+        )
     # Fresh files use independent rings: this preserves every input feature,
     # keeps native ring indexing unambiguous and avoids same-side overwrites.
     # The shared-arc decomposition above still validates degenerate input and
@@ -1362,7 +1487,7 @@ def _encode_polygons(
         bytes(index),
         bytes(coords),
         bytes(topo_bytes),
-        _encode_polygon_params(params, len(gdf), ring_index_offsets),
+        _encode_polygon_params(params, len(gdf), ring_index_offsets, ring_counts),
         arcs,
         arc_layers,
         topo,
@@ -1539,6 +1664,13 @@ class Writer:
         as ``value * 1000 / map_scale`` (the reader's inverse).  Ignored for
         longitude/latitude data.  Set to e.g. 250000 to reproduce a 1:250000
         sheet's native millimetre storage.
+    preserve_utm : bool, default False
+        Keep UTM coordinates unchanged and store the UTM projection scale
+        ``k=0.9996`` at offset 232. The default False retains the established
+        Gauss-Kruger k=1 conversion. Set ``map_scale=1000`` when a Reader
+        coordinate scale factor of 1.0 is also required. This mode currently
+        supports northern-hemisphere UTM only; southern-hemisphere input must
+        use the default conversion because false northing is not preserved.
     snap_tolerance : float, default 0.0
         Coordinate quantisation step (map units) applied before topology
         construction so that shared boundaries coincide byte-exactly.  0
@@ -1567,6 +1699,7 @@ class Writer:
         make_valid: bool = False,
         on_empty: str = "error",
         map_scale: float = 1000.0,
+        preserve_utm: bool = False,
         snap_tolerance: float = 0.0,
         graphic_params: bool = True,
         geometry_type: Optional[str] = None,
@@ -1590,11 +1723,27 @@ class Writer:
             self.shapeType = _detect_shape_type(geodataframe)
 
         self._gdf = _normalise_geometries(geodataframe, self.shapeType, on_empty)
+        self._gdf, self._crs = _prepare_crs(self._gdf, preserve_utm=preserve_utm)
         self._params: Optional[pd.DataFrame] = None
         self._attr = self._split_param_columns(self._gdf)
         if self.shapeType == "POLYGON":
             self._attr = self._add_polygon_standard_fields(self._attr)
-        self._crs = self._gdf.crs
+        elif self.shapeType in {"POINT", "LINE"}:
+            self._attr = self._add_point_line_standard_fields(self._attr)
+
+    def _add_point_line_standard_fields(self, attr: pd.DataFrame) -> pd.DataFrame:
+        """Add the native WT ID and WL ID/computed-length fields."""
+        if "ID" not in attr.columns:
+            attr = attr.copy()
+            attr.insert(0, "ID", pd.array(range(1, len(attr) + 1), dtype="int32"))
+        if self.shapeType == "LINE" and "长度" not in attr.columns:
+            attr = attr.copy()
+            attr.insert(
+                attr.columns.get_loc("ID") + 1,
+                "长度",
+                pd.array(self._gdf.geometry.length, dtype="float64"),
+            )
+        return attr
 
     def _add_polygon_standard_fields(self, attr: pd.DataFrame) -> pd.DataFrame:
         """Append the native ID/面积/周长 standard fields for .wp tables.
@@ -1644,7 +1793,7 @@ class Writer:
                 {
                     "linetype": _DEFAULT_LINETYPE,
                     "aux_linetype": _DEFAULT_AUX_LINETYPE,
-                    "aux_flag": 0,
+                    "aux_flag": _DEFAULT_AUX_FLAG,
                     "color": _DEFAULT_LINE_COLOR,
                     "width": _DEFAULT_LINE_WIDTH,
                     "x_coef": _DEFAULT_LINE_COEF,
@@ -1667,9 +1816,9 @@ class Writer:
                     "width": _DEFAULT_POINT_SIZE,
                     "spacing": 0.0,
                     "angle": 0.0,
-                    "color": 1,
+                    "color": _DEFAULT_POINT_COLOR,
                     "layer": 0,
-                    "pen_width": 0.05,
+                    "pen_width": _DEFAULT_POINT_PEN_WIDTH,
                     "font_zh": 1,
                     "font_en": 0,
                     "font_style": 0,
@@ -1686,15 +1835,16 @@ class Writer:
             # 吸收，缺失列按默认填充；field5/6/7 透传保真
             present = [c for c in want if c in attr.columns]
             if present or "class" in attr.columns or "layer" in attr.columns:
-                # Capture the explicit class/layer source before graphic
-                # columns are removed.  A defaulted layer=0 must not become
-                # class=0 (which suppresses native fills); the class default
-                # is 1 unless the caller explicitly supplied either column.
+                # Capture the explicit class source before graphic columns are
+                # removed. A defaulted layer=0 must not become class=0 (which
+                # suppresses native fills); fresh files use the native SHP-import
+                # 2×ring-count class unless supplied. Display layer is independent.
                 class_values = None
                 if "class" in attr.columns:
                     class_values = attr["class"].to_numpy()
-                elif "layer" in attr.columns:
-                    class_values = attr["layer"].to_numpy()
+                # "layer" is the display-layer index, not the polygon class.
+                # Never derive class from it; otherwise every layer=1 record
+                # incorrectly becomes class=1 and native fills can disappear.
                 params = attr[present].reindex(columns=want)
                 self._params = params.fillna({
                     "fill_color": 0,
@@ -1707,11 +1857,12 @@ class Writer:
                     "field6": 0,
                     "field7": 0,
                 })
-                self._params["class"] = (
-                    np.ones(len(attr), dtype=np.int64)
-                    if class_values is None
-                    else class_values
-                )
+                if class_values is None:
+                    class_values = [
+                        2 * sum(1 + len(shell.interiors) for shell in _iter_shells(geom))
+                        for geom in self._gdf.geometry
+                    ]
+                self._params["class"] = class_values
                 attr = attr.drop(columns=present)
                 if "class" in attr.columns:
                     attr = attr.drop(columns="class")
@@ -1744,7 +1895,7 @@ class Writer:
         )
 
         if self.shapeType == "POINT":
-            pool, boxes, flags = _encode_point_aux(self._gdf, self._params)
+            pool, boxes, flags = _encode_point_aux(self._gdf, self._params, factor)
             secs = {
                 0: _encode_points(self._gdf, self._params, factor),
                 1: pool,
@@ -1857,10 +2008,17 @@ class Writer:
         MapGIS's renderer consults this sequence,
         so missing entries leave written polygons undisplayable.  @304..328
         holds the four-double file bounding box in stored coordinate units
-        (window reset and symbol scaling).
+        (window reset and symbol scaling).  WT extents carry the native
+        SHP-import padding of 0.1 stored units on each side.
         """
         factor = self._scale_factor()
         minx, miny, maxx, maxy = self._gdf.total_bounds * factor
+        if self.shapeType == "POINT":
+            # MapGIS SHP import pads WT header extents by 0.1 stored units.
+            minx -= 0.1 * factor
+            miny -= 0.1 * factor
+            maxx += 0.1 * factor
+            maxy += 0.1 * factor
         features = len(self._gdf)
         if self.shapeType == "POLYGON":
             count = len(sections[0]) // _LINE_RECORD_SIZE - 1
@@ -1910,6 +2068,39 @@ class Writer:
         )
         return fields
 
+    def _source_params_match(self, sections, kind):
+        """Return True when supplied graphics match the native source bytes."""
+        if self._params is None:
+            return True
+        try:
+            import io as _io
+
+            from pymapgis.reader import (
+                _read_line_params,
+                _read_point_params,
+                _read_polygon_params,
+            )
+
+            if kind == "polygon":
+                raw = bytes(sections["8"])
+                source = _read_polygon_params(_io.BytesIO(raw), 0, len(raw))
+            else:
+                raw = bytes(sections["0"])
+                reader = _read_point_params if kind == "point" else _read_line_params
+                source = reader(_io.BytesIO(raw), 0, len(raw))
+            if len(source) != len(self._params):
+                return False
+            for column in self._params.columns:
+                if column not in source.columns:
+                    return False
+                left = self._params[column].to_numpy()
+                right = source[column].to_numpy()
+                if not np.array_equal(left, right, equal_nan=True):
+                    return False
+            return True
+        except Exception:
+            return False
+
     def _simple_passthrough(
         self, keys: List[str], factor: float, kind: str
     ) -> Optional[dict]:
@@ -1946,7 +2137,12 @@ class Writer:
                     (round(float(g.x), 6), round(float(g.y), 6))
                     for g in self._gdf.geometry
                 )
-                return pt if src_pts == our_pts and src_pts else None
+                return (
+                    pt
+                    if src_pts == our_pts and src_pts
+                    and self._source_params_match(sections, kind)
+                    else None
+                )
             raw_index = bytes(sections["0"])
             raw_coords = bytes(sections["1"])
             stream = _io.BytesIO(
@@ -1973,7 +2169,12 @@ class Writer:
 
             ours = _Counter(_key(self._gdf.geometry))
             theirs = _Counter(_key(src))
-            return pt if ours == theirs and ours else None
+            return (
+                pt
+                if ours == theirs and ours
+                and self._source_params_match(sections, kind)
+                else None
+            )
         except Exception:
             return None
 
@@ -1995,6 +2196,8 @@ class Writer:
         pt = getattr(self._gdf, "attrs", {}).get("mapgis_section_passthrough")
         sections = (pt or {}).get("sections", {})
         if not pt or not all(k in sections for k in ("0", "1", "3")):
+            return None
+        if not self._source_params_match(sections, "polygon"):
             return None
         try:
             import io as _io

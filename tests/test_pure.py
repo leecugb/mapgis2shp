@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import importlib.util
 import io
 import math
 import os
@@ -32,6 +33,10 @@ from pymapgis.reader import (
     _read_topology_table,
 )
 from pymapgis.slib import Element, SubgraphLib, parse_elements, symbol_geometries
+
+
+def _has_optional_adjudicated_tables() -> bool:
+    return importlib.util.find_spec("pymapgis.linesty_adjudicated") is not None
 
 
 class TestDecodeGbk:
@@ -149,11 +154,12 @@ class TestCrsRobustness:
 
     @staticmethod
     def _header(projection: int = 0, ellipsoid: int = 1, scale: float = 1.0,
-                central: float = None) -> io.BytesIO:
-        buf = bytearray(220)
+                central: float = None, projection_scale: float = 1.0) -> io.BytesIO:
+        buf = bytearray(240)
         buf[109] = projection
         buf[110] = ellipsoid
         struct.pack_into("<d", buf, 143, scale)
+        struct.pack_into("<d", buf, 232, projection_scale)
         if central is not None:
             struct.pack_into("<d", buf, 151, central)
         return io.BytesIO(bytes(buf))
@@ -190,6 +196,23 @@ class TestCrsRobustness:
         struct.pack_into("<d", stream.getbuffer(), 175, bad)
         crs, scale = _read_crs(stream)
         assert crs == "" and scale == 1.0
+
+    def test_tmerc_utm_projection_scale_and_unit_coordinate_factor(self) -> None:
+        crs, scale = _read_crs(self._header(
+            projection=5,
+            ellipsoid=7,
+            scale=1000.0,
+            central=-1170000.0,
+            projection_scale=0.9996,
+        ))
+        assert scale == 1.0
+        assert crs.to_epsg() == 32611
+        projection_scales = [
+            parameter.value
+            for parameter in crs.coordinate_operation.params
+            if "Scale factor" in parameter.name
+        ]
+        assert projection_scales == pytest.approx([0.9996])
 
     def test_truncated_header_raises_mapgis_error(self) -> None:
         with pytest.raises(MapGISError):
@@ -427,6 +450,10 @@ class TestPublicApi:
         assert "dotline_params" not in pymapgis.__all__
         assert "linedot_params" not in pymapgis.__all__
 
+    @pytest.mark.skipif(
+        not _has_optional_adjudicated_tables(),
+        reason="optional adjudicated tables are excluded from clean distributions",
+    )
     def test_adjudicated_tables_repo_side(self) -> None:
         """仓内环境（可导入 linesty_adjudicated）裁定表可用。"""
         from pymapgis import linesty
@@ -498,6 +525,10 @@ class TestContactForm:
     互证一致；2|1/2|4/2|18/16|1 为已裁定等价族。
     """
 
+    @pytest.mark.skipif(
+        not _has_optional_adjudicated_tables(),
+        reason="optional adjudicated tables are excluded from clean distributions",
+    )
     def test_contact_form_entries(self) -> None:
         from pymapgis.linesty import contact_semantics
         assert contact_semantics(1, 0)["contact"] == "整合接触"
@@ -744,6 +775,22 @@ class TestSlibElements:
     ])
     def test_malformed_description_rejected(self, header, counts) -> None:
         assert parse_elements(header, counts) == []
+
+    def test_missing_count_table_does_not_fabricate_elements(self, tmp_path) -> None:
+        rec = struct.pack(
+            "<8H8f",
+            2, 8, 0, 6, 0, 0, 1, 9,
+            0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+        )
+        data = struct.pack("<2I", 8, 8 + len(rec)) + rec + b"\x00" * 32
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+
+        sym = SubgraphLib(str(path)).decode(0)
+        assert sym is not None
+        assert len(sym.subpaths) == 1
+        assert len(sym.subpaths[0].points) == 4
+        assert sym.elements == []
 
     def test_indexed_decode_populates_elements(self, tmp_path) -> None:
         pts = [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0),
@@ -1014,7 +1061,7 @@ class TestSlibRegion:
                 + struct.pack("<62H", *([3] * 62))
                 + b"".join(struct.pack("<2f", x, y) for x, y in pts))
 
-    def _lib_with_region(self, tmp_path) -> "SubgraphLib":
+    def _lib_with_region(self, tmp_path, extra: bytes = b"") -> "SubgraphLib":
         """复刻真实库边界机制：2 索引 + 1 尾链 + 大头区域首记录 +
         FF00 止链填充（任意字节对齐的 (t,n) 均不过 _rec_like——
         偶对齐 t=255/n=255 奇，奇对齐 t=65280 超限）。"""
@@ -1023,7 +1070,7 @@ class TestSlibRegion:
         recT = self._record(3, [(0.5, 0.5), (0.4, 0.4)])
         rec3 = self._big_header_region_record()
         data = (struct.pack("<2I", 8, 8 + len(rec0))
-                + rec0 + rec1 + recT + rec3 + b"\xff\x00" * 32)
+                + rec0 + rec1 + recT + rec3 + extra + b"\xff\x00" * 32)
         path = tmp_path / "Subgraph.lib"
         path.write_bytes(data)
         return SubgraphLib(str(path))
@@ -1044,6 +1091,47 @@ class TestSlibRegion:
     def test_region_symbol_count_includes_walked(self, tmp_path) -> None:
         lib = self._lib_with_region(tmp_path)
         assert lib.symbol_count == 2 + lib.n_tail + 1
+
+    def test_region_dense_record_uses_header_window_not_point_count(self, tmp_path) -> None:
+        """n>13120 的合法密集记录不得被 npts>_REGION_WIN 误拒。"""
+        dense = self._region_record(
+            300, [], [2] * 3500, [(0.01, 0.01)] * 7000
+        )
+        lib = self._lib_with_region(tmp_path, extra=dense)
+        symbol = lib.decode(2 + lib.n_tail + 1)
+        assert symbol is not None
+        assert symbol.n == 14000
+        assert len(symbol.subpaths) == 3500
+        assert all(len(path.points) == 2 for path in symbol.subpaths)
+
+
+class TestSlibTruncatedInputs:
+    @pytest.mark.parametrize("data", [
+        struct.pack("<I", 4),
+        struct.pack("<2I", 8, 16),
+        b"",
+    ])
+    def test_index_only_or_truncated_index_stops_honestly(self, tmp_path, data) -> None:
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+        lib = SubgraphLib(str(path))
+        assert lib.n_tail == 0
+        assert lib.n_region == 0
+        assert lib.decode(0) is None
+
+    def test_mid_record_truncation_stops_honestly(self, tmp_path) -> None:
+        """合法后继记录头后载荷不完整时，双门抽样不得越过 EOF。"""
+        rec0 = TestSlibRegion._record(1, [(0.1, 0.2), (0.3, 0.4)])
+        rec1 = TestSlibRegion._record(2, [(0.2, 0.1), (0.4, 0.3)])
+        rec_tail = TestSlibRegion._record(3, [(0.5, 0.5), (0.4, 0.4)])
+        rec_region = TestSlibRegion._big_header_region_record()
+        data = (struct.pack("<2I", 8, 8 + len(rec0))
+                + rec0 + rec1 + rec_tail + rec_region + b"\xff\x00" * 32)
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data[:97])
+        lib = SubgraphLib(str(path))
+        assert lib.n_tail == 1
+        assert lib.decode(2 + lib.n_tail) is None
 
 
 class TestSlibDenseRmsGate:
@@ -1556,7 +1644,17 @@ def _slib_library_path(name: str, env_var: str) -> Path:
     from pymapgis.testing import slib_path
 
     configured = os.environ.get(env_var)
-    path = Path(configured) if configured else slib_path(name)
+    if configured:
+        path = Path(configured)
+        if not path.is_file():
+            raise FileNotFoundError(f"Required SLIB test library is unavailable: {path}")
+        return path
+    try:
+        path = slib_path(name)
+    except FileNotFoundError as exc:
+        if os.environ.get("PYMAPGIS_SLIB"):
+            raise
+        pytest.skip(f"Optional user-supplied SLIB integration is unavailable: {exc}")
     if not path.is_file():
         raise FileNotFoundError(f"Required SLIB test library is unavailable: {path}")
     return path
@@ -2393,11 +2491,11 @@ class TestFieldsFromDataFrame:
         codes = {s.source: s.type_code for s in specs}
         assert codes == {"b": 1, "s": 2, "i": 3, "big": 5, "f": 4, "d": 5, "txt": 0, "dt": 6}
 
-    def test_string_capacity_is_max_gbk_bytes_plus_one(self) -> None:
+    def test_string_capacity_uses_native_minimum_80(self) -> None:
         df = pd.DataFrame({"txt": ["中文", "abcd", None]})
         (spec,) = _fields_from_dataframe(df)
-        assert spec.declared == 4  # "中文" and "abcd" are both 4 GBK bytes
-        assert spec.storage == 5
+        assert spec.declared == 80
+        assert spec.storage == 81
 
     def test_offsets_are_compact_after_flag_byte(self) -> None:
         df = pd.DataFrame({"a": pd.array([1], dtype="int32"), "b": pd.array([2], dtype="int16")})

@@ -2,22 +2,77 @@
 """Inspect release archives for required content and packaging boundaries."""
 from __future__ import annotations
 
+import hashlib
+import json
 import sys
 import tarfile
 import zipfile
+from functools import lru_cache
 from pathlib import Path
 
-JWD_FIXTURE_NAMES = (
-    "LDLYAAE002.WP~", "LDZOFBB001.WP", "LDZOFBB002.WP", "LDZOFBB003.WP~",
-    "LDZOFBB004.WP", "LDLYAAE001.WL", "LDZOFBA002.WL", "LDZOFBA003.WL",
-    "LDZOFBA005.WL", "LDZOFBB098.WL", "LDZOFBA016.WT", "LDZOFBB099.WT",
-)
-SLIB_FIXTURE_NAMES = (
-    "Subgraph.lib", "LINESTY.lib", "Fillgrph.lib", "Colorlib.lib", "Pcolor.lib",
-)
 SYNTHETIC_FIXTURE_NAMES = (
     "synthetic_points.wt", "synthetic_lines.wl", "synthetic_polygons.wp",
 )
+TESTDATA_VECTOR_NAMES = (
+    "LDZOFBA002.WL", "LDZOFBA003.WL", "LDZOFBA016.WT",
+    "LDZOFBB001.WP", "LDZOFBB002.WP", "LDZOFBB003.WP", "LDZOFBB004.WP",
+)
+SLIB_LIBRARY_NAMES = (
+    "Colorlib.lib", "Fillgrph.lib", "LINESTY.lib", "Pcolor.lib", "Subgraph.lib",
+)
+WRITER_BATCH2_SHP_STEMS = (
+    "01_minimal_triangle", "02_two_sizes", "03_three_holes",
+    "04_multipart_with_holes", "05_touching_point", "06_shared_edge",
+    "07_hole_and_island", "08_duplicate_vertices", "09_invalid_bowtie",
+    "10_points", "11_multiline_and_duplicate",
+)
+WRITER_BATCH2_NAMES = tuple(
+    stem + suffix
+    for stem in WRITER_BATCH2_SHP_STEMS
+    for suffix in (".shp", ".shx", ".dbf", ".cpg", ".prj")
+) + tuple(
+    stem.upper() + (
+        ".WT" if stem.startswith("10_") else ".WL" if stem.startswith("11_") else ".WP"
+    )
+    for stem in WRITER_BATCH2_SHP_STEMS
+) + ("README_转换说明.md", "manifest.csv")
+WRITER_BATCH3_SHP_STEMS = (
+    "01_reference_triangle", "02_identical_polygons", "03_shared_edge_duplicate",
+    "04_nested_hole_island", "05_large_ring_over_64k", "06_large_then_small",
+    "07_projected_utm", "08_attribute_types", "09_null_geometry", "10_points",
+    "11_multiline", "12_degenerate_ring",
+)
+WRITER_BATCH3_NAMES = tuple(
+    stem + suffix
+    for stem in WRITER_BATCH3_SHP_STEMS
+    for suffix in (".shp", ".shx", ".dbf", ".cpg", ".prj")
+) + tuple(
+    stem.upper() + (
+        ".WT" if stem.startswith("10_") else ".WL" if stem.startswith("11_") else ".WP"
+    )
+    for stem in WRITER_BATCH3_SHP_STEMS
+) + ("README_转换说明.md", "manifest.csv")
+WRITER_BATCH4_SHP_STEMS = (
+    "01_POINT_BASIC", "02_POINT_ATTR_NULL", "03_POINT_MULTIPOINT", "04_POINT_257",
+    "05_LINE_BASIC", "06_LINE_MULTI_DUPLICATE", "07_LINE_EMPTY", "08_LINE_10001_VERTICES",
+    "09_POLY_BASIC", "10_POLY_HOLE_MULTIPART", "11_POLY_SHARED_ISLAND",
+    "12_POLY_DUPLICATE_VERTICES", "13_POLY_BOWTIE", "14_POLY_DEGENERATE",
+    "15_POLY_EMPTY", "16_POLY_80_FIELDS", "17_POLY_LARGE_RING",
+    "18_POLY_DUPLICATE_ATTRIBUTES", "19_POLY_LONG_TEXT", "20_EMPTY_FILE",
+)
+WRITER_BATCH4_NATIVE_STEMS = tuple(
+    stem for stem in WRITER_BATCH4_SHP_STEMS
+    if stem not in {"03_POINT_MULTIPOINT", "20_EMPTY_FILE"}
+)
+WRITER_BATCH4_NAMES = tuple(
+    stem + suffix
+    for stem in WRITER_BATCH4_SHP_STEMS
+    for suffix in (".shp", ".shx", ".dbf", ".cpg", ".prj")
+) + tuple(
+    stem + (".WT" if stem.startswith(("01", "02", "04")) else
+            ".WL" if stem.startswith(("05", "06", "07", "08")) else ".WP")
+    for stem in WRITER_BATCH4_NATIVE_STEMS
+) + ("README_转换说明.md",)
 
 
 def _require(condition: bool, message: str) -> None:
@@ -25,9 +80,87 @@ def _require(condition: bool, message: str) -> None:
         raise RuntimeError(message)
 
 
+@lru_cache(maxsize=1)
+def _forbidden_hashes() -> dict[str, str]:
+    """Return hashes of original NGAC vectors and native SHP exports.
+
+    Generic SLIB hashes are deliberately absent: those five libraries have a
+    separate packaging authorization. The seven processed USGS test vectors
+    are likewise not NGAC data and are not listed here.
+    """
+    fixture_root = Path(__file__).parent / "fixtures"
+    jwd = json.loads(
+        (fixture_root / "jwd_slib_manifest.json").read_text(encoding="utf-8")
+    )
+    native = json.loads(
+        (fixture_root / "reader_native_manifest.json").read_text(encoding="utf-8")
+    )
+    forbidden = {
+        item["sha256"].lower(): f"original NGAC JWD vector {name}"
+        for name, item in jwd["vectors"].items()
+    }
+    forbidden.update({
+        item["sha256"].lower(): f"native NGAC export {item['file']}"
+        for item in native["files"]
+    })
+    return forbidden
+
+
+def _check_member_hash(name: str, data: bytes, artifact: str) -> None:
+    digest = hashlib.sha256(data).hexdigest()
+    forbidden = _forbidden_hashes()
+    _require(
+        digest not in forbidden,
+        f"{artifact}: forbidden content disguised under another name: "
+        f"{name} ({forbidden.get(digest, '')})",
+    )
+
+
+def _check_wheel_hashes(archive: zipfile.ZipFile, artifact: str) -> None:
+    for info in archive.infolist():
+        if not info.is_dir():
+            _check_member_hash(info.filename, archive.read(info), artifact)
+
+
+def _check_sdist_hashes(archive: tarfile.TarFile, artifact: str) -> None:
+    for member in archive.getmembers():
+        if not member.isfile():
+            continue
+        file_obj = archive.extractfile(member)
+        _require(file_obj is not None, f"{artifact}: cannot read {member.name}")
+        _check_member_hash(member.name, file_obj.read(), artifact)
+
+
 def _check_common(names: list[str], artifact: str, *, allow_slib_fixtures: bool = False) -> None:
     _require(not any("__pycache__" in name or name.endswith(".pyc") for name in names),
              f"{artifact}: Python cache files are included")
+    _require(
+        not any("mapgis2shp_submission" in name.replace("\\", "/") for name in names),
+        f"{artifact}: manuscript submission content is included",
+    )
+    ngac_prefixes = (
+        "/tests/fixtures/jwd/",
+        "/tests/fixtures/reader_native/",
+        "/pymapgis/testing/fixtures/jwd/",
+        "/pymapgis/testing/fixtures/reader_native/",
+    )
+    for name in names:
+        normalised = "/" + name.lower().replace("\\", "/")
+        _require(
+            not any(prefix in normalised for prefix in ngac_prefixes),
+            f"{artifact}: original NGAC data must not be packaged: {name}",
+        )
+    optional_native_prefixes = (
+        "/tests/fixtures/usgs_conejo/native/",
+        "/pymapgis/testing/fixtures/usgs_conejo/native/",
+    )
+    for name in names:
+        normalised = "/" + name.lower().replace("\\", "/")
+        _require(
+            not any(prefix in normalised for prefix in optional_native_prefixes),
+            f"{artifact}: optional USGS native comparison data are not part of "
+            f"the clean standard package: {name}",
+        )
     library_names = {"colorlib.lib", "pcolor.lib", "subgraph.lib", "linesty.lib", "fillgrph.lib"}
     bundled = []
     for name in names:
@@ -47,6 +180,7 @@ def _check_common(names: list[str], artifact: str, *, allow_slib_fixtures: bool 
 def _check_wheel(path: Path) -> None:
     with zipfile.ZipFile(path) as archive:
         names = archive.namelist()
+        _check_wheel_hashes(archive, path.name)
     required = {
         "pymapgis/reader.py",
         "pymapgis/writer.py",
@@ -57,14 +191,32 @@ def _check_wheel(path: Path) -> None:
         "pymapgis/testing/__init__.py",
         "pymapgis/testing/fixtures/jwd_slib_manifest.json",
         "pymapgis/testing/fixtures/fixture_manifest.json",
+        "pymapgis/testing/fixtures/writer_batch2_manifest.json",
+        "pymapgis/testing/fixtures/writer_batch3_manifest.json",
+        "pymapgis/testing/fixtures/writer_batch4_manifest.json",
+        "pymapgis/testing/fixtures/reader_native_manifest.json",
+        "pymapgis/testing/fixtures/DATA_ATTRIBUTION.md",
+        "pymapgis/testing/examples/render_bundled_jwd.py",
     }
-    for name in JWD_FIXTURE_NAMES:
-        required.add("pymapgis/testing/fixtures/jwd/" + name)
-    for name in SLIB_FIXTURE_NAMES:
-        required.add("pymapgis/testing/fixtures/slib/" + name)
+    for name in WRITER_BATCH2_NAMES:
+        required.add("pymapgis/testing/fixtures/writer_batch2/" + name)
+    for name in WRITER_BATCH3_NAMES:
+        required.add("pymapgis/testing/fixtures/writer_batch3/" + name)
+    for name in WRITER_BATCH4_NAMES:
+        required.add("pymapgis/testing/fixtures/writer_batch4/" + name)
     for name in SYNTHETIC_FIXTURE_NAMES:
         required.add("pymapgis/testing/fixtures/mapgis/" + name)
+    for name in TESTDATA_VECTOR_NAMES:
+        required.add("pymapgis/testing/fixtures/testdata/" + name)
+    for name in SLIB_LIBRARY_NAMES:
+        required.add("pymapgis/testing/fixtures/slib/" + name)
+    required.add("pymapgis/testing/fixtures/testdata/manifest.json")
+    required.add("pymapgis/testing/fixtures/slib/manifest.json")
     _require(required.issubset(names), f"{path.name}: required release modules missing")
+    _require(
+        not any(name.startswith(("examples/", "mapgis2shp_submission/")) for name in names),
+        f"{path.name}: unnamespaced example or submission files included",
+    )
     forbidden = ("pymapgis/rendering/", "pymapgis/semantics/")
     _require(not any(name.startswith(forbidden) for name in names),
              f"{path.name}: experimental rendering or semantics included")
@@ -77,36 +229,51 @@ def _check_wheel(path: Path) -> None:
 def _check_sdist(path: Path) -> None:
     with tarfile.open(path) as archive:
         names = archive.getnames()
+        _check_sdist_hashes(archive, path.name)
     required_suffixes = (
         "/CITATION.cff",
+        "/DATA_ATTRIBUTION.md",
+        "/tests/fixtures/DATA_ATTRIBUTION.md",
         "/examples/geological_workflow.py",
+        "/examples/render_bundled_jwd.py",
         "/tests/test_graphic.py",
         "/tests/test_graphic_real_jwd.py",
+        "/tests/test_writer_native_batch2.py",
+        "/tests/test_writer_native_batch3.py",
+        "/tests/test_writer_native_batch4.py",
+        "/tests/test_reader_native_exports.py",
+        "/tests/test_writer_fixture_manifests.py",
         "/tests/fixtures/build_mapgis_fixtures.py",
         # test_public_fixtures.py reads the manifest at module scope; an sdist
         # without it passes inspection but crashes the shipped tests.
         "/tests/fixtures/fixture_manifest.json",
+        "/tests/fixtures/writer_batch2_manifest.json",
+        "/tests/fixtures/writer_batch3_manifest.json",
+        "/tests/fixtures/writer_batch4_manifest.json",
+        "/tests/fixtures/reader_native_manifest.json",
         "/tests/fixtures/mapgis/synthetic_points.wt",
         "/tests/fixtures/mapgis/synthetic_lines.wl",
         "/tests/fixtures/mapgis/synthetic_polygons.wp",
         "/tests/fixtures/jwd_slib_manifest.json",
-        "/tests/fixtures/jwd/LDLYAAE002.WP~",
-        "/tests/fixtures/jwd/LDZOFBB001.WP",
-        "/tests/fixtures/jwd/LDZOFBB002.WP",
-        "/tests/fixtures/jwd/LDZOFBB003.WP~",
-        "/tests/fixtures/jwd/LDZOFBB004.WP",
-        "/tests/fixtures/jwd/LDLYAAE001.WL",
-        "/tests/fixtures/jwd/LDZOFBA002.WL",
-        "/tests/fixtures/jwd/LDZOFBA003.WL",
-        "/tests/fixtures/jwd/LDZOFBA005.WL",
-        "/tests/fixtures/jwd/LDZOFBB098.WL",
-        "/tests/fixtures/jwd/LDZOFBA016.WT",
-        "/tests/fixtures/jwd/LDZOFBB099.WT",
-        "/tests/fixtures/slib/Subgraph.lib",
-        "/tests/fixtures/slib/LINESTY.lib",
-        "/tests/fixtures/slib/Fillgrph.lib",
-        "/tests/fixtures/slib/Colorlib.lib",
-        "/tests/fixtures/slib/Pcolor.lib",
+    )
+    required_suffixes += tuple(
+        "/tests/fixtures/writer_batch2/" + name for name in WRITER_BATCH2_NAMES
+    )
+    required_suffixes += tuple(
+        "/tests/fixtures/writer_batch3/" + name for name in WRITER_BATCH3_NAMES
+    )
+    required_suffixes += tuple(
+        "/tests/fixtures/writer_batch4/" + name for name in WRITER_BATCH4_NAMES
+    )
+    required_suffixes += tuple(
+        "/tests/fixtures/testdata/" + name for name in TESTDATA_VECTOR_NAMES
+    )
+    required_suffixes += tuple(
+        "/tests/fixtures/slib/" + name for name in SLIB_LIBRARY_NAMES
+    )
+    required_suffixes += (
+        "/tests/fixtures/testdata/manifest.json",
+        "/tests/fixtures/slib/manifest.json",
     )
     for suffix in required_suffixes:
         _require(any(name.endswith(suffix) for name in names),

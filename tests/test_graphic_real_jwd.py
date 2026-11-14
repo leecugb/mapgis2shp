@@ -1,7 +1,8 @@
-"""Self-contained real-library rendering regression for twelve JWD layers.
+"""Optional real-library rendering regression for twelve user-supplied JWD layers.
 
-The vectors and five SLIB libraries are bundled under tests/fixtures. Explicit
-PYMAPGIS_JWD/PYMAPGIS_SLIB paths remain available for external-library checks.
+Obtain the original vectors and five SLIB files through their official channel and
+set PYMAPGIS_JWD/PYMAPGIS_SLIB. Missing external data produces an explicit
+integration skip, not a silent pass or a substituted synthetic dataset.
 These tests do not replace visual acceptance in the MapGIS application.
 """
 from __future__ import annotations
@@ -10,11 +11,13 @@ import hashlib
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 
 import numpy as np
 import pytest
 
+from examples.render_bundled_jwd import regression_layers, summarise
 from pymapgis import GraphicLibraries, GraphicRenderer, Reader
 from pymapgis.graphic import _StampBuffer
 from pymapgis.testing import fixture_path, jwd_path, slib_path
@@ -22,14 +25,18 @@ from pymapgis.testing import fixture_path, jwd_path, slib_path
 pytestmark = pytest.mark.integration
 
 FIXTURE_DIR = fixture_path()
-BUNDLED_JWD = jwd_path()
-BUNDLED_SLIB = slib_path()
+try:
+    BUNDLED_JWD = jwd_path()
+    BUNDLED_SLIB = slib_path()
+except FileNotFoundError as exc:
+    pytest.skip(f"Optional user-supplied JWD/SLIB integration is unavailable: {exc}",
+                allow_module_level=True)
 LIBRARY_NAMES = ("Subgraph.lib", "LINESTY.lib", "Fillgrph.lib", "Colorlib.lib", "Pcolor.lib")
 LAYER_NAMES = [
-    "LDLYAAE002.WP~",
+    "LDLYAAE002.WP",
     "LDZOFBB001.WP",
     "LDZOFBB002.WP",
-    "LDZOFBB003.WP~",
+    "LDZOFBB003.WP",
     "LDZOFBB004.WP",
     "LDLYAAE001.WL",
     "LDZOFBA002.WL",
@@ -59,14 +66,8 @@ def _slib_root() -> Path:
 
 
 def _layers(root: Path):
-    layers = []
-    for name in LAYER_NAMES:
-        path = root / name
-        if path.suffix.lower() == ".wp~":
-            layers.append(Reader(str(path), read_graphic_params=True).geodataframe)
-        else:
-            layers.append(path)
-    return layers
+    # Exercise the same compatibility path as the manuscript Quickstart.
+    return regression_layers(root)
 
 
 def test_real_jwd_twelve_layer_render(tmp_path):
@@ -108,6 +109,7 @@ def test_real_jwd_twelve_layer_render(tmp_path):
     assert sum(item.get("compressed_text", 0) for item in reports) == 0
     assert sum(item.get("script_text", 0) for item in reports) == 0
     assert sum(item.get("excluded_text", 0) for item in reports) == 1362
+    assert sum(item["drawn"] + item.get("excluded_text", 0) for item in reports) == 7094
     assert sum(item.get("unknown_fill", 0) + item.get("aux_unknown_fill", 0)
                for item in reports) == 0
     assert sum(item.get("excluded_class", 0) for item in reports) == 0
@@ -123,6 +125,52 @@ def test_real_jwd_twelve_layer_render(tmp_path):
 
     assert png.read_bytes().startswith(b"\x89PNG")
     assert pdf.read_bytes().startswith(b"%PDF")
+
+
+def test_published_wp_backup_layout_quickstart(tmp_path):
+    """The V2.7.1 fixture layout also runs without renderer modifications."""
+    root = _jwd_root()
+    legacy = tmp_path / "legacy_jwd"
+    shutil.copytree(root, legacy)
+    for name in ("LDLYAAE002.WP", "LDZOFBB003.WP"):
+        (legacy / name).rename(legacy / (name + "~"))
+
+    renderer = GraphicRenderer(
+        GraphicLibraries.from_directory(_slib_root()),
+        scale=250000,
+        native_text_layout=True,
+        font_zh_map={1: "SimSun", 4: "SimHei"},
+        font_en_map={0: "DejaVu Sans"},
+        text_font_family=["Microsoft YaHei", "SimSun", "DejaVu Sans"],
+    )
+    result = renderer.render(regression_layers(legacy), tmp_path / "legacy.png", dpi=80)
+    summary = summarise(result.reports)
+    result.figure.clear()
+
+    assert summary["layers"] == 12
+    assert summary["features"] == 7094
+    assert summary["drawn"] + summary["excluded_text"] == 7094
+    assert summary["unknown_colour_occurrences"] == 0
+    assert summary["solid_fallbacks"] == 0
+    assert summary["unknown_fills"] == 0
+    assert summary["unresolved_symbols"] == 0
+    assert summary["unknown_fonts"] == []
+
+
+def test_original_wp_backup_is_not_loaded_alongside_normalized_wp(tmp_path):
+    root = _jwd_root()
+    duplicate = tmp_path / "duplicate_jwd"
+    shutil.copytree(root, duplicate)
+    for name in ("LDLYAAE002.WP", "LDZOFBB003.WP"):
+        shutil.copy2(duplicate / name, duplicate / (name + "~"))
+
+    layers = regression_layers(duplicate)
+    names = [layer.attrs["source"] if hasattr(layer, "attrs") else layer.name for layer in layers]
+    assert len(layers) == len(names) == len(set(names)) == 12
+    assert "LDLYAAE002.WP~" in names
+    assert "LDZOFBB003.WP~" in names
+    assert "LDLYAAE002.WP" not in names
+    assert "LDZOFBB003.WP" not in names
 
 
 def test_real_jwd_quaternary_library_colors():
@@ -251,6 +299,8 @@ def test_38_2_solid_segments_preserve_all_real_source_vertices():
     rhythm = renderer._rhythm(38, 2)
     checked_features = 0
     checked_parts = 0
+    checked_vertices = 0
+    max_deviation = 0.0
     for name in ("LDZOFBA002.WL", "LDZOFBA003.WL"):
         gdf = Reader(str(root / name), read_graphic_params=True).geodataframe
         selected = gdf[(gdf["linetype"] == 38) & (gdf["aux_linetype"] == 2)]
@@ -270,8 +320,13 @@ def test_38_2_solid_segments_preserve_all_real_source_vertices():
                 for vertex in points:
                     distance = np.min(np.linalg.norm(endpoints - vertex, axis=1))
                     assert distance <= 1e-9, (name, checked_features, vertex, distance)
+                    checked_vertices += 1
+                    max_deviation = max(max_deviation, float(distance))
                 checked_parts += 1
     assert checked_features == 37
+    assert checked_vertices == 782
+    # Preserve every source vertex while allowing platform floating-point roundoff.
+    assert max_deviation == pytest.approx(0.0, abs=1e-9)
     assert checked_parts >= checked_features
 
 
@@ -285,3 +340,57 @@ def test_bundled_jwd_slib_fixture_manifest():
             assert len(data) == expected["bytes"], name
             assert hashlib.sha256(data).hexdigest() == expected["sha256"], name
     assert manifest["totals"]["bytes"] == 19381767
+
+
+def test_bundled_library_structural_census():
+    """Pin every structural-coverage total printed in the manuscript."""
+    libraries = GraphicLibraries.from_directory(_slib_root())
+
+    assert libraries.subgraph.symbol_count == 7360
+
+    styles = [libraries.linesty.decode(no) for no in range(1, libraries.linesty.count + 1)]
+    nonempty = [style for style in styles if style is not None and style.sublines]
+    assert len(nonempty) == 859
+    assert sum(len(style.sublines) for style in nonempty) == 984
+    assert all(not style.truncated for style in nonempty)
+
+    assert libraries.fillgrph.count == 1337
+    assert sum(
+        libraries.fillgrph.decode(no) is not None
+        for no in range(1, libraries.fillgrph.count + 1)
+    ) == 1280
+    assert libraries.color.max_no == 870
+    assert libraries.pcolor is not None
+    assert libraries.pcolor.count == 4098
+    assert libraries.pcolor.trailing_bytes == 28
+
+
+def test_short_fold_axis_is_clipped_not_dropped(tmp_path):
+    """The 74.990 km third fold retains its 75 km-period partial motif."""
+    gdf = Reader(
+        str(_jwd_root() / "LDZOFBA005.WL"), read_graphic_params=True
+    ).geodataframe.to_crs("EPSG:32643")
+    fold = gdf[gdf["ID"] == 3]
+    assert len(fold) == 1
+    assert fold.geometry.length.iloc[0] < 75000
+
+    renderer = GraphicRenderer(GraphicLibraries.from_directory(_slib_root()), scale=250000)
+    result = renderer.render([fold], tmp_path / "fold-3.png", figsize=(6, 4), dpi=80)
+    assert result.reports[0]["pattern"] == 1
+    assert any(
+        len(collection.get_paths()) > 0
+        for collection in result.axes.collections
+        if hasattr(collection, "get_paths")
+    )
+    result.figure.clear()
+
+
+def test_regression_layers_preserves_metadata_and_filters_nonvectors(tmp_path):
+    source = BUNDLED_JWD / "LDZOFBB003.WP"
+    shutil.copyfile(source, tmp_path / "LDZOFBB003.WP~")
+    (tmp_path / "notes.txt").write_text("not a vector", encoding="utf-8")
+
+    layers = regression_layers(tmp_path)
+    assert len(layers) == 1
+    assert layers[0].attrs["source"] == "LDZOFBB003.WP~"
+    assert layers[0].attrs["kind"] == "wp"

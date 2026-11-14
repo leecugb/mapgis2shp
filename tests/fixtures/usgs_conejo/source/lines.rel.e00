@@ -1,0 +1,3368 @@
+EXP  0 /POOL5/B/PCOSSETTE/FSKN-OF/LINES.REL.E00                                 
+IFO  2
+LINES.REL                            3   3 326       672
+L-TAG            25-1   14-1  25-1 20-1  -1  -1-1                   1-
+L-DEF           100-1  264-1 100-1 20-1  -1  -1-1                   2-
+L-EXP           200-1 1264-1 200-1 20-1  -1  -1-1                   3-
+CL1                      .CLNB.
+                                             .cartographic line.map boundary.
+
+
+
+CL2                      .CLNW.
+                                             .cartographic line.water boundary.
+
+
+
+C1                       .CONG.DIS.IDC.OBS.MEE.
+                                             .generic contact.discrete.identity
+certain.observable.location meets map accuracy standard.
+
+
+C2                       .CONG.DIS.IDC.OBS.MNM.
+                                             .generic contact.discrete.identity
+certain.observable.location may not meet map accuracy standard.
+
+
+C3                       .CONG.DIS.IDC.INF.MNM.
+                                             .generic contact.discrete.identity
+certain.inferred.location may not meet map accuracy standard.
+
+
+C4                       .CONG.DIS.IDC.INFM.MNM.
+                                             .generic contact.discrete.identity
+certain.inferred beneath mapped covering unit.location may not meet map accuracy
+ standard.
+
+C5                       .CONG.DIS.IDC.INFU.MNM.
+                                             .generic contact.discrete.identity
+certain.inferred beneath unmapped covering unit.location may not meet map accura
+cy standard.
+
+C6                       .CONG.DIS.IDQ.INF.MNM.
+                                             .generic contact.discrete.identity
+questionable.inferred.location may not meet map accuracy standard.
+
+
+C7                       .CONG.DIS.IDQ.INFM.MNM.
+                                              .generic contact.discrete.identity
+ questionable.inferred beneath mapped covering unit.location may not meet map ac
+curacy standard.
+
+C8                       .CONG.DIS.INFU.MNM.
+                                             .generic contact.discrete.identity
+questionable.inferred beneath unmapped covering unit.location may not meet map a
+ccuracy standard.
+
+C9                       .CONG.GRD.IDC.OBS.MEE.
+                                             .generic contact.gradational.identi
+ty certain.observable.location meets map accuracy standard.
+
+
+C10                      .CONG.GRD.IDC.OBS.MNM.
+                                             .generic contact.gradational.identi
+ty certain.observable.location may not meet map accuracy standard.
+
+
+C11                      .CONG.GRD.IDC.INF.MNM.
+                                             .generic contact.gradational.identi
+ty certain.inferred.location may not meet map accuracy standard.
+
+
+C12                      .CONG.GRD.IDC.INFM.MNM.
+                                             .generic contact.gradational.identi
+ty certain.inferred beneath mapped covering unit.location may not meet map accur
+acy standard.
+
+C13                      .CONG.GRD.IDC.INFU.MNM.
+                                             .generic contact.gradational.identi
+ty certain.inferred beneath unmapped covering unit.location may not meet map acc
+uracy standard.
+
+C14                      .CONG.GRD.IDQ.INF.MNM.
+                                             .generic contact.gradational.identi
+ty questionable.inferred.location may not meet map accuracy standard.
+
+
+C15                      .CONG.GRD.IDQ.INFM.MNM.
+                                             .generic contact.gradational.identi
+ty questionable.inferred beneath mapped covering unit.location may not meet map
+accuracy standard.
+
+C16                      .CONG.GRD.IDQ.INFU.MNM.
+                                             .generic contact.gradational.identi
+ty questionable.inferred beneath unmapped covering unit.location may not meet ma
+p accuracy standard.
+
+C17                      .CONL.DIS.IDC.OBS.MEE.
+                                             .landslide contact.discrete.identit
+y certain.observable.location meets map accuracy standard.
+
+
+C18                      .CONL.DIS.IDC.OBS.MNM.
+                                             .landslide contact.discrete.identit
+y certain.observable.location may not meet map accuracy standard.
+
+
+C19                      .CONL.DIS.IDC.INF.MNM.
+                                             .landslide contact.discrete.identit
+y certain.inferred.location may not meet map accuracy standard.
+
+
+C20                      .CONL.DIS.IDC.INFM.MNM.
+                                             .landslide contact.discrete.identit
+y certain.inferred beneath mapped covering unit.location may not meet map accura
+cy standard.
+
+C21                      .CONL.DIS.IDC.INFU.MNM.
+                                             .landslide contact.discrete.identit
+y certain.inferred beneath unmapped covering unit.location may not meet map accu
+racy standard.
+
+C22                      .CONL.DIS.IDQ.INF.MNM.
+                                             .landslide contact.discrete.identit
+y questionable.inferred.location may not meet map accuracy standard.
+
+
+C23                      .CONL.DIS.IDQ.INFM.MNM.
+                                             .landslide contact.discrete.identit
+y questionable.inferred beneath mapped covering unit.location may not meet map a
+ccuracy standard.
+
+C24                      .CONL.DIS.INFU.MNM.
+                                             .landslide contact.discrete.identit
+y questionable.inferred beneath unmapped covering unit.location may not meet map
+ accuracy standard.
+
+C25                      .CONL.CRW.IDC.OBS.MEE.
+                                             .landslide contact.crown scarp.iden
+tity certain.observable.location meets map accuracy standard.
+
+
+C26                      .CONL.CRW.IDC.OBS.MNM.
+                                             .landslide contact.crown scarp.iden
+tity certain.observable.location may not meet map accuracy standard.
+
+
+C27                      .CONL.CRW.IDC.INF.MNM.
+                                             .landslide contact.crown scarp.iden
+tity certain.inferred.location may not meet map accuracy standard.
+
+
+C28N                     .CONL.CRW.IDQ.MNM.
+                                             .landslide contact.crown scarp.iden
+tity questionable.inferred.location may not meet map accuracy standard.
+
+
+C29                      .CONS.DIS.IDC.OBS.MEE.
+                                             .sedimentary contact.discrete.ident
+ity certain.observable.location meets map accuracy standard.
+
+
+C30                      .CONS.DIS.IDC.OBS.MNM.
+                                             .sedimentary contact.discrete.ident
+ity certain.observable.location may not meet map accuracy standard.
+
+
+C31                      .CONS.DIS.IDC.INF.MNM.
+                                             .sedimentary contact.discrete.ident
+ity certain.inferred.location may not meet map accuracy standard.
+
+
+C32                      .CONS.DIS.IDC.INFM.MNM.
+                                             .sedimentary contact.discrete.ident
+ity certain.inferred beneath mapped covering unit.location may not meet map accu
+racy standard.
+
+C33                      .CONS.DIS.IDC.INFU.MNM.
+                                             .sedimentary contact.discrete.ident
+ity certain.inferred beneath unmapped covering unit.location may not meet map ac
+curacy standard.
+
+C34                      .CONS.DIS.IDQ.INF.MNM.
+                                             .sedimentary contact.discrete.ident
+ity questionable.inferred.location may not meet map accuracy standard.
+
+
+C35                      .CONS.DIS.IDQ.INFM.MNM.
+                                             .sedimentary contact.discrete.ident
+ity questionable.inferred beneath mapped covering unit.location may not meet map
+ accuracy standard.
+
+C36                      .CONS.DIS.INFU.MNM.
+                                             .sedimentary contact.discrete.ident
+ity questionable.inferred beneath unmapped covering unit.location may not meet m
+ap accuracy standard.
+
+C37                      .CONST.DIS.IDC.OBS.MEE.
+                                             .sedimentary contact.discrete.separ
+ates terraced alluvial units.identity certain.observable.location meets map accu
+racy standard.
+
+C38                      .CONS.CONST.IDC.OBS.MNM.
+                                             .sedimentary contact.discrete.separ
+ates terraced alluvial units.identity certain.observable.location may not meet m
+ap accuracy standard.
+
+C39                      .CONS.CONST.IDC.INF.MNM.
+                                             .sedimentary contact.discrete.separ
+ates terraced alluvial units.identity certain.inferred.location may not meet map
+ accuracy standard.
+
+C40N                     .CONS.CONST.IDQ.INF.MNM.
+                                             .sedimentary contact.discrete.separ
+ates terraced alluvial units.identity questionable.inferred.location may not mee
+t map accuracy standard.
+
+C41                      .CONS.GRD.IDC.OBS.MEE.
+                                             .sedimentary contact.gradational.id
+entity certain.observable.location meets map accuracy standard.
+
+
+C42                      .CONS.GRD.IDC.OBS.MNM.
+                                             .sedimentary contact.gradational.id
+entity certain.observable.location may not meet map accuracy standard.
+
+
+C43                      .CONS.GRD.IDC.INF.MNM.
+                                             .sedimentary contact.gradational.id
+entity certain.inferred.location may not meet map accuracy standard.
+
+
+C44                      .CONS.GRD.IDC.INFM.MNM.
+                                             .sedimentary contact.gradational.id
+entity certain.inferred beneath mapped covering unit.location may not meet map a
+ccuracy standard.
+
+C45                      .CONS.GRD.IDC.INFU.MNM.
+                                             .sedimentary contact.gradational.id
+entity certain.inferred beneath unmapped covering unit.location may not meet map
+ accuracy standard.
+
+C46                      .CONS.GRD.IDQ.INF.MNM.
+                                             .sedimentary contact.gradational.id
+entity questionable.inferred.location may not meet map accuracy standard.
+
+
+C47                      .CONS.GRD.IDQ.INFM.MNM.
+                                             .sedimentary contact.gradational.id
+entity questionable.inferred beneath mapped covering unit.location may not meet
+map accuracy standard.
+
+C48                      .CONS.GRD.IDQ.INFU.MNM.
+                                             .sedimentary contact.gradational.id
+entity questionable.inferred beneath unmapped covering unit.location may not mee
+t map accuracy standard.
+
+C49                      .CONI.DIS.IDC.OBS.MEE.
+                                             .igneous contact.discrete.identity
+certain.observable.location meets map accuracy standard.
+
+
+C50                      .CONI.DIS.IDC.OBS.MNM.
+                                             .igneous contact.discrete.identity
+certain.observable.location may not meet map accuracy standard.
+
+
+C51                      .CONI.DIS.IDC.INF.MNM.
+                                             .igneous contact.discrete.identity
+certain.inferred.location may not meet map accuracy standard.
+
+
+C52                      .CONI.DIS.IDC.INFM.MNM.
+                                             .igneous contact.discrete.identity
+certain.inferred beneath mapped covering unit.location may not meet map accuracy
+ standard.
+
+C53                      .CONI.DIS.IDC.INFU.MNM.
+                                             .igneous contact.discrete.identity
+certain.inferred beneath unmapped covering unit.location may not meet map accura
+cy standard.
+
+C54                      .CONI.DIS.IDQ.INF.MNM.
+                                             .igneous contact.discrete.identity
+questionable.inferred.location may not meet map accuracy standard.
+
+
+C55                      .CONI.DIS.IDQ.INFM.MNM.
+                                             .igneous contact.discrete.identity
+questionable.inferred beneath mapped covering unit.location may not meet map acc
+uracy standard.
+
+C56                      .CONI.DIS.INFU.MNM.
+                                             .igneous contact.discrete.identity
+questionable.inferred beneath unmapped covering unit.location may not meet map a
+ccuracy standard.
+
+C57                      .CONI.GRD.IDC.OBS.MEE.
+                                             .igneous contact.gradational.identi
+ty certain.observable.location meets map accuracy standard.
+
+
+C58                      .CONI.GRD.IDC.OBS.MNM.
+                                             .igneous contact.gradational.identi
+ty certain.observable.location may not meet map accuracy standard.
+
+
+C59                      .CONI.GRD.IDC.INF.MNM.
+                                             .igneous contact.gradational.identi
+ty certain.inferred.location may not meet map accuracy standard.
+
+
+C60                      .CONI.GRD.IDC.INFM.MNM.
+                                             .igneous contact.gradational.identi
+ty certain.inferred beneath mapped covering unit.location may not meet map accur
+acy standard.
+
+C61                      .CONI.GRD.IDC.INFU.MNM.
+                                             .igneous contact.gradational.identi
+ty certain.inferred beneath unmapped covering unit.location may not meet map acc
+uracy standard.
+
+C62                      .CONI.GRD.IDQ.INF.MNM.
+                                             .igneous contact.gradational.identi
+ty questionable.inferred.location may not meet map accuracy standard.
+
+
+C63                      .CONI.GRD.IDQ.INFM.MNM.
+                                             .igneous contact.gradational.identi
+ty questionable.inferred beneath mapped covering unit.location may not meet map
+accuracy standard.
+
+C64                      .CONI.GRD.IDQ.INFU.MNM.
+                                             .igneous contact.gradational.identi
+ty questionable.inferred beneath unmapped covering unit.location may not meet ma
+p accuracy standard.
+
+C65                      .CONM.DIS.IDC.OBS.MEE.
+                                             .metamorphic contact.discrete.ident
+ity certain.observable.location meets map accuracy standard.
+
+
+C66                      .CONM.DIS.IDC.OBS.MNM.
+                                             .metamorphic contact.discrete.ident
+ity certain.observable.location may not meet map accuracy standard.
+
+
+C67                      .CONM.DIS.IDC.INF.MNM.
+                                             .metamorphic contact.discrete.ident
+ity certain.inferred.location may not meet map accuracy standard.
+
+
+C68                      .CONM.DIS.IDC.INFM.MNM.
+                                             .metamorphic contact.discrete.ident
+ity certain.inferred beneath mapped covering unit.location may not meet map accu
+racy standard.
+
+C69                      .CONM.DIS.IDC.INFU.MNM.
+                                             .metamorphic contact.discrete.ident
+ity certain.inferred beneath unmapped covering unit.location may not meet map ac
+curacy standard.
+
+C70                      .CONM.DIS.IDQ.INF.MNM.
+                                             .metamorphic contact.discrete.ident
+ity questionable.inferred.location may not meet map accuracy standard.
+
+
+C71                      .CONM.DIS.IDQ.INFM.MNM.
+                                             .metamorphic contact.discrete.ident
+ity questionable.inferred beneath mapped covering unit.location may not meet map
+ accuracy standard.
+
+C72                      .CONM.DIS.INFU.MNM.
+                                             .metamorphic contact.discrete.ident
+ity questionable.inferred beneath unmapped covering unit.location may not meet m
+ap accuracy standard.
+
+C73                      .CONM.GRD.IDC.OBS.MEE.
+                                             .metamorphic contact.gradational.id
+entity certain.observable.location meets map accuracy standard.
+
+
+C74                      .CONM.GRD.IDC.OBS.MNM.
+                                             .metamorphic contact.gradational.id
+entity certain.observable.location may not meet map accuracy standard.
+
+
+C75                      .CONM.GRD.IDC.INF.MNM.
+                                             .metamorphic contact.gradational.id
+entity certain.inferred.location may not meet map accuracy standard.
+
+
+C76                      .CONM.GRD.IDC.INFM.MNM.
+                                             .metamorphic contact.gradational.id
+entity certain.inferred beneath mapped covering unit.location may not meet map a
+ccuracy standard.
+
+C77                      .CONM.GRD.IDC.INFU.MNM.
+                                             .metamorphic contact.gradational.id
+entity certain.inferred beneath unmapped covering unit.location may not meet map
+ accuracy standard.
+
+C78                      .CONM.GRD.IDQ.INF.MNM.
+                                             .metamorphic contact.gradational.id
+entity questionable.inferred.location may not meet map accuracy standard.
+
+
+C79                      .CONM.GRD.IDQ.INFM.MNM.
+                                             .metamorphic contact.gradational.id
+entity questionable.inferred beneath mapped covering unit.location may not meet
+map accuracy standard.
+
+C80                      .CONM.GRD.IDQ.INFU.MNM.
+                                             .metamorphic contact.gradational.id
+entity questionable.inferred beneath unmapped covering unit.location may not mee
+t map accuracy standard.
+
+C81                      .CONR.DIS.IDC.OBS.MEE.
+                                             .regolith or pedogenic soil contact
+.discrete.identity certain.observable.location meets map accuracy standard.
+
+
+C82                      .CONR.DIS.IDC.OBS.MNM.
+                                             .regolith or pedogenic soil contact
+.discrete.identity certain.observable.location may not meet map accuracy standar
+d.
+
+C83                      .CONR.DIS.IDC.INF.MNM.
+                                             .regolith or pedogenic soil contact
+.discrete.identity certain.inferred.location may not meet map accuracy standard.
+
+
+C84                      .CONR.DIS.IDC.INFM.MNM.
+                                             .regolith or pedogenic soil contact
+.discrete.identity certain.inferred beneath mapped covering unit.location may no
+t meet map accuracy standard.
+
+C85                      .CONR.DIS.IDC.INFU.MNM.
+                                             .regolith or pedogenic soil contact
+.discrete.identity certain.inferred beneath unmapped covering unit.location may
+not meet map accuracy standard.
+
+C86                      .CONR.DIS.IDQ.INF.MNM.
+                                             .regolith or pedogenic soil contact
+.discrete.identity questionable.inferred.location may not meet map accuracy stan
+dard.
+
+C87                      .CONR.DIS.IDQ.INFM.MNM.
+                                             .regolith or pedogenic soil contact
+.discrete.identity questionable.inferred beneath mapped covering unit.location m
+ay not meet map accuracy standard.
+
+C88                      .CONR.DIS.INFU.MNM.
+                                             .regolith or pedogenic soil contact
+.discrete.identity questionable.inferred beneath unmapped covering unit.location
+ may not meet map accuracy standard.
+
+C89                      .COND.GPH.GPHA.MNM.
+                                             .contact inferred by indirect metho
+ds.geophysics.aeromagnetic survey.location may not meet map accuracy standard.
+
+
+C90                      .COND.GPH.GPHM.MNM.
+                                             .contact inferred by indirect metho
+ds.geophysics.ground magnetic survey.location may not meet map accuracy standard
+.
+
+C91                      .COND.GPH.GPHG.MNM.
+                                             .contact inferred by indirect metho
+ds.geophysics.gravity survey.location may not meet map accuracy standard.
+
+
+C92                      .COND.GPH.GPHR.MNM.
+                                             .contact inferred by indirect metho
+ds.geophysics.radiometric survey.location may not meet map accuracy standard.
+
+
+C93                      .COND.RSI.MNM.
+                                             .contact inferred by indirect metho
+ds.remote sensing imagery.location may not meet map accuracy standard.
+
+
+C94                      .COND.GWL.MNM.
+                                             .contact inferred by indirect metho
+ds.ground water levels.location may not meet map accuracy standard.
+
+
+C95                      .COND.SSB.MNM.
+                                             .contact inferred by indirect metho
+ds.subsurface boring data.location may not meet map accuracy standard.
+
+
+C96                      .CONKG.
+                                             .contact
+
+
+
+C97                      .CONKL.
+                                             .contact
+
+
+
+C98                      .CONKS.
+                                             .contact
+
+
+
+C99                      .CONKI.
+                                             .contact
+
+
+
+C100                     .CONKM.
+                                             .contact
+
+
+
+C101                     .CONKR.
+                                             .contact
+
+
+
+MH1                      .MMHB.IDC.OBS.LOW.
+                                             .mapped marker horizon.buried paleo
+sol.identity certain.observable.located well but may not meet map accuracy stand
+ard.
+
+MH2                      .MMHB.IDC.INFM.MNM.
+                                             .mapped marker horizon.buried paleo
+sol.identity certain.inferred beneath mapped covering unit.location may not meet
+ map accuracy standard.
+
+MH3                      .MMHV.IDC.OBS.LOW.
+                                             .mapped marker horizon.volcanic flo
+w.identity certain.observable.located well but may not meet map accuracy standar
+d.
+
+MH4                      .MMHV.IDC.INFM.MNM.
+                                             .mapped marker horizon.volcanic flo
+w.identity certain.inferred beneath mapped covering unit.location may not meet m
+ap accuracy standard.
+
+MH5                      .MMHA.IDC.OBS.LOW.
+                                             .mapped marker horizon.volcanic ash
+ layer.identity certain.observable.located well but may not meet map accuracy st
+andard.
+
+MH6                      .MMHA.IDC.INFM.MNM.
+                                             .mapped marker horizon.volcanic ash
+ layer.identity certain.inferred beneath mapped covering unit.location may not m
+eet map accuracy standard.
+
+MH7                      .MMHG.IDC.OBS.LOW.
+                                             .mapped marker horizon.gravel layer
+.identity certain.observable.located well but may not meet map accuracy standard
+.
+
+MH8                      .MMHG.IDC.INFM.MNM.
+                                             .mapped marker horizon.gravel layer
+.identity certain.inferred beneath mapped covering unit.location may not meet ma
+p accuracy standard.
+
+MH9                      .MMH.IDC.OBS.LOW.
+                                             .mapped marker horizon.identity cer
+tain.observable.located well but may not meet map accuracy standard.
+
+
+MH10                     .MMH.IDC.INFM.MNM.
+                                             .mapped marker horizon.identity cer
+tain.inferred beneath mapped covering unit.location may not meet map accuracy st
+andard.
+
+MH11                     .MMH.IDC.OBS.LOW.
+                                             .mapped marker horizon.identity cer
+tain.observable.located well but may not meet map accuracy standard.
+
+
+MH12                     .MMH.IDC.INFM.MNM.
+                                             .mapped marker horizon.identity cer
+tain.inferred beneath mapped covering unit.location may not meet map accuracy st
+andard.
+
+F1                       .FLTH.SLPUG.EXC.OBS.MEE.
+                                             .high-angle fault.slip unspecified.
+generic fault.existence certain.observable.location meets map accuracy standard.
+
+
+F2                       .FLTH.SLPSR.EXC.OBS.MEE.
+                                             .high-angle fault.strike slip.right
+ lateral fault.existence certain.observable.location meets map accuracy standard
+.
+
+F3                       .FLTH.SLPSL.EXC.OBS.MEE.
+                                             .high-angle fault.strike slip.left
+lateral fault.existence certain.observable.location meets map accuracy standard.
+
+
+F4                       .FLTH.SLPNN.EXC.OBS.MEE.
+                                             .high-angle fault.normal slip.norma
+l fault.existence certain.observable.location meets map accuracy standard.
+
+
+F5                       .FLTH.SLPRR.EXC.OBS.MEE.
+                                             .high-angle fault.reverse slip.reve
+rse fault.existence certain.observable.location meets map accuracy standard.
+
+
+F6                       .FLTH.SLPOO.EXC.OBS.MEE.
+                                             .high-angle fault.oblique slip.obli
+que fault.existence certain.observable.location meets map accuracy standard.
+
+
+F7                       .FLTH.SLPUG.EXC.OBS.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.existence certain.observable.location may not meet map accuracy st
+andard.
+
+F8                       .FLTH.SLPSR.EXC.OBS.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.existence certain.observable.location may not meet map accuracy s
+tandard.
+
+F9                       .FLTH.SLPSL.EXC.OBS.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.existence certain.observable.location may not meet map accuracy st
+andard.
+
+F10                      .FLTH.SLPNN.EXC.OBS.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.existence certain.observable.location may not meet map accuracy standard
+.
+
+F11                      .FLTH.SLPRR.EXC.OBS.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.existence certain.observable.location may not meet map accuracy standa
+rd.
+
+F12                      .FLTH.SLPOO.EXC.OBS.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.existence certain.observable.location may not meet map accuracy standa
+rd.
+
+F13                      .FLTH.SLPUG.EXC.INF.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.existence certain.inferred.location may not meet map accuracy stan
+dard.
+
+F14                      .FLTH.SLPSR.EXC.INF.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.existence certain.inferred.location may not meet map accuracy sta
+ndard.
+
+F15                      .FLTH.SLPSL.EXC.INF.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.existence certain.inferred.location may not meet map accuracy stan
+dard.
+
+F16                      .FLTH.SLPNN.EXC.INF.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.existence certain.inferred.location may not meet map accuracy standard.
+
+
+F17                      .FLTH.SLPRR.EXC.INF.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.existence certain.inferred.location may not meet map accuracy standard
+.
+
+F18                      .FLTH.SLPOO.EXC.INF.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.existence certain.inferred.location may not meet map accuracy standard
+.
+
+F19                      .FLTH.SLPUG.EXC.INFM.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.existence certain.inferred beneath mapped covering unit.location m
+ay not meet map accuracy standard.
+
+F20                      .FLTH.SLPSR.EXC.INFM.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.existence certain.inferred beneath mapped covering unit.location
+may not meet map accuracy standard.
+
+F21                      .FLTH.SLPSL.EXC.INFM.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.existence certain.inferred beneath mapped covering unit.location m
+ay not meet map accuracy standard.
+
+F22                      .FLTH.SLPNN.EXC.INFM.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.existence certain.inferred beneath mapped covering unit.location may not
+ meet map accuracy standard.
+
+F23                      .FLTH.SLPR.SLPRR.EXC.INFM.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.existence certain.inferred beneath mapped covering unit.location may n
+ot meet map accuracy standard.
+
+F24                      .FLTH.SLPO.SLPOO.EXC.INFM.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.existence certain.inferred beneath mapped covering unit.location may n
+ot meet map accuracy standard.
+
+F25                      .FLTH.SLPUG.EXC.INFU.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.existence certain.inferred beneath unmapped covering unit.location
+ may not meet map accuracy standard.
+
+F26                      .FLTH.SLPSR.EXC.INFU.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.existence certain.inferred beneath unmapped covering unit.locatio
+n may not meet map accuracy standard.
+
+F27                      .FLTH.SLPSL.EXC.INFU.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.existence certain.inferred beneath unmapped covering unit.location
+ may not meet map accuracy standard.
+
+F28                      .FLTH.SLPNN.EXC.INFU.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.existence certain.inferred beneath unmapped covering unit.location may n
+ot meet map accuracy standard.
+
+F29                      .FLTH.SLPRR.EXC.INFU.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.existence certain.inferred beneath unmapped covering unit.location may
+ not meet map accuracy standard.
+
+F30                      .FLTH.SLPOO.EXC.INFU.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.existence certain.inferred beneath unmapped covering unit. location ma
+y not meet map accuracy standard.
+
+F31                      .FLTH.SLPUG.EXQ.INF.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.existence questionable.inferred.location may not meet map accuracy
+ standard.
+
+F32                      .FLTH.SLPSR.EXQ.INF.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.existence questionable.inferred.location may not meet map accurac
+y standard.
+
+F33                      .FLTH.SLPSL.EXQ.INF.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.existence questionable.inferred.location may not meet map accuracy
+ standard.
+
+F34                      .FLTH.SLPNN.EXQ.INF.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.existence questionable.inferred.location may not meet map accuracy stand
+ard.
+
+F35                      .FLTH.SLPRR.EXQ.INF.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.existence questionable.inferred.location may not meet map accuracy sta
+ndard.
+
+F36                      .FLTH.SLPOO.EXQ.INF.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.existence questionable.inferred.location may not meet map accuracy sta
+ndard.
+
+F37                      .FLTH.SLPUG.EXQ.INFM.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.existence questionable.inferred beneath mapped covering unit.locat
+ion may not meet map accuracy standard.
+
+F38                      .FLTH.SLPSR.EXQ.INFM.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.existence questionable.inferred beneath mapped covering unit.loca
+tion may not meet map accuracy standard.
+
+F39                      .FLTH.SLPSL.EXQ.INFM.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.existence questionable.inferred beneath mapped covering unit.locat
+ion may not meet map accuracy standard.
+
+F40                      .FLTH.SLPNN.EXQ.INFM.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.existence questionable.inferred beneath mapped covering unit.location ma
+y not meet map accuracy standard.
+
+F41                      .FLTH.SLPRR.EXQ.INFM.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.existence questionable.inferred beneath mapped covering unit.location
+may not meet map accuracy standard.
+
+F42                      .FLTH.SLPOO.EXQ.INFM.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.existence questionable.inferred beneath mapped covering unit.location
+may not meet map accuracy standard.
+
+F43                      .FLTH.SLPUG.EXQ.INFU.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.existence questionable.inferred beneath unmapped covering unit.loc
+ation may not meet map accuracy standard.
+
+F44                      .FLTH.SLPSR.EXQ.INFU.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.existence questionable.inferred beneath unmapped covering unit.lo
+cation may not meet map accuracy standard.
+
+F45                      .FLTH.SLPSL.EXQ.INFU.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.existence questionable.inferred beneath unmapped covering unit.may
+ not meet map accuracy standard.
+
+F46                      .FLTH.SLPNN.EXQ.INFU.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.existence questionable.inferred beneath unmapped covering unit.location
+may not meet map accuracy standard.
+
+F47                      .FLTH.SLPRR.EXQ.INFU.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.existence questionable.inferred beneath unmapped covering unit.locatio
+n may not meet map accuracy standard.
+
+F48                      .FLTH.SLPOO.EXQ.INFU.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.existence questionable.inferred beneath unmapped covering unit.locatio
+n may not meet map accuracy standard.
+
+F49                      .FLTH.SLPUG.FSC.IDC.MEE.
+                                             .high-angle fault.slip unspecified.
+generic fault.scarp.identity certain.location meets map accuracy standard.
+
+
+F50                      .FLTH.SLPSR.FSC.IDC.MEE.
+                                             .high-angle fault.strike slip.right
+ lateral fault.scarp.identity certain.location meets map accuracy standard.
+
+
+F51                      .FLTH.SLPSL.FSC.IDC.MEE.
+                                             .high-angle fault.strike slip.left
+lateral fault.scarp.identity certain.location meets map accuracy standard.
+
+
+F52                      .FLTH.SLPNN.FSC.IDC.MEE.
+                                             .high-angle fault.normal slip.norma
+l fault.scarp.identity certain.location meets map accuracy standard.
+
+
+F53                      .FLTH.SLPRR.FSC.IDC.MEE.
+                                             .high-angle fault.reverse slip.reve
+rse fault.scarp.identity certain.location meets map accuracy standard.
+
+
+F54                      .FLTH.SLPOO.FSC.IDC.MEE.
+                                             .high-angle fault.oblique slip.obli
+que fault.scarp.identity certain.location meets map accuracy standard.
+
+
+F55                      .FLTH.SLPUG.FSC.IDC.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.scarp.identity certain.location may not meet map accuracy standard
+.
+
+F56                      .FLTH.SLPSR.FSC.IDC.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.scarp.identity certain.location may not meet map accuracy standar
+d.
+
+F57                      .FLTH.SLPSL.FSC.IDC.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.scarp.identity certain.location may not meet map accuracy standard
+.
+
+F58                      .FLTH.SLPNN.FSC.IDC.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.scarp.identity certain.location may not meet map accuracy standard.
+
+
+F59                      .FLTH.SLPRR.FSC.IDC.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.scarp.identity certain.location may not meet map accuracy standard.
+
+
+F60                      .FLTH.SLPOO.FSC.IDC.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.scarp.identity certain.location may not meet map accuracy standard.
+
+
+F61N                     .FLTH.SLPUG.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.scarp.identity questionable.probable.location may not meet map acc
+uracy standard.
+
+F62N                     .FLTH.SLPUG.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.scarp.identity questionable.possible.location may not meet map acc
+uracy standard.
+
+F63N                     .FLTH.SLPSR.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.scarp.identity questionable.probable.location may not meet map ac
+curacy standard.
+
+F64N                     .FLTH.SLPSR.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.scarp.identity questionable.possible.location may not meet map ac
+curacy standard.
+
+F65N                     .FLTH.SLPSL.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.scarp.identity questionable.probable.location may not meet map acc
+uracy standard.
+
+F66N                     .FLTH.SLPSL.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.scarp.identity questionable.possible.location may not meet map acc
+uracy standard.
+
+F67N                     .FLTH.SLPNN.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.scarp.identity questionable.probable.location may not meet map accuracy
+standard.
+
+F68N                     .FLTH.SLPNN.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.scarp.identity questionable.possible.location may not meet map accuracy
+standard.
+
+F69N                     .FLTH.SLPRR.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.scarp.identity questionable.probable.location may not meet map accurac
+y standard.
+
+F70N                     .FLTH.SLPRR.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.scarp.identity questionable.possible.location may not meet map accurac
+y standard.
+
+F71N                     .FLTH.SLPOO.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.scarp.identity questionable.probable.location may not meet map accurac
+y standard.
+
+F72N                     .FLTH.SLPOO.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.scarp.identity questionable.possible.location may not meet map accurac
+y standard.
+
+F73                      .FLTL.SLPUL.WRLU.EXC.OBS.MEE.
+                                             .fault.low angle.slip unspecified.f
+ault wall relations unspecified.low angle fault.existence certain.observable.loc
+ation meets map accuracy standard.
+
+F74                      .FLTL.SLPUL.WRLU.EXC.OBS.MNM.
+                                             .fault.low angle.slip unspecified.f
+ault wall relations unspecified.low angle fault.existence certain.observable.loc
+ation may not meet map accuracy standard.
+
+F75                      .FLTL.SLPUL.WRLU.EXC.INF.MNM.
+                                             .fault.low angle.slip unspecified.f
+ault wall relations unspecified.low angle fault.existence certain.inferred.locat
+ion may not meet map accuracy standard.
+
+F76                      .FLTL.SLPUL.WRLU.EXC.INFM.MNM.
+                                             .fault.low angle.slip unspecified.f
+ault wall relations unspecified.low angle fault.existence certain.inferred benea
+th mapped covering unit.location may not meet map accuracy standard.
+
+F77                      .FLTL.SLPUL.WRLU.EXC.INFU.MNM.
+                                             .fault.low angle.slip unspecified.f
+ault wall relations unspecified.low angle fault.existence certain.inferred benea
+th unmapped covering unit.location may not meet map accuracy standard.
+
+F78                      .FLTL.SLPUL.WRLU.EXQ.INF.MNM.
+                                             .fault.low angle.slip unspecified.f
+ault wall relations unspecified.low angle fault.existence questionable.inferred.
+location may not meet map accuracy standard.
+
+F79                      .FLTL.SLPUL.WRLU.EXQ.INFM.MNM.
+                                             .fault.low angle.slip unspecified.f
+ault wall relations unspecified.low angle fault.existence questionable.Inferred
+beneath mapped covering unit.location may not meet map accuracy standard.
+
+F80                      .FLTL.SLPUL.WRLU.EXQ.INFU.MNM.
+                                             .fault.low angle.slip unspecified.f
+ault wall relations unspecified.low angle fault.existence questionable.inferred
+beneath unmapped covering unit.location may not meet map accuracy standard.
+
+F81                      .FLTL.SLPUL.WRLY.EXC.OBS.MEE.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence certain.observable.location meets ma
+p accuracy standard.
+
+F82                      .FLTL.SLPUL.WRLY.EXC.OBS.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence certain.observable.location may not
+meet map accuracy standard.
+
+F83                      .FLTL.SLPUL.WRLY.EXC.INF.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence certain.inferred.location may not me
+et map accuracy standard.
+
+F84                      .FLTL.SLPUL.WRLY.EXC.INFM.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence certain.inferred beneath mapped cove
+ring unit.location may not meet map accuracy standard.
+
+F85                      .FLTL.SLPUL.WRLY.EXC.INFU.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence certain.inferred beneath unmapped co
+vering unit.location may not meet map accuracy standard.
+
+F86N                     .FLTL.SLPUL.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence questionable.inferred.location may n
+ot meet map accuracy standard.
+
+F87N                     .FLTL.SLPUL.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence questionable.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+F88N                     .FLTL.SLPUL.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence questionable.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+F89                      .FLTL.SLPUL.WRLO.EXC.OBS.MEE.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence certain.observable.location meets ma
+p accuracy standard.
+
+F90                      .FLTL.SLPUL.WRLO.EXC.OBS.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence certain.observable.location may not
+meet map accuracy standard.
+
+F91                      .FLTL.SLPUL.WRLO.EXC.INF.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence certain.nferred.location may not mee
+t map accuracy standard.
+
+F92                      .FLTL.SLPUL.WRLO.EXC.INFM.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence certain.inferred beneath mapped cove
+ring unit.location may not meet map accuracy standard.
+
+F93                      .FLTL.SLPUL.WRLO.EXC.INFU.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence certain.inferred beneath unmapped co
+vering unit.location may not meet map accuracy standard.
+
+F94N                     .FLTL.SLPUL.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence questionable.inferred.location may n
+ot meet map accuracy standard.
+
+F95N                     .FLTL.SLPUL.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence questionable.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+F96N                     .FLTL.SLPUL.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence questionable.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+F97                      .FLTL.SLPNL.WRLY.EXC.OBS.MEE.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence certain.observable.location meets
+map accuracy standard.
+
+F98                      .FLTL.SLPNL.WRLY.EXC.EC.OBS.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence certain.observable.location may no
+t meet map accuracy standard.
+
+F99                      .FLTL.SLPNL.WRLY.EXC.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence certain.inferred.location may not
+meet map accuracy standard.
+
+F100                     .FLTL.SLPNL.WRLY.EXC.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence certain.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F101                     .FLTL.SLPNL.WRLY.EXC.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence certain.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F102N                    .FLTL.SLPNL.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence questionable.inferred.location may
+ not meet map accuracy standard.
+
+F103N                    .FLTL.SLPNL.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence questionable.inferred beneath mapp
+ed covering unit.location may not meet map accuracy standard.
+
+F104N                    .FLTL.SLPNL.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence questionable.inferred beneath unma
+pped covering unit.location may not meet map accuracy standard.
+
+F105                     .FLTL.SLPNDM.WRLY.EXC.OBS.MEE.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence certain.observable.location meets map a
+ccuracy standard.
+
+F106                     .FLTL.SLPNDM.WRLY.EXC.OBS.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence certain.observable.location may not mee
+t map accuracy standard.
+
+F107                     .FLTL.SLPNDM.WRLY.EXC.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence certain.inferred.location may not meet
+map accuracy standard.
+
+F108                     .FLTL.SLPNDM.WRLY.EXC.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence certain.nferred beneath mapped covering
+ unit.location may not meet map accuracy standard.
+
+F109                     .FLTL.SLPNDM.WRLY.EXC.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence certain.inferred beneath unmapped cover
+ing unit.location may not meet map accuracy standard.
+
+F110N                    .FLTL.SLPNDM.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+F111N                    .FLTL.SLPNDM.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F112N                    .FLTL.SLPNDM.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence questionable.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F113                     .FLTL.SLPND.WRLY.EXC.OBS.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence certain.observable.location meets map accuracy
+ standard.
+
+F114                     .FLTL.SLPND.WRLY.EXC.OBS.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence certain.observable.location may not meet map a
+ccuracy standard.
+
+F115                     .FLTL.SLPND.WRLY.EXC.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence certain.inferred.located well but rarely meets
+ map accuracy standard.
+
+F116                     .FLTL.SLPND.WRLY.EXC.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence certain.inferred beneath mapped covering unit.
+located well but rarley meets map accuracy standard.
+
+F117                     .FLTL.SLPND.WRLY.EXC.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence certain.inferred beneath unmapped covering uni
+t.location may not meet map accuracy standard.
+
+F118N                    .FLTL.SLPND.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence questionable.inferred.location may not meet ma
+p accuracy standard.
+
+F119N                    .FLTL.SLPND.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence questionable.inferred beneath mapped covering
+unit.location may not meet map accuracy standard.
+
+F120N                    .FLTL.SLPND.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence questionable.inferred beneath unmapped coverin
+g unit.location may not meet map accuracy standard.
+
+F121                     .FLTL.SLPNL.WRLY.EXC.OBS.MEE.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence certain.observable.location meets
+ map accuracy standard.
+
+F122                     .FLTL.SLPNL.WRLY.EXC.OBS.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence certain.observable.location may n
+ot meet map accuracy standard.
+
+F123                     .FLTL.SLPNL.WRLY.EXC.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence questionable.inferred.location ma
+y not meet map accuracy standard.
+
+F124                     .FLTL.SLPNL.WRLY.EXC.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence certain.inferred beneath mapped c
+overing unit.location may not meet map accuracy standard.
+
+F125                     .FLTL.SLPNL.WRLY.EXC.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence certain.inferred beneath unmapped
+ covering unit.location may not meet map accuracy standard.
+
+F126N                    .FLTL.SLPNL.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence questionable.inferred.location ma
+y not meet map accuracy standard.
+
+F127N                    .FLTL.SLPNL.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence questionable.inferred beneath map
+ped covering unit.location may not meet map accuracy standard.
+
+F128N                    .FLTL.SLPNL.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence questionable.inferred beneath unm
+apped covering unit.location may not meet map accuracy standard.
+
+F129                     .FLTL.SLPNDM.WRLO.EXC.OBS.MEE.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence certain.observable.location meets map a
+ccuracy standard.
+
+F130                     .FLTL.SLPNDM.WRLO.EXC.OBS.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence certain.observable.location may not mee
+t map accuracy standard.
+
+F131                     .FLTL.SLPNDM.WRLO.EXC.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence certain.inferred.location may not meet
+map accuracy standard.
+
+F132                     .FLTL.SLPNDM.WRLO.EXC.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence certain.nferred beneath mapped covering
+ unit.location may not meet map accuracy standard.
+
+F133                     .FLTL.SLPNDM.WRLO.EXC.INFU.MNM.
+                                             fault.low angle.normal slip.older o
+ver younger.master detachment.existence certain.inferred beneath unmapped coveri
+ng unit.location may not meet map accuracy standard.
+
+F134N                    .FLTL.SLPNDM.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+F135N                    .FLTL.SLPNDM.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F136N                    .FLTL.SLPNDM.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence questionable.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F137                     .FLTL.SLPND.WRLO.EXC.OBS.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence certain.observable.location meets map accuracy
+ standard.
+
+F138                     .FLTL.SLPND.WRLO.EXC.OBS.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence certain.observable.location may not meet map a
+ccuracy standard.
+
+F139                     .FLTL.SLPND.WRLO.EXC.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence certain.inferred.located well but rarely meets
+ map accuracy standard.
+
+F140                     .FLTL.SLPND.WRLO.EXC.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence certain.inferred beneath mapped covering unit.
+located well but rarley meets map accuracy standard.
+
+F141                     .FLTL.SLPND.WRLO.EXC.INFU.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence certain.inferred beneath unmapped covering uni
+t.location may not meet map accuracy standard.
+
+F142N                    .FLTL.SLPND.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence questionable.inferred.location may not meet ma
+p accuracy standard.
+
+F143N                    .FLTL.SLPND.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence questionable.inferred beneath mapped covering
+unit.location may not meet map accuracy standard.
+
+F144N                    .FLTL.SLPND.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence questionable.inferred beneath unmapped coverin
+g unit.location may not meet map accuracy standard.
+
+F145                     .FLTL.SLPNL.WRLO.EXC.OBS.MEE.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence certain.observable.location meets
+ map accuracy standard.
+
+F146                     .FLTL.SLPNL.WRLO.EXC.OBS.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence certain.observable.location may n
+ot meet map accuracy standard.
+
+F147                     .FLTL.SLPNL.WRLO.EXC.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence questionable.inferred.location ma
+y not meet map accuracy standard.
+
+F148                     .FLTL.SLPNL.WRLO.EXC.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence certain.inferred beneath mapped c
+overing unit.location may not meet map accuracy standard.
+
+F149                     .FLTL.SLPNL.WRLO.EXC.INFU.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence certain.inferred beneath unmapped
+ covering unit.location may not meet map accuracy standard.
+
+F150N                    .FLTL.SLPNL.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence questionable.inferred.location ma
+y not meet map accuracy standard.
+
+F151N                    .FLTL.SLPNL.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence questionable.inferred beneath map
+ped covering unit.location may not meet map accuracy standard.
+
+F152N                    .FLTL.SLPNL.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence questionable.inferred beneath unm
+apped covering unit.location may not meet map accuracy standard.
+
+F153                     .FLTL.SLPTD.WRLY.EXC.OBS.MEE.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence certain.observable.location meets map accurac
+y standard.
+
+F154                     .FLTL.SLPTD.WRLY.EXC.OBS.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence certain.observable.location may not meet map
+accuracy standard.
+
+F155                     .FLTL.SLPTD.WRLY.EXC.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence certain.inferred.location may not meet map ac
+curacy standard.
+
+F156                     .FLTL.SLPTD.WRLY.EXC.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence certain.inferred beneath mapped covering unit
+.location may not meet map accuracy standard.
+
+F157                     .FLTL.SLPTD.WRLY.EXC.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence certain.inferred beneath unmapped covering un
+it.location may not meet map accuracy standard.
+
+F158N                    .FLTL.SLPTD.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence questionable.inferred.location may not meet m
+ap accuracy standard.
+
+F159N                    .FLTL.SLPTD.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence questionable.inferred beneath mapped covering
+ unit.location may not meet map accuracy standard.
+
+F160N                    .FLTL.SLPTD.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence questionable.inferred beneath unmapped coveri
+ng unit.location may not meet map accuracy standard.
+
+F161                     .FLTL.SLPTT.WRLY.EXC.OBS.MEE.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence certain.observable.location meets map accuracy sta
+ndard.
+
+F162                     .FLTL.SLPTT.WRLY.EXC.OBS.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence certain.observable.location may not meet map accur
+acy standard.
+
+F163                     .FLTL.SLPTT.WRLY.EXC.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence certain.inferred.location may not meet map accurac
+y standard.
+
+F164                     .FLTL.SLPTT.WRLY.EXC.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence certain.inferred beneath mapped covering unit.loca
+tion may not meet map accuracy standard.
+
+F165                     .FLTL.SLPTT.WRLY.EXC.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence certain.inferred beneath unmapped covering unit.lo
+cation may not meet map accuracy standard.
+
+F166N                    .FLTL.SLPTT.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence questionable.inferred.location may not meet map ac
+curacy standard.
+
+F167N                    .FLTL.SLPTT.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence questionable.inferred beneath mapped covering unit
+.location may not meet map accuracy standard.
+
+F168N                    .FLTL.SLPTT.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence questionable.inferred beneath unmapped covering un
+it.location may not meet map accuracy standard.
+
+F169                     .FLTL.SLPTTO.WRLY.EXC.OBS.MEE.
+                                             .fault.low angle.thrust slip. young
+er over older.thrust.overturned.existence certain.observable.location meets map
+accuracy standard.
+
+F170                     .FLTL.SLPTTO.WRLY.EXC.OBS.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence certain.observable.location may not mee
+t map accuracy standard.
+
+F171                     .FLTL.SLPTTO.WRLY.EXC.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence certain.inferred.location may not meet
+map accuracy standard.
+
+F172                     .FLTL.SLPTTO.WRLY.EXC.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence certain.inferred beneath mapped coverin
+g unit.location may not meet map accuracy standard.
+
+F173                     .FLTL.SLPTTO.WRLY.EXC.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence certain.inferred beneath unmapped cover
+ing unit.location may not meet map accuracy standard.
+
+F174N                    .FLTL.SLPTTO.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+F175N                    .FLTL.SLPTTO.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F176N                    .FLTL.SLPTTO.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence questionable.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F177                     .FLTL.SLPTT.WRLO.EXC.OBS.MEE.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence certain.observable.location meets map accuracy sta
+ndard.
+
+F178                     .FLTL.SLPTT.WRLO.EXC.OBS.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence certain.observable.location may not meet map accur
+acy standard.
+
+F179                     .FLTL.SLPTT.WRLO.EXC.INF.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence certain.inferred.location may not meet map accurac
+y standard.
+
+F180                     .FLTL.SLPTT.WRLO.EXC.INFM.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence certain.inferred beneath mapped covering unit.loca
+tion may not meet map accuracy standard.
+
+F181                     .FLTL.SLPTT.WRLO.EXC.INFU.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence certain.inferred beneath unmapped covering unit.lo
+cation may not meet map accuracy standard.
+
+F182N                    .FLTL.SLPTT.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence questionable.inferred.location may not meet map ac
+curacy standard.
+
+F183N                    .FLTL.SLPTT.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence questionable.inferred beneath mapped covering unit
+.location may not meet map accuracy standard.
+
+F184N                    .FLTL.SLPTT.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence questionable.inferred beneath unmapped covering un
+it.location may not meet map accuracy standard.
+
+F185                     .FLTL.SLPTTO.WRLO.EXC.OBS.MEE.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence certain.observable.location meets map a
+ccuracy standard.
+
+F186                     .FLTL.SLPTTO.WRLO.EXC.OBS.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence certain.observable.location may not mee
+t map accuracy standard.
+
+F187                     .FLTL.SLPTTO.WRLO.EXC.INF.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence certain.inferred.location may not meet
+map accuracy standard.
+
+F188                     .FLTL.SLPTTO.WRLO.IEC.NFM.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence certain.inferred beneath mapped coverin
+g unit.location may not meet map accuracy standard.
+
+F189N                    .FLTL.SLPTTO.WRLO.EXC.INFU.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence certain.inferred beneath unmapped cover
+ing unit.location may not meet map accuracy standard.
+
+F190N                    .FLTL.SLPTTO.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+F191N                    .FLTL.SLPTTO.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F192N                    .FLTL.SLPTTO.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence questionable.overturned.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F193                     .FLTL.SLPTT.WRLO.FSC.IDC.MEE.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.scarp.identity certain.location meets map accuracy standard.
+
+
+F194                     .FLTL.SLPTT.WRLO.FSC.IDC.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.scarp.identity certain.location may not meet map accuracy st
+andard.
+
+F195N                    .FLTL.SLPTT.WRLO.FSC.IDQ.PRO.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.scarp.identity questionable.probable.location may not meet m
+ap accuracy standard.
+
+F196N                    .FLTL.SLPTT.WRLO.FSC.IDQ.POS.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.scarp.identity questionable.possible.location may not meet m
+ap accuracy standard.
+
+F197                     .FLTV.SLPT.FMC.EXC.OBS.MEE.
+                                             .fault.variable angle.thrust slip.f
+aulted metamorphic contact.existence certain.observable.location meets map accur
+acy standard.
+
+F198                     .FLTV.SLPT.FMC.EXC.OBS.MNM.
+                                             .fault.variable angle.thrust slip.f
+aulted metamorphic contact.existence certain.observable.location may not meet ma
+p accuracy standard.
+
+F199                     .FLTV.SLPT.FMC.EXC.OBS.MNM.
+                                             .fault.variable angle.thrust slip.f
+aulted metamorphic contact.existence certain.inferred.location may not meet map
+accuracy standard.
+
+F200                     .FLTV.SLPT.FMC.INFM.MNM.
+                                             .fault.variable angle.thrust slip.f
+aulted metamorphic contact.existence certain.inferred beneath mapped covering un
+it.location may not meet map accuracy standard.
+
+F201                     .FLTV.SLPT.FMC.INFU.MNM.
+                                             .fault.variable angle.thrust slip.f
+aulted metamorphic contact.existence certain.inferred beneath unmapped covering
+unit.location may not meet map accuracy standard.
+
+F202                     .FLTV.SLPT.FMC.EXQ.INF.MNM.
+                                             .fault.variable angle.thrust slip.f
+aulted metamorphic contact.existence questionable.inferred.location may not meet
+ map accuracy standard.
+
+F203                     .FLTV.SLPT.FMC.EXQ.INFM.MNM.
+                                             .fault.variable angle.thrust slip.f
+aulted metamorphic contact.existence questionable.Inferred beneath mapped coveri
+ng unit.location may not meet map accuracy standard.
+
+F204                     .FLTV.SLPT.FMC.EXQ.INFU.MNM.
+                                             .fault.variable angle.thrust slip.f
+aulted metamorphic contact.existence questionable.inferred beneath unmapped cove
+ring unit.location may not meet map accuracy standard.
+
+F205                     .FLTV.SLPNRS.EXC.OBS.MEE.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence certain.observable.location may not meet map acc
+uracy standard.
+
+F207                     .FLTV.SLPNRS.EXC.INF.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence certain.inferred.location may not meet map accur
+acy standard.
+
+F208                     .FLTV.SLPNRS.EXC.INFM.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence certain.inferred beneath mapped covering unit.lo
+cation may not meet map accuracy standard.
+
+F209                     .FLT.SLPNRS.EXC.INFU.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence certain.inferred beneath unmapped covering unit.
+location may not meet map accuracy standard.
+
+F210N                    .FLTV.SLPNRS.INF.EXQ.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence questionable.inferred.location may not meet map
+accuracy standard.
+
+F211N                    .FLT.SLPNRS.EXQ.INFM.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence questionable.inferred beneath mapped covering un
+it.location may not meet map accuracy standard.
+
+F212N                    .FLT.SLPNRS.EXQ.INFU.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence questionable.inferred beneath unmapped covering
+unit.location may not meet map accuracy standard.
+
+F213                     .FLTD.GPH.GPHA.MNM.
+                                             .fault.inferred by indirect methods
+.geophysics.aeromagnetic survey.location may not meet map accuracy standard.
+
+
+F214                     .FLTD.GPH.GPHM.MNM.
+                                             .fault.inferred by indirect methods
+.geophysics.ground magnetic survey.location may not meet map accuracy standard.
+
+
+F215                     .FLTD.GPH.GPHG.MNM.
+                                             .fault.inferred by indirect methods
+.geophysics.gravity survey.location may not meet map accuracy standard.
+
+
+F216                     .FLTD.GPH.GPHR.MNM.
+                                             .fault.inferred by indirect methods
+.geophysics.radiometric survey.location may not meet map accuracy standard.
+
+
+F217                     .FLTD.RSI.MNM.
+                                             .fault.inferred by indirect methods
+.remote-sensing imagery.location may not meet map accuracy standard.
+
+
+F218                     .FLTD.GWL.MNM.
+                                             .fault.inferred by indirect methods
+.ground water levels.location may not meet map accuracy standard.
+
+
+F219                     .FLTD.SSB.MNM.
+                                             .fault.inferred by indirect methods
+.subsurface boring data.location may not meet map accuracy standard.
+
+
+F220                     .FLTI.
+                                             .fault.intruded
+
+
+
+GF1                      .GEOE.IDC.OBS.LOW.
+                                             .geomorphic feature.eolian sand dun
+e crest.identity certain.observable.located well but may not meet map accuracy s
+tandard.
+
+GF2                      .GEOP.IDC.OBS.LOW.
+                                             .geomorphic feature.sag pond outlin
+e.identity certain.observable.located well but may not meet map accuracy standar
+d.
+
+GF3                      .GEOG.IDC.OBS.LOW.
+                                             .geomorphic feature.glacial moraine
+ crest.identity certain.observable.located well but may not meet map accuracy st
+andard.
+
+GF4                      .GEODC.IDC.OBS.LOW.
+                                             .geomorphic feature.debris flow cre
+st.identity certain.observable.located well but may not meet map accuracy standa
+rd.
+
+GF5                      .GEODO.IDC.OBS.LOW.
+                                             .geomorphic feature.debris flow out
+line.identity certain.observable.located well but may not meet map accuracy stan
+dard.
+
+GF6                      .GEOLC.IDC.OBS.LOW.
+                                             .geomorphic feature.landslide debri
+s train crest.identity certain.observable.located well but may not meet map accu
+racy standard.
+
+GF7                      .GEOTU.IDC.OBS.LOW.
+                                             .geomorphic feature.topographic sca
+rp origin unknown.identity certain.observable.located well but may not meet map
+accuracy standard.
+
+GF8                      .GEOLD.IDC.OBS.LOW.
+                                             .geomorphic feature.landslide close
+d depression.identity certain.observable.located well but may not meet map accur
+acy standard.
+
+GF9                      .GEOTG.IDC.OBS.LOW.
+                                             .geomorphic feature.ground-failure
+crown scarp.identity certain.observable.located well but may not meet map accura
+cy standard.
+
+GF10                     .GEOS.IDC.OBS.LOW.
+                                             .geomorphic feature.lakeshore stran
+d line.identity certain.observable.located well but may not meet map accuracy st
+andard.
+
+GF11                     .GEOS.IDC.OBS.LOW.
+                                             .geomorphic feature.lakeshore stran
+d line.identity certain.observable.located well but may not meet map accuracy st
+andard.
+
+GF12                     .GEOS.IDC.OBS.LOW.
+                                             .geomorphic feature.lakeshore stran
+d line.identity certain.observable.located well but may not meet map accuracy st
+andard.
+
+FZ1                      .FZBSG.
+                                             .fault zone boundary.scratch.generi
+c.
+
+
+FZ2                      .FZBSB.
+                                             .fault zone boundary.scratch.bounda
+ry of fault breccia zone.
+
+
+FZ3                      .FZBSC.
+                                             .fault zone boundary.scratch.bounda
+ry of cataclastic zone.
+
+
+FZ4                      .FZBSM.
+                                             .fault zone boundary.scratch.bounda
+ry of mylonite zone.
+
+
+FA1                      .FAXNA.UPR.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.subhorizontal.existence certain.observable.location mee
+ts map accuracy standard.
+
+FA2                      .FAXNA.UPR.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.subhorizontal.existence certain.observable.location may
+ not meet map accuracy standard.
+
+FA3                      .FAXNA.UPR.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.subhorizontal.existence certain.inferred.location may n
+ot meet map accuracy standard.
+
+FA4                      .FAXNA.UPR.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.subhorizontal.existence certain.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+FA5                      .FAXNA.UPR.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.subhorizontal.existence certain.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+FA6                      .FAXNA.UPR.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.subhorizontal.existence questionable.inferred.location
+may not meet map accuracy standard.
+
+FA7                      .FAXNA.UPR.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.subhorizontal.existence questionable.inferred beneath m
+apped covering unit.location may not meet map accuracy standard.
+
+FA8                      .FAXNA.UPR.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.subhorizontal.existence questionable.inferred beneath u
+nmapped covering unit.location may not meet map accuracy standard.
+
+FA9                      .FAXNA.UPR.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.plunging.existence certain.observable.location meets ma
+p accuracy standard.
+
+FA10                     .FAXNA.UPR.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.plunging.existence certain.observable.location may not
+meet map accuracy standard.
+
+FA11                     .FAXNA.UPR.PLG.EXC.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.plunging.existence certain.inferred.location may not me
+et map accuracy standard.
+
+FA12                     .FAXNA.UPR.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.plunging.existence certain.inferred beneath mapped cove
+ring unit.location may not meet map accuracy standard.
+
+FA13                     .FAXNA.UPR.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.plunging.existence certain.inferred beneath unmapped co
+vering unit.location may not meet map accuracy standard.
+
+FA14                     .FAXNA.UPR.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.plunging.existence questionable.inferred.location may n
+ot meet map accuracy standard.
+
+FA15                     .FAXNA.UPR.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.plunging.existence questionable.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+FA16                     .FAXNA.UPR.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.upright.plunging.existence questionable.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+FA17                     .FAXNA.OVT.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.subhorizontal.existence certain.observable.location
+meets map accuracy standard.
+
+FA18                     .FAXNA.OVT.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.subhorizontal.existence certain.observable.location
+may not meet map accuracy standard.
+
+FA19                     .FAXNA.OVT.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.subhorizontal.existence certain.location may not mee
+t map accuracy standard.
+
+FA20                     .FAXNA.OVT.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.subhorizontal.existence certain.inferred beneath map
+ped covering unit.location may not meet map accuracy standard.
+
+FA21                     .FAXNA.OVT.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.subhorizontal.existence certain.inferred beneath unm
+apped covering unit.location may not meet map accuracy standard.
+
+FA22                     .FAXNA.OVT.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.subhorizontal.existence questionable.inferred.locati
+on may not meet map accuracy standard.
+
+FA23                     .FAXNA.OVT.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.subhorizontal.existence questionable.inferred beneat
+h mapped covering unit.location may not meet map accuracy standard.
+
+FA24                     .FAXNA.OVT.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.subhorizontal.existence questionable.inferred beneat
+h unmapped covering unit.location may not meet map accuracy standard.
+
+FA25                     .FAXNA.OVT.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.plunging.existence certain.observable.location meets
+ map accuracy standard.
+
+FA26                     .FAXNA.OVT.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.plunging.existence certain.observable.location may n
+ot meet map accuracy standard.
+
+FA27                     .FAXNA.OVT.PLG.EXC.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.plunging.existence certain.inferred.location may not
+ meet map accuracy standard.
+
+FA28                     .FAXNA.OVT.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.plunging.existence certain.inferred beneath mapped c
+overing unit.location may not meet map accuracy standard.
+
+FA29                     .FAXNA.OVT.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.plunging.existence certain.inferred beneath unmapped
+ covering unit.location may not meet map accuracy standard.
+
+FA30                     .FAXNA.OVT.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.plunging.existence questionable.inferred.location ma
+y not meet map accuracy standard.
+
+FA31                     .FAXNA.OVT.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.plunging.existence questionable.inferred beneath map
+ped covering unit.location may not meet map accuracy standard.
+
+FA32                     .FAXNA.OVT.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.antiform.overturned.plunging.existence questionable.inferred beneath unm
+apped covering unit.location may not meet map accuracy standard.
+
+FA33                     .FAXDA.UPR.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.subhorizontal.existence certain.observable.location meets
+map accuracy standard.
+
+FA34                     .FAXDA.UPR.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.subhorizontal.existence certain.observable.location may no
+t meet map accuracy standard.
+
+FA35                     .FAXDA.UPR.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.subhorizontal.existence questionable.inferred.location may
+ not meet map accuracy standard.
+
+FA36                     .FAXDA.UPR.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.subhorizontal.existence certain.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+FA37                     .FAXDA.UPR.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.subhorizontal.existence certain.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+FA38                     .FAXDA.UPR.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.subhorizontal.existence questionable.inferred.location may
+ not meet map accuracy standard.
+
+FA39                     .FAXDA.UPR.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.subhorizontal.existence questionable.inferred beneath mapp
+ed covering unit.location may not meet map accuracy standard.
+
+FA40                     .FAXDA.UPR.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.subhorizontal.existence questionable.inferred beneath unma
+pped covering unit.location may not meet map accuracy standard.
+
+FA41                     .FAXDA.UPR.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.plunging.existence certain.observable.location meets map a
+ccuracy standard.
+
+FA42                     .FAXDA.UPR.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.plunging.existence certain.observable.location may not mee
+t map accuracy standard.
+
+FA43                     .FAXDA.UPR.PLG.EXC.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.plunging.existence certain.inferred.location may not meet
+map accuracy standard.
+
+FA44                     .FAXDA.UPR.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.plunging.existence certain.inferred beneath mapped coverin
+g unit.location may not meet map accuracy standard.
+
+FA45                     .FAXDA.UPR.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.plunging.existence certain.inferred beneath unmapped cover
+ing unit.location may not meet map accuracy standard.
+
+FA46                     .FAXDA.UPR.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.plunging.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+FA47                     .FAXDA.UPR.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.plunging.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+FA48                     .FAXDA.UPR.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.upright.plunging.existence questionable.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+FA49                     .FAXDA.OVT.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.subhorizontal.existence certain.observable.location mee
+ts map accuracy standard.
+
+FA50                     .FAXDA.OVT.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.subhorizontal.existence certain.observable.location may
+ not meet map accuracy standard.
+
+FA51                     .FAXDA.OVT.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.subhorizontal.existence certain.inferred.location may n
+ot meet map accuracy standard.
+
+FA52                     .FAXDA.OVT.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.subhorizontal.existence certain.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+FA53                     (.FAXDA.OVT.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.subhorizontal.existence certain.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+FA54                     .FAXDA.OVT.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.subhorizontal.existence questionable.inferred.location
+may not meet map accuracy standard.
+
+FA55                     .FAXDA.OVT.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.subhorizontal.existence questionable.inferred beneath m
+apped covering unit.location may not meet map accuracy standard.
+
+FA56                     .FAXDA.OVT.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.subhorizontal.existence questionable.inferred beneath u
+nmapped covering unit.location may not meet map accuracy standard.
+
+FA57                     .FAXDA.OVT.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.plunging.existence certain.observable.location meets ma
+p accuracy standard.
+
+FA58                     .FAXDA.OVT.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.plunging.existence certain.observable.location may not
+meet map accuracy standard.
+
+FA59                     .FAXDA.OVT.PLG.EXC.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.plunging.existence certain.inferred.location may not me
+et map accuracy standard.
+
+FA60                     .FAXDA.OVT.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.plunging.existence certain.inferred beneath mapped cove
+ring unit.location may not meet map accuracy standard.
+
+FA61                     .FAXDA.OVT.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.plunging.existence certain.inferred beneath unmapped co
+vering unit.location may not meet map accuracy standard.
+
+FA62                     .FAXDA.OVT.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.plunging.existence questionable.inferred.location may n
+ot meet map accuracy standard.
+
+FA63                     .FAXDA.OVT.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.plunging.existence questionable.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+FA64                     .FAXDA.OVT.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.anticline.overturned.plunging.existence questionable.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+FA65                     .FAXNS.UPR.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.subhorizontal.existence certain.observable.location meet
+s map accuracy standard.
+
+FA66                     .FAXNS.UPR.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.subhorizontal.existence certain.observable.location may
+not meet map accuracy standard.
+
+FA67                     .FAXNS.UPR.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.subhorizontal.existence certain.inferred.location may no
+t meet map accuracy standard.
+
+FA68                     .FAXNS.UPR.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.subhorizontal.existence certain.inferred beneath mapped
+covering unit.location may not meet map accuracy standard.
+
+FA69                     .FAXNS.UPR.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.subhorizontal.existence certain.inferred beneath unmappe
+d covering unit.location may not meet map accuracy standard.
+
+FA70                     .FAXNS.UPR.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.subhorizontal.existence questionable.inferred.location m
+ay not meet map accuracy standard.
+
+FA71                     .FAXNS.UPR.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.subhorizontal.existence questionable.inferred beneath ma
+pped covering unit.location may not meet map accuracy standard.
+
+FA72                     .FAXNS.UPR.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.subhorizontal.existence questionable.inferred beneath un
+mapped covering unit.location may not meet map accuracy standard.
+
+FA73                     .FAXNS.UPR.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.plunging.existence certain.observable.location meets map
+ accuracy standard.
+
+FA74                     .FAXNS.UPR.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.plunging.existence certain.observable.location may not m
+eet map accuracy standard.
+
+FA75                     .FAXNS.UPR.PLG.EXC.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.plunging.existence certain.inferred.location may not mee
+t map accuracy standard.
+
+FA76                     .FAXNS.UPR.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.plunging.existence certain.inferred beneath mapped cover
+ing unit.location may not meet map accuracy standard.
+
+FA77                     .FAXNS.UPR.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.plunging.existence certain.inferred beneath unmapped cov
+ering unit.location may not meet map accuracy standard.
+
+FA78                     .FAXNS.UPR.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.plunging.existence questionable.inferred.location may no
+t meet map accuracy standard.
+
+FA79                     .FAXNS.UPR.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.plunging.existence questionable.inferred beneath mapped
+covering unit.location may not meet map accuracy standard.
+
+FA80                     .FAXNS.UPR.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.upright.plunging.existence questionable.inferred beneath unmappe
+d covering unit.location may not meet map accuracy standard.
+
+FA81                     .FAXNS.OVT.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.subhorizontal.existence certain.observable.location m
+eets map accuracy standard.
+
+FA82                     .FAXNS.OVT.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.subhorizontal.existence certain.observable.location m
+ay not meet map accuracy standard.
+
+FA83                     .FAXNS.OVT.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.subhorizontal.existence certain.inferred.location may
+ not meet map accuracy standard.
+
+FA84                     .FAXNS.OVT.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.subhorizontal.existence certain.inferred beneath mapp
+ed covering unit.location may not meet map accuracy standard.
+
+FA85                     .FAXNS.OVT.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.subhorizontal.existence certain.inferred beneath unma
+pped covering unit.location may not meet map accuracy standard.
+
+FA86                     .FAXNS.OVT.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.subhorizontal.existence questionable.inferred.locatio
+n may not meet map accuracy standard.
+
+FA87                     .FAXNS.OVT.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.subhorizontal.existence questionable.inferred beneath
+ mapped covering unit.location may not meet map accuracy standard.
+
+FA88                     .FAXNS.OVT.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.subhorizontal.existence questionable.inferred beneath
+ unmapped covering unit.location may not meet map accuracy standard.
+
+FA89                     .FAXNS.OVT.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.plunging.existence certain.observable.location meets
+map accuracy standard.
+
+FA90                     .FAXNS.OVT.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.plunging.existence certain.observable.location may no
+t meet map accuracy standard.
+
+FA91                     .FAXNS.OVT.PLG.EXC.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.plunging.existence certain.inferred.location may not
+meet map accuracy standard.
+
+FA92                     .FAXNS.OVT.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.plunging.existence certain.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+FA93                     .FAXNS.OVT.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.plunging.existence certain.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+FA94                     .FAXNS.OVT.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.plunging.existence questionable.inferred.location may
+ not meet map accuracy standard.
+
+FA95                     .FAXNS.OVT.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.plunging.existence questionable.inferred beneath mapp
+ed covering unit.location may not meet map accuracy standard.
+
+FA96                     .FAXNS.OVT.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form not det
+ermined.synform.overturned.plunging.existence questionable.inferred beneath unma
+pped covering unit.location may not meet map accuracy standard.
+
+FA97                     .FAXDS.UPR.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.subhorizontal.existence certain.observable.location meets m
+ap accuracy standard.
+
+FA98                     .FAXDS.UPR.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.subhorizontal.existence certain.observable.location may not
+ meet map accuracy standard.
+
+FA99                     .FAXDS.UPR.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.subhorizontal.existence certain.inferred.location may not m
+eet map accuracy standard.
+
+FA100                    .FAXDS.UPR.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.subhorizontal.existence certain.inferred beneath mapped cov
+ering unit.location may not meet map accuracy standard.
+
+FA101                    .FAXDS.UPR.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.subhorizontal.existence certain.inferred beneath unmapped c
+overing unit.location may not meet map accuracy standard.
+
+FA102                    .FAXDS.UPR.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.subhorizontal.existence questionable.inferred.location may
+not meet map accuracy standard.
+
+FA103                    .FAXDS.UPR.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.subhorizontal.existence questionable.inferred beneath mappe
+d covering unit.location may not meet map accuracy standard.
+
+FA104                    .FAXDS.UPR.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.subhorizontal.existence questionable.inferred beneath unmap
+ped covering unit.location may not meet map accuracy standard.
+
+FA105                    .FAXDS.UPR.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.plunging.existence certain.observable.location meets map ac
+curacy standard.
+
+FA106                    .FAXDS.UPR.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.plunging.existence certain.observable.location may not meet
+ map accuracy standard.
+
+FA107                    .FAXDS.UPR.PLG.EXC.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.plunging.existence certain.inferred.location may not meet m
+ap accuracy standard.
+
+FA108                    .FAXDS.UPR.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.plunging.existence certain.inferred beneath mapped covering
+ unit.location may not meet map accuracy standard.
+
+FA109                    .FAXDS.UPR.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.plunging.existence certain.inferred beneath unmapped coveri
+ng unit.location may not meet map accuracy standard.
+
+FA110                    .FAXDS.UPR.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.plunging.existence questionable.inferred.location may not m
+eet map accuracy standard.
+
+FA111                    .FAXDS.UPR.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.plunging.existence questionable.inferred beneath mapped cov
+ering unit.location may not meet map accuracy standard.
+
+FA112                    .FAXDS.UPR.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.upright.plunging.inferred beneath unmapped covering unit.location m
+ay not meet map accuracy standard.
+
+FA113                    .FAXDS.OVT.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.subhorizontal.existence certain.observable.location meet
+s map accuracy standard.
+
+FA114                    .FAXDS.OVT.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.subhorizontal.existence certain.observable.location may
+not meet map accuracy standard.
+
+FA115                    .FAXDS.OVT.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.subhorizontal.existence certain.inferred.location may no
+t meet map accuracy standard.
+
+FA116                    .FAXDS.OVT.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.subhorizontal.existence certain.inferred beneath mapped
+covering unit.location may not meet map accuracy standard.
+
+FA117                    .FAXDS.OVT.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.subhorizontal.existence certain.inferred beneath unmappe
+d covering unit.location may not meet map accuracy standard.
+
+FA118                    .FAXDS.OVT.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.subhorizontal.existence questionable.inferred.location m
+ay not meet map accuracy standard.
+
+FA119                    .FAXDS.OVT.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.subhorizontal.existence questionable.inferred beneath ma
+pped covering unit.location may not meet map accuracy standard.
+
+FA120                    .FAXDS.OVT.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.subhorizontal.existence questionable.inferred beneath un
+mapped covering unit.location may not meet map accuracy standard.
+
+FA121                    .FAXDS.OVT.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.plunging.existence certain.observable.location meets map
+ accuracy standard.
+
+FA122                    .FAXDS.OVT.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.plunging.existence certain.observable.location may not m
+eet map accuracy standard.
+
+FA123                    .FAXDS.OVT.PLG.EXC.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.plunging.existence certain.inferred.location may not mee
+t map accuracy standard.
+
+FA124                    .FAXDS.OVT.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.plunging.existence certain.inferred beneath mapped cover
+ing unit.location may not meet map accuracy standard.
+
+FA125                    .FAXDS.OVT.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.plunging.existence certain.inferred beneath unmapped cov
+ering unit.location may not meet map accuracy standard.
+
+FA126                    .FAXDS.OVT.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.plunging.existence questionable.inferred.location may no
+t meet map accuracy standard.
+
+FA127                    .FAXDS.OVT.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.plunging.existence questionable.inferred beneath mapped
+covering unit.location may not meet map accuracy standard.
+
+FA128                    .FAXDS.OVT.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.fold form determi
+ned.syncline.overturned.plunging.existence questionable.inferred beneath unmappe
+d covering unit.location may not meet map accuracy standard.
+
+FA129                    .FAXRN.UPR.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.subhorizontal.existence certain.observable.locatio
+n meets map accuracy standard.
+
+FA130                    .FAXRN.UPR.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.subhorizontal.existence certain.observable.locatio
+n may not meet map accuracy standard.
+
+FA131                    .FAXRN.UPR.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.subhorizontal.existence certain.inferred.location
+may not meet map accuracy standard.
+
+FA132                    .FAXRN.UPR.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.subhorizontal.existence certain.inferred beneath m
+apped covering unit.location may not meet map accuracy standard.
+
+FA133                    .FAXRN.UPR.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.subhorizontal.existence certain.inferred beneath u
+nmapped covering unit.location may not meet map accuracy standard.
+
+FA134                    .FAXRN.UPR.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.subhorizontal.existence questionable.inferred.loca
+tion may not meet map accuracy standard.
+
+FA135                    .FAXRN.UPR.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.subhorizontal.existence questionable.inferred bene
+ath mapped covering unit.location may not meet map accuracy standard.
+
+FA136                    .FAXRN.UPR.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.subhorizontal.existence questionable.inferred bene
+ath unmapped covering unit.location may not meet map accuracy standard.
+
+FA137                    .FAXRN.UPR.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.plunging.existence certain.observable.location mee
+ts map accuracy standard.
+
+FA138                    .FAXRN.UPR.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.plunging.existence certain.observable.location may
+ not meet map accuracy standard.
+
+FA139                    .FAXRN.UPR.PLG.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.plunging.existence certain.inferred.location may n
+ot meet map accuracy standard.
+
+FA140                    .FAXRN.UPR.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.plunging.existence certain.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+FA141                    .FAXRN.UPR.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.plunging.existence certain.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+FA142                    .FAXRN.UPR.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.plunging.existence questionable.inferred.location
+may not meet map accuracy standard.
+
+FA143                    .FAXRN.UPR.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.plunging.existence questionable.inferred beneath m
+apped covering unit.location may not meet map accuracy standard.
+
+FA144                    .FAXRN.UPR.P.EQL.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.upright.plunging.existence questionable.inferred beneath u
+nmapped covering unit.location may not meet map accuracy standard.
+
+FA145                    .FAXRN.OVT.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.subhorizontal.existence certain.observable.loca
+tion meets map accuracy standard.
+
+FA146                    .FAXRN.OVT.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.subhorizontal.existence certain.observable.loca
+tion may not meet map accuracy standard.
+
+FA147                    .FAXRN.OVT.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form no determined.overturned.subhorizontal.existence certain.inferred.locatio
+n may not meet map accuracy standard.
+
+FA148                    .FAXRN.OVT.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.subhorizontal.existence certain.inferred beneat
+h mapped covering unit.location may not meet map accuracy standard.
+
+FA149                    .FAXRN.OVT.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.subhorizontal.existence certain.inferred beneat
+h unmapped covering unit.location may not meet map accuracy standard.
+
+FA150                    .FAXRN.OVT.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.subhorizontal.existence questionable.inferred.l
+ocation may not meet map accuracy standard.
+
+FA151                    .FAXRN.OVT.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.subhorizontal.existence questionable.inferred b
+eneath mapped covering unit.location may not meet map accuracy standard.
+
+FA152                    .FAXRN.OVT.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.subhorizontal.existence questionable.inferred b
+eneath unmapped covering unit.location may not meet map accuracy standard.
+
+FA153                    .FAXRN.OVT.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.plunging.existence certain.observable.location
+meets map accuracy standard.
+
+FA154                    .FAXRN.UPR.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.plunging.existence certain.observable.location
+may not meet map accuracy standard.
+
+FA155                    .FAXRN.UPR.PLG.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.plunging.existence certain.inferred.location ma
+y not meet map accuracy standard.
+
+FA156                    .FAXRN.UPR.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.plunging.existence certain.inferred beneath map
+ped covering unit.location may not meet map accuracy standard.
+
+FA157                    .FAXRN.UPR.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.plunging.existence certain.inferred beneath unm
+apped covering unit.location may not meet map accuracy standard.
+
+FA158                    .FAXRN.UPR.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.plunging.existence questionable.inferred.locati
+on may not meet map accuracy standard.
+
+FA159                    .FAXRN.UPR.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.plunging.existence questionable.inferred beneat
+h mapped covering unit.location may not meet map accuracy standard.
+
+FA160                    .FAXRN.UPR.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form not determined.overturned.plunging.existence questionable.inferred beneat
+h unmapped covering unit.location may not meet map accuracy standard.
+
+FA161                    .FAXRDA.UPR.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.subhorizontal.
+existence certain.observable.location meets map accuracy standard.
+
+FA162                    .FAXRDA.UPR.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.subhorizontal.
+existence certain.observable.location may not meet map accuracy standard.
+
+FA163                    .FAXRDA.UPR.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.subhorizontal.
+existence certain.inferred.location may not meet map accuracy standard.
+
+FA164                    .FAXRDA.UPR.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.subhorizontal.
+existence certain.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA165                    .FAXRDA.UPR.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.subhorizontal.
+existence certain.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA166                    .FAXRDA.UPR.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.subhorizontal.
+existence questionable.inferred.loc may not meet MAS.
+
+FA167                    .FAXRDA.UPR.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.subhorizontal.
+existence questionable.inferred beneath mapped covering unit.loc may not meet MA
+S.
+FA168                    .FAXRDA.UPR.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.subhorizontal.
+existence questionable.inferred beneath unmapped covering unit.loc may not meet
+MAS.
+FA169                    .FAXRDA.UPR.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.plunging.exist
+ence certain.observable.location meets map accuracy standard.
+
+FA170                    .FAXRDA.UPR.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.plunging.exist
+ence certain.observable.location may not meet map accuracy standard.
+
+FA171                    .FAXRDA.UPR.PLG.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.plunging.exist
+ence certain.inferred.location may not meet map accuracy standard.
+
+FA172                    .FAXRDA.UPR.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.plunging.exist
+ence certain.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA173                    .FAXRDA.UPR.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.plunging.exist
+ence certain.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA174                    .FAXRDA.UPR.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.plunging.exist
+ence questionable.inferred.location may not meet map accuracy standard.
+
+FA175                    .FAXRDA.UPR.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.plunging.exist
+ence questionable.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA176                    .FAXRDA.UPR.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).upright.plunging.exist
+ence questionable.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA177                    .FAXRDA.OVT.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.subhorizont
+al.existence certain.observable.location meets map accuracy standard.
+
+FA178                    .FAXRDA.OVT.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.subhorizont
+al.existence certain.observable.location may not meet map accuracy standard.
+
+FA179                    .FAXRDA.OVT.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.subhorizont
+al.existence certain.inferred.location may not meet map accuracy standard.
+
+FA180                    .FAXRDA.OVT.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.subhorizont
+al.existence certain.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA181                    .FAXRDA.OVT.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.subhorizont
+al.existence certain.inferred beneath unmapped covering unit.loc may not meet MA
+S.
+FA182                    .FAXRDA.OVT.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.subhorizont
+al.existence questionable.inferred.location may not meet map accuracy standard.
+
+FA183                    .FAXRDA.OVT.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.subhorizont
+al.existence questionable.inferred beneath mapped covering unit.loc may not meet
+ MAS.
+FA184                    .FAXRDA.OVT.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.antiformal syncline (inverted syncline).overturned.subhorizontal.ex
+istence questionable.inferred beneath unmapped covering unit.loc may not meet MA
+S.
+FA185                    .FAXRDA.OVT.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.plunging.ex
+istence certain.observable.location meets map accuracy standard.
+
+FA186                    .FAXRDA.OVT.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.plunging.ex
+istence certain.observable.location may not meet map accuracy standard.
+
+FA187                    .FAXRDA.OVT.PLG.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.plunging.ex
+istence certain.inferred.location may not meet map accuracy standard.
+
+FA188                    .FAXRDA.OVT.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.plunging.ex
+istence certain.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA189                    .FAXRDA.OVT.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.plunging.ex
+istence certain.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA190                    .FAXRN.FFD.FAXRDA.OVT.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.antiformal syncline (inverted syncline).overturned.plunging.ex
+istence questionable.inferred.location may not meet map accuracy standard.
+
+FA191                    .FAXRN.FFD.FAXRDA.OVT.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.antiformal syncline (inverted syncline).overturned.plunging.existen
+ce questionable.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA192                    .FAXRN.FFD.FAXRDA.OVT.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.antiformal syncline (inverted syncline).overturned.plunging.existen
+ce questionable.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA193                    .FAXRDS.UPR.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).upright.subhorizontal
+.existence certain.observable.location meets map accuracy standard.
+
+FA194                    .FAXRDS.UPR.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).upright.subhorizontal
+.existence certain.observable.location may not meet map accuracy standard.
+
+FA195                    .FAXRDS.UPR.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).upright.subhorizontal
+.existence certain.inferred.location may not meet map accuracy standard.
+
+FA196                    .FAXRDS.UPR.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.subhorizontal.exis
+tence certain.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA197                    .FAXRDS.UPR.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.subhorizontal.exis
+tence certain.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA198                    .FAXRDS.UPR.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.subhorizontal.exis
+tence questionable.inferred.loc may not meet MAS.
+
+FA199                    .FAXRDS.UPR.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.subhorizontal.exis
+tence questionable.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA200                    .FAXRDS.UPR.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.subhorizontal.exis
+tence questionable.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA201                    .FAXRDS.UPR.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).upright.plunging.exis
+tence certain.observable.location meets map accuracy standard.
+
+FA202                    .FAXRDS.UPR.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).upright.plunging.exis
+tence certain.observable.location may not meet map accuracy standard.
+
+FA203                    .FAXRDS.UPR.PLG.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).upright.plunging.exis
+tence certain.inferred.location may not meet map accuracy standard.
+
+FA204                    .FAXRDS.UPR.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.plunging.existence
+ certain.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA205                    .FAXRDS.UPR.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.plunging.existence
+ certain.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA206                    .FAXRDS.UPR.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).upright.plunging.exis
+tence questionable.inferred.location may not meet map accuracy standard.
+
+FA207                    .FAXRDS.UPR.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.plunging.existence
+ questionable.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA208                    .FAXRDS.UPR.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).upright.plunging.existence
+ questionable.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA209                    .FAXRDS.OVT.SHZ.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).overturned.subhorizon
+tal.existence certain.observable.location meets map accuracy standard.
+
+FA210                    .FAXRDS.OVT.SHZ.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).overturned.subhorizon
+tal.existence certain.observable.location may not meet map accuracy standard.
+
+FA211                    .FAXRDS.OVT.SHZ.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).overturned.subhorizon
+tal.existence certain.inferred.location may not meet map accuracy standard.
+
+FA212                    .FAXRDS.OVT.SHZ.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.subhorizontal.e
+xistence certain.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA213                    .FAXRDS.OVT.SHZ.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.subhorizontal.e
+xistence certain.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA214                    .FAXRDS.OVT.SHZ.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.subhorizontal.e
+xistence questionable.inferred.loc may not meet MAS.
+
+FA215                    .FAXRDS.OVT.SHZ.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.subhorizontal.e
+xistence questionable.inferred beneath mapped covering unit.loc may not meet MAS
+.
+FA216                    .FAXRDS.OVT.SHZ.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.subhorizontal.e
+xistence questionable.inferred beneath unmapped covering unit.loc may not meet M
+AS.
+FA217                    .FAXRDS.OVT.PLG.EXC.OBS.MEE.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).overturned.plunging.e
+xistence certain.observable.location meets map accuracy standard.
+
+FA218                    .FAXRDS.OVT.PLG.EXC.OBS.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).overturned.plunging.e
+xistence certain.observable.location may not meet map accuracy standard.
+
+FA219                    .FAXRDS.OVT.PLG.EXC.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).overturned.plunging.e
+xistence certain.inferred.location may not meet map accuracy standard.
+
+FA220                    .FAXRDS.OVT.PLG.EXC.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.plunging.existe
+nce certain.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA221                    .FAXRDS.OVT.PLG.EXC.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.plunging.existe
+nce certain.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+FA222                    .FAXRDS.OVT.PLG.EXQ.INF.MNM.
+                                             .fold axial trace.refolded fold.fol
+d form determined.synformal anticline (inverted anticline).overturned.plunging.e
+xistence questionable.inferred.location may not meet map accuracy standard.
+
+FA223                    .FAXRDS.OVT.PLG.EXQ.INFM.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.plunging.existe
+nce questionable.inferred beneath mapped covering unit.loc may not meet MAS.
+
+FA224                    .FAXRDS.OVT.PLG.EXQ.INFU.MNM.
+                                             .fold axial trace.refolded fold.for
+m determined.synformal anticline (inverted anticline).overturned.plunging.existe
+nce questionable.inferred beneath unmapped covering unit.loc may not meet MAS.
+
+DK1                      .DIK.IDC.OBS.LOW.
+                                             .dike.identity certain.observable.l
+ocated well
+
+
+DK2                      .DIK.IDC.INFM.MNM.
+                                             .dike.identity certain.inferred ben
+eath mapped covering unit.location may not meet map accuracy standard.
+
+
+DK3                      .DIK.IDQ.INF.MNM.
+                                             .dike.identity questionable.inferre
+d.location may not meet map accuracy standard.
+
+
+DK4                      .DIK.IDQ.INFM.MNM.
+                                             .dike.identity questionable.inferre
+d beneath mapped covering unit.location may not meet map accuracy standard.
+
+
+DK5                      .DIK.IDC.OBS.LOW.
+                                             .dike.identity certain.observable.l
+ocated well
+
+
+DK6                      .DIK.IDC.INFM.MNM.
+                                             .dike.identity certain.inferred ben
+eath mapped covering unit.location may not meet map accuracy standard.
+
+
+DK7                      .DIK.IDQ.INF.MNM.
+                                             .dike.identity questionable.inferre
+d.location may not meet map accuracy standard.
+
+
+DK8                      .DIK.IDQ.INFM.MNM.
+                                             .dike.identity questionable.inferre
+d beneath mapped covering unit.location may not meet map accuracy standard.
+
+
+DK9                      .DIK.IDC.OBS.MNM.
+                                             .dike.identity certain.observable.l
+ocation may not meet map accuracy standard.
+
+
+DK10                     .DIK.IDC.INFM.MNM.
+                                             .dike.identity certain.inferred ben
+eath mapped covering unit.location may not meet map accuracy standard.
+
+
+DK11                     .DIK.IDQ.INF.MNM.
+                                             .dike.identity questionable.inferre
+d.location may not meet map accuracy standard.
+
+
+DK12                     .DIK.IDQ.INFM.MNM.
+                                             .dike.identity questionable.inferre
+d beneath mapped covering unit.location may not meet map accuracy standard.
+
+
+VEN1                     .VEN.IDC.OBS.LOW.
+                                             .vein.identity certain.observable.l
+ocated well
+
+
+VEN2                     .VEN.IDC.INFM.MNM.
+                                             .vein.identity certain.inferred ben
+eath mapped covering unit.location may not meet map accuracy standard.
+
+
+VEN3                     .VEN.IDQ.INF.MNM.
+                                             .vein.identity questionable.inferre
+d.location may not meet map accuracy standard.
+
+
+VEN4                     .VEN.IDQ.INFM.MNM.
+                                             .vein.identity questionable.inferre
+d beneath mapped covering unit.location may not meet map accuracy standard.
+
+
+VEN5                     .VEN.IDC.OBS.LOW.
+                                             .vein.identity certain.observable.l
+ocated well
+
+
+VEN6                     .VEN.IDC.INFM.MNM.
+                                             .vein.identity certain.inferred ben
+eath mapped covering unit.location may not meet map accuracy standard.
+
+
+VEN7                     .VEN.IDQ.INF.MNM.
+                                             .vein.identity questionable.inferre
+d.location may not meet map accuracy standard.
+
+
+VEN8                     .VEN.IDQ.INFM.MNM.
+                                             .vein.identity questionable.inferre
+d beneath mapped covering unit.location may not meet map accuracy standard.
+
+
+VEN9                     .VEN.IDC.OBS.MNM.
+                                             .vein.identity certain.observable.l
+ocation may not meet map accuracy standard.
+
+
+VEN10                    .VEN.IDC.INFM.MNM.
+                                             .vein.identity certain.inferred ben
+eath mapped covering unit.location may not meet map accuracy standard.
+
+
+VEN11                    .VEN.IDQ.INF.MNM.
+                                             .vein.identity questionable.inferre
+d.location may not meet map accuracy standard.
+
+
+VEN12                    .VEN.IDQ.INFM.MNM.
+                                             .vein.identity questionable.inferre
+d beneath mapped covering unit.location may not meet map accuracy standard.
+
+
+LT1                      .LIN.LINF.IDC.OBS.LOW.
+                                             .lineament.fault line escarpment.id
+entity certain.observable.located well but may not meet map accuracy standard.
+
+
+LT2                      .LIN.LINA.IDC.OBS.LOW.
+                                             .lineament.aligned topographic sadd
+les.identity certain.observable.located well but may not meet map accuracy stand
+ard.
+
+LT3                      .LIN.LINB.IDC.OBS.LOW.
+                                             .lineament.base of fold controlled
+slope.identity certain.observable.located well but may not meet map accuracy sta
+ndard.
+
+LT4                      .LIN.LINE.IDC.OBS.LOW.
+                                             .lineament.eroded edge of resistant
+ bed.identity certain.observable.located well but may not meet map accuracy stan
+dard.
+
+LT5                      .LIN.LINU.IDC.OBS.LOW.
+                                             .lineament.origin unknown.identity
+certain.observable.located well but may not meet map accuracy standard.
+
+
+ML1                      .MSC.TRNG.LOW.
+                                             .line of gravity transect.located w
+ell but may not meet map accuracy standard.
+
+
+ML2                      .MSC.TRNM.LOW.
+                                             .line of magnetic transect.located
+well but may not meet map accuracy standard.
+
+
+ML3                      .MSC.TRNR.LOW.
+                                             .line of radiometric transect.locat
+ed well but may not meet map accuracy standard.
+
+
+ML4                      .MSC.TRNS.LOW.
+                                             .line of seismic transect.located w
+ell but may not meet map accuracy standard.
+
+
+ML5                      .MSC.MSS.LOW.
+                                             .line of measured stratigraphic sec
+tion.located well but may not meet map accuracy standard.
+
+
+ML6                      .MSC.GCS.LOW.
+                                             .line of geologic cross section.loc
+ated well but may not meet map accuracy standard.
+
+
+ML7                      .MSC.POLU.LOW.
+                                             .polygon boundary.geologic type and
+ origin unknown.located well but may not meet map accuracy standard.
+
+
+C28R                     .CON.CONL.CRW.IDQ.INF.MNM.
+                                             .landslide contact.crown scarp.iden
+tity questionable.location may not meet map accuracy standard.
+
+
+C40R                     .CON.CONS.CONST.IDQ.INF.MNM.
+                                             .sedimentary contact.separates terr
+aced alluvial units.identity questionable.inferred.location may not meet map acc
+uracy standard.
+
+F61R                     .FLTH.SLPUG.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.scarp.identity questionable.probable.location may not meet map acc
+uracy standard.
+
+F62R                     .FLTH.SLPUG.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.slip unspecified.
+generic fault.scarp.identity questionable.possible.location   may not meet map a
+ccuracy standard.
+
+F63R                     .FLTH.SLPSR.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.scarp.identity questionable.probable.location may not meet map  a
+ccuracy standard.
+
+F64R                     .FLTH.SLPSR.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.strike slip.right
+ lateral fault.scarp.identity questionable.possible.location  may not meet map a
+ccuracy standard.
+
+F65R                     .FLTH.SLPSL.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.scarp.identity questionable.probable.location  may not meet map ac
+curacy standard.
+
+F66R                     .FLTH.SLPSL.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.strike slip.left
+lateral fault.scarp.identity questionable.possible.location may not meet map  ac
+curacy standard.
+
+F67R                     .FLTH.SLPNN.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.scarp.identity questionable.probable.location may not meet map accuracy
+standard.
+
+F68R                     .FLTH.SLPNN.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.normal slip.norma
+l fault.scarp.identity questionable.possible.location may not meet map accuracy
+standard.
+
+F69R                     .FLTH.SLPRR.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.scarp.identity questionable.probable.location may not meet map accurac
+y standard.
+
+F70R                     .FLTH.SLPRR.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.reverse slip.reve
+rse fault.scarp.identity questionable.possible.location may not meet map accurac
+y standard.
+
+F71R                     .FLTH.SLPOO.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.scarp.identity questionable.probable.location may not meet map accurac
+y standard.
+
+F71R                     .FLTH.SLPOO.FSC.IDQ.PRO.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.scarp.identity questionable.probable.location may not meet map accurac
+y standard.
+
+F72R                     .FLTH.SLPOO.FSC.IDQ.POS.MNM.
+                                             .high-angle fault.oblique slip.obli
+que fault.scarp.identity questionable.possible.location may not meet map accurac
+y standard.
+
+F86R                     .FLTL.SLPUL.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence questionable.inferred.location  may
+not meet map accuracy standard.
+
+F87R                     .FLTL.SLPUL.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence questionable.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+F88R                     .FLTL.SLPUL.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.slip unspecified.y
+ounger over older.low angle fault.existence questionable.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+F94R                     .FLTL.SLPUL.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence questionable.inferred.location may n
+ot meet map accuracy standard.
+
+F95R                     .FLTL.SLPUL.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence questionable.inferred beneath mapped
+ covering unit.location may not meet map accuracy standard.
+
+F96R                     .FLTL.SLPUL.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.slip unspecified.o
+lder over younger.low angle fault.existence questionable.inferred beneath unmapp
+ed covering unit.location may not meet map accuracy standard.
+
+F102R                    .FLTL.SLPNL.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence questionable.inferred.location may
+ not meet map accuracy standard.
+
+F103R                    .FLTL.SLPNL.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence questionable.inferred beneath mapp
+ed covering unit.location may not meet map accuracy standard.
+
+F104R                    .FLTL.SLPNL.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.low angle normal fault.existence questionable.inferred beneath unma
+pped covering unit.location may not meet map accuracy standard.
+
+F109R                    .FLTL.SLPNDM.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+F110R                    .FLTL.SLPNDM.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F111R                    .FLTL.SLPNDM.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.master detachment.existence questionable.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F118R                    .FLTL.SLPND.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence questionable.inferred.location may not meet ma
+p accuracy standard.
+
+F119R                    .FLTL.SLPND.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.existence inferred.existence questionable.inferred benea
+th mapped covering unit.location may not meet map accuracy standard.
+
+F120R                    .FLTL.SLPND.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.detachment.inferred beneath unmapped covering unit.location may not
+ meet map accuracy standard.
+
+F126R                    .FLTL.SLPNL.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence questionable.inferred.location ma
+y not meet map accuracy standard.
+
+F127R                    .FLTL.SLPNL.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence questionable.inferred beneath map
+ped covering unit.location may not meet map accuracy standard.
+
+F128R                    .FLTL.SLPNL.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.younge
+r over older.listric into detachment.existence questionable.inferred beneath unm
+apped covering unit.location may not meet map accuracy standard.
+
+F134N                    .FLTL.SLPNDM.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+F135N                    .FLTL.SLPNDM.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F136N                    .FLTL.SLPNDM.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.master detachment.existence questionable.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F142N                    .FLTL.SLPND.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence questionable.inferred.location may not meet ma
+p accuracy standard.
+
+F143N                    .FLTL.SLPND.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence questionable.inferred beneath mapped covering
+unit.location may not meet map accuracy standard.
+
+F144N                    .FLTL.SLPND.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.detachment.existence questionable.inferred beneath unmapped coverin
+g unit.location may not meet map accuracy standard.
+
+F150N                    .FLTL.SLPNL.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence questionable.inferred.location ma
+y not meet map accuracy standard.
+
+F151N                    .FLTL.SLPNL.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence questionable.inferred beneath map
+ped covering unit.location may not meet map accuracy standard.
+
+F152N                    .FLTL.SLPNL.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.normal slip.older
+over younger.listric into detachment.existence questionable.inferred beneath unm
+apped covering unit.location may not meet map accuracy standard.
+
+F158R                    .FLTL.SLPTD.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence questionable.inferred.location may not meet m
+ap accuracy standard.
+
+F159R                    .FLTL.SLPTD.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence questionable.inferred beneath mapped covering
+ unit.location may not meet map accuracy standard.
+
+F160R                    .FLTL.SLPTD.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.decollement.existence questionable.inferred beneath unmapped coveri
+ng unit.location may not meet map accuracy standard.
+
+F166R                    .FLTL.SLPTT.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence questionable.inferred.location may not meet map ac
+curacy standard.
+
+F167R                    .FLTL.SLPTT.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence questionable.inferred beneath mapped covering unit
+.location may not meet map accuracy standard.
+
+F168R                    .FLTL.SLPTT.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.existence questionable.inferred beneath unmapped covering un
+it.location may not meet map accuracy standard.
+
+F174R                    .FLTL.SLPTTO.WRLY.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+F175R                    .FLTL.SLPTTO.WRLY.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F176R                    .FLTL.SLPTTO.WRLY.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.younge
+r over older.thrust.overturned.existence questionable.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F182R                    .FLTL.SLPTT.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence questionable.inferred.location may not meet map ac
+curacy standard.
+
+F183R                    .FLTL.SLPTT.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence questionable.inferred beneath mapped covering unit
+.location may not meet map accuracy standard.
+
+F184R                    .FLTL.SLPTT.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.existence questionable.inferred beneath unmapped covering un
+it.location may not meet map accuracy standard.
+
+F190R                    .FLTL.SLPTTO.WRLO.EXQ.INF.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence questionable.inferred.location may not
+meet map accuracy standard.
+
+F191R                    .FLTL.SLPTTO.WRLO.EXQ.INFM.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence questionable.inferred beneath mapped co
+vering unit.location may not meet map accuracy standard.
+
+F192R                    .FLTL.SLPTTO.WRLO.EXQ.INFU.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.overturned.existence questionable.inferred beneath unmapped
+covering unit.location may not meet map accuracy standard.
+
+F195R                    .FLTL.SLPTT.WRLO.FSC.IDQ.PRO.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.scarp.identity questionable.probable.location may not meet m
+ap accuracy standard.
+
+F196R                    .FLTL.SLPTT.WRLO.FSC.IDQ.POS.MNM.
+                                             .fault.low angle.thrust slip.older
+over younger.thrust.scarp.identity questionable.possible.location may not meet m
+ap accuracy standard.
+
+F210R                    .FLTV.SLPNRS.EXQ.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence questionable.inferred.location may not meet map
+accuracy standard.
+
+F211R                    .FLT.SLPNRS.EXQ.INFM.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence questionable.inferred beneath mapped covering un
+it.location may not meet map accuracy standard.
+
+F212R                    .FLT.SLPNRS.EXQ.INFU.MNM.
+                                             .fault.variable angle.rotational no
+rmal slip.slide fault.existence questionable.inferred beneath unmapped covering
+unit.location may not meet map accuracy standard.
+
+EOI
+EOS

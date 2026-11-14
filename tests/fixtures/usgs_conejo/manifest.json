@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "dataset": "USGS Conejo Well 7.5-minute quadrangle",
+  "citation": "Powell, Robert E., and Cossette, Pamela M. (digital cartography), 2001. Geologic map and digital database of the Conejo Well 7.5 minute quadrangle, Riverside County, California. USGS OFR 01-031, Version 1.0.",
+  "url": "https://pubs.usgs.gov/of/2001/of01-031/",
+  "distribution": "USGS source fixture; optional native six-layer comparison data",
+  "rights_note": "USGS-authored public-domain data. Access_Constraints=None. Preserve attribution, source metadata, as-is disclaimer and spatial-resolution limits. Generic SLIB is bundled separately; native six-layer comparison data are optional and are not required by the processed seven-layer testdata fixture.",
+  "source_crs": "NAD27 Polyconic",
+  "native_crs": "UTM11; source SHP declares EPSG:32611",
+  "source_files": {
+    "cwell_geo.e00": {
+      "sha256": "b1287becce9f57cf8a933bda67bb76c358982efa6a7bbf04e9b2e6a356e46fb6",
+      "layers": {
+        "ARC": 5991,
+        "PAL": 2498,
+        "LAB": 2498
+      }
+    },
+    "cwell_dk.e00": {
+      "sha256": "84523c3fb47807dc7cc0a3911e9faf6a8ee374ac0e3f472d84711fc33c6bb3c7",
+      "layers": {
+        "ARC": 253
+      }
+    },
+    "cwell_str.e00": {
+      "sha256": "0df26928c1ea9583f772d2163976b162a701db7b8d0282e04160238714783550",
+      "layers": {
+        "LAB": 23
+      }
+    },
+    "cwell_orn.e00": {
+      "sha256": "18d81957e08058b875e4410c833d7c23116e5068ce8a7f904a9bae4dd616f1da",
+      "layers": {
+        "LAB": 2
+      }
+    },
+    "cwell_ldr.e00": {
+      "sha256": "ba6f6fbb0cedeab41feae338630c62355b11ea44afca643aaabc217fb4b17cd6",
+      "layers": {
+        "ARC": 37
+      }
+    }
+  },
+  "native_files": {
+    "CWELL_DK_WL.WL": {
+      "sha256": "2156b08164d503aad7a2358e104a584b9cf86885bded2a8907d4e87b25ee844e",
+      "features": 253,
+      "empty_geometries": 0,
+      "origin": "MapGIS-produced native file"
+    },
+    "CWELL_GEO_WL.WL": {
+      "sha256": "b764258044a9dc1ced121c190296fef1783119939e806ce66153437ee6e13613",
+      "features": 5991,
+      "empty_geometries": 0,
+      "origin": "MapGIS-produced native file"
+    },
+    "CWELL_GEO_WP.WP": {
+      "sha256": "3c8993a1f0a47fbc627174073d7c0814ffa5a8b4258f366c38a9c03dd608db57",
+      "features": 2498,
+      "empty_geometries": 0,
+      "origin": "MapGIS-produced native file"
+    },
+    "CWELL_LDR_WL.WL": {
+      "sha256": "1213382adef64dd98b53dc7cce5c48ea166da3eb62c88addffecc690261e8385",
+      "features": 37,
+      "empty_geometries": 0,
+      "origin": "MapGIS-produced native file"
+    },
+    "CWELL_ORN_WT.WT": {
+      "sha256": "d9b8a5f860b75ae553616673155fd1e7cdcf156577790bb780c0bb6d6f5cab05",
+      "features": 2,
+      "empty_geometries": 0,
+      "origin": "MapGIS-produced native file"
+    },
+    "CWELL_STR_WT.WT": {
+      "sha256": "2d8a111b62b29982115ca641c2456b112df0d945ed0f89fda0aafe0b1663e2d1",
+      "features": 23,
+      "empty_geometries": 0,
+      "origin": "MapGIS-produced native file"
+    }
+  },
+  "metadata_files": {
+    "cwell_met.txt": "bd35c56451d72fc58f913ffeeff1406b9b2758547fc21c9ccc9ba4956d6cd764",
+    "cwell_readme.txt": "c5d1813f0d80876153f54d6b5873539eca76c987bba710a1a52aff03db7ffdfe",
+    "cwell_pamph.txt": "6a3777c5ddabfefeacf9c31f7e875451943abc95469a146a45644b5d83405cc0"
+  }
+}
