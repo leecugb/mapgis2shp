@@ -350,19 +350,23 @@ def _fields_from_dataframe(
         orig = meta_fields.get(name)
         raw = meta_raw.get(name)
         if orig is not None and raw is not None:
+            # Descriptor @25 stores physical bytes per record value, while
+            # @27 stores the declared display width. Strings use declared+1;
+            # confusing the two leaves no terminator and overlaps new fields.
+            storage = struct.unpack_from("<h", raw, 25)[0]
             specs.append(
                 _FieldSpec(
                     name=name,
                     type_code=int(orig["type_code"]),
                     offset=int(orig["offset"]),
-                    storage=int(orig["length"]),
+                    storage=storage,
                     declared=struct.unpack_from("<h", raw, 27)[0],
                     decimals=int(orig.get("decimals", 0)),
                     source=str(column),
                     raw=bytes(raw),
                 )
             )
-            offset = max(offset, int(orig["offset"]) + int(orig["length"]))
+            offset = max(offset, int(orig["offset"]) + storage)
             continue
         type_code, storage, declared, decimals = _field_spec_for_column(df[column])
         specs.append(
@@ -425,6 +429,11 @@ def _pack_field_descriptor(index: int, spec: _FieldSpec) -> bytes:
     )
 
 
+def _required_record_length(specs: List[_FieldSpec]) -> int:
+    """Return the physical record size needed by all sparse field offsets."""
+    return max((spec.offset + spec.storage for spec in specs), default=1)
+
+
 def _build_attribute_section(
     df: pd.DataFrame,
     specs: List[_FieldSpec],
@@ -451,7 +460,9 @@ def _build_attribute_section(
     prefix[320:322] = _ATTR_PREFIX_SIGNATURE
 
     if record_length is None:
-        record_length = 1 + sum(spec.storage for spec in specs)
+        record_length = _required_record_length(specs)
+    if record_length > 32767:
+        raise WriterError("attribute record length exceeds the int16 format limit")
     head = struct.pack("<hih", len(specs), len(df) + 1, record_length) + b"\x00" * 18
     descriptors = b"".join(
         _pack_field_descriptor(i, spec) for i, spec in enumerate(specs)
@@ -463,8 +474,13 @@ def _build_attribute_section(
         rec[0] = 0x01
         for spec in specs:
             packed = _pack_attribute_field(row[spec.source], spec)
-            end = min(spec.offset + len(packed), record_length)
-            rec[spec.offset:end] = packed[: end - spec.offset]
+            end = spec.offset + len(packed)
+            if end > record_length:
+                raise WriterError(
+                    f"attribute field {spec.name!r} exceeds record length "
+                    f"after layout calculation"
+                )
+            rec[spec.offset:end] = packed
         records += bytes(rec)
 
     return bytes(prefix) + head + descriptors + bytes(records)
@@ -675,9 +691,9 @@ def _header_crs_block_fields(
         off: ("B", val) for off, val in _HEADER_CRS_BLOCK_BYTES.items()
     })
     for off, raw in _HEADER_CRS_BLOCK_F32_BYTES.items():
-        # AEA/LCC lat_2 occupies @191-198, so the generic f32 stamp at
-        # @195 would overwrite its high four bytes (e.g. 45° -> 47°).
-        if _projection_name(crs) in {"aea", "lcc"} and off == 195:
+        # AEA/LCC lat_1 and lat_2 occupy @183-190 and @191-198. Generic
+        # f32 stamps at @187/@195 would overwrite their high four bytes.
+        if _projection_name(crs) in {"aea", "lcc"} and off in {187, 195}:
             continue
         fields.update({off + i: ("B", byte) for i, byte in enumerate(raw)})
     fields[_HEADER_CRS_NEG_ZERO_OFFSET] = ("f", -0.0)
@@ -1885,11 +1901,16 @@ class Writer:
         specs = _fields_from_dataframe(self._attr, meta)
         stamp = _ATTR_TYPE_STAMP[self.shapeType]
         record_length = None
+        required_length = _required_record_length(specs)
         if meta and all(
             any(s.source == f["name"] or s.name == f["name"] for s in specs)
             for f in meta.get("fields", [])
         ):
-            record_length = int(meta.get("record_length") or 0) or None
+            # Keep native trailing padding only when it still contains every
+            # field. Appended columns must never be truncated to the old size.
+            record_length = max(
+                int(meta.get("record_length") or 0), required_length
+            )
         attr_section = _build_attribute_section(
             self._attr, specs, stamp, record_length=record_length
         )
@@ -2184,14 +2205,12 @@ class Writer:
         topo: List[Tuple[int, int]],
         factor: float,
     ) -> Optional[dict]:
-        """Return the reader-stashed raw sections when the geometry is unchanged.
+        """Return reader-stashed raw sections only for identical geometry.
 
-        Compares area/bbox fingerprints of the polygons rebuilt from our
-        arcs against those from the source file's raw sections (the read-
-        rebuild chain may nudge individual vertices via make_valid / endpoint
-        matching, so vertex-exact comparison is too strict).  On a match the
-        original arc/metadata/tail bytes are reused, keeping a round-tripped
-        file byte-isomorphic to the native original.
+        Full normalized WKB is compared for every polygon. Area/bbox-only
+        fingerprints are deliberately avoided because they discard small but
+        real boundary edits. If exact equality cannot be established, the
+        geometry is re-encoded instead of silently restoring the source shape.
         """
         pt = getattr(self._gdf, "attrs", {}).get("mapgis_section_passthrough")
         sections = (pt or {}).get("sections", {})
@@ -2242,11 +2261,9 @@ class Writer:
             )
             out = []
             for pid in pids:
-                g = builder.build(pid)
-                out.append(
-                    (round(float(g.area), 4), tuple(round(v, 4) for v in g.bounds))
-                )
-            return sorted(out)
+                geometry = builder.build(pid)
+                out.append(_shp.wkb.dumps(geometry, byte_order=1))
+            return out
 
         ours = _fingerprint(arcs, topo)
         # Source sections are decoded with scale=1.0 and therefore remain in

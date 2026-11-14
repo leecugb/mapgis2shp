@@ -4,10 +4,11 @@ import sys
 from pathlib import Path
 
 import pytest
-from osgeo import osr
 
 from pymapgis.geopdf import inspect_geopdf
 from pymapgis.testing import jwd_path, slib_path
+
+osr = pytest.importorskip("osgeo.osr")
 
 try:
     JWD = jwd_path()
@@ -93,11 +94,17 @@ def test_real_jwd_default_gauss_kruger_geopdf(tmp_path):
     assert geopdf_info["content_mode"] == "vector"
     assert geopdf_info["scale_denominator"] == 250000
     assert geopdf_info["scale_policy"] == "axes_page_size_from_ground_extent"
-    actual_x_scale = abs(geopdf_info["page_transform"][1]) * geopdf_info["page_width_pt"] * geopdf_info["metres_per_unit"] / (
-        geopdf_info["page_width_mm"] / 1000.0
+    actual_x_scale = (
+        abs(geopdf_info["page_transform"][1])
+        * geopdf_info["page_width_pt"]
+        * geopdf_info["metres_per_unit"]
+        / (geopdf_info["page_width_mm"] / 1000.0)
     )
-    actual_y_scale = abs(geopdf_info["page_transform"][5]) * geopdf_info["page_height_pt"] * geopdf_info["metres_per_unit"] / (
-        geopdf_info["page_height_mm"] / 1000.0
+    actual_y_scale = (
+        abs(geopdf_info["page_transform"][5])
+        * geopdf_info["page_height_pt"]
+        * geopdf_info["metres_per_unit"]
+        / (geopdf_info["page_height_mm"] / 1000.0)
     )
     assert actual_x_scale == pytest.approx(250000, rel=1e-9)
     assert actual_y_scale == pytest.approx(250000, rel=1e-9)

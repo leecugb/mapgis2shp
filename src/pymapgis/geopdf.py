@@ -9,8 +9,8 @@ raster image XObjects and sizes the vector Axes to the requested paper scale.
 """
 from __future__ import annotations
 
-import re
 import math
+import re
 from pathlib import Path
 from typing import Any, Dict, Sequence, Tuple
 
@@ -33,7 +33,6 @@ def matplotlib_geotransform(figure: Any, axes: Any, dpi: int) -> GeoTransform:
     y0 = float(bbox.y0) * output_scale
     x1 = float(bbox.x1) * output_scale
     y1 = float(bbox.y1) * output_scale
-    width_px = int(round(figure.get_size_inches()[0] * dpi))
     height_px = int(round(figure.get_size_inches()[1] * dpi))
     xmin, xmax = (float(value) for value in axes.get_xlim())
     ymin, ymax = (float(value) for value in axes.get_ylim())
