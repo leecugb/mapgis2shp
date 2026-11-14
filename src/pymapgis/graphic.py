@@ -37,10 +37,10 @@ from pymapgis.linesty import (
 )
 from pymapgis.pcolor import PcolorLib
 from pymapgis.reader import (
-    Reader,
     _LINE_PARAM_COLUMNS,
     _POINT_PARAM_COLUMNS,
     _POLYGON_PARAM_COLUMNS,
+    Reader,
 )
 from pymapgis.slib import SubgraphLib
 
@@ -535,8 +535,13 @@ class GraphicRenderer:
             if len(axes_rect) != 4 or any(not math.isfinite(float(v)) for v in axes_rect):
                 raise ValueError("axes_rect must contain four finite values")
             left, bottom, width, height = (float(v) for v in axes_rect)
-            if left < 0 or bottom < 0 or width <= 0 or height <= 0 or left + width > 1 or bottom + height > 1:
-                raise ValueError("axes_rect must be [left, bottom, width, height] within the figure")
+            if (
+                left < 0 or bottom < 0 or width <= 0 or height <= 0
+                or left + width > 1 or bottom + height > 1
+            ):
+                raise ValueError(
+                    "axes_rect must be [left, bottom, width, height] within the figure"
+                )
 
         fig = Figure(figsize=figsize, dpi=dpi)
         FigureCanvasAgg(fig)
