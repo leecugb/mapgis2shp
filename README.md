@@ -1280,7 +1280,12 @@ Unknown field-type descriptors are skipped without shifting the retained raw des
 
 ## Changelog
 
-### Unreleased manuscript-regression updates
+### 2.7.2 (2026-11-14)
+
+- Bundle seven processed USGS Conejo Well test layers (8,512 features) and the independently authorized five generic SLIB libraries; keep original NGAC/JWD vectors and native NGAC exports external, reject them in current release trees and archives, and detect renamed forbidden content by SHA-256
+- Add strict-scale fully vector GeoPDF output, `Writer(..., preserve_utm=True)`, projection-scale parsing at byte 232 and explicit Reader `coordinate_scale_factor`; distinguish native storage scaling from the source map's cartographic scale
+- Replace application examples with self-contained `testdata_path()` / `slib_path()` workflows, add the actual rendered geological map to the README, and update `examples/geological_workflow.py` for the seven bundled layers
+- Add release-boundary tests, strict wheel/sdist content inspection, and current full-suite validation
 
 - Align fresh WT/WL/WP output with MapGIS SHP import: compute attribute-prefix descriptor offsets/counts and descriptor flags, add native ID/length/area fields, use native text/numeric declarations, write WT 65536 flags and coordinate-scaled boxes/extents, apply fresh polygon ring-count classes and cyclic fill colours, zero fresh legacy header stamps, and prevent geometry passthrough from discarding explicit style edits
 - Add external SHP→MapGIS reference tests covering binary coordinate sections, native auxiliary records, attribute descriptors, default graphics and style-preserving mode

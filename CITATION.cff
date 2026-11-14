@@ -11,8 +11,8 @@ abstract: >-
   GeoDataFrames / shapefiles, enabling Chinese
   geological-survey data locked in the proprietary MapGIS format to enter
   the open-source geospatial stack and return to it.
-version: "2.7.1"
-date-released: 2026-11-07
+version: "2.7.2"
+date-released: 2026-11-14
 license: Apache-2.0
 repository-code: https://github.com/leecugb/mapgis2shp
 url: https://doi.org/10.5281/zenodo.24036158
