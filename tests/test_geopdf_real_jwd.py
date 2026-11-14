@@ -4,10 +4,11 @@ import sys
 from pathlib import Path
 
 import pytest
-from osgeo import osr
 
 from pymapgis.geopdf import inspect_geopdf
 from pymapgis.testing import jwd_path, slib_path
+
+osr = pytest.importorskip("osgeo.osr")
 
 try:
     JWD = jwd_path()

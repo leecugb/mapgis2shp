@@ -1280,6 +1280,13 @@ Unknown field-type descriptors are skipped without shifting the retained raw des
 
 ## Changelog
 
+### 2.7.3 (2026-11-14)
+
+- Fix AEA/LCC first-standard-parallel overwrites, preserve appended attribute values with physical storage-length accounting and expanded records, and replace fuzzy polygon passthrough fingerprints with exact normalized-WKB comparison
+- Add `tests/test_writer_regressions_20261114.py` with five targeted regression cases, covering non-25° conic parallels, native attribute append and small polygon edits; verify the complete Writer batch2/3/4 native comparison suites
+- Declare PyMuPDF and lxml in the development extra, add `pytest.importorskip` guards for optional GDAL and geosciml4china dependencies, remove the hard-coded semantic-extension path, and set pytest `pythonpath` for direct invocation
+- Bundle the Writer integrity fixes in a public 2.7.3 release and distinguish that release from the earlier 2.7.2 artifact
+
 ### 2.7.2 (2026-11-14)
 
 - Bundle seven processed USGS Conejo Well test layers (8,512 features) and the independently authorized five generic SLIB libraries; keep original NGAC/JWD vectors and native NGAC exports external, reject them in current release trees and archives, and detect renamed forbidden content by SHA-256
@@ -1363,8 +1370,23 @@ pip install -e ".[dev]"
 Run the test suite:
 
 ```bash
-pytest
+python -m pytest -q
 ```
+
+For a clean-environment reproducibility check, create a fresh virtual
+environment and install only the declared development extra before running it:
+
+```bash
+python -m venv .venv
+.venv/bin/python -m pip install -e ".[dev]"
+.venv/bin/python -m pytest -q
+```
+
+The dev extra includes PyMuPDF and lxml. Tests requiring GDAL/osgeo or the
+external geosciml4china package are skipped explicitly when those optional
+packages are unavailable; they no longer abort collection. Direct `pytest` and
+`python -m pytest` both work because the pytest configuration includes the
+repository root on `sys.path`.
 
 The `dev` extra currently selects `geopandas<1.2` for the test reference
 environment. GeoPandas 1.2 changes edge pixels in the old reference plotting

@@ -3,12 +3,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pymupdf
 import pyproj
 import pytest
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
-from osgeo import osr
 
 from pymapgis.geopdf import (
     inspect_geopdf,
@@ -17,6 +15,9 @@ from pymapgis.geopdf import (
     write_vector_geopdf,
 )
 from pymapgis.render_projection import gauss_kruger_crs
+
+pymupdf = pytest.importorskip("pymupdf")
+osr = pytest.importorskip("osgeo.osr")
 
 JWD_CRS = "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +no_defs"
 
