@@ -1,0 +1,116 @@
+{
+  "title": "Native SHP exports used for Reader robustness regression",
+  "source": {
+    "dataset": "Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000) (V1)",
+    "sheet": "J43C001002",
+    "doi": "10.23650/data.A.2018.NGA131703.K1.1.1.V1",
+    "companion_article_doi": "10.12029/gc2018Z101",
+    "usage": "Original open-edition data for software testing and validation only; original terms apply."
+  },
+  "conversion": "MapGIS native SHP exports supplied by the user; MapGIS version and settings not provided",
+  "current_distribution": "Native SHP exports are not bundled in the current Git tree, wheel or source archive. Set PYMAPGIS_READER_NATIVE to a legally obtained local directory and verify these hashes.",
+  "shp_crs": "No .prj files were supplied; CRS is not inferred from SHP",
+  "files": [
+    {
+      "case": "LDLYAAI002",
+      "file": "LDLYAAI002.SHP",
+      "bytes": 6876,
+      "sha256": "8036eb91f6a49be75b62f18d2ee302730b14581b29608754060d69cc00e98777"
+    },
+    {
+      "case": "LDLYAAI002",
+      "file": "LDLYAAI002.SHX",
+      "bytes": 2036,
+      "sha256": "e06c3020b91292c2d2274a38e968b9418f7b73a4ca04f2887516ede9a205333c"
+    },
+    {
+      "case": "LDLYAAI002",
+      "file": "LDLYAAI002.DBF",
+      "bytes": 23249,
+      "sha256": "e594c4b7f555d4b3b6b65763c0a1dafd35a3d73038d297400b73f49be2ea8ba7"
+    },
+    {
+      "case": "LDZOFBA002",
+      "file": "LDZOFBA002.SHP",
+      "bytes": 1228196,
+      "sha256": "0d062ecca2fd4246b387db5d51f4d6609b30b964b6f3989696b02042cad09a14"
+    },
+    {
+      "case": "LDZOFBA002",
+      "file": "LDZOFBA002.SHX",
+      "bytes": 17876,
+      "sha256": "cec6c70a8dabebde7ae77d1dd1868c2b459d10fde1d151a4697cbaf1dbcd7a2a"
+    },
+    {
+      "case": "LDZOFBA002",
+      "file": "LDZOFBA002.DBF",
+      "bytes": 711267,
+      "sha256": "6fa311a31900a3b40beffd7252bb4990e7e48647f0047a65fd40cfc66055937f"
+    },
+    {
+      "case": "LDZOFBB001",
+      "file": "LDZOFBB001.SHP",
+      "bytes": 1703084,
+      "sha256": "21dc027bb5d9be490fbcbbe45beb674bd6bb12ce4a0e6f47fee4d65efc4b6326"
+    },
+    {
+      "case": "LDZOFBB001",
+      "file": "LDZOFBB001.SHX",
+      "bytes": 4964,
+      "sha256": "60f1b5f209c2e91676aa8b2ca6914436f4702060cde89082e65a110e9bf9c854"
+    },
+    {
+      "case": "LDZOFBB001",
+      "file": "LDZOFBB001.DBF",
+      "bytes": 393315,
+      "sha256": "8666e196a2e40252b53f98dcab139ab6dcdfc590690304d4b580a25117232926"
+    },
+    {
+      "case": "LDZOFBB004",
+      "file": "LDZOFBB004.SHP",
+      "bytes": 200720,
+      "sha256": "40f714d9016bbcd3fd0dd27241aef3bba38d9e7eaae1a853e8089a47bed46031"
+    },
+    {
+      "case": "LDZOFBB004",
+      "file": "LDZOFBB004.SHX",
+      "bytes": 492,
+      "sha256": "b43a830a71028991096da5dcb41b54e9d8607524a4457ad5c2f2a9382071ca6e"
+    },
+    {
+      "case": "LDZOFBB004",
+      "file": "LDZOFBB004.DBF",
+      "bytes": 51241,
+      "sha256": "54f2cc81ecb2087d63f71fc0346746d10e8f39ad4f7e06e8a06c3517f6a50ce7"
+    },
+    {
+      "case": "LDZOFBB099",
+      "file": "LDZOFBB099.SHP",
+      "bytes": 56772,
+      "sha256": "0d626c928ab8de794fdeb19896ffb5ebb415db94afaecfc22c1d4ebcb8813103"
+    },
+    {
+      "case": "LDZOFBB099",
+      "file": "LDZOFBB099.SHX",
+      "bytes": 16292,
+      "sha256": "597484c23813d7fd02ed4ea8b3c31d171d199f923ef598fba3c5e394dee887ba"
+    },
+    {
+      "case": "LDZOFBB099",
+      "file": "LDZOFBB099.DBF",
+      "bytes": 135803,
+      "sha256": "ac3a548def552c9ea7c2b575f1348c281e8d65d546fbe575f1cf9964866ad7ad"
+    },
+    {
+      "case": "LDLYAAI002",
+      "file": "LDLYAAI002.WT",
+      "bytes": 56859,
+      "sha256": "14021019ec279feee7e3a2f9551b37a09340158fdb715a62e414f7cea6c0a0af"
+    }
+  ],
+  "native_notes": {
+    "LDZOFBB001": "SHP merges many polygon parts and has 87 invalid geometries; Reader geometries are valid.",
+    "LDZOFBB004": "SHP row 48 is empty while Reader recovers a valid polygon; 14 other non-empty SHP geometries are self-intersecting.",
+    "LDZOFBB099": "Four WAT text values differ from binary and SHP attributes; these are native export inconsistencies, not Reader decoding errors."
+  }
+}

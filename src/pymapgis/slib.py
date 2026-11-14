@@ -182,10 +182,21 @@ class SubgraphLib:
 
     def __init__(self, path: str):
         self.data = Path(path).read_bytes()
-        # 2026-10-15 优化：np.frombuffer 向量化（原逐 u32 struct 解包）
-        n_idx = self._u32(0) // 4
-        self.offsets = np.frombuffer(self.data, dtype="<u4",
-                                     count=n_idx).tolist()
+        self.offsets: List[int] = []
+        if len(self.data) >= 4:
+            first = self._u32(0)
+            if 4 <= first <= len(self.data) and first % 4 == 0:
+                # 索引表项数 = 首记录偏移 / 4（首个 u32 = 索引区末尾 =
+                # 记录区起点；原探测法会把记录区内小值误吞为索引）。
+                # 部分复制可能留下指向 EOF 之外的尾部索引：在首个越界项
+                # 处诚实截断，不把异常泄漏给原生渲染管线。
+                raw_offsets = np.frombuffer(
+                    self.data, dtype="<u4", count=first // 4
+                ).tolist()
+                for offset in raw_offsets:
+                    if offset >= len(self.data):
+                        break
+                    self.offsets.append(int(offset))
         # 末条索引记录的真实终点 = 未索引尾段链起点：头长走查定界
         last = self._scan_record(self.offsets[-1]) if self.offsets else None
         self._indexed_end = last[3] if last else len(self.data)
@@ -234,6 +245,8 @@ class SubgraphLib:
         (header_len, type, n, end)。链证两级：优先"后继记录样合法且
         后继载荷抽查亦过"（双门，取最短头）；否则退"后继仅记录样合法"
         （单门）；无链候选即诚实停止（不臆猜头长）。"""
+        if o < 0 or o + 4 > len(self.data):
+            return None
         c1 = c2 = None
         for hl in range(4, self._TAIL_HL_MAX + 2, 2):
             t, n = self._u16(o), self._u16(o + 2)
@@ -247,6 +260,11 @@ class SubgraphLib:
                 continue
             if c1 is None:
                 c1 = (hl, t, n, end)
+            # 后继记录头合法并不代表其载荷完整。部分复制常在记录
+            # 中间结束，此时只能使用已建立的单门候选，不能在双门
+            # 抽样中越过 EOF。
+            if end + 4 + nn * 4 > len(self.data):
+                continue
             ok = bad = 0
             step = max(2, nn // 20)
             for j in range(0, nn, step):
@@ -326,8 +344,9 @@ class SubgraphLib:
         npts = n // 2
         avail = len(self.data) - o - 4
         m = min(avail // 2, self._REGION_WIN)
-        if m < npts:
-            return []
+        # _REGION_WIN 是描述区 + 点数表的最大 u16 窗口，不是坐标点数
+        # 上限。每条子路径至少两点，因此 npts 最大时点数表也仅需
+        # npts/2 项；后续 bisect、k>m 与载荷边界检查会拒绝不可行记录。
         stream = np.frombuffer(self.data, dtype="<u2", count=m, offset=o + 4)
         csum = np.cumsum(stream, dtype=np.int64).tolist()
         ps = [0] + csum
@@ -433,6 +452,8 @@ class SubgraphLib:
                 return None
             return self._decode_region_symbol(no, region[j])
         o, e = self.record_bounds(no)
+        if o < 0 or e < o or e > len(self.data):
+            return None
         total = e - o
         if total <= 8:
             return Symbol(no=no, type=0, n=0, header_len=total, header_u16=[])
@@ -448,9 +469,10 @@ class SubgraphLib:
         pts = list(zip(arr[0::2].tolist(), arr[1::2].tolist()))
         sym = Symbol(no=no, type=t, n=n, header_len=hl, header_u16=header_u16)
         counts = self._subpath_counts(header_u16, len(pts))
+        has_count_table = bool(counts)
         if not counts:
-            counts = [len(pts)]  # 头尾无点数表 → 单子路径
-        sym.elements = parse_elements(header_u16, counts)
+            counts = [len(pts)]  # 头尾无点数表 → 单子路径，但不伪造描述区分组
+        sym.elements = parse_elements(header_u16, counts) if has_count_table else []
         i = 0
         for cnt in counts:
             sp = SubPath(points=pts[i:i + cnt])

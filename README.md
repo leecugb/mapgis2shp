@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/mapgis2shp.svg)](https://pypi.org/project/mapgis2shp/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21487339-blue.svg)](https://doi.org/10.5281/zenodo.21487339)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.24036158-blue.svg)](https://doi.org/10.5281/zenodo.24036158)
 
 Read **and write** MapGIS 6.x/67 vector files (`.wt`, `.wl`, `.wp`) with [GeoPandas](https://geopandas.org/) GeoDataFrames.
 
@@ -89,14 +89,25 @@ from pymapgis import Reader
 
 ```python
 from pymapgis import Reader
+from pymapgis.testing import testdata_path
 
-with Reader("example.wp") as r:
+# No external survey data is needed: this is one of the seven bundled,
+# USGS-derived MapGIS test layers.
+with Reader(
+    testdata_path("LDZOFBB001.WP"),
+    read_graphic_params=True,
+) as r:
     print(r)
-    # Write to Shapefile
-    r.geodataframe.to_file("example.shp")
-    # Or access the GeoDataFrame directly
-    print(r.geodataframe.head())
+    print(r.crs.to_epsg())                  # 32611
+    print(r.coordinate_scale_factor)        # 1.0
+    print(r.geodataframe[["QDUECC", "QDUECD"]].head())
+    r.geodataframe.to_file("testdata_polygons.shp")
 ```
+
+The seven processed test layers are real USGS Conejo Well derivatives, not
+original NGAC/JWD vectors. Their native CRS is EPSG:32611 and coordinates are
+in metres. The source map's 1:24,000 cartographic scale is independent of the
+Reader coordinate multiplier.
 
 ## Public interface at a glance
 
@@ -112,7 +123,7 @@ The curated top-level API is defined by `pymapgis.__all__`:
 | Fill patterns | `FillgrphLib`, `FillPattern`, `FillStroke`, `pattern_geometry()` |
 | Colours | `ColorLib`, `PcolorLib` |
 | Render WP / WL / WT | `GraphicRenderer`, `GraphicRenderResult`, `render_graphic_map()` |
-| Bundled test data | `pymapgis.testing.fixture_path()`, `jwd_path()`, `slib_path()` |
+| Bundled test data | `pymapgis.testing.fixture_path()`, `testdata_path()`, `usgs_conejo_path()`, `jwd_path()`, `slib_path()` |
 
 Legacy research helpers remain available from their implementation modules for
 compatibility, but are not all promoted to the curated top-level API. In
@@ -122,6 +133,21 @@ package responsibilities.
 ## Command-line usage
 
 ```bash
+# Use the bundled seven-layer testdata in shell-based application examples.
+# These two path-resolution commands require only the installed package.
+TEST_WP="$(python -c "from pymapgis.testing import testdata_path; print(testdata_path('LDZOFBB001.WP'))")"
+TEST_WT="$(python -c "from pymapgis.testing import testdata_path; print(testdata_path('LDZOFBA016.WT'))")"
+SLIB_DIR="$(python -c "from pymapgis.testing import slib_path; print(slib_path())")"
+
+# Convert bundled MapGIS data to common GIS formats.
+pymapgis "$TEST_WP" testdata_polygons.shp
+pymapgis "$TEST_WT" testdata_attitudes.geojson --driver GeoJSON
+
+# Inspect the bundled, independently authorized generic graphic libraries.
+pymapgis lib "$SLIB_DIR/Subgraph.lib" --symbol 1245
+pymapgis lib "$SLIB_DIR/Colorlib.lib" --color 602
+pymapgis lib "$SLIB_DIR/Pcolor.lib" --color 602
+
 # Convert a polygon file to Shapefile
 pymapgis input.wp output.shp
 
@@ -228,7 +254,7 @@ high halves of float32 values stored in the head_9 section.
 - `InvalidDirectoryError` — reserved for project/directory errors
 - `WriterError` — a GeoDataFrame cannot be encoded as a MapGIS file
 
-### `Writer(geodataframe, *, make_valid=False, on_empty="error", map_scale=1000.0, snap_tolerance=0.0, graphic_params=True, geometry_type=None)`
+### `Writer(geodataframe, *, make_valid=False, on_empty="error", map_scale=1000.0, preserve_utm=False, snap_tolerance=0.0, graphic_params=True, geometry_type=None)`
 
 Encode a GeoDataFrame as a MapGIS binary file. One geometry type per file:
 Point/MultiPoint for `.wt` (MultiPoint is exploded with a warning),
@@ -237,9 +263,24 @@ Polygon/MultiPolygon for `.wp` (a MultiPolygon stays one polygon feature,
 matching the reader).
 
 ```python
-from pymapgis import Writer, write
+from pymapgis import Reader, Writer
+from pymapgis.testing import testdata_path
 
-Writer(gdf).to_file("out.wp")   # or the shortcut: write(gdf, "out.wp")
+source = Reader(
+    testdata_path("LDZOFBB001.WP"),
+    read_graphic_params=True,
+)
+
+# Preserve the existing UTM metres and native parameter areas. map_scale=1000
+# is a storage setting that makes Reader's coordinate multiplier 1.0; it is
+# not the source map's 1:24,000 cartographic scale.
+Writer(
+    source.geodataframe,
+    map_scale=1000,
+    preserve_utm=True,
+).to_file("testdata_roundtrip.wp")
+
+# For another GeoDataFrame, the shortcut remains: write(gdf, "out.wp")
 ```
 
 - `make_valid` — disabled by default to preserve native rings, duplicate
@@ -250,6 +291,10 @@ Writer(gdf).to_file("out.wp")   # or the shortcut: write(gdf, "out.wp")
   requested
 - `map_scale` — map-scale denominator for projected CRS (coordinates are
   stored as `value * 1000 / map_scale`); ignored for longitude/latitude data
+- `preserve_utm` — `False` by default, converting UTM to the same-datum
+  Gauss–Krüger `tmerc + k=1` target. `True` keeps northern-hemisphere UTM
+  coordinates and writes `k=0.9996` at offset 232. Southern-hemisphere UTM is
+  rejected explicitly because false-northing preservation is not implemented.
 - `snap_tolerance` — coordinate quantisation step applied before topology
   validation and ring encoding (0 = exact coordinates, no snapping)
 - `graphic_params` — when the frame carries the reader's graphic-parameter
@@ -283,6 +328,12 @@ polygon label boxes and file footers.
   (e.g. `pattern_color` → `pattern_col`) when passing through `.shp`, which
   disables the matching parameter group on write; GeoJSON/GeoPackage or a
   direct GeoDataFrame hand-off is unaffected
+- By default, UTM inputs are first reprojected to Gauss-Kruger (k=1) with the
+  zone-derived central meridian, preserving the established native-output path.
+  Use `Writer(..., preserve_utm=True)` to keep UTM coordinates unchanged and
+  store `k=0.9996` at offset 232. Set `map_scale=1000` when a Reader coordinate
+  scale factor of 1.0 is also required. Native MapGIS acceptance of non-unity
+  `k` remains a separate validation step
 - Longitude/latitude, Transverse Mercator, Albers, and Lambert CRS are
   written; other projections raise `WriterError`
 - CGCS2000 has no MapGIS ellipsoid code and is written as WGS84 with a
@@ -292,6 +343,125 @@ polygon label boxes and file footers.
   footer sections, closed-ring arcs), but arbitrary new data still needs
   native-application acceptance. Round-tripped files preserve source structure
   and are checked by internal Reader → Writer → Reader regression
+
+## Processing model: Reader, Writer, SLIB and GeoPDF
+
+The current pipeline has four separate stages. Keeping these stages explicit
+avoids confusing file decoding, coordinate conversion, style interpretation and
+page production.
+
+### 1. Reader: native bytes to aligned GeoDataFrames
+
+`Reader` first identifies the vector magic and then reads all 16 physical section
+entries. Attribute descriptors and record widths are decoded before records are
+joined to geometry. WP files additionally reconstruct the arc–ring–polygon
+topology, including holes, and retain the 24-bit ring-index pointers. Non-empty
+source sections, footer bytes, field metadata and coordinate metadata are kept
+in `gdf.attrs` for loss-aware writing.
+
+Alignment rules are strict: only topology IDs with matching attribute rows are
+emitted, and the same filtered sequence drives attributes, geometry and native
+parameters. Orphan IDs are not silently joined to the wrong features.
+`make_valid=True` repairs reconstructed polygons by default; use `False` to keep
+the raw rings. `read_graphic_params=True` decodes WP/WL parameters, and
+`read_point_params=True` decodes WT parameters. Native parameters take
+precedence when a DBF column and a native parameter have the same name.
+
+CRS handling is metadata handling, not reprojection. The reader decodes
+projection and ellipsoid indices, the header scale at byte 143 and the
+Transverse-Mercator `k` at byte 232. The geometry multiplier is
+`header_scale / 1000`, exposed as `coordinate_scale_factor` and
+`gdf.attrs["mapgis_coordinate_scale_factor"]`. Thus 1:1000 means 1 MapGIS unit
+= 1 ground metre, while `k=0.9996` is a projection parameter, not a paper-scale
+denominator. `set_crs` declares a CRS; `to_crs` performs a coordinate operation.
+Reader itself never performs that operation.
+
+### 2. Writer: GeoDataFrames to native vectors
+
+Writer accepts one geometry family per file. MultiPoint and MultiLineString are
+exploded with warnings; a MultiPolygon remains one feature. `make_valid=False`
+preserves source rings and duplicate vertices by default, while explicit repair
+may change them. Empty/null rows follow `on_empty`; a validation result with no
+polygonal geometry raises `WriterError` instead of leaking an encoding error.
+Polygon `class` and `layer` are independent native parameters and are never
+inferred from one another.
+
+Fresh polygons are encoded as independent closed rings with arc, coordinate and
+24-bit ring-index sections kept consistent. When a Reader-derived geometry is
+unchanged, Writer instead reuses source sections, descriptors, label boxes,
+shared arcs and footer bytes. This distinction is why internal round-trips can
+be byte-faithful without claiming that every newly authored file is guaranteed
+to display identically in MapGIS.
+
+For projected data, `map_scale=S` stores coordinates as `value * 1000 / S`, so
+the file continues to use scaled paper millimetres. UTM input follows two
+explicit paths: the default converts to the same-datum Gauss–Krüger target with
+`k=1`; `preserve_utm=True` keeps northern-hemisphere coordinates and writes
+`k=0.9996` at offset 232. Southern-hemisphere preservation is rejected rather
+than silently misread. Longitude/latitude, Transverse Mercator, Albers and
+Lambert are supported; other projections fail explicitly.
+
+### 3. Graphic libraries: native indices to drawable geometry
+
+| Library | Native role | Current interpretation |
+|---|---|---|
+| `Subgraph.lib` | WT symbols | Indexed and tail-chain records, subpaths, fills, circles and arcs, with truncated-record guards |
+| `LINESTY.lib` | WL line styles | Subline templates and f32 rhythm payloads; actual pen intervals, offsets and source-chainage clipping |
+| `Fillgrph.lib` | WP patterns | Fill polygons, polylines, circles and arcs, including per-stroke width arrays |
+| `Colorlib.lib` | Line, point and pattern colours | Four-channel records with an explicit KCMY/YMCK installation model |
+| `Pcolor.lib` | WP fill colours | 32-byte node `N + 3`, channel bytes at node offset 28; all-zero KCMY is valid white |
+
+Only an exact solid-pen record uses the solid fast path. Partial, reversed or
+offset single-pen records retain their stored intervals. Alternative non-solid
+sublines are not merged, multiple solid pens remain overlays, and zero-offset
+strokes follow the original vertices rather than chords between period
+endpoints. Unsupported structures remain unresolved and are reported rather
+than replaced by inferred geometry. WP fills use Pcolor in `auto` mode when it
+is available; other colour roles continue to use Colorlib.
+
+### 4. Rendering: native geometry and styles to a strict-scale GeoPDF
+
+`prepare_render_layers()` resolves coordinates before drawing. An explicit
+`--target-crs` wins. Otherwise, the combined non-empty bounds select one
+6-degree Gauss–Krüger zone (3-degree zoning is optional), preserving the source
+ellipsoid and `towgs84` values and reprojecting every layer to that one CRS.
+Missing source CRS requires `--source-crs`, or an explicit
+`--map-units-per-mm` for unprojected rendering without GeoPDF. Mixed datums,
+antimeridian ambiguity, excessive spans and polar inputs require an explicit
+target.
+
+Graphic dimensions remain paper-relative, not ground-relative:
+
+```text
+1 MapGIS unit = 1 paper mm = scale_denominator / 1000 ground metres
+paper_mm = ground_units × 1000 / scale_denominator
+paper_pt = paper_mm × 72 / 25.4
+```
+
+The renderer's `_unit()` performs the millimetre-to-ground conversion for the
+selected CRS. Fonts, line widths and collision offsets use points, and the
+fallback dip tick uses `attitude_dip_tick_mm=2.0`. The requested DPI is used
+when the Figure is created, so it affects text measurement and layout but not
+the certified page scale.
+
+Reports retain the WP → WL → WT order. In full-layout mode, native WT
+annotations become fixed obstacles first, derived dip labels are placed next,
+and WP/WL labels follow. Polygon candidates search in-polygon offsets with a
+seed, buffer and maximum offset instead of deleting conflicts wholesale.
+Native text-category filters apply only to text annotations, never to attitude
+Subgraph points. Dip text comes from `dip`/`GZBBAD`; symbols 1245/1249 use the
+actual SLIB short tick and other symbols use the native dip-direction field.
+Independent native dip annotations are excluded when the derived form is
+selected, preventing duplicates.
+
+`write_vector_geopdf()` then computes the Axes dimensions from the ground
+extent and requested denominator and embeds ISO 32000 `/VP`, `/Measure /GEO`,
+`/GPTS`, `/LPTS` and `/GCS`. The standard entry independently recomputes X/Y
+scale from the final page transform and fails on any mismatch or raster image
+object. Ordinary tight-bbox PDF is intentionally not produced. The JSON report
+includes each input's SHA-256, native CRS and header-scale values, plus final
+text-collision and drawing statistics. PNG/SVG remain previews, not
+scale-certified prints.
 
 ## Reading graphic parameters
 
@@ -409,42 +579,122 @@ the legacy comparison path. All other colour roles continue to use Colorlib.
 `Fillgrph.lib`, `LINESTY.lib`, `Subgraph.lib` and `Colorlib.lib`. It preserves
 polygon holes, stamps line-style elements along the original coordinates
 without extending line endpoints, instantiates subgraph geometry and fills,
-and renders WT text annotations.
+and renders WT text annotations. Subgraph geometry uses a uniform
+`min(width, height)` scale before rotation, preserving its native aspect ratio
+instead of applying directional shear. A zero dimension falls back to the other
+dimension, rather than collapsing the symbol. Geographic layers should be
+projected to a suitable conformal CRS before rendering; the JWD example uses a
+source-datum 6-degree Gauss–Krüger target with central meridian 75°E and `k=1`.
+
+The following image is the actual application-example output from the seven
+bundled USGS Conejo Well layers, using their native EPSG:32611 coordinates and
+the bundled SLIB definitions. It is a software-rendering test result, not an
+original USGS plot or an NGAC/JWD product.
+
+![Geological map rendered from the seven bundled USGS-derived MapGIS layers](docs/images/testdata_map.png)
+
+The complete example below writes this preview PNG and a strict 1:24,000,
+fully vector GeoPDF. The 1:24,000 denominator is explicit for the source map;
+it is not inferred from the native storage scale.
 
 ```python
 from pymapgis import GraphicLibraries, GraphicRenderer
+from pymapgis.geopdf import inspect_geopdf, write_vector_geopdf
+from pymapgis.testing import slib_path, testdata_path
 
-libraries = GraphicLibraries.from_directory("/path/to/SLIB")
+# Read the seven bundled layers; no external JWD or SLIB directory is needed.
+layers = []
+for path in sorted(testdata_path().iterdir()):
+    if path.suffix.lower() not in {".wt", ".wl", ".wp"}:
+        continue
+    layer = GraphicRenderer.read_layer(path)
+    layer.attrs["source"] = path.name
+    layer.attrs["kind"] = path.suffix.lower().lstrip(".")
+    layers.append(layer)
+
+# All seven layers already carry EPSG:32611. The source map's cartographic
+# scale is explicitly set to 1:24,000; this is not a storage-scale inference.
 renderer = GraphicRenderer(
-    libraries,
-    scale=250000,
-    # Native WT layout: per-character advance = width + spacing.
+    GraphicLibraries.from_directory(slib_path()),
+    scale=24000,
+    vector_patterns=True,
     native_text_layout=True,
-    # Geosciml4china-style labels from polygon attributes (default):
     polygon_labels=True,
-    polygon_label_fields=("QDUECC_eff", "QDUECC", "QDUECD"),
-    polygon_label_fontsize=4.5,
-    # Fragmented WT unit-code annotations are excluded by default:
-    exclude_text_categories={"代号"},
-    text_category_scales={"产状": 0.45, "断层产状": 0.45},
-    text_font_family=["Noto Sans CJK JP", "SimSun", "DejaVu Sans"],
-    # Optional native font-number mappings (installation-local):
+    polygon_label_fields=("QDUECC", "QDUECD"),
+    polygon_label_fontsize=5.0,
+    polygon_label_scale=0.7,
+    polygon_label_avoid_collisions=True,
+    polygon_label_randomize=True,
+    polygon_label_seed=42,
+    polygon_label_buffer_pt=2.0,
+    polygon_label_max_offset_pt=48.0,
+    attitude_dip_labels=True,
+    attitude_dip_label_direction="symbol",
+    attitude_dip_tick_mm=2.0,
+    attitude_dip_label_buffer_pt=0.5,
+    exclude_text_categories=("代号", "产状"),
+    text_font_family=["Microsoft YaHei", "SimSun", "DejaVu Sans"],
     font_zh_map={1: "SimSun", 4: "SimHei"},
     font_en_map={0: "DejaVu Sans"},
-    font_style_map={0: {"style": "normal"}},
 )
+
 result = renderer.render(
-    ["area.wp", "boundaries.wl", "points.wt"],  # automatically WP → WL → WT
-    "map.png",                                 # .png and .pdf are supported
-    figsize=(12, 10),
+    layers,
+    figsize=(7.5, 9.5),
     dpi=300,
+    axes_rect=(0.02, 0.02, 0.96, 0.96),
 )
 print(result.reports)  # drawn features, fallbacks, unresolved colours, ...
+
+# Preview only: this PNG has no scale-certification role.
+result.figure.savefig("testdata_map.png", dpi=300)
+
+# Formal output: strict 1:24,000, fully vector, georeferenced GeoPDF.
+write_vector_geopdf(
+    "testdata_geopdf_1_24000.pdf",
+    result.figure,
+    result.axes,
+    "EPSG:32611",
+    scale_denominator=24000,
+    title="USGS Conejo Well 7.5-minute quadrangle - 1:24000 vector GeoPDF",
+)
+readback = inspect_geopdf("testdata_geopdf_1_24000.pdf")
+assert readback["image_xobject_count"] == 0
 ```
 
+To run the same renderer against an external twelve-layer JWD dataset and the bundled five generic SLIB files, use:
+
+```bash
+python examples/render_bundled_jwd.py --output-dir jwd_render
+```
+
+Optional interface flags include `--input-dir`, `--target-crs`, `--source-crs`,
+`--map-units-per-mm`, `--zone-width`, `--scale` and `--no-geopdf`. Without an
+explicit target, the pipeline computes one source-datum 6-degree Gauss–Krüger
+CRS from the combined geographic bounds, avoiding a hard-coded zone for other
+sheets. Set `--target-crs` to override it. Layers with missing CRS metadata
+require either `--source-crs` or `--map-units-per-mm`; `--source-crs` establishes
+the input CRS before projection.
+
+The example writes preview-only `jwd_map.png` and `jwd_map.svg`, the strict-scale
+fully vector `jwd_map_geopdf.pdf`, and `jwd_render_reports.json`. Fillgrph
+patterns, paths and text are vector objects; the writer rejects any raster image
+XObject. No registration source PNG is produced. It intentionally does not write
+an ordinary `jwd_map.pdf`: a tight-bbox vector preview does not implement a
+certified physical map scale. `--no-geopdf` therefore means preview-only output
+without a scale-certified formal PDF. Its `regression_layers()` helper pre-reads `.WP~`
+backup polygons with `Reader` and, when both normalized and backup WP files coexist,
+loads the original backup once rather than duplicating the layer. Both the published V2.7.1 fixture layout and
+the normalized current WP layout therefore follow the same rendering path. Its regression case contains 12 layers and 7,094
+input features, with 5,732 original features drawn and no unresolved colours,
+unknown fills, solid fallbacks or unresolved symbols. The JSON separates input
+features from drawn features and excluded annotations. These values are
+internal regression evidence, not native MapGIS visual acceptance.
+
 By default, complete geological-unit labels come from polygon attributes and
-are drawn at each geometry's `representative_point()` with Mathtext, 4.5 pt
-type and a translucent background, following the geosciml4china pipeline.
+are drawn at each geometry's `representative_point()` with Mathtext at 70% of
+the 4.5 pt base size (3.15 pt) and a translucent background, following the
+geosciml4china pipeline.
 Fragmented WT annotations whose `CHFCEC` is `代号` are reported as
 `excluded_text` instead of being duplicated. `polygon_label` counts the new
 labels. Set `polygon_labels=False` and `exclude_text_categories=()` to restore
@@ -454,19 +704,31 @@ The one-shot equivalent is:
 
 ```python
 from pymapgis import render_graphic_map
+from pymapgis.testing import slib_path, testdata_path
 
+paths = [
+    path for path in sorted(testdata_path().iterdir())
+    if path.suffix.lower() in {".wt", ".wl", ".wp"}
+]
 result = render_graphic_map(
-    ["area.wp", "boundaries.wl", "points.wt"],
-    "/path/to/SLIB",
-    "map.pdf",
-    scale=250000,
+    paths,
+    slib_path(),
+    "testdata_preview.png",
+    scale=24000,
 )
 ```
+
+When the one-shot API receives an SLIB directory, `channel_order="YMCK"` is
+forwarded to both colour-library parsers. To use an existing
+`GraphicLibraries` instance, construct it with the desired channel order first.
 
 For an existing Matplotlib workflow, use `renderer.draw_layers(ax, layers)` or
 `renderer.draw_layer(ax, gdf, kind="wl")`. File paths and pre-read
 GeoDataFrames can be mixed. The latter must have been read with
-`read_graphic_params=True` (and `read_point_params=True` for WT).
+`read_graphic_params=True` (and `read_point_params=True` for WT). Set
+`gdf.attrs['source']` to preserve the layer name in reports, and
+`gdf.attrs['kind']` to `wl`, `wp` or `wt`; the kind is especially useful for
+empty layers whose geometry type cannot be inferred.
 
 The paper-mm/map-unit conversion is inferred from the CRS. For local data
 without a CRS, pass `map_units_per_mm` explicitly. For original graphic-library
@@ -487,18 +749,30 @@ output. Its current display-parameter boundaries are explicit:
 - Polygon `class=0` features are skipped and counted as `excluded_class`
 - Positive WT `pen_width` values override `symbol_line_width_pt`; zero/missing
   values retain that display default
-- With `native_text_layout=True` (default), character advance is exactly
-  `width + spacing`, including negative compression values. Script size and
-  baseline remain typographic approximations. Set it to `False` for whole-label
-  Mathtext layout
+- With `native_text_layout=True` (default), character advance is
+  `(width + spacing) × scale`, including negative compression values. The
+  default attitude multiplier is 0.3 for `产状`, `断层产状` and `断层辅助点`;
+  set `attitude_text_scale=1.0` to disable this additional multiplier, or use
+  `text_category_scales` for other category vocabularies. Script size and
+  baseline remain typographic approximations. Set native layout to `False` for
+  whole-label Mathtext layout
 - Polygon unit labels default to `QDUECC_eff`, `QDUECC` or `QDUECD`, anchored at
-  `representative_point()` with 4.5 pt Mathtext and a translucent background;
-  Greek labels use Times New Roman. WT `代号` annotations are excluded by
-  default; the two paths can be switched independently through
-  `polygon_labels` and `exclude_text_categories`
+  `representative_point()` with 3.15 pt Mathtext (70% of the 4.5 pt base) and a
+  translucent background; Greek labels use Times New Roman. WT `代号`
+  annotations are excluded by default; the two paths can be switched
+  independently through `polygon_labels` and `exclude_text_categories`
 - Native font numbers are installation-local. Supply `font_zh_map`,
   `font_en_map` and optionally `font_style_map`; unmapped numbers are counted
   in `unknown_fonts` rather than silently treated as resolved
+- `pattern` is counted only when a feature adds visible geometry. A pattern with
+  no visible output is reported as `empty_pattern`; stored zero widths and
+  coefficients are preserved rather than silently replaced with defaults.
+  Exceeding
+  `max_pattern_cycles` (default 100,000) is reported as `cycle_limit`. Pattern memory is bounded
+  independently by `max_pattern_tiles` and `max_pattern_bytes`; the first limit
+  reached wins. At the default 26-pixel tiles, the 128 MiB byte cap is reached
+  before the nominal 40,000-tile cap, so both controls must be considered when
+  tuning large patterns
 - The aux field has verified dual semantics. An in-range value selects a main-
   record subline variant; an out-of-range value is decoded and drawn as an
   independent auxiliary record. The style-2 equivalent-dash family is the
@@ -508,6 +782,108 @@ output. Its current display-parameter boundaries are explicit:
 - Out-of-range colour numbers use `fallback_color`; these substitutions,
   unknown fill states and unresolved symbols/styles are reported rather than
   hidden
+
+## Real USGS geological map conversion
+
+`examples/convert_usgs_conejo.py` converts the real USGS Open-File Report
+[01-031 Conejo Well geological database](https://pubs.usgs.gov/of/2001/of01-031/)
+to native MapGIS WT/WL/WP layers. It is not a synthetic or warped dataset. The
+source E00 files and metadata are bundled under `tests/fixtures/usgs_conejo/` and in wheel installations under
+`pymapgis/testing/fixtures/usgs_conejo/`. The original six MapGIS conversion layers remain optional historical comparison data and are not required by the clean standard testdata package. The fixture manifest records provenance and hashes.
+Run the converter with:
+
+```bash
+PYMAPGIS_SLIB=/path/to/SLIB python examples/convert_usgs_conejo.py \
+  --source tests/fixtures/usgs_conejo/source --output-dir output/usgs_conejo --dpi 160
+```
+
+The strict reader in `examples/e00_fast.py` handles the uncompressed ARC, PAL,
+LAB and fixed-width IFO sections directly, avoiding excessive AVCE00 assembly
+time for this coverage. It preserves the source vertices and attributes, skips
+only the ARC/INFO universe polygon and non-boundary dangling arcs, and reprojects
+NAD27 Polyconic to EPSG:32611. Eight native layers are written under `vectors/`
+and read back before PNG/PDF/SVG rendering. Rendering uses
+`mapgis2shp / pymapgis.GraphicRenderer` with the five libraries selected by
+`PYMAPGIS_SLIB` (this run: `D:/SLIB/SLIB`), not direct in-memory E00 plotting.
+Attitude symbols and their dip/plunge
+annotations are separate WT layers, so every numeric value remains visible.
+MapGIS 6x can store UTM `k=0.9996` at offset 232; the example's default conversion path uses Gauss–Krüger `k=1` (central meridian −117°), while `preserve_utm=True` is available when northern-hemisphere UTM coordinates must remain unchanged. The example restores EPSG:32611 after the native round-trip and checks
+geometry agreement. Source hashes, original documents,
+unit mappings, resolution constraints and conversion limits are recorded beside
+the outputs. The native WT retains every source label and uses plain `LABL` unit
+codes rather than GeoAge-specific `PLABL` control characters. The overview draws
+whole codes with font-accurate collision checks while covering every unit. Fill
+colours are declared age-based thematic colours, not recovered
+USGS plot shades. Tests are in `tests/test_usgs_conejo.py`.
+
+The bundled fixture is accessible through `pymapgis.testing.usgs_conejo_path()`:
+`source/` contains the original E00 coverages and `metadata/` preserves the USGS
+constraints and disclaimer. The optional `native/` comparison directory, when supplied separately, contains six MapGIS conversion layers without lab files; it is not required for the processed seven-layer fixture. Geological codes remain available as WP attributes
+for MapGIS polygon labeling. Source and native hashes are verified conditionally by
+`tests/test_usgs_conejo_fixture.py`. Reader and original-library rendering are covered by `tests/test_six_usgs_layers.py` only when that optional comparison directory is present.
+
+The separate seven-layer standard-renderer fixture is accessible through
+`pymapgis.testing.testdata_path()`. It contains 8,512 features under
+`tests/fixtures/testdata/` and in wheel installations, with the user's current
+colour and Fillgrph parameters preserved. The five generic SLIB libraries are
+available through `pymapgis.testing.slib_path()` from `tests/fixtures/slib/` or
+the installed fixture package; `PYMAPGIS_SLIB` remains an explicit override.
+File-level SHA-256 values and source notes are recorded in each directory's
+`manifest.json`.
+
+For native MapGIS compatibility troubleshooting,
+`examples/export_usgs_shapefile.py` bypasses the MapGIS Writer and exports the
+same source data directly to Shapefile. It writes both EPSG:32611 and a WGS84
+Gauss-Krüger k=1 (central meridian −117°) variant, uses GBK DBF text, preserves
+graphic parameters as attributes, and includes explicit ten-character field
+aliases. It reads back every SHP to verify all 16 layer/CRS combinations,
+geometry, attributes and CRS. Graphic parameters still need to be assigned in
+MapGIS after import; SHP does not carry SLIB display rules.
+
+```bash
+python examples/export_usgs_shapefile.py \
+  --source work_usgs/e00/tempfiles --output-dir output/usgs_conejo/shp
+```
+
+Tests are in `tests/test_usgs_shapefile_export.py`.
+
+## Synthetic geological map
+
+`examples/generate_synthetic_geology.py` creates an independent, deterministic
+simulation with twelve `SIM_*` WT/WL/WP layers. It uses the same native graphic
+parameters and SLIB rendering pipeline, but does not reuse or warp real JWD
+features. All `SIM-*` identifiers are for testing only and have no geological
+meaning. The categorical palette is validated, with visible labels and a legend
+so unit identity does not depend on colour alone.
+
+```bash
+PYMAPGIS_SLIB=/path/to/SLIB python examples/generate_synthetic_geology.py \
+  --output-dir output/synthetic_geology --seed 42 --dpi 160
+```
+
+The command writes native MapGIS layers under `vectors/`, PNG/PDF/SVG maps,
+`synthetic_manifest.json` and `synthetic_units.csv`. `write_layers()` and
+`read_layers()` also provide a Writer → Reader round-trip check. Regression tests
+are in `tests/test_synthetic_geology.py`.
+
+## GeoSciML semantic simulation
+
+`examples/generate_semantic_geology.py` extends the independent simulation with
+geosciml4china's semantic model. It emits native MapGIS layers, a rendered map,
+GeoSciML GML and `semantic_report.json`, including geologic unit types and event
+processes, contact types, fault types and movement senses, fold profiles, and
+foliation orientation/polarity. All `SIM-*` identifiers remain synthetic.
+
+```bash
+PYMAPGIS_SLIB=/path/to/SLIB python examples/generate_semantic_geology.py \
+  --output-dir output/semantic_geology --seed 42 --dpi 160
+```
+
+The GML is assembled with `geosciml4china.convert.model` and
+`geosciml4china.convert.emit`. `semantic_report.json` records the semantic
+entities and the XSD validation result; if the local schema parser is
+unavailable, validation is explicitly marked as skipped rather than passed.
+Regression tests are in `tests/test_semantic_geology.py`.
 
 ## Supported formats
 
@@ -572,6 +948,7 @@ The CRS parameters are stored at the same fixed offsets in all three file types:
 | Projection type | 109 | 1 | uint8 | Projection-type index |
 | Ellipsoid type | 110 | 1 | uint8 | Ellipsoid index |
 | Scale | 143 | 8 | double | Scale denominator |
+| Transverse Mercator projection scale | 232 | 8 | double | `k=1` for Gauss-Krüger; `k=0.9996` for UTM |
 
 > The projection-type index and ellipsoid index correspond to index tables in the MapGIS installation directory and `ellip.dat`, respectively. Therefore, the full CRS interpretation depends on the external MapGIS software environment.
 
@@ -608,7 +985,9 @@ seconds = ms - minutes * 100
 decimal_degrees = sign * (degrees + minutes/60 + seconds/3600)
 ```
 
-For longitude/latitude (projection type 0), coordinates are decimal degrees and the header scale is ignored because native files may store zero there. For supported projected CRS types, internal coordinates are converted to map units with `scale / 1000`. A non-finite or non-positive projected scale, or invalid projection parameters, yields an empty CRS rather than collapsing or poisoning the geometry.
+For longitude/latitude (projection type 0), coordinates are decimal degrees and the header scale is ignored because native files may store zero there. For supported projected CRS types, internal coordinates are converted to map units with `scale / 1000`. A non-finite or non-positive projected scale, or invalid projection parameters, yields an empty CRS rather than collapsing or poisoning the geometry. The resulting multiplier is exposed as `Reader.coordinate_scale_factor` and `geodataframe.attrs['mapgis_coordinate_scale_factor']`.
+
+For Transverse Mercator, offset 232 stores the projection scale `k`, independently of the geometry multiplier. A header with central meridian −117°, WGS84 ellipsoid, `k=0.9996`, and header scale 1000 therefore reads as an EPSG:32611-equivalent CRS with `coordinate_scale_factor == 1.0` and unchanged metre coordinates.
 
 ### Point files (`.wt`)
 
@@ -901,6 +1280,26 @@ Unknown field-type descriptors are skipped without shifting the retained raw des
 
 ## Changelog
 
+### 2.7.2 (2026-11-14)
+
+- Bundle seven processed USGS Conejo Well test layers (8,512 features) and the independently authorized five generic SLIB libraries; keep original NGAC/JWD vectors and native NGAC exports external, reject them in current release trees and archives, and detect renamed forbidden content by SHA-256
+- Add strict-scale fully vector GeoPDF output, `Writer(..., preserve_utm=True)`, projection-scale parsing at byte 232 and explicit Reader `coordinate_scale_factor`; distinguish native storage scaling from the source map's cartographic scale
+- Replace application examples with self-contained `testdata_path()` / `slib_path()` workflows, add the actual rendered geological map to the README, and update `examples/geological_workflow.py` for the seven bundled layers
+- Add release-boundary tests, strict wheel/sdist content inspection, and current full-suite validation
+
+- Align fresh WT/WL/WP output with MapGIS SHP import: compute attribute-prefix descriptor offsets/counts and descriptor flags, add native ID/length/area fields, use native text/numeric declarations, write WT 65536 flags and coordinate-scaled boxes/extents, apply fresh polygon ring-count classes and cyclic fill colours, zero fresh legacy header stamps, and prevent geometry passthrough from discarding explicit style edits
+- Add external SHP→MapGIS reference tests covering binary coordinate sections, native auxiliary records, attribute descriptors, default graphics and style-preserving mode
+
+- Use original open-edition JWD/SLIB for current regression and examples, stop new JWD-derived synthetic variants, and strengthen dataset, companion-article and SLIB attribution in `DATA_ATTRIBUTION.md`
+- Add the fourth domestic Gauss-Kruger Writer batch (20 SHP cases and 18 native MapGIS outputs); preserve multipart geometry, valid topology, metric fields and null semantics while matching native point/line defaults, and reject native topology/empty-geometry defects instead of inheriting them
+- Add twelve third-batch Writer cases for large 24-bit ring-index offsets, projected UTM input, long attributes, null geometry and degenerate rings; reproject UTM to Gauss-Kruger (k=1) with the correct central meridian instead of writing UTM coordinates with incorrect metadata
+- Add eleven native SHP-to-MapGIS Writer cases with provenance manifests and source/wheel fixture access; align default WT point size 0.1 mm, colour 6 and pen width 0.1 mm, and default WL width 0.05 mm, X/Y coefficients 1.0 and `aux_flag=1` with the supplied native conversion reference
+- Normalize the two bundled WP backup filenames to `.WP`, and add a compatibility loader that still handles the published V2.7.1 `.WP~` layout through `Reader`
+- Add `examples/render_bundled_jwd.py` with PNG/PDF/SVG output and sanitized JSON reports, and run it in CI
+- Assert all 782 38|2 source vertices and `max_deviation <= 1e-9`, pin `drawn + excluded_text == 7094`, cover the published WP-backup layout, and add direct Subgraph/LINESTY/Fillgrph/Colorlib/Pcolor structural-census assertions
+- Select `geopandas<1.2` only in the `dev` reference environment because GeoPandas 1.2 changes edge pixels in the optional legacy rendering reference path; ordinary runtime requirements are unchanged
+- Synchronize the citation title and 2.7.1 Zenodo DOI, and clarify the SoftwareX validation artifacts and native-acceptance boundary
+
 ### 2.7.1 (2026-11-07)
 
 - Document original-library rendering in the package introduction and project metadata; clarify the complete vector / graphic-library / rendering scope
@@ -967,6 +1366,12 @@ Run the test suite:
 pytest
 ```
 
+The `dev` extra currently selects `geopandas<1.2` for the test reference
+environment. GeoPandas 1.2 changes edge pixels in the old reference plotting
+path of the optional `pymapgis.rendering` module, which is excluded from release
+archives. The ordinary runtime requirement remains `geopandas>=0.12`; the
+public original-library JWD regression also passed with GeoPandas 1.2.0.
+
 Run the smoke-test regression against all local MapGIS files:
 
 ```bash
@@ -990,48 +1395,74 @@ Writer-generated fixtures support internal regression only;
 they are not official MapGIS exports or independent native-export validation.
 
 An executable geological-data migration example is provided in
-`examples/geological_workflow.py`. It reads the public binaries, reprojects the
-layers to EPSG:32643, and reports attribute-grouped lengths and areas:
+`examples/geological_workflow.py`. It reads the seven bundled USGS-derived
+layers through `testdata_path()`, retains their native EPSG:32611 metre
+coordinates, and reports attitude counts, line lengths and polygon areas:
 
 ```bash
 PYTHONPATH=src python3 examples/geological_workflow.py
 ```
 
-The twelve-layer JWD vectors and all five matching SLIB libraries are also
-bundled under `tests/fixtures/jwd/` and `tests/fixtures/slib/`. The real
-rendering and colour-parser tests use them by default, with no absolute paths
-or environment variables required:
+The original twelve-layer JWD vectors are **not bundled** in the current Git
+tree, wheel or source archive. Obtain them through the official National
+Geological Archives of China channel and configure a local directory before
+running the original-JWD integration tests. The five generic SLIB libraries are
+bundled separately under the user's explicit packaging authorization; that
+authorization does not extend to original JWD vectors or native NGAC exports.
+The JWD source is the public
+V1 *Spatial database of serial suite-tectonic map-sheets of mainland China
+(1:250,000)*, sheet **J43C001002**, produced by the Development and Research
+Center of China Geological Survey and distributed by the National Geological
+Archives of China. Cite dataset DOI **10.23650/data.A.2018.NGA131703.K1.1.1.V1**
+and companion-article DOI **10.12029/gc2018Z101**. See
+[DATA_ATTRIBUTION.md](DATA_ATTRIBUTION.md) for citations, acquisition guidance
+and the usage boundary. Public, non-classified and test-only status does not
+by itself grant redistribution permission, and the software licence does not
+relicense JWD or SLIB.
+
+Configure the external data before running the real rendering and colour tests:
 
 ```bash
-python -m pytest -q tests/test_graphic_real_jwd.py
-python -m pytest -q tests/test_pure.py -k "ColorLib or PcolorLib"
+PYMAPGIS_JWD=/path/to/original/jwd PYMAPGIS_SLIB=/path/to/original/slib \
+  python -m pytest -q tests/test_graphic_real_jwd.py
+PYMAPGIS_JWD=/path/to/original/jwd PYMAPGIS_SLIB=/path/to/original/slib \
+  python -m pytest -q tests/test_pure.py -k "ColorLib or PcolorLib"
 ```
 
-`PYMAPGIS_JWD` and `PYMAPGIS_SLIB` remain optional external-directory overrides;
-`PYMAPGIS_COLORLIB` and `PYMAPGIS_PCOLOR` override individual colour libraries.
-`tests/fixtures/jwd_slib_manifest.json` records provenance and SHA-256 for every
-file. The real and synthetic fixtures are included in both the source archive
-and wheel. `pymapgis.testing` provides a single source/install-independent path
-API:
+`PYMAPGIS_COLORLIB` and `PYMAPGIS_PCOLOR` can override individual colour
+libraries. `PYMAPGIS_READER_NATIVE` points to optional native SHP exports.
+Missing external data produces an explicit optional-integration skip with
+acquisition guidance. An invalid configured path or checksum mismatch still
+fails loudly. `tests/fixtures/jwd_slib_manifest.json` remains as the provenance
+and SHA-256 registry; original JWD vectors and native NGAC SHP exports are
+forbidden from both archive types, while the seven processed USGS layers and
+independently authorized generic SLIB are explicitly allowed and required.
+`pymapgis.testing` resolves configured external directories or bundled fixtures:
 
 ```python
-from pymapgis.testing import fixture_path, jwd_path, slib_path
+from pymapgis.testing import (
+    fixture_path, jwd_path, slib_path, testdata_path, usgs_conejo_path,
+)
 
-print(jwd_path())                       # directory containing the twelve vectors
-print(slib_path("Pcolor.lib"))          # installed or source Pcolor.lib
-print(fixture_path("mapgis"))           # synthetic WT/WL/WP directory
+print(jwd_path())                       # external directory with twelve vectors
+print(slib_path("Pcolor.lib"))          # bundled generic Pcolor.lib
+print(testdata_path())                  # bundled seven-layer USGS-derived data
+print(usgs_conejo_path("source"))       # bundled original USGS E00 coverages
+print(fixture_path("mapgis"))           # bundled synthetic WT/WL/WP directory
 ```
 
-They verify library decoding, PNG/PDF generation, geometry and report
-invariants; they are not a substitute for MapGIS native-application visual,
-editing or save/reopen acceptance. See `tests/fixtures/README.md` for the
-separate real-data provenance and licensing note.
+The real tests verify library decoding, PNG/PDF generation, geometry and report
+invariants. They are not a substitute for MapGIS native-application visual,
+editing or save/reopen acceptance. See `tests/fixtures/README.md` for detailed
+acquisition and optional-integration behaviour.
 
-The workflow in `.github/workflows/test-and-build.yml` is configured to run
-lint, tests with the bundled synthetic and real fixtures, and the public
-example on Linux, Windows, and macOS. Its build job additionally checks wheel and source-archive
-contents with `tests/inspect_dist.py` and retains the artifacts for review.
-The optional Matplotlib extra is required only for rendering tests.
+The workflow in `.github/workflows/test-and-build.yml` runs lint, tests with
+required synthetic and Writer fixtures, and public examples on Linux, Windows
+and macOS. Real JWD/SLIB rendering runs only when external fixture directories
+are configured; otherwise the workflow prints an explicit optional-data skip.
+Its build job checks wheel and source-archive contents with
+`tests/inspect_dist.py` and retains the artifacts for review. The optional
+Matplotlib extra is required only for rendering tests.
 
 ## Further documentation
 

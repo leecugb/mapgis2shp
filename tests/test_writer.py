@@ -127,6 +127,49 @@ class TestPointWriter:
         start, size = struct.unpack_from("<2i", raw, data_start + 10)
         assert size == 2
         assert raw[start : start + size] == b"\x00\x00"
+    def test_native_point_flags_and_coordinate_unit_boxes(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {
+                "point_type": [0], "symbol_no": [0], "height": [2.0],
+                "width": [3.0], "spacing": [0.0], "angle": [0.0],
+                "color": [1], "layer": [1], "font_zh": [1],
+                "font_en": [0], "font_style": [0], "CHFCED": ["ABCD"],
+                "annotation_flag": [65537],
+            },
+            geometry=[shapely.geometry.Point(100.0, 200.0)],
+            crs=(
+                "+proj=tmerc +lat_0=0 +lon_0=-117 +k=1 +x_0=500000 "
+                "+y_0=0 +datum=WGS84 +units=m +no_defs"
+            ),
+        )
+        path = tmp_path / "native_point_aux.wt"
+        Writer(gdf).to_file(path)
+        raw = path.read_bytes()
+        data_start = struct.unpack_from("<i", raw, 12)[0]
+        box_start, _ = struct.unpack_from("<2i", raw, data_start + 30)
+        flag_start, _ = struct.unpack_from("<2i", raw, data_start + 40)
+        assert struct.unpack_from("<i", raw, flag_start + 4)[0] == 65537
+        assert struct.unpack_from("<4d", raw, box_start + 32) == pytest.approx(
+            (100.0, 198.0, 105.2, 202.0)
+        )
+
+    def test_native_attribute_declaration_widths(self, tmp_path) -> None:
+        path = tmp_path / "native_attributes.wt"
+        gdf = _sample_point_gdf()
+        Writer(gdf).to_file(path)
+        meta = Reader(path).geodataframe.attrs["mapgis_field_meta"]
+        fields = {field["name"]: field for field in meta["fields"]}
+        assert fields["ID"]["length"] == 8
+        assert fields["DEPTH"]["length"] == 20
+        assert fields["名称"]["length"] == 80
+        descriptors = meta["raw_descriptors"]
+        assert struct.unpack_from("<i", descriptors["ID"], 29)[0] == 256
+        assert struct.unpack_from("<i", descriptors["DEPTH"], 29)[0] == 271
+        raw = path.read_bytes()
+        data_start = struct.unpack_from("<i", raw, 12)[0]
+        start, _ = struct.unpack_from("<2i", raw, data_start + 20)
+        assert struct.unpack_from("<i", raw, start + 12)[0] == 348 + 39 * len(fields)
+        assert struct.unpack_from("<i", raw, start + 16)[0] == len(gdf)
 
 
 class TestLineWriter:
@@ -510,10 +553,10 @@ class TestPolygonWriter:
         reader = _write_and_read(
             gdf, tmp_path / "class_default.wp", {"read_graphic_params": True}
         )
-        assert reader.geodataframe["class"].tolist() == [2, 1]
+        assert reader.geodataframe["class"].tolist() == [2, 2]
 
     def test_defaulted_layer_does_not_zero_polygon_class(self, tmp_path) -> None:
-        """Supplying only a fill colour must retain the default class=1."""
+        """Only a fill colour retains the native fresh class=2 for one ring."""
         gdf = gpd.GeoDataFrame(
             {"fill_color": [195]},
             geometry=[shapely.geometry.box(0, 0, 1, 1)],
@@ -525,9 +568,9 @@ class TestPolygonWriter:
         params = reader.geodataframe.iloc[0]
         assert params["fill_color"] == 195
         assert params["layer"] == 0
-        assert params["class"] == 1
+        assert params["class"] == 2
 
-    def test_explicit_polygon_layer_still_supplies_class(self, tmp_path) -> None:
+    def test_polygon_layer_does_not_override_class(self, tmp_path) -> None:
         gdf = gpd.GeoDataFrame(
             {"fill_color": [195], "layer": [3]},
             geometry=[shapely.geometry.box(0, 0, 1, 1)],
@@ -536,7 +579,9 @@ class TestPolygonWriter:
         reader = _write_and_read(
             gdf, tmp_path / "explicit_layer.wp", {"read_graphic_params": True}
         )
-        assert reader.geodataframe.iloc[0]["class"] == 3
+        # Display layer and polygon class are independent native parameters.
+        assert reader.geodataframe.iloc[0]["layer"] == 3
+        assert reader.geodataframe.iloc[0]["class"] == 2
 
     def test_polygon_area_conservation_real(self, tmp_path, sample_wp) -> None:
         with Reader(sample_wp, read_graphic_params=True) as source:
@@ -615,7 +660,7 @@ class TestHeaderExtentFields:
         assert struct.unpack_from("<I", b, 292)[0] == 1
         assert b[336] == 0x80
         box = struct.unpack_from("<4d", b, 304)
-        assert box == pytest.approx((74.0, 39.5, 74.2, 39.7))
+        assert box == pytest.approx((73.9, 39.4, 74.3, 39.8))
 
     def test_line_counts_and_bbox(self, tmp_path) -> None:
         gdf = gpd.GeoDataFrame(
@@ -729,6 +774,44 @@ class TestHeaderCrsBlock:
         assert struct.unpack_from("<d", b, 252)[0] == 0.0
         assert struct.unpack_from("<d", b, 232)[0] == 1.0
 
+    def test_tmerc_projection_scale_roundtrip(self, tmp_path) -> None:
+        crs = (
+            "+proj=tmerc +lat_0=0 +lon_0=-117 +k=0.9996 "
+            "+x_0=500000 +y_0=0 +datum=WGS84 +units=m +no_defs"
+        )
+        gdf = gpd.GeoDataFrame(
+            {"n": [1]},
+            geometry=[shapely.geometry.Point(615530.802, 3735141.436)],
+            crs=crs,
+        )
+        path = tmp_path / "utm11.wt"
+        Writer(gdf, map_scale=1000, preserve_utm=True).to_file(path)
+        assert struct.unpack_from("<d", path.read_bytes(), 232)[0] == pytest.approx(0.9996)
+        reader = Reader(path)
+        assert reader.coordinate_scale_factor == 1.0
+        assert reader.crs.to_epsg() == 32611
+        assert reader.geom[0].x == pytest.approx(615530.802)
+        assert reader.geom[0].y == pytest.approx(3735141.436)
+
+    def test_preserve_utm_rejects_southern_hemisphere(self, tmp_path) -> None:
+        gdf = gpd.GeoDataFrame(
+            {"n": [1]}, geometry=[shapely.geometry.Point(500100, 100100)], crs="EPSG:32711"
+        )
+        with pytest.raises(WriterError, match="southern-hemisphere"):
+            Writer(gdf, preserve_utm=True).to_file(tmp_path / "south.wt")
+
+    def test_southern_utm_default_conversion_roundtrip(self, tmp_path) -> None:
+        source = gpd.GeoDataFrame(
+            {"n": [1]}, geometry=[shapely.geometry.Point(500100, 100100)], crs="EPSG:32711"
+        )
+        path = tmp_path / "south_default.wt"
+        Writer(source, map_scale=1000).to_file(path)
+        reader = Reader(path)
+        assert reader.geom[0].y < 0
+        roundtrip = gpd.GeoSeries([reader.geom[0]], crs=reader.crs).to_crs(source.crs).iloc[0]
+        assert roundtrip.x == pytest.approx(source.geometry.iloc[0].x, abs=1e-6)
+        assert roundtrip.y == pytest.approx(source.geometry.iloc[0].y, abs=1e-6)
+
 
 class TestLineAuxSections:
     """线辅助段原生布局（2026-10-17 J43C001002 定案）。
@@ -830,6 +913,8 @@ class TestPolygonAuxSections:
         assert struct.unpack_from("<I", sec[2], 16)[0] == 2
         assert struct.unpack_from("<hih", sec[2], 322) == (2, 3, 13)
         assert struct.unpack_from("<i", sec[2], 348 + 29)[0] == 256  # ID 标志
+        assert struct.unpack_from("<i", sec[2], 348 + 39 + 29)[0] == 518  # 长度标志
+        assert struct.unpack_from("<h", sec[2], 348 + 39 + 27)[0] == 15
         lengths = []
         for k in range(2):
             record = sec[2][439 + 13 * k : 439 + 13 * (k + 1)]
@@ -909,6 +994,99 @@ class TestCrsAndErrors:
         writer = write(_sample_point_gdf(), path)
         assert isinstance(writer, Writer)
         assert len(Reader(path)) == 2
+
+
+def test_passthrough_does_not_restore_old_point_style(tmp_path):
+    gdf = gpd.GeoDataFrame(
+        {
+            "point_type": [1], "symbol_no": [1281], "height": [2.0],
+            "width": [2.0], "spacing": [np.nan], "angle": [0.0],
+            "color": [6], "layer": [1], "pen_width": [0.1],
+        },
+        geometry=[shapely.geometry.Point(1, 2)], crs="EPSG:4326",
+    )
+    first = tmp_path / "first.wt"
+    Writer(gdf).to_file(first)
+    edited = Reader(first, read_graphic_params=True).geodataframe
+    edited["color"] = 9
+    second = tmp_path / "second.wt"
+    Writer(edited).to_file(second)
+    assert Reader(second, read_graphic_params=True).point_params.iloc[0]["color"] == 9
+
+
+def test_passthrough_does_not_restore_old_line_style(tmp_path):
+    gdf = gpd.GeoDataFrame(
+        {
+            "linetype": [1], "aux_linetype": [0], "aux_flag": [0],
+            "color": [1], "width": [0.1], "x_coef": [1.0], "y_coef": [1.0],
+            "aux_color": [0], "layer": [1], "transparent": [0],
+        },
+        geometry=[shapely.geometry.LineString([(0, 0), (1, 1)])], crs="EPSG:4326",
+    )
+    first = tmp_path / "first.wl"
+    Writer(gdf).to_file(first)
+    edited = Reader(first, read_graphic_params=True).geodataframe
+    edited["width"] = 0.4
+    second = tmp_path / "second.wl"
+    Writer(edited).to_file(second)
+    width = Reader(second, read_graphic_params=True).line_params.iloc[0]["width"]
+    assert width == pytest.approx(0.4)
+
+
+def test_passthrough_does_not_restore_old_polygon_style(tmp_path):
+    gdf = gpd.GeoDataFrame(
+        {"fill_color": [601]},
+        geometry=[shapely.geometry.box(0, 0, 1, 1)], crs="EPSG:4326",
+    )
+    first = tmp_path / "first.wp"
+    Writer(gdf).to_file(first)
+    edited = Reader(first, read_graphic_params=True).geodataframe
+    edited["fill_color"] = 999
+    second = tmp_path / "second.wp"
+    Writer(edited).to_file(second)
+    assert Reader(second, read_graphic_params=True).polygon_params.iloc[0]["fill_color"] == 999
+
+
+def test_point_aux_and_header_share_projected_scale_factor(tmp_path):
+    gdf = gpd.GeoDataFrame(
+        {
+            "point_type": [0], "symbol_no": [0], "height": [2.0],
+            "width": [3.0], "spacing": [0.0], "angle": [0.0],
+            "color": [1], "layer": [1], "font_zh": [1],
+            "font_en": [0], "font_style": [0],
+        },
+        geometry=[shapely.geometry.Point(100.0, 200.0)],
+        crs=(
+            "+proj=tmerc +lat_0=0 +lon_0=-117 +k=1 +x_0=500000 "
+            "+y_0=0 +datum=WGS84 +units=m +no_defs"
+        ),
+    )
+    path = tmp_path / "scaled.wt"
+    Writer(gdf, map_scale=2000).to_file(path)
+    raw = path.read_bytes()
+    data_start = struct.unpack_from("<i", raw, 12)[0]
+    box_start, _ = struct.unpack_from("<2i", raw, data_start + 30)
+    assert struct.unpack_from("<4d", raw, box_start + 32) == pytest.approx(
+        (50.0, 99.0, 51.5, 101.0)
+    )
+    assert struct.unpack_from("<4d", raw, 304) == pytest.approx(
+        (49.95, 99.95, 50.05, 100.05)
+    )
+
+
+def test_fresh_polygon_class_uses_native_ring_count(tmp_path):
+    shell = shapely.geometry.box(0, 0, 4, 4)
+    hole = shapely.geometry.box(1, 1, 2, 2)
+    gdf = gpd.GeoDataFrame(
+        {"fill_color": [602]}, geometry=[shell.difference(hole)], crs="EPSG:4326"
+    )
+    reader = _write_and_read(gdf, tmp_path / "ring_class.wp", {"read_graphic_params": True})
+    assert reader.polygon_params.iloc[0]["class"] == 4
+    reader = _write_and_read(
+        gdf, tmp_path / "ring_class_no_style.wp", {"read_graphic_params": True},
+        graphic_params=False,
+    )
+    assert reader.polygon_params.iloc[0]["class"] == 4
 
 
 class TestShpIntermediary:

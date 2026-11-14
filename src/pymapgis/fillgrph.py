@@ -199,9 +199,10 @@ def pattern_geometry(lib: FillgrphLib, no: int) -> Optional[dict]:
 
     返回 {"fill_polygons": [[(x,y),...]], "polylines": [[(x,y),...]],
     "circles": [(cx,cy,r),...], "arcs": [(cx,cy,r,a0,a1),...],
-    "dropped": int}——dropped = 未进几何输出的笔划数（亚可视微段/
-    退化笔划，如 220 的落笔单点对）；解析失败或结构不合时返回
-    None（诚实停止，绝不臆断）。
+    "polyline_widths": [int,...], "arc_widths": [int,...],
+    "dropped": int}——宽度数组与对应几何数组逐项对齐；dropped =
+    未进几何输出的笔划数（亚可视微段/退化笔划，如 220 的落笔单点对）；
+    解析失败或结构不合时返回 None（诚实停止，绝不臆断）。
     笔宽档见 pat.strokes[].width（发丝线=65535）。
     """
     pat = lib.decode(no)
@@ -209,8 +210,10 @@ def pattern_geometry(lib: FillgrphLib, no: int) -> Optional[dict]:
         return None
     fill_polygons: List[List[Tuple[float, float]]] = []
     polylines: List[List[Tuple[float, float]]] = []
+    polyline_widths: List[int] = []
     circles: List[Tuple[float, float, float]] = []
     arcs: List[Tuple[float, float, float, float, float]] = []
+    arc_widths: List[int] = []
     dropped = 0
     for s in pat.strokes:
         pts = _merge_close(s.points)
@@ -224,6 +227,7 @@ def pattern_geometry(lib: FillgrphLib, no: int) -> Optional[dict]:
         elif s.kind in (KIND_LINE_HAIR, KIND_LINE):
             if len(pts) > 1 and _stroke_len(pts) >= 0.01:
                 polylines.append(pts)
+                polyline_widths.append(s.width)
             else:
                 dropped += 1
         elif s.kind in (KIND_ARC_DEG,) + KIND_CIRCLE_FAMILY and len(pts) == 3:
@@ -234,13 +238,16 @@ def pattern_geometry(lib: FillgrphLib, no: int) -> Optional[dict]:
                 circles.append((cx, cy, r))
             else:
                 arcs.append((cx, cy, r, a0, a1))
+                arc_widths.append(s.width)
         else:
             # 非常规 kind/载荷 → 剔除并计数（不静默）
             dropped += 1
     return {
         "fill_polygons": fill_polygons,
         "polylines": polylines,
+        "polyline_widths": polyline_widths,
         "circles": circles,
         "arcs": arcs,
+        "arc_widths": arc_widths,
         "dropped": dropped,
     }

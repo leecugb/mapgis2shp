@@ -12,6 +12,7 @@ env/
 # Distribution / packaging
 build/
 dist/
+dist_*/
 *.egg-info/
 *.egg
 
@@ -53,21 +54,40 @@ src/pymapgis/semantics/
 *.WL~
 *.WP~
 
-# Real geological survey vectors remain ignored except for the explicitly
-# integrated owner-supplied regression dataset. Public synthetic fixtures and
-# tests/fixtures/jwd are the only MapGIS binaries intended for source archives.
+# Synthetic fixtures and Writer-native batches are intended for source archives.
+# Optional user-supplied NGAC JWD/SLIB and derivative SHP files stay external.
 !tests/fixtures/mapgis/*.wt
 !tests/fixtures/mapgis/*.wl
 !tests/fixtures/mapgis/*.wp
 !tests/fixtures/mapgis/*.WT
 !tests/fixtures/mapgis/*.WL
 !tests/fixtures/mapgis/*.WP
-!tests/fixtures/jwd/*.WT
-!tests/fixtures/jwd/*.WL
-!tests/fixtures/jwd/*.WP
-!tests/fixtures/jwd/*.WT~
-!tests/fixtures/jwd/*.WL~
-!tests/fixtures/jwd/*.WP~
+!tests/fixtures/mapgis/*.WT~
+!tests/fixtures/mapgis/*.WL~
+!tests/fixtures/mapgis/*.WP~
+!tests/fixtures/writer_batch2/*.WT
+!tests/fixtures/writer_batch2/*.WL
+!tests/fixtures/writer_batch2/*.WP
+!tests/fixtures/writer_batch3/*.WT
+!tests/fixtures/writer_batch3/*.WL
+!tests/fixtures/writer_batch3/*.WP
+!tests/fixtures/writer_batch4/*.WT
+!tests/fixtures/writer_batch4/*.WL
+!tests/fixtures/writer_batch4/*.WP
+tests/fixtures/jwd/
+tests/fixtures/reader_native/
+
+# Bundled USGS-role testdata and generic SLIB are explicitly distributable.
+!tests/fixtures/testdata/
+!tests/fixtures/testdata/*.WT
+!tests/fixtures/testdata/*.WL
+!tests/fixtures/testdata/*.WP
+!tests/fixtures/slib/
+!tests/fixtures/slib/*.lib
+!tests/fixtures/usgs_conejo/native/
+!tests/fixtures/usgs_conejo/native/*.WT
+!tests/fixtures/usgs_conejo/native/*.WL
+!tests/fixtures/usgs_conejo/native/*.WP
 
 # MapGIS project / raster overlay files
 *.MPJ
@@ -82,9 +102,20 @@ src/pymapgis/semantics/
 *.tiff
 *.mbtiles
 
+# Keep the executable README example's actual USGS-derived geological map.
+!docs/images/testdata_map.png
+
 # Exceptions: keep paper figures (publication assets)
 !paper/figures/*.png
 !paper/figures/*.pdf
+!mapgis2shp_submission/softwarex_architecture.png
+!mapgis2shp_submission/jwd_map.png
+
+# Local release and figure-audit work products
+mapgis2shp_submission/wheel_quickstart_*/
+mapgis2shp_submission/*.collision-audit.log
+mapgis2shp_submission/*.text-audit.log
+mapgis2shp_submission/*.collision-audit.pdf
 
 # Generated analysis artifacts (regenerated from scripts, not source)
 *_debug.png

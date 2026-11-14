@@ -4,13 +4,19 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mapgis2shp"
-version = "2.7.1"
+version = "2.7.2"
 description = "Open-source MapGIS vector interoperability, graphic-library parsing and original-library rendering with GeoPandas."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
 authors = [
-    { name = "pymapgis contributors", email = "1045105061@qq.com" },
+    { name = "Shijie Li", email = "1045105061@qq.com" },
+    { name = "Haiyang He", email = "hehaiyangcugb@foxmail.com" },
+    { name = "Xu Sun" },
+    { name = "Haoyang Qin" },
+    { name = "Xiaoyu Liu" },
+    { name = "Yilin Feng" },
+    { name = "Zengyun Zuo" },
 ]
 keywords = ["mapgis", "gis", "vector", "geopandas", "shapefile", "wt", "wl", "wp"]
 classifiers = [
@@ -38,8 +44,11 @@ dependencies = [
 [project.optional-dependencies]
 render = [
     "matplotlib>=3.5",
+    "pymupdf>=1.24,<1.27; python_version < '3.10'",
+    "pymupdf>=1.24; python_version >= '3.10'",
 ]
 dev = [
+    "geopandas>=0.12,<1.2",
     "build>=0.10",
     "pytest>=7.0",
     "pytest-cov>=4.0",
@@ -63,6 +72,7 @@ include = [
     "/README.md",
     "/LICENSE",
     "/CITATION.cff",
+    "/DATA_ATTRIBUTION.md",
     "/verify_pymapgis.py",
     "/pymapgis_baseline.json",
     "/docs",
@@ -73,6 +83,11 @@ exclude = [
     "/src/pymapgis/linesty_adjudicated.py",
 ]
 
+[tool.hatch.build.targets.sdist.force-include]
+"tests/fixtures/testdata" = "tests/fixtures/testdata"
+"tests/fixtures/slib" = "tests/fixtures/slib"
+"tests/fixtures/usgs_conejo" = "tests/fixtures/usgs_conejo"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/pymapgis"]
 exclude = [
@@ -82,9 +97,19 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel.force-include]
-"tests/fixtures/jwd" = "pymapgis/testing/fixtures/jwd"
-"tests/fixtures/slib" = "pymapgis/testing/fixtures/slib"
 "tests/fixtures/mapgis" = "pymapgis/testing/fixtures/mapgis"
+"tests/fixtures/usgs_conejo" = "pymapgis/testing/fixtures/usgs_conejo"
+"tests/fixtures/testdata" = "pymapgis/testing/fixtures/testdata"
+"tests/fixtures/slib" = "pymapgis/testing/fixtures/slib"
+"tests/fixtures/writer_batch2" = "pymapgis/testing/fixtures/writer_batch2"
+"tests/fixtures/writer_batch2_manifest.json" = "pymapgis/testing/fixtures/writer_batch2_manifest.json"
+"tests/fixtures/writer_batch3" = "pymapgis/testing/fixtures/writer_batch3"
+"tests/fixtures/writer_batch3_manifest.json" = "pymapgis/testing/fixtures/writer_batch3_manifest.json"
+"tests/fixtures/writer_batch4" = "pymapgis/testing/fixtures/writer_batch4"
+"tests/fixtures/writer_batch4_manifest.json" = "pymapgis/testing/fixtures/writer_batch4_manifest.json"
+"tests/fixtures/reader_native_manifest.json" = "pymapgis/testing/fixtures/reader_native_manifest.json"
+"examples/render_bundled_jwd.py" = "pymapgis/testing/examples/render_bundled_jwd.py"
+"DATA_ATTRIBUTION.md" = "pymapgis/testing/fixtures/DATA_ATTRIBUTION.md"
 "tests/fixtures/jwd_slib_manifest.json" = "pymapgis/testing/fixtures/jwd_slib_manifest.json"
 "tests/fixtures/fixture_manifest.json" = "pymapgis/testing/fixtures/fixture_manifest.json"
 

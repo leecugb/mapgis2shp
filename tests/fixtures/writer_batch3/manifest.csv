@@ -1,0 +1,13 @@
+﻿file,geometry_type,features,null_geometries,outer_rings,interior_rings,consecutive_duplicates,invalid_geometries,crs,note
+01_reference_triangle.shp,POLYGON,1,0,1,0,0,0,EPSG:4326,Reference minimum ring
+02_identical_polygons.shp,POLYGON,2,0,2,0,0,0,EPSG:4326,Two exactly identical polygons with distinct FIDs
+03_shared_edge_duplicate.shp,POLYGON,2,0,2,0,1,0,EPSG:4326,Shared edge containing a consecutive duplicate vertex
+04_nested_hole_island.shp,POLYGON,2,0,2,1,0,0,EPSG:4326,Hole with a separate island feature
+05_large_ring_over_64k.shp,POLYGON,1,0,1,1,0,0,EPSG:4326,Large outer ring plus hole; ring-index offset exceeds 65535
+06_large_then_small.shp,POLYGON,2,0,2,0,0,0,EPSG:4326,Second polygon pointer also exceeds 65535
+07_projected_utm.shp,POLYGON,2,0,2,0,0,0,EPSG:32643,WGS84 UTM zone 43N shared edge
+08_attribute_types.shp,POLYGON,3,0,3,0,0,0,EPSG:4326,"Long Chinese text, nulls, signed integers, floats and dates"
+09_null_geometry.shp,POLYGON,2,1,1,0,0,1,EPSG:4326,One polygon and one null geometry; conversion may reject it
+10_points.shp,POINT,3,0,,,0,0,EPSG:4326,Points with Chinese text and nullable dates
+11_multiline.shp,LINE,2,0,,,1,0,EPSG:4326,MultiLineString and one duplicate vertex
+12_degenerate_ring.shp,POLYGON,1,0,1,0,3,1,EPSG:4326,All vertices identical; intentional negative case
