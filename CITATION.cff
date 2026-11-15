@@ -15,7 +15,7 @@ version: "2.7.3"
 date-released: 2026-11-14
 license: Apache-2.0
 repository-code: https://github.com/leecugb/mapgis2shp
-url: https://doi.org/10.5281/zenodo.24036158
+url: https://github.com/leecugb/mapgis2shp/releases/tag/v2.7.3
 keywords:
   - MapGIS
   - GIS
@@ -71,11 +71,11 @@ preferred-citation:
     - given-names: Zengyun
       family-names: Zuo
       affiliation: Xi'an Mineral Resources Survey, China Geological Survey
-  version: "2.7.1"
-  date-released: 2026-11-07
+  version: "2.7.3"
+  date-released: 2026-11-14
   license: Apache-2.0
   repository-code: https://github.com/leecugb/mapgis2shp
-  url: https://doi.org/10.5281/zenodo.24036158
+  url: https://github.com/leecugb/mapgis2shp/releases/tag/v2.7.3
   keywords:
     - MapGIS
     - GIS
@@ -88,15 +88,15 @@ references:
   - type: dataset
     title: "Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000) (V1)"
     authors:
-      - given-names: Qunqiang
+      - given-names: Qunchao
         family-names: Zuo
       - given-names: Tianzhu
         family-names: Ye
-      - given-names: Yanli
+      - given-names: Yanfang
         family-names: Feng
       - given-names: Zuo
         family-names: Ge
-      - given-names: Yanggang
+      - given-names: Yingchao
         family-names: Wang
     year: 2018
     url: https://doi.org/10.23650/data.A.2018.NGA131703.K1.1.1.V1
@@ -108,20 +108,20 @@ references:
   - type: article
     title: "Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000)"
     authors:
-      - given-names: Qunqiang
+      - given-names: Qunchao
         family-names: Zuo
       - given-names: Tianzhu
         family-names: Ye
-      - given-names: Yanli
+      - given-names: Yanfang
         family-names: Feng
       - given-names: Zuo
         family-names: Ge
-      - given-names: Yanggang
+      - given-names: Yingchao
         family-names: Wang
     year: 2018
     journal: Geology in China
     volume: 45
     issue: S1
-    pages: 1-26
+    pages: 1-34
     url: https://doi.org/10.12029/gc2018Z101
     notes: "Companion article for the JWD/SLIB source dataset."

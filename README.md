@@ -3,7 +3,6 @@
 [![PyPI version](https://img.shields.io/pypi/v/mapgis2shp.svg)](https://pypi.org/project/mapgis2shp/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.24036158-blue.svg)](https://doi.org/10.5281/zenodo.24036158)
 
 Read **and write** MapGIS 6.x/67 vector files (`.wt`, `.wl`, `.wp`) with [GeoPandas](https://geopandas.org/) GeoDataFrames.
 
@@ -684,12 +683,14 @@ an ordinary `jwd_map.pdf`: a tight-bbox vector preview does not implement a
 certified physical map scale. `--no-geopdf` therefore means preview-only output
 without a scale-certified formal PDF. Its `regression_layers()` helper pre-reads `.WP~`
 backup polygons with `Reader` and, when both normalized and backup WP files coexist,
-loads the original backup once rather than duplicating the layer. Both the published V2.7.1 fixture layout and
-the normalized current WP layout therefore follow the same rendering path. Its regression case contains 12 layers and 7,094
-input features, with 5,732 original features drawn and no unresolved colours,
-unknown fills, solid fallbacks or unresolved symbols. The JSON separates input
-features from drawn features and excluded annotations. These values are
-internal regression evidence, not native MapGIS visual acceptance.
+loads the original backup once rather than duplicating the layer. Legacy `.WP~` and
+normalized `.WP` layouts therefore follow the same rendering path. The regression case
+contains 12 layers and 7,094 input features, with 5,425 source features drawn and
+305 attribute-derived dip labels generated. No unresolved colours, unknown fills,
+solid fallbacks, unresolved symbols or unknown fonts remain in the final report.
+The JSON separates input features, drawn source features, generated dip labels and
+excluded annotations. These values are internal regression evidence, not native
+MapGIS visual acceptance.
 
 By default, complete geological-unit labels come from polygon attributes and
 are drawn at each geometry's `representative_point()` with Mathtext at 70% of
