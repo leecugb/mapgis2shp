@@ -1,15 +1,16 @@
 # License and Provenance Review
 
 - **Project:** mapgis2shp (`pymapgis` import name)
-- **Review date:** 2026-10-17 (2.4.0); header re-check 2026-10-18 (2.5.0)
-- **Release scope reviewed:** 2.4.0 source and distribution configuration
+- **Original review:** 2026-10-17 (2.4.0); header re-check 2026-10-18 (2.5.0)
+- **Current distribution-boundary re-check:** 2026-11-16 (2.7.3)
+- **Current release scope reviewed:** 2.7.3 source, wheel and sdist configuration
 
-On 2026-10-18 the 2.5.0 release was published. Its distribution configuration
-differs from 2.4.0 only in the version number; the SPDX header re-check found
-identifiers present in every release module and the release boundaries
-unchanged. The statements below therefore also apply to 2.5.0, with the
-package-boundary and third-party findings re-confirmed against the unchanged
-release configuration.
+The 2.4.0/2.5.0 header review is retained as historical context. The current
+2.7.3 package additionally contains the original-library renderer, GeoPDF
+support, seven processed USGS test layers and five specifically authorized
+generic SLIB fixtures. The third-party section below describes the current
+boundary and supersedes the earlier statement that no graphic libraries were
+bundled.
 
 This document records the project team's licence and provenance review for
 OSGeo Community Project preparation. It is a project-maintained review, not a
@@ -38,6 +39,13 @@ The following first-party release modules now carry
 - `src/pymapgis/cli.py`
 - `src/pymapgis/slib.py`
 - `src/pymapgis/linesty.py`
+- `src/pymapgis/fillgrph.py`
+- `src/pymapgis/colorlib.py`
+- `src/pymapgis/pcolor.py`
+- `src/pymapgis/graphic.py`
+- `src/pymapgis/geopdf.py`
+- `src/pymapgis/render_projection.py`
+- `src/pymapgis/testing/__init__.py`
 - `verify_pymapgis.py`
 
 The SPDX line is placed after a shebang or encoding cookie where one is
@@ -63,21 +71,27 @@ as mapgis2shp code.
 
 ## Third-party material and data
 
-Within the release-file scope reviewed:
+Within the current 2.7.3 release-file scope:
 
 - No vendor MapGIS source code is bundled.
-- No proprietary MapGIS symbol, style, colour, or pattern library is bundled.
-- The 36 geological-survey validation layers and the 400 MB validation dataset
-  are not redistributed with the package.
-- Real-data integration tests skip when their input files are unavailable.
-- No additional bundled third-party source component was identified during
-  this review. References to other projects in documentation are citations or
+- Five generic SLIB files (`Subgraph.lib`, `LINESTY.lib`, `Fillgrph.lib`,
+  `Colorlib.lib` and `Pcolor.lib`) are bundled only in the documented test
+  fixture locations. Their inclusion relies on the user's explicit packaging
+  authorization recorded on 2026-11-13; no public-domain dedication or broader
+  relicensing is inferred.
+- Seven processed USGS Conejo Well test layers and the original public USGS
+  E00/metadata fixtures are bundled with attribution and checksums. They are
+  not original NGAC/JWD vectors or native NGAC exports.
+- Original NGAC/JWD vectors, native NGAC exports, the separate 36-layer
+  validation corpus and the 400 MB validation dataset are not redistributed.
+- Optional integration tests skip when their external inputs are unavailable.
+- References to other projects in documentation are citations or
   interoperability notes, not incorporated source code.
 
-Contributors must not add restricted survey data, proprietary graphic
+Contributors must not add restricted survey data, unapproved graphic
 libraries, credentials, or third-party code with unclear redistribution
-rights. Any future bundled third-party component requires a source, licence,
-and attribution review before merging.
+rights. Any additional bundled third-party component requires a source,
+licence, attribution and archive-boundary review before merging.
 
 ## Maintenance
 

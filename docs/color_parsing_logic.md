@@ -116,20 +116,20 @@ K/C/M/Y  → node offset +28
 
 实现：[pcolor.py](../src/pymapgis/pcolor.py)、[graphic.py](../src/pymapgis/graphic.py)。
 
-## 6. 验证与输出
+## 6. 历史验证与输出（2026-11-06/07）
 
 - 合成节点测试验证 32B 布局、白色、越界和显式通道模型。
 - 真实库测试逐一验证 14 个对话框锚及 602/652。
 - 真实 12 层：7094 个输入要素；5732 个原要素绘制，713 个面内代号标注，1362 条 WT 代号点注记排除；未知色号 0，颜色回退 0，unknown_fill 0，实线回退 0。
 - 完整包测试（默认使用仓内 JWD/SLIB 夹具）：**324 passed，0 skipped**。
 
-输出：
+历史本地输出文件名如下。这些文件**未随当前源码包或发行包归档**，因此保留为审计索引而不是可点击证据；当前验证应以可运行的测试及其新输出为准。
 
-- [库参数版 PDF](../output/graphic_api_library_only_20261106.pdf)
-- [库参数版 PNG](../output/graphic_api_library_only_20261106.png)
-- [渲染与来源清单](../output/graphic_api_library_only_20261106_manifest.json)
-- [机器可读真值与节点审计](../output/color_truth_audit.json)
-- [0.5 倍线宽对照版 PDF](../output/graphic_api_library_only_thin_20261107.pdf)
+- 库参数版 PDF：`output/graphic_api_library_only_20261106.pdf`（未归档）
+- 库参数版 PNG：`output/graphic_api_library_only_20261106.png`（未归档）
+- 渲染与来源清单：`output/graphic_api_library_only_20261106_manifest.json`（未归档）
+- 机器可读真值与节点审计：`output/color_truth_audit.json`（未归档）
+- 0.5 倍线宽对照版 PDF：`output/graphic_api_library_only_thin_20261107.pdf`（未归档）
 
 ## 7. 后续新增颜色证据的规则
 

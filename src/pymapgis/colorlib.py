@@ -55,7 +55,15 @@ class ColorLib:
         self.max_no = (len(self.data) - _TABLE_START) // _ENTRY - 1
 
     def kcmy(self, no: int) -> Optional[Tuple[int, int, int, int]]:
-        """色号 no（0 基）→ on-disk (K, C, M, Y)；越界返回 None。"""
+        """色号 no（0 基）→ 盘上原始 4 字节，按 **on-disk 通道顺序**返回；
+        越界返回 None。
+
+        本方法不做通道重排：默认 channel_order="KCMY" 的参考库盘上即
+        (K, C, M, Y)；channel_order="YMCK" 安装模型下盘上字节序为
+        (Y, M, C, K)，此时返回值同样是 (Y, M, C, K)——方法名 kcmy 是
+        历史沿用，不表示返回序恒为 KCMY。语义化通道解释在 rgb()/rgb01()
+        中按 self.channel_order 完成。
+        """
         off = _TABLE_START + no * _ENTRY
         if no < 0 or off + _ENTRY > len(self.data):
             return None

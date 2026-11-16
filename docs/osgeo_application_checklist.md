@@ -69,7 +69,7 @@ This matches the six locally prepared items above; the provenance review
    of the project's public change process; it should not be described as
    external collaboration.
 3. Update the GitHub repository description so that it describes both reading
-   and writing, matching the 2.5.0 README and PyPI release.
+   and writing, matching the current README and PyPI release.
 4. Open a small number of substantive issues for actual unresolved work. Keep
    them technical and actionable; do not open placeholder issues merely to
    create a numerical collaboration record.
@@ -127,7 +127,7 @@ website in order to share my work with more people!
 mapgis2shp (`pymapgis` on import) is an Apache-2.0 Python library and CLI for
 reading, writing, and converting MapGIS 6.x/67 binary vector formats. The
 repository is at https://github.com/leecugb/mapgis2shp and the current release
-is 2.5.0 on PyPI.
+is 2.7.3 on PyPI.
 
 My OSGeo userid is "**insert OSGeo userid**" and I will need permission to
 create a project page.
@@ -146,8 +146,9 @@ mapgis2shp to join the OSGeo Community Projects initiative.
 mapgis2shp (`pymapgis` on import) is an Apache-2.0 Python library and CLI for
 reading, writing, and converting MapGIS 6.x/67 binary vector formats. It
 provides GeoPandas interoperability, CRS inference, polygon-topology
-reconstruction, graphic-parameter decoding, and structural parsers for MapGIS
-symbol and line-style libraries. The current release is 2.5.0 on PyPI.
+reconstruction, graphic-parameter decoding, structural parsers for the five
+supported graphic libraries, and original-library rendering. The current
+release is 2.7.3 on PyPI.
 
 Project page: **insert the published project-page URL before sending**
 

@@ -75,6 +75,8 @@ include = [
     "/README.md",
     "/LICENSE",
     "/CITATION.cff",
+    "/CONTRIBUTING.md",
+    "/CODE_OF_CONDUCT.md",
     "/DATA_ATTRIBUTION.md",
     "/verify_pymapgis.py",
     "/pymapgis_baseline.json",

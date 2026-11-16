@@ -156,9 +156,15 @@ class SubgraphLib:
     索引表项数 = 首记录偏移 / 4（首个 u32 = 索引区末尾 = 记录区起点；
     原探测法会把记录区内小值误吞为索引，已废弃）。
     未索引尾段（符号号 ≥ 索引数）由链式走查定界——#1840 起地质专用
-    符号在未索引链中按序续号（#1960=蚀变实证）；本库走查定案至
-    #1995（155 条双门链证 + #1961 单门），#1996 起结构变化、其后
-    7.76MB 挂账专项逆向。旧版"0xBE×3 预留区"扫描是载荷内 0xBE 假阳性
+    符号在未索引链中按序续号（#1960=蚀变实证）；本库尾段链定案
+    #1840–#1995 共 156 条（155 条双门链证 + #1961 单门）。
+    #1996 起的尾段区域已不再挂账：2026-10-18 破解定案（根因是记录头
+    超出旧走查 512B 扫描上限），模型 (t,n)+描述区(10B 块×L)+点数表
+    (k 项≥2，和==n//2)+n×4 f32，由 _walk_region 三重验证 + 前瞻 3
+    选链深走查——本库 5364 条 #1996–#7359 100% 字节覆盖到文件末尾，
+    全链坐标审计 [-1.375,+1.485]mm 零越界。走查在验证失败处**诚实
+    停止**：结构无法确认的记录一律不解码（decode 返回 None），绝不
+    臆造几何。旧版"0xBE×3 预留区"扫描是载荷内 0xBE 假阳性
     （record_end=945916 误判），已移除。
     """
 
@@ -749,11 +755,42 @@ def fit_circle(pts: List[Tuple[float, float]]) -> Optional[Tuple[float, float, f
     return (mx + uc, my + vc, r)
 
 
+def _arc_bbox_points(
+    cx: float, cy: float, r: float, a0: float, a1: float
+) -> List[Tuple[float, float]]:
+    """CCW 弧段（a0→a1，度，自 +x 轴逆时针）的包围盒采样点。
+
+    返回弧的两个端点，以及落在 CCW 张角内的 0/90/180/270° 极值点
+    （笛卡尔 x/y 的最值只可能出现在端点或这四个方位角上）。张角取
+    sweep=(a1−a0)%360，与 graphic.arc_points 的绘制语义一致——
+    a0==a1 时退化为单点，不按整圆扩张。
+    """
+    pts = [
+        (cx + r * math.cos(math.radians(a0)),
+         cy + r * math.sin(math.radians(a0))),
+        (cx + r * math.cos(math.radians(a1)),
+         cy + r * math.sin(math.radians(a1))),
+    ]
+    sweep = (a1 - a0) % 360.0
+    for card in (0.0, 90.0, 180.0, 270.0):
+        if 0.0 < (card - a0) % 360.0 < sweep:
+            pts.append((cx + r * math.cos(math.radians(card)),
+                        cy + r * math.sin(math.radians(card))))
+    return pts
+
+
 def symbol_geometries(lib: SubgraphLib, no: int) -> dict:
     """符号几何的结构化导出（渲染/重建消费）。
 
     返回 {subpaths, circles, arcs, elements, bbox}；elements 保留描述区
     分组、原始字段及已裁定 fill_kind，避免调用方重新解析 header_u16。
+
+    bbox 按**实际可绘制几何**计算（2026-11-16 审计修复）：普通子路径
+    取折线点；判圆子路径取整圆范围 (cx±r, cy±r)；判弧子路径取 CCW
+    弧段端点并补弧上 0/90/180/270° 极值点（_arc_bbox_points）。圆/弧
+    子路径的原始存储点是编码控制值（[圆心, 半径参考点, 圆心回点] 或
+    [圆心, (半径, 起角), (终角, 0)] 三点组），一律不计入 bbox；多个
+    子路径取联合范围。无可绘制几何时 bbox 为 None。
     """
     sym = lib.decode(no)
     if sym is None:
@@ -782,9 +819,19 @@ def symbol_geometries(lib: SubgraphLib, no: int) -> dict:
             "arc": [round(v, 6) for v in sp.arc] if sp.arc else None,
             "template_digit": sp.template_digit,
         })
-        for x, y in sp.points:
-            xs.append(x)
-            ys.append(y)
+        # bbox 用可绘制几何，不用编码控制点（2026-11-16 审计修复）
+        if sp.circle is not None:
+            cx, cy, r = sp.circle
+            xs.extend((cx - r, cx + r))
+            ys.extend((cy - r, cy + r))
+        elif sp.arc is not None:
+            for x, y in _arc_bbox_points(*sp.arc):
+                xs.append(x)
+                ys.append(y)
+        else:
+            for x, y in sp.points:
+                xs.append(x)
+                ys.append(y)
     if xs:
         out["bbox"] = [round(min(xs), 4), round(min(ys), 4),
                        round(max(xs), 4), round(max(ys), 4)]

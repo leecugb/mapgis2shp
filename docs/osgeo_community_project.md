@@ -15,7 +15,7 @@ GeoDataFrames and common GIS formats.
 
 The project addresses a practical geospatial interoperability problem: legacy
 `.wt`, `.wl`, and `.wp` files are not natively supported by the usual
-GDAL/OGR-based vector-I/O path. The current release is **2.5.0**, distributed
+GDAL/OGR-based vector-I/O path. The current release is **2.7.3**, distributed
 through PyPI as `mapgis2shp`.
 
 ## Main capabilities
@@ -28,7 +28,8 @@ through PyPI as `mapgis2shp`.
 - Reconstruct polygon shells, holes, and shared-boundary topology, and
   regenerate topology when writing
 - Decode point, line, and polygon graphic parameters
-- Parse `Subgraph.lib` point-symbol and `LINESTY.lib` line-style structures
+- Parse `Subgraph.lib`, `LINESTY.lib`, `Fillgrph.lib`, `Colorlib.lib` and
+  `Pcolor.lib`, and render vectors from the original libraries
 - Preserve unknown or unsupported conditions explicitly rather than inventing
   CRS definitions or symbol geometry
 
@@ -41,7 +42,7 @@ through PyPI as `mapgis2shp`.
 - **Command-line usage:** [README — Command-line usage](../README.md#command-line-usage)
 - **Python API:** [README — API](../README.md#api)
 - **Binary format reference:** [MapGIS Vector Format](MapGIS_Vector_Format.md)
-- **Software archive DOI:** <https://doi.org/10.5281/zenodo.21487339>
+- **Software archive DOI:** <https://doi.org/10.5281/zenodo.24036158>
 
 The package supports Python 3.9 and later. Runtime dependencies are declared in
 `pyproject.toml` and installed by the Python package manager.
@@ -76,8 +77,11 @@ additionally subject to the OSGeo Code of Conduct and its reporting guidance.
 
 mapgis2shp is distributed under the
 [Apache License 2.0](../LICENSE). Contributions must preserve notices and
-provide provenance for third-party material. Proprietary survey datasets and
-MapGIS graphic libraries are not redistributed with the package.
+provide provenance for third-party material. Original NGAC/JWD vectors and
+native NGAC exports are not redistributed. Five generic SLIB fixtures and
+seven processed USGS test layers are bundled under their separately documented
+attribution and packaging conditions; the Apache-2.0 software licence does not
+relicense those fixtures.
 
 ## Project contact
 

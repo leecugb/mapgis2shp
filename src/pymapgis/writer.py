@@ -833,7 +833,11 @@ def _encode_points(gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame], factor
         point_type = int(row["point_type"]) if row is not None else _DEFAULT_POINT_TYPE
         record[31] = point_type
         if point_type == POINT_TYPE_SYMBOL:
-            symbol_no = int(row["symbol_no"]) if row is not None else _DEFAULT_SYMBOL_NO
+            symbol_no = _int16_parameter(
+                row["symbol_no"] if row is not None else _DEFAULT_SYMBOL_NO,
+                "symbol_no",
+                _DEFAULT_SYMBOL_NO,
+            )
             height = float(row["height"]) if row is not None else _DEFAULT_POINT_SIZE
             width = float(row["width"]) if row is not None else _DEFAULT_POINT_SIZE
             struct.pack_into("<h", record, 33, symbol_no)
@@ -900,11 +904,19 @@ def _encode_lines(
         struct.pack_into("<i", record, 14, offset)
 
         row = params.iloc[i] if params is not None else None
-        linetype = int(row["linetype"]) if row is not None else _DEFAULT_LINETYPE
+        linetype = _int16_parameter(
+            row["linetype"] if row is not None else _DEFAULT_LINETYPE,
+            "linetype",
+            _DEFAULT_LINETYPE,
+        )
         aux = int(row["aux_linetype"]) if row is not None else _DEFAULT_AUX_LINETYPE
-        color = _DEFAULT_LINE_COLOR
-        if row is not None and "color" in row.index:
-            color = int(row["color"])
+        color = _int16_parameter(
+            row["color"]
+            if row is not None and "color" in row.index
+            else _DEFAULT_LINE_COLOR,
+            "color",
+            _DEFAULT_LINE_COLOR,
+        )
         width = float(row["width"]) if row is not None else _DEFAULT_LINE_WIDTH
         x_coef = float(row["x_coef"]) if row is not None else _DEFAULT_LINE_COEF
         y_coef = float(row["y_coef"]) if row is not None else _DEFAULT_LINE_COEF
@@ -924,7 +936,13 @@ def _encode_lines(
         struct.pack_into("<f", record, 39, y_coef)
         # 2026-10-15 明码补齐三字段（reader.py 对称，官方 wal 9 参数定位）：
         # @43 u16 辅助色（0=无）、@47 u8 图层、@48 u8 透明输出。
-        aux_color = int(row["aux_color"]) if (row is not None and "aux_color" in row.index) else 0
+        aux_color = _int16_parameter(
+            row["aux_color"]
+            if row is not None and "aux_color" in row.index
+            else 0,
+            "aux_color",
+            0,
+        )
         layer = int(row["layer"]) if (row is not None and "layer" in row.index) else 0
         transparent = (
             int(row["transparent"])
@@ -1017,7 +1035,7 @@ def _encode_line_aux(
     # re-saved native node table is optional and remains available through
     # source-section passthrough.
     nodes = b""
-    boxes = struct.pack("<4d", *gdf.total_bounds)
+    boxes = struct.pack("<4d", *_bounds_or_zero(gdf))
     flags = struct.pack("<i", _LINE_FLAG_BASE)
     for i, geom in enumerate(gdf.geometry):
         minx, miny, maxx, maxy = geom.bounds
@@ -1280,6 +1298,25 @@ def _uint8_parameter(value: Any, name: str, default: int) -> int:
         raise WriterError(f"{name} must be an integer in 0..255") from exc
     if not np.isfinite(number) or not number.is_integer() or not 0 <= number <= 255:
         raise WriterError(f"{name} must be an integer in 0..255; got {value!r}")
+    return int(number)
+
+
+def _int16_parameter(value: Any, name: str, default: int = 0) -> int:
+    """Return a validated signed 16-bit graphic parameter."""
+    if _is_missing(value):
+        return default
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as exc:
+        raise WriterError(f"{name} must be an integer in -32768..32767") from exc
+    if (
+        not np.isfinite(number)
+        or not number.is_integer()
+        or not -32768 <= number <= 32767
+    ):
+        raise WriterError(
+            f"{name} must be an integer in -32768..32767; got {value!r}"
+        )
     return int(number)
 
 
@@ -1666,6 +1703,13 @@ def _normalise_geometries(
     return out
 
 
+def _bounds_or_zero(gdf: gpd.GeoDataFrame) -> np.ndarray:
+    """Return finite zero extents for an empty frame, otherwise its bounds."""
+    if len(gdf) == 0:
+        return np.zeros(4, dtype=np.float64)
+    return np.asarray(gdf.total_bounds, dtype=np.float64)
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -1735,12 +1779,29 @@ class Writer:
     ) -> None:
         if not isinstance(geodataframe, gpd.GeoDataFrame):
             raise WriterError("Writer expects a geopandas.GeoDataFrame")
+        duplicate_columns = geodataframe.columns[
+            geodataframe.columns.duplicated()
+        ].tolist()
+        if duplicate_columns:
+            raise WriterError(
+                f"duplicate column names are not supported: {duplicate_columns!r}"
+            )
         self._make_valid = make_valid
         if on_empty not in {"error", "drop"}:
             raise WriterError("on_empty must be 'error' or 'drop'")
         self._on_empty = on_empty
-        self._map_scale = float(map_scale)
-        self._snap = float(snap_tolerance)
+        try:
+            self._map_scale = float(map_scale)
+        except (TypeError, ValueError) as exc:
+            raise WriterError("map_scale must be positive and finite") from exc
+        if not np.isfinite(self._map_scale) or self._map_scale <= 0:
+            raise WriterError("map_scale must be positive and finite")
+        try:
+            self._snap = float(snap_tolerance)
+        except (TypeError, ValueError) as exc:
+            raise WriterError("snap_tolerance must be finite and non-negative") from exc
+        if not np.isfinite(self._snap) or self._snap < 0:
+            raise WriterError("snap_tolerance must be finite and non-negative")
         self._graphic_params = graphic_params
 
         if geometry_type is not None:
@@ -2046,8 +2107,8 @@ class Writer:
         SHP-import padding of 0.1 stored units on each side.
         """
         factor = self._scale_factor()
-        minx, miny, maxx, maxy = self._gdf.total_bounds * factor
-        if self.shapeType == "POINT":
+        minx, miny, maxx, maxy = _bounds_or_zero(self._gdf) * factor
+        if self.shapeType == "POINT" and len(self._gdf) > 0:
             # MapGIS SHP import pads WT header extents by 0.1 stored units.
             minx -= 0.1 * factor
             miny -= 0.1 * factor
@@ -2138,10 +2199,11 @@ class Writer:
     def _simple_passthrough(
         self, keys: List[str], factor: float, kind: str
     ) -> Optional[dict]:
-        """Return the reader-stashed raw sections for point/line round-trips.
+        """Return reader-stashed raw sections only for identical WT/WL geometry.
 
-        Geometry matching compares the coordinate multiset of our encoding
-        against the source sections decoded by the reader's own helpers.
+        Feature order, line membership, vertex order and every coordinate are
+        significant.  Approximate or unordered fingerprints can pair rewritten
+        attributes with stale geometry, so any difference forces re-encoding.
         """
         pt = getattr(self._gdf, "attrs", {}).get("mapgis_section_passthrough")
         sections = (pt or {}).get("sections", {})
@@ -2163,14 +2225,12 @@ class Writer:
                 src = _read_points(
                     stream, 16, len(raw_points), 1.0
                 )
-                src_pts = sorted(
-                    (round(float(g.x) / factor, 6), round(float(g.y) / factor, 6))
-                    for g in src
-                )
-                our_pts = sorted(
-                    (round(float(g.x), 6), round(float(g.y), 6))
-                    for g in self._gdf.geometry
-                )
+                src_pts = [
+                    (float(g.x) / factor, float(g.y) / factor) for g in src
+                ]
+                our_pts = [
+                    (float(g.x), float(g.y)) for g in self._gdf.geometry
+                ]
                 return (
                     pt
                     if src_pts == our_pts and src_pts
@@ -2190,19 +2250,21 @@ class Writer:
                 len(raw_coords),
                 1.0,
             )
-            from collections import Counter as _Counter
-
-            def _key(lines, nd=6):
-                pts = []
-                for ln in lines:
-                    pts.extend(
-                        (round(float(x) / factor, nd), round(float(y) / factor, nd))
-                        for x, y in ln.coords
+            def _key(lines, *, stored: bool = False):
+                # Source helpers decode with scale=1 (stored units), whereas
+                # the current frame is in map units.  Compare in map units and
+                # retain one ordered vertex tuple per feature.
+                divisor = factor if stored else 1.0
+                return [
+                    tuple(
+                        (float(x) / divisor, float(y) / divisor)
+                        for x, y in line.coords
                     )
-                return pts
+                    for line in lines
+                ]
 
-            ours = _Counter(_key(self._gdf.geometry))
-            theirs = _Counter(_key(src))
+            ours = _key(self._gdf.geometry)
+            theirs = _key(src, stored=True)
             return (
                 pt
                 if ours == theirs and ours
@@ -2314,7 +2376,7 @@ class Writer:
         header_fields = {
             **_crs_header_fields(self._crs, self._map_scale),
             **_header_crs_block_fields(
-                self._crs, self._map_scale, self._gdf.total_bounds
+                self._crs, self._map_scale, _bounds_or_zero(self._gdf)
             ),
             **self._header_extent_fields(sections),
         }

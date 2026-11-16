@@ -15,6 +15,17 @@ from pymapgis import InvalidFileError, MapGISError, Reader, Writer
 _MAPGIS_SUFFIXES = {".wt", ".wl", ".wp"}
 
 
+def _same_input_output(input_path: Path, output_path: Path) -> bool:
+    """Return whether two paths identify the same input file.
+
+    ``samefile`` also catches hard links and symlink aliases.  For a new output
+    path, resolving both paths still catches spelling aliases such as ``./a``.
+    """
+    if output_path.exists():
+        return input_path.samefile(output_path)
+    return input_path.resolve() == output_path.resolve()
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Entry point for the ``pymapgis`` CLI."""
     args_list = list(argv) if argv is not None else sys.argv[1:]
@@ -81,6 +92,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 1
 
     try:
+        if _same_input_output(args.input, args.output):
+            print(
+                "error: input and output refer to the same file; "
+                "choose a different output path",
+                file=sys.stderr,
+            )
+            return 1
         if args.input.suffix.lower() in _MAPGIS_SUFFIXES:
             with Reader(
                 args.input,

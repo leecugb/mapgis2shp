@@ -181,4 +181,4 @@ points_per_unit = pixels_per_unit × 72 / figure.dpi
 - [线型解析逻辑](linesty_parsing_logic.md)
 - [颜色解析逻辑与真值链](color_parsing_logic.md)
 - [真实 12 层集成测试](../tests/test_graphic_real_jwd.py)
-- [真实库基线](../output/mapgis2shp_library_baseline.json)
+- 历史本地真实库基线：`output/mapgis2shp_library_baseline.json`（未随当前源码包或发行包归档，不能作为随包复核证据）
