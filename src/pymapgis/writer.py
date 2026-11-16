@@ -706,19 +706,20 @@ def _header_crs_block_fields(
     )
     fields[_CRS_PROJECTION_SCALE_OFFSET] = ("d", projection_scale)
     fields.update({off: ("B", val) for off, val in _HEADER_CRS_BLOCK_U8.items()})
-    if _projection_name(crs) == "lcc":
-        # 2026-11 native-reference finding: MapGIS stamps @91-92 with the
-        # u16 flag 0x0103 and @93/@101 with the coordinate unit factor
-        # (header scale field / 1000, the reader's inverse) for LCC files.
-        # Without these fields MapGIS cannot display the standard parallels
-        # (verified: patching only this block restores recognition).  Native
-        # tmerc samples (LDZOF* of all three geometry types) leave the whole
-        # region zeroed, so the stamp is LCC-specific.
-        coordinate_factor = map_scale / 1000.0
+    # 2026-11 native-reference finding (NEWLIN*.WL corpus, verified in
+    # MapGIS): every CRS-bearing file carries a u16 flag at @91-92 and the
+    # constant double 100.0 at @93/@101.  Without them MapGIS cannot
+    # display the CRS parameters (standard parallels, projection, …).
+    #   geographic files:  bytes 01 04
+    #   projected files:   bytes 03 01   (codes 1/2/3 verified; 5 inferred)
+    if pyproj.CRS(crs).is_geographic:
+        fields[91] = ("B", 0x01)
+        fields[92] = ("B", 0x04)
+    else:
         fields[91] = ("B", 0x03)
         fields[92] = ("B", 0x01)
-        fields[93] = ("d", coordinate_factor)
-        fields[101] = ("d", coordinate_factor)
+    fields[93] = ("d", 100.0)
+    fields[101] = ("d", 100.0)
     if crs not in (None, "") and pyproj.CRS(crs).is_geographic:
         x_coef, y_coef = _mm_to_degree_coefs(crs, map_scale, bbox)
         fields[_HEADER_MM_DEG_X_OFFSET] = ("d", x_coef)
@@ -752,19 +753,29 @@ def _crs_header_fields(crs: Any, map_scale: float) -> Dict[int, Tuple[str, Any]]
             "longitude/latitude, Transverse Mercator (tmerc), Albers (aea) "
             "and Lambert (lcc)"
         )
-    fields[_CRS_PROJECTION_OFFSET] = ("B", code)
-    fields[_CRS_SCALE_OFFSET] = ("d", float(map_scale))
-    if code == 5:
-        if params.get("x_0", 500000.0) != 500000.0 or params.get("lat_0", 0.0) != 0.0:
-            warnings.warn("tmerc with non-standard lat_0/x_0; MapGIS assumes "
-                          "lat_0=0 and x_0=500000")
+    if proj == "tmerc":
+        # UTM (k=0.9996, x_0=500000) has its own native code 1
+        # (NEWLIN_UTM.WL sample, 2026-11); generic tmerc stays code 5.
+        k = params.get("k", 1.0)
+        if abs(k - 0.9996) < 1e-9 and params.get("x_0", 500000.0) == 500000.0:
+            code = 1
     if proj == "utm":
+        # Native UTM files use projection code 1 (NEWLIN_UTM.WL, 2026-11);
+        # the default Gauss-Kruger conversion lands in the tmerc branch
+        # with code 5.
+        code = 1
         zone = params.get("zone")
         if zone is None:
             raise WriterError("UTM input requires an explicit zone")
         central_meridian = int(zone) * 6 - 183
     else:
         central_meridian = params.get("lon_0", 0.0)
+    fields[_CRS_PROJECTION_OFFSET] = ("B", code)
+    fields[_CRS_SCALE_OFFSET] = ("d", float(map_scale))
+    if code == 5:
+        if params.get("x_0", 500000.0) != 500000.0 or params.get("lat_0", 0.0) != 0.0:
+            warnings.warn("tmerc with non-standard lat_0/x_0; MapGIS assumes "
+                          "lat_0=0 and x_0=500000")
     fields[_CRS_CENTRAL_MERIDIAN_OFFSET] = (
         "d",
         _degrees_to_raw_dms(central_meridian),
