@@ -706,6 +706,19 @@ def _header_crs_block_fields(
     )
     fields[_CRS_PROJECTION_SCALE_OFFSET] = ("d", projection_scale)
     fields.update({off: ("B", val) for off, val in _HEADER_CRS_BLOCK_U8.items()})
+    if _projection_name(crs) == "lcc":
+        # 2026-11 native-reference finding: MapGIS stamps @91-92 with the
+        # u16 flag 0x0103 and @93/@101 with the coordinate unit factor
+        # (header scale field / 1000, the reader's inverse) for LCC files.
+        # Without these fields MapGIS cannot display the standard parallels
+        # (verified: patching only this block restores recognition).  Native
+        # tmerc samples (LDZOF* of all three geometry types) leave the whole
+        # region zeroed, so the stamp is LCC-specific.
+        coordinate_factor = map_scale / 1000.0
+        fields[91] = ("B", 0x03)
+        fields[92] = ("B", 0x01)
+        fields[93] = ("d", coordinate_factor)
+        fields[101] = ("d", coordinate_factor)
     if crs not in (None, "") and pyproj.CRS(crs).is_geographic:
         x_coef, y_coef = _mm_to_degree_coefs(crs, map_scale, bbox)
         fields[_HEADER_MM_DEG_X_OFFSET] = ("d", x_coef)

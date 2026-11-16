@@ -27,6 +27,44 @@ def test_conic_first_standard_parallel_roundtrip(tmp_path, projection):
     assert "+lat_1=36.25" in Reader(path).crs.to_proj4()
 
 
+def test_lcc_header_stamps_for_mapgis_standard_parallel_display(tmp_path):
+    """MapGIS requires @91-92=0x0103 and @93/@101=coordinate factor on LCC files.
+
+    2026-11 native-reference finding: without these stamps MapGIS cannot
+    display the standard parallels of LCC files written by the Writer
+    (verified against NEWLIN.WL / writer_lcc1.wl; tmerc natives leave the
+    region zeroed, so the stamp is LCC-specific).
+    """
+    crs = (
+        "+proj=lcc +lat_0=0 +lon_0=75 +lat_1=25 +lat_2=47 "
+        "+x_0=0 +y_0=0 +a=6378140 +b=6356755.288157528 +units=m +no_defs"
+    )
+    frame = gpd.GeoDataFrame(
+        {"name": ["lcc"]},
+        geometry=[Point(0, 0)],
+        crs=crs,
+    )
+    path = tmp_path / "lcc.wt"
+    Writer(frame, map_scale=100000).to_file(path)
+    raw = path.read_bytes()
+    assert raw[91:93] == b"\x03\x01"
+    assert struct.unpack_from("<d", raw, 93)[0] == 100.0
+    assert struct.unpack_from("<d", raw, 101)[0] == 100.0
+
+    # Non-LCC files keep the region zeroed, matching native tmerc samples.
+    utm = gpd.GeoDataFrame(
+        {"name": ["utm"]},
+        geometry=[Point(500000, 3735000)],
+        crs="EPSG:32611",
+    )
+    utm_path = tmp_path / "utm.wt"
+    Writer(utm, preserve_utm=True, map_scale=1000).to_file(utm_path)
+    raw_utm = utm_path.read_bytes()
+    assert raw_utm[91:93] == b"\x00\x00"
+    assert struct.unpack_from("<d", raw_utm, 93)[0] == 0.0
+    assert struct.unpack_from("<d", raw_utm, 101)[0] == 0.0
+
+
 def test_append_native_attribute_preserves_values_and_layout(tmp_path):
     source = Reader(
         FIXTURES / "writer_batch3/08_ATTRIBUTE_TYPES.WP",
