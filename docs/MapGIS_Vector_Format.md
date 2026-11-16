@@ -1,5 +1,7 @@
 # MapGIS 矢量文件格式解析说明（*.wt / *.wl / *.wp）
 
+> **Historical note:** This document preserves early reverse-engineering notes. Several point, line and polygon graphic-parameter layouts below have been superseded by later plaintext-pair and native-dialog evidence. For the current Reader/Writer implementation, use the [current vector format reference](mapgis_vector_format_reference.md).
+
 MapGIS 矢量文件是中地数码公司开发的一套二进制矢量数据格式，广泛应用于国内地质调查、工程勘察及科研领域。该格式为闭源格式，文件本身**不携带完整的坐标系描述**，投影与椭球参数需依赖 MapGIS 安装环境（如 `mapgis67\program\ellip.dat`）中的索引表来解释。
 
 本文基于对 MapGIS 6x/67 格式 `.wt`（点）、`.wl`（线）、`.wp`（区）文件的逆向解析实践，以及技术文章《MapGIS 文件解析》中给出的字节级结构描述，整理出可供开源读取器实现参考的格式说明。

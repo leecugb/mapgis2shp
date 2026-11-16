@@ -10,6 +10,18 @@ MapGIS is a widely used closed-source GIS platform in China, especially in geolo
 
 > **Relationship to prior work:** This package (`mapgis2shp`, import name `pymapgis`) is the matured, validated successor to the first author's earlier [`pymapgis`](https://github.com/leecugb/pymapgis) (2022) single-file reader — both developed by **Shijie Li** (leecugb). The present version adds coordinate-reference inference, vectorised parsing, polygon-topology reconstruction, and independent validation against the official MapGIS export.
 
+## Contents
+
+- [Installation](#installation) and [Quick start](#quick-start)
+- [Command-line usage](#command-line-usage) and [Python API](#api)
+- [Processing model](#processing-model-reader-writer-slib-and-geopdf)
+- [Graphic libraries](#parsing-the-graphic-libraries)
+- [Original-library rendering](#rendering-with-the-original-graphic-libraries)
+- [USGS and research examples](#real-usgs-geological-map-conversion)
+- [Supported formats](#supported-formats) and [technical documentation](#technical-documentation)
+- [Development and tests](#development)
+- [Release notes](#release-notes) and [further documentation](#further-documentation)
+
 ## Scope and boundaries
 
 `mapgis2shp` has three deliberately bounded responsibilities:
@@ -42,11 +54,12 @@ save/reopen acceptance is separate from internal regression testing.
 - Read **point** (`.wt`), **line** (`.wl`), and **polygon** (`.wp`) files
 - **Write** GeoDataFrames back to native `.wt` / `.wl` / `.wp` binaries
 - **Byte-preserving round-trips**: files written from a Reader's GeoDataFrame
-  reuse the source sections verbatim (arcs, metadata, label boxes, field
-  widths) whenever the geometry is unchanged, preserving the source structure.
-  Reader → Writer → Reader regression verifies this internally; native MapGIS
-  open/edit/save acceptance is a separate verification step
-- **Native-display-compatible writing**: written files carry the full 16-entry
+  reuse source sections only when feature order, per-feature geometry and graphic
+  parameters still match exactly. Reordered, regrouped or edited WT/WL/WP data are
+  re-encoded instead of pairing new attributes with stale geometry. Reader → Writer →
+  Reader regression verifies this internally; native MapGIS open/edit/save acceptance
+  is a separate verification step
+- **Native-structure writing**: written files carry the full 16-entry
   index table, the polygon label-box section (entry 11) and file footer
   (entry 12), the mm-to-degree display coefficients, and the header count
   sequence that MapGIS's renderer requires
@@ -63,7 +76,7 @@ save/reopen acceptance is separate from internal regression testing.
   records with explicit handling of unsupported structures
 - Reconstruct polygon topology from arc records; preserve native sections on unchanged round-trips and encode freshly written polygons as independent closed rings with native ring-index pointers
 - Preserve or repair invalid polygon geometries with `shapely.make_valid`
-- Export to formats supported by GeoPandas/OGR (Shapefile, GeoJSON, GeoPackage, etc., via pyogrio or Fiona)
+- Export to formats supported by GeoPandas/OGR (Shapefile, GeoJSON, GeoPackage, etc.; pyogrio is the declared runtime engine, while Fiona may be used when installed separately)
 - Simple command-line interface for quick conversions in both directions
 
 ## Installation
@@ -72,7 +85,8 @@ save/reopen acceptance is separate from internal regression testing.
 pip install mapgis2shp
 ```
 
-For original graphic-library rendering, install the optional Matplotlib dependency:
+For original-library rendering and GeoPDF output, install the optional rendering
+dependencies (Matplotlib and PyMuPDF):
 
 ```bash
 pip install "mapgis2shp[render]"
@@ -122,6 +136,7 @@ The curated top-level API is defined by `pymapgis.__all__`:
 | Fill patterns | `FillgrphLib`, `FillPattern`, `FillStroke`, `pattern_geometry()` |
 | Colours | `ColorLib`, `PcolorLib` |
 | Render WP / WL / WT | `GraphicRenderer`, `GraphicRenderResult`, `render_graphic_map()` |
+| Projection / GeoPDF module APIs | `pymapgis.render_projection.prepare_render_layers()`, `pymapgis.geopdf.write_vector_geopdf()`, `inspect_geopdf()` |
 | Bundled test data | `pymapgis.testing.fixture_path()`, `testdata_path()`, `usgs_conejo_path()`, `jwd_path()`, `slib_path()` |
 
 Legacy research helpers remain available from their implementation modules for
@@ -177,7 +192,7 @@ pymapgis lib Pcolor.lib --color 602           # Pcolor 32-byte node and RGB
 pymapgis lib Colorlib.lib --color 602 --channel-order YMCK
 ```
 
-The direction is chosen from the **input** extension: `.wt`/`.wl`/`.wp` input reads MapGIS; any other input writes MapGIS. The same interface is available as `python -m pymapgis input.wp output.shp`.
+The direction is chosen from the **input** extension: `.wt`/`.wl`/`.wp` input reads MapGIS; any other input writes MapGIS. The same interface is available as `python -m pymapgis input.wp output.shp`. CLI conversion preserves native polygon rings by default; pass `--make-valid` to repair them. Input and output must be different files—the CLI rejects identical paths and filesystem aliases instead of overwriting the source.
 
 ## API
 
@@ -214,9 +229,11 @@ high halves of float32 values stored in the head_9 section.
 - Attribute/geometry count disagreement raises `MapGISError`. A graphic-parameter
   count disagreement emits a warning and drops that parameter group rather than
   joining values to the wrong features
-- Invalid headers, negative section offsets/sizes, degenerate one-point arcs and
-  topology tables longer than the arc index raise `MapGISError`. Empty input
-  produces an empty GeoDataFrame and a zero bounding box
+- Invalid headers, negative or past-EOF section ranges, degenerate one-point arcs and
+  topology tables longer than the arc index raise `MapGISError`. Declared section and
+  attribute sizes are checked before bulk reads so malformed files cannot request
+  memory beyond the available data. Empty input produces an empty GeoDataFrame and a
+  zero bounding box
 
 **Attributes**
 
@@ -288,13 +305,13 @@ Writer(
 - `on_empty` — `"error"` (default) rejects empty/null geometries with their
   row positions; `"drop"` discards them with a warning only when explicitly
   requested
-- `map_scale` — map-scale denominator for projected CRS (coordinates are
+- `map_scale` — positive, finite map-scale denominator for projected CRS (coordinates are
   stored as `value * 1000 / map_scale`); ignored for longitude/latitude data
 - `preserve_utm` — `False` by default, converting UTM to the same-datum
   Gauss–Krüger `tmerc + k=1` target. `True` keeps northern-hemisphere UTM
   coordinates and writes `k=0.9996` at offset 232. Southern-hemisphere UTM is
   rejected explicitly because false-northing preservation is not implemented.
-- `snap_tolerance` — coordinate quantisation step applied before topology
+- `snap_tolerance` — finite, non-negative coordinate quantisation step applied before topology
   validation and ring encoding (0 = exact coordinates, no snapping)
 - `graphic_params` — when the frame carries the reader's graphic-parameter
   columns (`point_type`/`symbol_no`/..., `linetype`/...,
@@ -303,7 +320,8 @@ Writer(
   A recognised key column activates a parameter group and missing columns
   receive native defaults. Polygon `field5`/`field6`/`field7` are computed
   ring-index offsets, not editable style defaults
-- `geometry_type` — explicit `"POINT"`/`"LINE"`/`"POLYGON"` for empty frames
+- `geometry_type` — explicit `"POINT"`/`"LINE"`/`"POLYGON"` for empty frames; empty
+  output uses finite zero header extents
 
 Freshly written WP files encode every exterior and interior ring as an
 independent closed arc, preserve consecutive duplicate vertices, and write
@@ -312,12 +330,15 @@ native polygon/ring/arc indices into the coordinate section. Each polygon's
 arc index, coordinate section and head_9 pointers stay consistent.
 
 Attributes are encoded with MapGIS field types inferred from pandas dtypes
-(GBK strings, dates, times, numbers); unsupported columns raise `WriterError`.
+(GBK strings, dates, times, numbers). Unsupported or duplicate columns, invalid scale
+or tolerance values, and signed-16-bit graphic-parameter overflow raise `WriterError`
+instead of leaking low-level encoder exceptions.
 A GeoDataFrame produced by `Reader` also carries source section bytes and field
-metadata in `gdf.attrs`. When its geometry is unchanged, `Writer` reuses those
-sections byte-for-byte—including the original shared-arc layout and pointer
-table—so tested round-trips preserve native record widths, metadata blocks,
-polygon label boxes and file footers.
+metadata in `gdf.attrs`. `Writer` reuses those sections only when ordered feature
+geometry and graphic parameters match exactly, including line grouping and every
+vertex coordinate. Otherwise it re-encodes the changed data. Tested unchanged
+round-trips preserve native record widths, metadata blocks, polygon label boxes and
+file footers without hiding reordering or small edits.
 
 **Write-side limitations**
 
@@ -386,11 +407,11 @@ Polygon `class` and `layer` are independent native parameters and are never
 inferred from one another.
 
 Fresh polygons are encoded as independent closed rings with arc, coordinate and
-24-bit ring-index sections kept consistent. When a Reader-derived geometry is
-unchanged, Writer instead reuses source sections, descriptors, label boxes,
-shared arcs and footer bytes. This distinction is why internal round-trips can
-be byte-faithful without claiming that every newly authored file is guaranteed
-to display identically in MapGIS.
+24-bit ring-index sections kept consistent. Reader-derived source sections are reused
+only after exact ordered geometry and parameter comparison; any reordering, regrouping
+or coordinate edit forces safe re-encoding. This distinction is why internal
+round-trips can be byte-faithful without claiming that every newly authored file is
+guaranteed to display identically in MapGIS.
 
 For projected data, `map_scale=S` stores coordinates as `value * 1000 / S`, so
 the file continues to use scaled paper millimetres. UTM input follows two
@@ -574,134 +595,36 @@ the legacy comparison path. All other colour roles continue to use Colorlib.
 
 ## Rendering with the original graphic libraries
 
-`pymapgis.graphic` renders `.wp`, `.wl` and `.wt` layers directly from
-`Fillgrph.lib`, `LINESTY.lib`, `Subgraph.lib` and `Colorlib.lib`. It preserves
-polygon holes, stamps line-style elements along the original coordinates
-without extending line endpoints, instantiates subgraph geometry and fills,
-and renders WT text annotations. Subgraph geometry uses a uniform
-`min(width, height)` scale before rotation, preserving its native aspect ratio
-instead of applying directional shear. A zero dimension falls back to the other
-dimension, rather than collapsing the symbol. Geographic layers should be
-projected to a suitable conformal CRS before rendering; the JWD example uses a
-source-datum 6-degree Gauss–Krüger target with central meridian 75°E and `k=1`.
+`GraphicRenderer` draws WP/WL/WT vectors with the original Subgraph, LINESTY,
+Fillgrph, Colorlib and optional Pcolor definitions. It preserves polygon holes,
+line-style geometry along source vertices, point-symbol aspect ratios and native
+text parameters. It is a format-level renderer, not a claim of pixel-identical
+MapGIS display.
 
-The following image is the actual application-example output from the seven
-bundled USGS Conejo Well layers, using their native EPSG:32611 coordinates and
-the bundled SLIB definitions. It is a software-rendering test result, not an
+The image below is actual output from the seven bundled USGS-derived layers, not an
 original USGS plot or an NGAC/JWD product.
 
 ![Geological map rendered from the seven bundled USGS-derived MapGIS layers](docs/images/testdata_map.png)
 
-The complete example below writes this preview PNG and a strict 1:24,000,
-fully vector GeoPDF. The 1:24,000 denominator is explicit for the source map;
-it is not inferred from the native storage scale.
+### Run the self-contained example
 
-```python
-from pymapgis import GraphicLibraries, GraphicRenderer
-from pymapgis.geopdf import inspect_geopdf, write_vector_geopdf
-from pymapgis.testing import slib_path, testdata_path
-
-# Read the seven bundled layers; no external JWD or SLIB directory is needed.
-layers = []
-for path in sorted(testdata_path().iterdir()):
-    if path.suffix.lower() not in {".wt", ".wl", ".wp"}:
-        continue
-    layer = GraphicRenderer.read_layer(path)
-    layer.attrs["source"] = path.name
-    layer.attrs["kind"] = path.suffix.lower().lstrip(".")
-    layers.append(layer)
-
-# All seven layers already carry EPSG:32611. The source map's cartographic
-# scale is explicitly set to 1:24,000; this is not a storage-scale inference.
-renderer = GraphicRenderer(
-    GraphicLibraries.from_directory(slib_path()),
-    scale=24000,
-    vector_patterns=True,
-    native_text_layout=True,
-    polygon_labels=True,
-    polygon_label_fields=("QDUECC", "QDUECD"),
-    polygon_label_fontsize=5.0,
-    polygon_label_scale=0.7,
-    polygon_label_avoid_collisions=True,
-    polygon_label_randomize=True,
-    polygon_label_seed=42,
-    polygon_label_buffer_pt=2.0,
-    polygon_label_max_offset_pt=48.0,
-    attitude_dip_labels=True,
-    attitude_dip_label_direction="symbol",
-    attitude_dip_tick_mm=2.0,
-    attitude_dip_label_buffer_pt=0.5,
-    exclude_text_categories=("代号", "产状"),
-    text_font_family=["Microsoft YaHei", "SimSun", "DejaVu Sans"],
-    font_zh_map={1: "SimSun", 4: "SimHei"},
-    font_en_map={0: "DejaVu Sans"},
-)
-
-result = renderer.render(
-    layers,
-    figsize=(7.5, 9.5),
-    dpi=300,
-    axes_rect=(0.02, 0.02, 0.96, 0.96),
-)
-print(result.reports)  # drawn features, fallbacks, unresolved colours, ...
-
-# Preview only: this PNG has no scale-certification role.
-result.figure.savefig("testdata_map.png", dpi=300)
-
-# Formal output: strict 1:24,000, fully vector, georeferenced GeoPDF.
-write_vector_geopdf(
-    "testdata_geopdf_1_24000.pdf",
-    result.figure,
-    result.axes,
-    "EPSG:32611",
-    scale_denominator=24000,
-    title="USGS Conejo Well 7.5-minute quadrangle - 1:24000 vector GeoPDF",
-)
-readback = inspect_geopdf("testdata_geopdf_1_24000.pdf")
-assert readback["image_xobject_count"] == 0
-```
-
-To run the same renderer against an external twelve-layer JWD dataset and the bundled five generic SLIB files, use:
+From a source checkout, install the rendering dependencies and run:
 
 ```bash
-python examples/render_bundled_jwd.py --output-dir jwd_render
+python -m pip install -e ".[render]"
+PYTHONPATH=src python examples/render_testdata.py --output-dir output/testdata_render
 ```
 
-Optional interface flags include `--input-dir`, `--target-crs`, `--source-crs`,
-`--map-units-per-mm`, `--zone-width`, `--scale` and `--no-geopdf`. Without an
-explicit target, the pipeline computes one source-datum 6-degree Gauss–Krüger
-CRS from the combined geographic bounds, avoiding a hard-coded zone for other
-sheets. Set `--target-crs` to override it. Layers with missing CRS metadata
-require either `--source-crs` or `--map-units-per-mm`; `--source-crs` establishes
-the input CRS before projection.
+The example reads only bundled data, uses native EPSG:32611 coordinates and an explicit
+1:24,000 cartographic scale, and writes:
 
-The example writes preview-only `jwd_map.png` and `jwd_map.svg`, the strict-scale
-fully vector `jwd_map_geopdf.pdf`, and `jwd_render_reports.json`. Fillgrph
-patterns, paths and text are vector objects; the writer rejects any raster image
-XObject. No registration source PNG is produced. It intentionally does not write
-an ordinary `jwd_map.pdf`: a tight-bbox vector preview does not implement a
-certified physical map scale. `--no-geopdf` therefore means preview-only output
-without a scale-certified formal PDF. Its `regression_layers()` helper pre-reads `.WP~`
-backup polygons with `Reader` and, when both normalized and backup WP files coexist,
-loads the original backup once rather than duplicating the layer. Legacy `.WP~` and
-normalized `.WP` layouts therefore follow the same rendering path. The regression case
-contains 12 layers and 7,094 input features, with 5,425 source features drawn and
-305 attribute-derived dip labels generated. No unresolved colours, unknown fills,
-solid fallbacks, unresolved symbols or unknown fonts remain in the final report.
-The JSON separates input features, drawn source features, generated dip labels and
-excluded annotations. These values are internal regression evidence, not native
-MapGIS visual acceptance.
+- `testdata_map.png` and `testdata_map.svg` — previews, with no certified page scale;
+- `testdata_geopdf_1_24000.pdf` — strict-scale, georeferenced, fully vector GeoPDF;
+- `render_summary.json`, `layer_reports.json` and `text_collisions.json`.
 
-By default, complete geological-unit labels come from polygon attributes and
-are drawn at each geometry's `representative_point()` with Mathtext at 70% of
-the 4.5 pt base size (3.15 pt) and a translucent background, following the
-geosciml4china pipeline.
-Fragmented WT annotations whose `CHFCEC` is `代号` are reported as
-`excluded_text` instead of being duplicated. `polygon_label` counts the new
-labels. Set `polygon_labels=False` and `exclude_text_categories=()` to restore
-the legacy WT-only annotation path.
-
-The one-shot equivalent is:
+It independently checks the X/Y page scale and rejects any raster image XObject.
+The source map's 1:24,000 denominator is not inferred from Reader's storage multiplier.
+For a one-shot preview, the public convenience API is:
 
 ```python
 from pymapgis import render_graphic_map
@@ -712,77 +635,45 @@ paths = [
     if path.suffix.lower() in {".wt", ".wl", ".wp"}
 ]
 result = render_graphic_map(
-    paths,
-    slib_path(),
-    "testdata_preview.png",
-    scale=24000,
+    paths, slib_path(), "testdata_preview.png", scale=24000,
 )
 ```
 
-When the one-shot API receives an SLIB directory, `channel_order="YMCK"` is
-forwarded to both colour-library parsers. To use an existing
-`GraphicLibraries` instance, construct it with the desired channel order first.
+For strict output, keep the returned Figure/Axes and use
+`pymapgis.geopdf.write_vector_geopdf()` as shown in `examples/render_testdata.py`.
+`inspect_geopdf()` reads back the geospatial dictionaries, image/drawing counts and
+text statistics. PNG, SVG and ordinary Matplotlib PDF do not inherit the strict
+GeoPDF guarantees. The compatibility raster writer `write_geopdf()` accepts only
+finite, non-degenerate north-up GeoTransforms; rotated or sheared grids are rejected.
 
-For an existing Matplotlib workflow, use `renderer.draw_layers(ax, layers)` or
-`renderer.draw_layer(ax, gdf, kind="wl")`. File paths and pre-read
-GeoDataFrames can be mixed. The latter must have been read with
-`read_graphic_params=True` (and `read_point_params=True` for WT). Set
-`gdf.attrs['source']` to preserve the layer name in reports, and
-`gdf.attrs['kind']` to `wl`, `wp` or `wt`; the kind is especially useful for
-empty layers whose geometry type cannot be inferred.
+### Rendering rules and limits
 
-The paper-mm/map-unit conversion is inferred from the CRS. For local data
-without a CRS, pass `map_units_per_mm` explicitly. For original graphic-library
-rendering, WP fills use Pcolor in `auto` mode when available, while pattern,
-line, auxiliary and point colours always resolve through Colorlib. Only
-out-of-range colour numbers use `fallback_color`; no family-interpolated or
-unit-specific colours are enabled by default. `color_overrides` and
-`unit_color_overrides` are restricted to explicitly labelled thematic or
-comparison renders and must not be used to present a map as native MapGIS
-output. Unresolved feature colours and line-style solid fallbacks are counted
-in each layer's report.
-See [the colour-evidence and role rules](docs/color_parsing_logic.md) for the
-JWD truth-anchor history and current verification results.
+- Layers are drawn in WP → WL → WT order. Polygon `class=0` features are skipped and
+  reported as `excluded_class`; holes and multipart polygons are preserved.
+- WP fills use Pcolor first in `auto` mode when available. Point, line, auxiliary-line
+  and pattern colours continue to use Colorlib. Unknown colours and styles are counted;
+  no family-interpolated or unit-specific recolouring is enabled by default.
+- Line rhythms preserve stored intervals and source vertices. Verified auxiliary-style
+  rules distinguish subline selection from independent overlays; unresolved cases are
+  reported rather than silently presented as native geometry.
+- Polygon and attitude labels support collision avoidance with explicit seeds, buffers
+  and offsets. Native text advance and fonts remain partly installation-dependent;
+  unmapped font numbers are reported, and script metrics are approximations.
+- `vector_patterns=True` emits vector Fillgrph geometry for formal output. Pattern
+  memory, tile, element and cycle limits prevent runaway rendering and are reported.
+- Geographic data should be projected before formal rendering. Use
+  `prepare_render_layers()` or the example's explicit target-CRS workflow. Reader itself
+  never reprojects coordinates.
 
-The renderer is format-level and is not a guarantee of pixel-identical MapGIS
-output. Its current display-parameter boundaries are explicit:
+For an external twelve-layer JWD dataset, use:
 
-- Polygon `class=0` features are skipped and counted as `excluded_class`
-- Positive WT `pen_width` values override `symbol_line_width_pt`; zero/missing
-  values retain that display default
-- With `native_text_layout=True` (default), character advance is
-  `(width + spacing) × scale`, including negative compression values. The
-  default attitude multiplier is 0.3 for `产状`, `断层产状` and `断层辅助点`;
-  set `attitude_text_scale=1.0` to disable this additional multiplier, or use
-  `text_category_scales` for other category vocabularies. Script size and
-  baseline remain typographic approximations. Set native layout to `False` for
-  whole-label Mathtext layout
-- Polygon unit labels default to `QDUECC_eff`, `QDUECC` or `QDUECD`, anchored at
-  `representative_point()` with 3.15 pt Mathtext (70% of the 4.5 pt base) and a
-  translucent background; Greek labels use Times New Roman. WT `代号`
-  annotations are excluded by default; the two paths can be switched
-  independently through `polygon_labels` and `exclude_text_categories`
-- Native font numbers are installation-local. Supply `font_zh_map`,
-  `font_en_map` and optionally `font_style_map`; unmapped numbers are counted
-  in `unknown_fonts` rather than silently treated as resolved
-- `pattern` is counted only when a feature adds visible geometry. A pattern with
-  no visible output is reported as `empty_pattern`; stored zero widths and
-  coefficients are preserved rather than silently replaced with defaults.
-  Exceeding
-  `max_pattern_cycles` (default 100,000) is reported as `cycle_limit`. Pattern memory is bounded
-  independently by `max_pattern_tiles` and `max_pattern_bytes`; the first limit
-  reached wins. At the default 26-pixel tiles, the 128 MiB byte cap is reached
-  before the nominal 40,000-tile cap, so both controls must be considered when
-  tuning large patterns
-- The aux field has verified dual semantics. An in-range value selects a main-
-  record subline variant; an out-of-range value is decoded and drawn as an
-  independent auxiliary record. The style-2 equivalent-dash family is the
-  explicit exception. Thus `16|1`, `38|2` and `65|4` do not acquire an extra
-  auxiliary line, while `1|2` retains one. Native visual confirmation is still
-  required for aux combinations not covered by these verified rules
-- Out-of-range colour numbers use `fallback_color`; these substitutions,
-  unknown fill states and unresolved symbols/styles are reported rather than
-  hidden
+```bash
+PYMAPGIS_JWD=/path/to/original/jwd   python examples/render_bundled_jwd.py --output-dir output/jwd_render
+```
+
+The original JWD vectors must be obtained separately. See
+[rendering and GeoPDF details](docs/rendering_geopdf.md) and
+[DATA_ATTRIBUTION.md](DATA_ATTRIBUTION.md).
 
 ## Real USGS geological map conversion
 
@@ -805,7 +696,8 @@ only the ARC/INFO universe polygon and non-boundary dangling arcs, and reproject
 NAD27 Polyconic to EPSG:32611. Eight native layers are written under `vectors/`
 and read back before PNG/PDF/SVG rendering. Rendering uses
 `mapgis2shp / pymapgis.GraphicRenderer` with the five libraries selected by
-`PYMAPGIS_SLIB` (this run: `D:/SLIB/SLIB`), not direct in-memory E00 plotting.
+`pymapgis.testing.slib_path()` (optionally overridden by `PYMAPGIS_SLIB`), not direct
+in-memory E00 plotting.
 Attitude symbols and their dip/plunge
 annotations are separate WT layers, so every numeric value remains visible.
 MapGIS 6x can store UTM `k=0.9996` at offset 232; the example's default conversion path uses Gauss–Krüger `k=1` (central meridian −117°), while `preserve_utm=True` is available when northern-hemisphere UTM coordinates must remain unchanged. The example restores EPSG:32611 after the native round-trip and checks
@@ -843,12 +735,12 @@ MapGIS after import; SHP does not carry SLIB display rules.
 
 ```bash
 python examples/export_usgs_shapefile.py \
-  --source work_usgs/e00/tempfiles --output-dir output/usgs_conejo/shp
+  --source tests/fixtures/usgs_conejo/source --output-dir output/usgs_conejo/shp
 ```
 
 Tests are in `tests/test_usgs_shapefile_export.py`.
 
-## Synthetic geological map
+## Synthetic geological map (research example)
 
 `examples/generate_synthetic_geology.py` creates an independent, deterministic
 simulation with twelve `SIM_*` WT/WL/WP layers. It uses the same native graphic
@@ -867,7 +759,7 @@ The command writes native MapGIS layers under `vectors/`, PNG/PDF/SVG maps,
 `read_layers()` also provide a Writer → Reader round-trip check. Regression tests
 are in `tests/test_synthetic_geology.py`.
 
-## GeoSciML semantic simulation
+## GeoSciML semantic simulation (optional, outside the core API)
 
 `examples/generate_semantic_geology.py` extends the independent simulation with
 geosciml4china's semantic model. It emits native MapGIS layers, a rendered map,
@@ -896,467 +788,22 @@ Regression tests are in `tests/test_semantic_geology.py`.
 
 CRS detection supports the most common projections found in MapGIS 6.x files, including longitude/latitude, Gauss-Krüger (Transverse Mercator), Lambert Conformal Conic, and Albers Equal-Area. Because MapGIS stores only projection and ellipsoid **index numbers**, the complete CRS depends on external MapGIS index files (`ellip.dat`, etc.).
 
-## Technical Documentation: MapGIS Vector File Format
+## Technical documentation
 
-> The following section describes the MapGIS 6x/67 binary vector format (`.wt` / `.wl` / `.wp`) as implemented by the current `Reader` and `Writer`. Historical reverse-engineering notes and supporting evidence remain under `docs/`.
+The byte-level layouts used by the current implementation are maintained in the
+[MapGIS vector format reference](docs/mapgis_vector_format_reference.md). It covers
+file headers and all 16 section entries, CRS fields, WT/WL/WP geometry and graphic
+parameters, polygon topology, attribute descriptors and known limits.
 
-MapGIS vector files are a closed-source binary vector data format developed by MapGIS (Zhongdi Digital). They are widely used in geological surveying, engineering investigation, and scientific research in China. The format itself **does not carry a complete coordinate-system description**; projection and ellipsoid parameters must be interpreted using the index tables in the MapGIS installation environment (e.g., `mapgis67\program\ellip.dat`).
+Earlier reverse-engineering notes are retained separately as
+[historical format material](docs/MapGIS_Vector_Format.md); where they disagree with
+the current reference, the current reference and executable regressions take precedence.
 
-**Conventions**
+## Release notes
 
-- All offsets are **0-based** from the beginning of the file.
-- `int16` / `int32` / `uint8` / `double` are all **little-endian**.
-- String fields are encoded as **GBK** unless otherwise noted.
-
-### Overall file structure
-
-The three file types share the same top-level organization:
-
-| Region | Description |
-|--------|-------------|
-| File header | 8-byte magic + 4-byte file ID + 4-byte index-section start offset |
-| Index section | 16 records of 10 bytes each, recording start offsets and sizes of sub-sections |
-| Sub-sections | Coordinates / arcs / polygons / attributes, etc. |
-
-The index-section start offset is at file bytes **12–15**, denoted as `data_start`. From `data_start` there are 16 consecutive index records (the first ten hold the regular data sections; entries 11 and 12 hold the polygon label-box section and file footer, which MapGIS’s renderer requires):
-
-```
-head_1  : offset data_start + 0
-head_2  : offset data_start + 10
-...
-head_10 : offset data_start + 90
-head_11 : offset data_start + 100   (polygon label boxes, 32 + 32n bytes)
-head_12 : offset data_start + 120   (polygon file footer, 4 + 4n bytes)
-head_13..16 : empty
-```
-
-Each index record begins with 8 bytes `(start, volume)` representing the start offset and size (in bytes) of the corresponding sub-section.
-
-The magic numbers and file IDs are:
-
-| File type | Magic | File ID | Description |
-|-----------|-------|---------|-------------|
-| Point `.wt` | `WMAP`D22` | 1 | Point features |
-| Line `.wl` | `WMAP`D21` | 0 | Line features |
-| Polygon `.wp` | `WMAP`D23` | 2 | Polygon features |
-
-### Coordinate reference system parsing
-
-The CRS parameters are stored at the same fixed offsets in all three file types:
-
-| Content | Offset | Bytes | Type | Description |
-|---------|--------|-------|------|-------------|
-| Projection type | 109 | 1 | uint8 | Projection-type index |
-| Ellipsoid type | 110 | 1 | uint8 | Ellipsoid index |
-| Scale | 143 | 8 | double | Scale denominator |
-| Transverse Mercator projection scale | 232 | 8 | double | `k=1` for Gauss-Krüger; `k=0.9996` for UTM |
-
-> The projection-type index and ellipsoid index correspond to index tables in the MapGIS installation directory and `ellip.dat`, respectively. Therefore, the full CRS interpretation depends on the external MapGIS software environment.
-
-#### Common ellipsoids
-
-| Index | Datum | PROJ4 definition |
-|-------|-------|------------------|
-| 1 | Beijing 54 | `+ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +units=m +no_defs` |
-| 2 | Xi'an 80 | `+a=6378140 +b=6356755.288157528` |
-| 7 | WGS84 | `+datum=WGS84` |
-| 16 | Krassovsky | `+ellps=krass` |
-
-#### Projection parameters
-
-For Gauss-Krüger (projection index 5), Lambert (3), Albers (2), and similar projections, additional parameters are stored as follows. The offsets 175/183/191 correspond to the starting latitude, first standard parallel, and second standard parallel described in the original technical article:
-
-| Content | Offset | Bytes | Type | Description |
-|---------|--------|-------|------|-------------|
-| Central meridian | 151 | 8 | double | Format `DDDMMSS.sss` |
-| Starting latitude | 175 | 8 | double | Standard parallel 0 |
-| First standard parallel | 183 | 8 | double | Standard parallel 1 |
-| Second standard parallel | 191 | 8 | double | Standard parallel 2 |
-| False easting | 199 | 8 | double | False Easting |
-| False northing | 207 | 8 | double | False Northing |
-
-The central meridian and standard parallels are encoded as `DDDMMSS.sss` doubles. The reader decodes them arithmetically, preserving fractional seconds and negative western longitudes without string rounding or zero-padding:
-
-```
-sign = -1 if raw < 0 else 1
-ms = abs(raw) % 10000
-degrees = (abs(raw) - ms) / 10000
-minutes = int(ms // 100)
-seconds = ms - minutes * 100
-decimal_degrees = sign * (degrees + minutes/60 + seconds/3600)
-```
-
-For longitude/latitude (projection type 0), coordinates are decimal degrees and the header scale is ignored because native files may store zero there. For supported projected CRS types, internal coordinates are converted to map units with `scale / 1000`. A non-finite or non-positive projected scale, or invalid projection parameters, yields an empty CRS rather than collapsing or poisoning the geometry. The resulting multiplier is exposed as `Reader.coordinate_scale_factor` and `geodataframe.attrs['mapgis_coordinate_scale_factor']`.
-
-For Transverse Mercator, offset 232 stores the projection scale `k`, independently of the geometry multiplier. A header with central meridian −117°, WGS84 ellipsoid, `k=0.9996`, and header scale 1000 therefore reads as an EPSG:32611-equivalent CRS with `coordinate_scale_factor == 1.0` and unchanged metre coordinates.
-
-### Point files (`.wt`)
-
-#### File header and index section
-
-| Content | Offset | Bytes | Type | Description |
-|---------|--------|-------|------|-------------|
-| File header magic | 0–7 | 8 | string | `WMAP`D22` |
-| File ID | 8–11 | 4 | int32 | Fixed value 1 |
-| Index section start | 12–15 | 4 | int32 | `data_start` |
-
-Index-section meaning:
-
-| head | Offset (relative to `data_start`) | Meaning |
-|------|-----------------------------------|---------|
-| head_1 | 0 | Coordinate data section start and size |
-| head_2 | 10 | Unused |
-| head_3 | 20 | Attribute data section start and size |
-
-#### Coordinate data section
-
-The coordinate data section stores one point per **93 bytes**. The first 93-byte record is empty, so the actual point count is:
-
-```
-point_count = coord_volume / 93 - 1
-```
-
-Single point record structure:
-
-| Content | Offset within record | Bytes | Type | Description |
-|---------|----------------------|-------|------|-------------|
-| Label | 0 | 1 | uint8 | Point label |
-| Reserved | 1–6 | 6 | - | Unused |
-| X coordinate | 7–14 | 8 | double | X value |
-| Y coordinate | 15–22 | 8 | double | Y value |
-| Graphic parameters | 23–92 | 70 | - | Point graphic parameters (see below) |
-
-#### Point graphic parameters (bytes 23–92)
-
-> Reverse-engineered in September 2026 and validated on the annotation layers
-> of map sheet J43C001002. The byte at offset 31 selects the point kind; the
-> remaining fields are interpreted according to that kind. Sizes are in
-> millimetres and the angle in degrees (counter-clockwise from east, matching
-> the `atan2(dy, dx)` line-tangent convention — verified by fault symbols
-> whose rotation is parallel (mod 180°) to their parent fault's strike).
-
-| Content | Offset within record | Bytes | Type | Description |
-|---------|----------------------|-------|------|-------------|
-| Reserved | 23–30 | 8 | - | Unused (always zero) |
-| Point kind | 31 | 1 | uint8 | 0 = text annotation, 1 = subgraph symbol |
-| Reserved | 32 | 1 | - | Unused |
-| Subgraph number | 33–34 | 2 | int16 | Symbol points: symbol-library number; 0 for text |
-| Text height | 33–36 | 4 | float32 | Text points: character height in mm (overlaps the subgraph number; interpret by kind) |
-| Height | 37–40 | 4 | float32 | Symbol points: glyph height (mm); text points: character width (mm) |
-| Width | 41–44 | 4 | float32 | Symbol points: glyph width (mm); text points: character spacing (mm) |
-| Rotation angle | 45–48 | 4 | float32 | Symbol / text rotation angle in degrees |
-| Kind-dependent pen/font fields | 49–53 | 5 | Symbol points: float32 pen width at 49–52 (mm). Text points: `font_zh` at 49, `font_en` at 51, `font_style` at 53 |
-| Colour | 75 | 1 | uint8 | Native Colorlib index shared by symbol and text points |
-| Layer | 83 | 1 | uint8 | Native layer number shared by both point kinds |
-| Other / reserved | 54–74, 76–82, 84–92 | — | - | Not fully decoded; auxiliary colour, text arrangement and transparent-output offsets remain unpinned |
-
-> **These parameters are not self-contained.** The subgraph number is an
-> index into the MapGIS system symbol library (Slib) of the originating
-> MapGIS installation; the glyph definitions are not stored in the file.
-> Under a different or customised library the same number may map to a
-> different glyph, and what a rotation of zero means depends on the glyph
-> design. Interpret the values only in the context of the symbol library
-> (and library version) that produced the data.
-
-### Line files (`.wl`)
-
-#### File header and index section
-
-| Content | Offset | Bytes | Type | Description |
-|---------|--------|-------|------|-------------|
-| File header magic | 0–7 | 8 | string | `WMAP`D21` |
-| File ID | 8–11 | 4 | int32 | Fixed value 0 |
-| Index section start | 12–15 | 4 | int32 | `data_start` |
-
-Index-section meaning:
-
-| head | Offset (relative to `data_start`) | Meaning |
-|------|-----------------------------------|---------|
-| head_1 | 0 | Line data section start and size |
-| head_2 | 10 | Coordinate data section start and size |
-| head_3 | 20 | Attribute data section start and size |
-
-#### Line data section
-
-The line data section stores one line index record per **57 bytes**. The first 57-byte record is empty, so the actual line count is:
-
-```
-line_count = line_volume / 57 - 1
-```
-
-Single line index structure:
-
-| Content | Offset within record | Bytes | Type | Description |
-|---------|----------------------|-------|------|-------------|
-| Reserved | 0–9 | 10 | - | Unused |
-| Anchor point count | 10–13 | 4 | int32 | Number of coordinate points in this line |
-| Anchor coordinate offset | 14–17 | 4 | int32 | Offset relative to coordinate-section start |
-| Graphic parameters | 18–56 | 39 | - | Line graphic parameters (see below) |
-
-#### Line graphic parameters (bytes 18–56)
-
-> Reverse-engineered in September 2026 and validated on all 18 line layers of
-> map sheet J43C001002 (widths are geologically plausible for every layer,
-> 0.05–4 mm; style numbers cluster by line category).
-
-| Content | Offset within record | Bytes | Type | Description |
-|---------|----------------------|-------|------|-------------|
-| Reserved | 18–21 | 4 | - | Unused |
-| Line-style number | 22–23 | 2 | int16 | Index into the MapGIS line-style library (1 = plain solid) |
-| Auxiliary line-style number | 24 | 1 | uint8 | Exposed as `aux_linetype`; not combined with the following flag byte |
-| Auxiliary flag | 25 | 1 | uint8 | Exposed as `aux_flag`; 0 is the normal case, 1 marks special/residual records |
-| Line colour | 26–27 | 2 | int16 | Colorlib index (1-based) |
-| Reserved | 28–29 | 2 | - | Unused |
-| Line width | 30–33 | 4 | float32 | Width in millimetres |
-| Reserved | 34 | 1 | - | Padding |
-| X coefficient | 35–38 | 4 | float32 | Pattern X scale (unaligned) |
-| Y coefficient | 39–42 | 4 | float32 | Pattern Y scale (unaligned) |
-| Auxiliary colour | 43–44 | 2 | int16 | Colorlib index; 0 = none |
-| Reserved | 45–46 | 2 | - | Not currently decoded |
-| Layer | 47 | 1 | uint8 | Native layer number |
-| Transparent output | 48 | 1 | uint8 | 0 = no, 1 = transparent output |
-| Reserved | 49–56 | 8 | - | Not currently decoded |
-
-> Line-style and colour numbers reference the external MapGIS line-style
-> library and are not self-contained (same dependency as point parameters).
-
-#### Additional sections
-
-Beyond the documented sections (lines / coordinates / attributes), `.wl`
-files in J43C001002 carry further per-line sections in the header index:
-head_4 (24 bytes per line), head_7 (32 bytes per line) and head_8 (4 bytes
-per line). Their content shows no correlation with display parameters and
-their purpose is undetermined (possibly topology/annotation linkages).
-
-#### Coordinate data section
-
-The coordinate data section stores anchor points sequentially. Each XY pair occupies **16 bytes** (2 × double). Reading uses the anchor point count and coordinate offset from the line index.
-
-### Polygon files (`.wp`)
-
-#### File header and index section
-
-| Content | Offset | Bytes | Type | Description |
-|---------|--------|-------|------|-------------|
-| File header magic | 0–7 | 8 | string | `WMAP`D23` |
-| File ID | 8–11 | 4 | int32 | Fixed value 2 |
-| Index section start | 12–15 | 4 | int32 | `data_start` |
-
-Index-section meaning:
-
-| head | Offset (relative to `data_start`) | Meaning |
-|------|-----------------------------------|---------|
-| head_1 | 0 | Arc data section start and size |
-| head_2 | 10 | Coordinate data section start and size |
-| head_3 | 20 | Metadata block (Windows FILETIME + source-path area) |
-| head_4 | 30 | Polygon topology data section start and size |
-| head_9 | 80 | Polygon graphic-parameter section (see below) |
-| head_10 | 90 | Attribute data section start and size |
-
-#### Arc data section
-
-Polygon files reuse the line arc-storage structure: **57 bytes** per arc index record, with the first 57-byte record empty. The fields have the same meaning as in `.wl` (anchor point count + coordinate offset).
-
-#### Coordinate data section
-
-Arc coordinates use the same 16-byte double-precision XY pairs as line files, but the WP coordinate section also contains variable-length **polygon/ring/arc index records** between coordinate blocks. Arc byte offsets therefore always refer to the combined coordinate-and-index stream, not to an array of coordinates alone.
-
-For freshly written files, the Writer emits each polygon's ring-index record after the first arc of the following polygon, and emits the final polygon's record after the final arc. The record lead is derived from raw arc point counts and hole/zero markers. Each record's byte offset is returned to the head_9 encoder and stored in `field5`/`field6`/`field7`, keeping the coordinate section, arc index and ring pointers synchronized.
-
-#### Polygon topology data section
-
-The topology data section stores one record per **24 bytes**. The first 24-byte record is empty, so the actual topology record count is:
-
-```
-topo_count = poly_volume / 24 - 1
-```
-
-The first 16 bytes of each record contain 4 little-endian int32 values. The parser mainly uses columns 2 and 3 (0-indexed), i.e., record bytes 8–15:
-
-| Content | Offset within record | Bytes | Type | Description |
-|---------|----------------------|-------|------|-------------|
-| Left polygon ID | 8–11 | 4 | int32 | Polygon ID on the left side of the arc |
-| Right polygon ID | 12–15 | 4 | int32 | Polygon ID on the right side of the arc |
-| Reserved | 16–23 | 8 | - | Unused |
-
-> Polygon IDs are 1-based. To reconstruct a polygon, select all arcs whose left or right polygon ID equals the target ID. If the left ID matches, the arc coordinates are usually reversed so that the polygon boundary is consistently on the same side of the arc. The arcs are then chained by matching endpoints into closed rings, and rings are classified as shells or holes to build `Polygon` / `MultiPolygon` geometries.
-
-#### Polygon graphic-parameter section (head_9)
-
-> Reverse-engineered in September 2026 and validated on all 13 polygon layers
-> of map sheet J43C001002: the section holds exactly one record per polygon,
-> and its fields are 100% consistent within each geological unit.
-
-The section stores one record per **40 bytes**, the first record is empty,
-and record *i* (0-based after the empty record) belongs to polygon ID *i + 1*:
-
-| Content | Offset within record | Bytes | Type | Description |
-|---------|----------------------|-------|------|-------------|
-| Kind byte | 0 | 1 | uint8 | Observed value 1 |
-| Class code | 1 | 1 | uint8 | Native display class; 0 suppresses the native fill |
-| Reserved | 2–4 | 3 | - | Unused |
-| Ring-index offset | 5–7 | 3 | uint8 × 3 | 24-bit little-endian byte offset of the polygon's ring-index record in the coordinate section; `field5` low, `field6` middle, `field7` high |
-| Reserved | 8 | 1 | - | Unused |
-| Fill colour | 9–10 | 2 | uint16 | Colorlib index; values above the standard library range require installation-specific colour evidence |
-| Reserved | 11–12 | 2 | - | Unused / observed zero |
-| Fill-pattern number | 13–14 | 2 | uint16 | Fillgrph.lib pattern index |
-| Reserved | 15–16 | 2 | - | Unused |
-| Pattern height | 17–18 | 2 | uint16 | High 16 bits of a float32; reconstructed as `uint16_value << 16` and viewed as float32, in mm |
-| Reserved | 19–20 | 2 | - | Unused |
-| Pattern width | 21–22 | 2 | uint16 | Same high-half float32 representation as pattern height, in mm |
-| Pattern colour | 23 | 1 | uint8 | Colorlib index used for the pattern |
-| Reserved | 24–29 | 6 | - | Unused |
-| Layer | 30 | 1 | uint8 | Native layer number |
-| Reserved | 31–39 | 9 | - | Unused |
-
-For freshly written WP files, `field5`/`field6`/`field7` are calculated from the generated coordinate layout and must not be replaced with colour or arbitrary display values. For unchanged source-derived round-trips, the original pointer table is preserved with the original arc layout.
-
-> Colour and pattern numbers reference the external MapGIS colour/pattern
-> libraries and are not self-contained (same dependency as point parameters).
-
-#### Polygon reconstruction key points
-
-1. **Select arcs**: For target polygon ID `pid`, select arcs where `left_id == pid` or `right_id == pid`.
-2. **Orient arcs**: If `left_id == pid`, reverse the arc coordinates so the polygon boundary stays on the consistent side.
-3. **Form rings**: Use a greedy nearest-endpoint merge to chain arcs into closed rings. Endpoint coordinates may differ by ~1e-6 due to floating-point precision.
-4. **Hole detection**: Use point-in-polygon containment between rings to distinguish outer shells and inner holes.
-5. **Validity repair**: Because arc merging can produce self-intersecting rings, `shapely.make_valid()` or similar repair is recommended after reconstruction.
-
-### Attribute data section (common to all file types)
-
-Point, line, and polygon files share the same attribute table structure.
-
-#### Attribute table header
-
-| Content | Offset within attribute section | Bytes | Type | Description |
-|---------|---------------------------------|-------|------|-------------|
-| Reserved | 0–321 | 322 | - | Date, work directory, and other metadata |
-| Field count | 322–323 | 2 | int16 | `field_count` |
-| Record count | 324–327 | 4 | int32 | `record_count` |
-| Record length | 328–329 | 2 | int16 | `record_length` |
-| Reserved | 330–347 | 18 | - | Unused |
-| Field descriptors | 348 onwards | 39 × field_count | - | 39 bytes per field |
-
-> The original technical article states that field descriptors start at "the 349th byte"; this is a 1-based description. This document uses 0-based offsets, so the start is **348**.
-
-#### Field descriptor
-
-Each field descriptor is fixed **39 bytes**:
-
-| Content | Offset within descriptor | Bytes | Type | Description |
-|---------|--------------------------|-------|------|-------------|
-| Field name | 0–19 | 20 | string | GBK encoded, terminated by `\x00` |
-| Field type | 20 | 1 | uint8 | 0–7 |
-| Storage offset | 21–24 | 4 | int32 | Start offset of the field within each record |
-| Reserved / display width | 25–38 | 14 | - | Includes display width, decimal places, etc. |
-
-Field type mapping:
-
-| Type value | Meaning | Python type |
-|------------|---------|-------------|
-| 0 | string | `str` |
-| 1 | byte | `int` |
-| 2 | short integer | `int` |
-| 3 | integer | `int` |
-| 4 | float | `float` |
-| 5 | double | `float` |
-| 6 | date | `datetime.date` |
-| 7 | time | `datetime.time` |
-
-#### Record data
-
-Immediately after the field descriptors there are `record_count × record_length` bytes of data. **The first record is empty**; the actual valid record count is `record_count - 1`.
-
-Each record is sliced at the field descriptor's `storage offset`. String fields use their declared byte length and are decoded as GBK up to a null terminator or invalid byte. Numeric fields use the fixed size implied by their type code rather than the display width. Date fields contain year (int16), month and day; time fields contain hour, minute and seconds (double, including fractional seconds).
-
-Unknown field-type descriptors are skipped without shifting the retained raw descriptors used by the Writer. Truncated numeric values and invalid or non-finite date/time values decode as `None`; a non-positive attribute `record_length` raises `MapGISError` instead of leaking a low-level parsing exception.
-
-### Known limitations
-
-1. **Incomplete coordinate system**: The file only stores projection/ellipsoid index numbers. The full CRS depends on external `ellip.dat` and projection index tables. The current implementation embeds common ellipsoids (Beijing 54, Xi'an 80, WGS84, etc.) and projections (Gauss-Krüger, Albers, Lambert).
-2. **Polygon topology tolerance**: Arc endpoints may have tiny deviations, and some source data may contain topological gaps or self-intersections. Geometry validity repair is recommended after reading.
-3. **Encoding**: Field names and string attribute values use GBK. Illegal bytes are typically truncated at the first invalid byte.
-4. **Scale and invalid CRS fields**: Geographic files ignore the header scale because native zero/uninitialised values are valid. Supported projected CRS types use `scale / 1000`; a non-finite or non-positive projected scale and invalid projection parameters produce an empty CRS rather than usable-looking but corrupted coordinates.
-5. **Graphic parameters are library-dependent**: symbol, line-style, colour and pattern numbers reference the MapGIS system libraries (Slib, line-style and pattern libraries) of the originating installation, which are not embedded in the file. They are only meaningful together with those libraries (and their versions); some field assignments are validated candidates rather than certainties (see the per-section notes).
-
-## Changelog
-
-### 2.7.3 (2026-11-14)
-
-- Fix AEA/LCC first-standard-parallel overwrites, preserve appended attribute values with physical storage-length accounting and expanded records, and replace fuzzy polygon passthrough fingerprints with exact normalized-WKB comparison
-- Add `tests/test_writer_regressions_20261114.py` with five targeted regression cases, covering non-25° conic parallels, native attribute append and small polygon edits; verify the complete Writer batch2/3/4 native comparison suites
-- Declare PyMuPDF and lxml in the development extra, add `pytest.importorskip` guards for optional GDAL and geosciml4china dependencies, remove the hard-coded semantic-extension path, and set pytest `pythonpath` for direct invocation
-- Bundle the Writer integrity fixes in a public 2.7.3 release and distinguish that release from the earlier 2.7.2 artifact
-
-### 2.7.2 (2026-11-14)
-
-- Bundle seven processed USGS Conejo Well test layers (8,512 features) and the independently authorized five generic SLIB libraries; keep original NGAC/JWD vectors and native NGAC exports external, reject them in current release trees and archives, and detect renamed forbidden content by SHA-256
-- Add strict-scale fully vector GeoPDF output, `Writer(..., preserve_utm=True)`, projection-scale parsing at byte 232 and explicit Reader `coordinate_scale_factor`; distinguish native storage scaling from the source map's cartographic scale
-- Replace application examples with self-contained `testdata_path()` / `slib_path()` workflows, add the actual rendered geological map to the README, and update `examples/geological_workflow.py` for the seven bundled layers
-- Add release-boundary tests, strict wheel/sdist content inspection, and current full-suite validation
-
-- Align fresh WT/WL/WP output with MapGIS SHP import: compute attribute-prefix descriptor offsets/counts and descriptor flags, add native ID/length/area fields, use native text/numeric declarations, write WT 65536 flags and coordinate-scaled boxes/extents, apply fresh polygon ring-count classes and cyclic fill colours, zero fresh legacy header stamps, and prevent geometry passthrough from discarding explicit style edits
-- Add external SHP→MapGIS reference tests covering binary coordinate sections, native auxiliary records, attribute descriptors, default graphics and style-preserving mode
-
-- Use original open-edition JWD/SLIB for current regression and examples, stop new JWD-derived synthetic variants, and strengthen dataset, companion-article and SLIB attribution in `DATA_ATTRIBUTION.md`
-- Add the fourth domestic Gauss-Kruger Writer batch (20 SHP cases and 18 native MapGIS outputs); preserve multipart geometry, valid topology, metric fields and null semantics while matching native point/line defaults, and reject native topology/empty-geometry defects instead of inheriting them
-- Add twelve third-batch Writer cases for large 24-bit ring-index offsets, projected UTM input, long attributes, null geometry and degenerate rings; reproject UTM to Gauss-Kruger (k=1) with the correct central meridian instead of writing UTM coordinates with incorrect metadata
-- Add eleven native SHP-to-MapGIS Writer cases with provenance manifests and source/wheel fixture access; align default WT point size 0.1 mm, colour 6 and pen width 0.1 mm, and default WL width 0.05 mm, X/Y coefficients 1.0 and `aux_flag=1` with the supplied native conversion reference
-- Normalize the two bundled WP backup filenames to `.WP`, and add a compatibility loader that still handles the published V2.7.1 `.WP~` layout through `Reader`
-- Add `examples/render_bundled_jwd.py` with PNG/PDF/SVG output and sanitized JSON reports, and run it in CI
-- Assert all 782 38|2 source vertices and `max_deviation <= 1e-9`, pin `drawn + excluded_text == 7094`, cover the published WP-backup layout, and add direct Subgraph/LINESTY/Fillgrph/Colorlib/Pcolor structural-census assertions
-- Select `geopandas<1.2` only in the `dev` reference environment because GeoPandas 1.2 changes edge pixels in the optional legacy rendering reference path; ordinary runtime requirements are unchanged
-- Synchronize the citation title and 2.7.1 Zenodo DOI, and clarify the SoftwareX validation artifacts and native-acceptance boundary
-
-### 2.7.1 (2026-11-07)
-
-- Document original-library rendering in the package introduction and project metadata; clarify the complete vector / graphic-library / rendering scope
-- Fix CI Ruff checks, pin Python 3.9 to Ubuntu 24.04, update checkout/setup-python actions and make nested `pytest.approx()` tests compatible with current pytest
-
-### 2.7.0 (2026-11-07)
-
-- Add the original graphic-library rendering API: `GraphicLibraries`, `GraphicRenderer`, `GraphicRenderResult` and `render_graphic_map`, with WP/WL/WT rendering, PNG/PDF output, per-layer reports and the optional `render` Matplotlib extra
-- Honour WP `class=0`, positive WT `pen_width`, native `width + spacing` text advances (including compression), annotation scripts and optional native font-number maps; add the bundled twelve-layer real JWD rendering regression
-- Correct Matplotlib display-pixel to typographic-point conversion for WL widths and marker sizes so output geometry does not change with DPI
-- Extend Subgraph decoding with element groups, parameter-driven fill handling and explicit-angle circles/arcs; export those elements through `symbol_geometries()` and preserve unresolved structures as explicit non-results
-- Use a hybrid LINESTY path: verified `(linetype, aux)` variants resolve through `feature_rhythm()`, while other records use direct library rhythm or `SubLine.parameter_geometry()` with selected subline variants; retain all-solid pen overlays, preserve unresolved verified variants as non-results and report unknown fill states explicitly
-- Render 48-family raised lines from library segment intervals with source-vertex preservation and X/Y coefficient scaling instead of fixed screen-space dashes; merge coincident solid-dot references in verified 16/17 families without changing their visible geometry
-- Resolve aux duality as main-record subline selection versus independent auxiliary-record overlay, including the style-2 exception; preserve origin vertical ticks without duplicating closed-line end seams
-- Follow the geosciml4china polygon-label scheme by default: draw complete unit codes at polygon representative points with Mathtext, translucent backgrounds and Greek font selection; exclude fragmented WT `代号` annotations and retain an explicit legacy compatibility switch
-- Preserve every original source vertex when clipping zero-offset rhythm strokes, including the 38|2 solid baseline; verify all 37 real 38|2 features and all 782 source vertices with zero omissions
-- Render constant-offset parallel strokes along complete offset curves with source-chainage phase control, and keep `(linetype, aux)` rhythm cache keys type-correct
-- Export `FillgrphLib`, `FillPattern`, `FillStroke` and `pattern_geometry` at package level; compute Fillgrph record boundaries once and use O(n) f32-bitwise coordinate deduplication while preserving every real-library geometry hash
-- Decode verified 32-byte Pcolor colour nodes (`N + 3`, channels at +28), including valid all-zero white nodes; use Pcolor for WP fills in `auto` mode while retaining Colorlib for other roles, resolving all 25 previously unresolved JWD colour codes without manual overrides
-- Bundle the twelve JWD vectors and five matching SLIB libraries as checksummed integration fixtures under `tests/fixtures/`; include them in both sdist and wheel and expose source/install-independent access through `pymapgis.testing.fixture_path()`
-- Clarify the vector/graphic-library/rendering scope, curate `pymapgis.__all__`, remove geological semantics from CLI output, and extend `pymapgis lib` to Fillgrph, Colorlib and Pcolor record inspection
-- Harden Reader CRS inference, malformed-section handling, temporal/numeric missing values, and attribute/geometry/graphic-parameter alignment; non-finite DMS and conic-projection parameters now follow the same empty-CRS fallback instead of leaking `ValueError`
-- Change Writer defaults to preserve native rings (`make_valid=False`), add explicit `on_empty` handling, encode fresh polygons as independent closed rings, and generate native ring indices plus 24-bit head_9 pointers; unchanged source geometry continues to use raw-section passthrough
-- Synchronize the public format documentation with the current WT/WL/WP layouts and document the remaining native-rendering verification boundaries
-
-### 2.6.0
-- **Writer**: encode GeoDataFrames back to native MapGIS `.wt` / `.wl` / `.wp` binaries — attribute table (GBK strings, dates, times, typed numerics), graphic parameters (with mapgis → shp → mapgis fidelity when the reader's parameter columns are present), CRS (longitude/latitude, Transverse Mercator, Albers, Lambert), and regenerated polygon topology (shared boundaries stored as single arcs with left/right polygon IDs). New public API: `Writer`, `write()`, and `WriterError`
-- CLI converts in both directions based on the input extension (`.shp`, `.geojson`, `.gpkg`, ... → `.wt`/`.wl`/`.wp`); new `--encoding` option
-- New runtime dependency: `pyogrio>=0.8` (reading shapefiles is now a runtime feature)
-- `verify_pymapgis.py --roundtrip`: Reader → Writer → Reader regression over all local MapGIS files (not recorded in the baseline)
-- New graphic-library parsers: `ColorLib` (Colorlib.lib CMYK → RGB) and `FillgrphLib` (fill-pattern records; unsupported structures return `None` rather than inferred geometry)
-- Fix the coincident hole–island polygon regression (area over-count when a hole boundary exactly coincides with an independent island polygon); covered by `test_coincident_hole_and_island` and the public fixtures
-- Public synthetic MapGIS fixtures (`tests/fixtures/mapgis/`, with generator, provenance manifest and SHA-256 checksums), clean-checkout test fallbacks, executable example (`examples/geological_workflow.py`), CI workflow (`.github/workflows/test-and-build.yml`) and release-archive inspection (`tests/inspect_dist.py`)
-- Release notes for 2.3.0–2.5.0 remain to be backfilled into this changelog
-
-### 2.2.1
-- Packaging fix: `pymapgis.rendering` is under active development and is not yet ready for distribution (it is also undocumented and requires matplotlib, which is not a declared runtime dependency). It is excluded from the wheel and sdist; the published package again focuses on reading/conversion. Optional development copies are not required by the core package and may remain outside the tracked repository. A separate package or extra can be considered once the module stabilises
-
-### 2.2.0
-- `read_graphic_params=True`: decode line graphic parameters (`.wl`: `linetype`, `aux_linetype`, `width`, `x_coef`, `y_coef`) and polygon graphic parameters (`.wp` head_9 section: `fill_color`, `pattern`, `pattern_color`), exposed as `line_params` / `polygon_params` and joined into the GeoDataFrame
-- Format documentation: line graphic-parameter area (bytes 18–56), polygon head_9 section, additional `.wl` index sections
-
-### 2.1.0
-- `read_point_params=True`: decode point graphic parameters (`.wt`: `point_type`, `symbol_no`, `height`, `width`, `spacing`, `angle`), exposed as `point_params` and joined into the GeoDataFrame
-- New constants `POINT_TYPE_TEXT` / `POINT_TYPE_SYMBOL`
-- Format documentation: point graphic-parameter area (bytes 23–92)
-
-### 2.0.x
-- Matured reader: CRS inference, vectorised parsing, polygon-topology reconstruction, GBK attribute decoding, CLI
+The current published release is **2.7.3**. Audit fixes in this source tree are listed
+under **Unreleased** until a new version is packaged. See the
+[full changelog](docs/CHANGELOG.md) for current changes and historical release notes.
 
 ## Development
 
@@ -1377,10 +824,20 @@ python -m pytest -q
 For a clean-environment reproducibility check, create a fresh virtual
 environment and install only the declared development extra before running it:
 
+POSIX / macOS / Linux:
+
 ```bash
 python -m venv .venv
 .venv/bin/python -m pip install -e ".[dev]"
 .venv/bin/python -m pytest -q
+```
+
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python -m pip install -e ".[dev]"
+.venv\Scripts\python -m pytest -q
 ```
 
 The dev extra includes PyMuPDF and lxml. Tests requiring GDAL/osgeo or the
@@ -1423,7 +880,7 @@ layers through `testdata_path()`, retains their native EPSG:32611 metre
 coordinates, and reports attitude counts, line lengths and polygon areas:
 
 ```bash
-PYTHONPATH=src python3 examples/geological_workflow.py
+PYTHONPATH=src python examples/geological_workflow.py
 ```
 
 The original twelve-layer JWD vectors are **not bundled** in the current Git
@@ -1485,10 +942,15 @@ and macOS. Real JWD/SLIB rendering runs only when external fixture directories
 are configured; otherwise the workflow prints an explicit optional-data skip.
 Its build job checks wheel and source-archive contents with
 `tests/inspect_dist.py` and retains the artifacts for review. The optional
-Matplotlib extra is required only for rendering tests.
+`render` extra is required for original-library rendering and GeoPDF tests.
 
 ## Further documentation
 
+- [Current MapGIS vector format reference](docs/mapgis_vector_format_reference.md) —
+  implemented WT/WL/WP headers, sections, attributes, CRS and graphic parameters
+- [Rendering and GeoPDF](docs/rendering_geopdf.md) — target CRS, exact page scale,
+  label layout, output guarantees and verification
+- [Full changelog](docs/CHANGELOG.md) — Unreleased audit fixes and historical releases
 - [MapGIS file-structure knowledge archive](docs/mapgis_file_structure_knowledge.md) —
   header fields, section layouts, display gates, and the evidence appendix
   from the native-format reverse-engineering sessions

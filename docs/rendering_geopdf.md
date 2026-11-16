@@ -1,6 +1,6 @@
 # Gauss–Krüger rendering and vector ISO 32000 GeoPDF
 
-`examples/render_bundled_jwd.py` resolves projection **after** the MapGIS Reader has loaded the layers. Reader itself never reprojects coordinates.
+`examples/render_testdata.py` runs the self-contained seven-layer USGS fixture at 1:24,000. For external JWD data, `examples/render_bundled_jwd.py` resolves projection **after** the MapGIS Reader has loaded the layers. Reader itself never reprojects coordinates.
 
 ## Target CRS and scale
 
@@ -57,7 +57,7 @@ axes_height_mm = abs(ymax - ymin) * metres_per_unit / scale_denominator * 1000
 
 `write_vector_geopdf()` resizes the figure iteratively until the actual Axes has those physical dimensions, preserving its margins and equal-aspect adjustment. It then computes a north-up transform from **PDF points** (bottom-left origin) to projected map coordinates. The four page corners are transformed to geographic latitude/longitude for `/GPTS`.
 
-A geographic CRS is rejected for exact paper-scale output because degrees cannot be converted to a paper scale without a latitude-dependent approximation. The earlier raster writer `write_geopdf()` remains available for compatibility, but JWD uses `write_vector_geopdf()` exclusively.
+A geographic CRS is rejected for exact paper-scale output because degrees cannot be converted to a paper scale without a latitude-dependent approximation. The earlier raster writer `write_geopdf()` remains available for compatibility with finite, non-degenerate **north-up** GeoTransforms only; rotated or sheared grids are rejected instead of producing inconsistent page geometry. JWD uses `write_vector_geopdf()` exclusively.
 
 Use `--no-geopdf` to skip strict-scale vector GeoPDF generation; the remaining PNG/SVG files are previews only, with no scale-certified formal PDF. The `render` extra installs PyMuPDF (with a Python-3.9-compatible version bound); the import is delayed so `--no-geopdf` still works with older rendering-only installations.
 

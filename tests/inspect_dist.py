@@ -232,10 +232,15 @@ def _check_sdist(path: Path) -> None:
         _check_sdist_hashes(archive, path.name)
     required_suffixes = (
         "/CITATION.cff",
+        "/CONTRIBUTING.md",
+        "/CODE_OF_CONDUCT.md",
         "/DATA_ATTRIBUTION.md",
         "/tests/fixtures/DATA_ATTRIBUTION.md",
         "/examples/geological_workflow.py",
         "/examples/render_bundled_jwd.py",
+        "/examples/render_testdata.py",
+        "/docs/mapgis_vector_format_reference.md",
+        "/docs/CHANGELOG.md",
         "/tests/test_graphic.py",
         "/tests/test_graphic_real_jwd.py",
         "/tests/test_writer_native_batch2.py",

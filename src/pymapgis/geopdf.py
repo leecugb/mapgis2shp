@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """ISO 32000 geospatial PDF output for rendered rasters and vector maps.
 
 The implementation follows GDAL's ``WriteSRS_ISO32000`` structure: a page
@@ -76,13 +77,33 @@ def write_geopdf(
     scale_denominator: float = 250000,
     title: str = "Georeferenced map",
 ) -> Dict[str, Any]:
-    """Write a one-page ISO 32000 GeoPDF at an exact paper scale."""
+    """Write a one-page ISO 32000 GeoPDF at an exact paper scale.
+
+    Only north-up geotransforms are supported: the rotation/shear terms
+    ``geotransform[2]`` and ``geotransform[4]`` must be zero, all six
+    values must be finite, and the pixel sizes ``geotransform[1]`` and
+    ``geotransform[5]`` must be non-zero. Violations raise ValueError
+    instead of silently writing mis-georeferenced control points (the
+    ``/GPTS`` quadrilateral and the page extent assume an axis-aligned
+    pixel grid). ``matplotlib_geotransform`` always returns a compatible
+    north-up transform.
+    """
     if dpi <= 0:
         raise ValueError("dpi must be positive")
     if not math.isfinite(scale_denominator) or scale_denominator <= 0:
         raise ValueError("scale_denominator must be positive and finite")
     if len(geotransform) != 6:
         raise ValueError("geotransform must contain six values")
+    if not all(math.isfinite(float(value)) for value in geotransform):
+        raise ValueError("geotransform must contain only finite values")
+    if geotransform[2] != 0.0 or geotransform[4] != 0.0:
+        raise ValueError(
+            "write_geopdf supports only north-up geotransforms: "
+            "rotation/shear terms geotransform[2] and geotransform[4] "
+            "must be zero"
+        )
+    if geotransform[1] == 0.0 or geotransform[5] == 0.0:
+        raise ValueError("geotransform pixel sizes must be non-zero")
     target = crs if isinstance(crs, pyproj.CRS) else pyproj.CRS.from_user_input(crs)
     if target.is_geographic:
         raise ValueError("An exact paper-scale GeoPDF requires a projected CRS")

@@ -70,6 +70,23 @@ class TestCliMain:
         code = main([str(bad), str(output)])
         assert code == 1
 
+    def test_same_input_output_is_rejected_without_overwrite(
+        self, sample_wp: Path, tmp_path: Path, capsys
+    ) -> None:
+        source = tmp_path / "same.wp"
+        source.write_bytes(sample_wp.read_bytes())
+        original = source.read_bytes()
+
+        code = main([str(source), str(source), "--driver", "GeoJSON"])
+
+        assert code == 1
+        assert source.read_bytes() == original
+        assert "same file" in capsys.readouterr().err
+
+        alias = tmp_path / "missing" / ".." / "same.wp"
+        assert main([str(source), str(alias), "--driver", "GeoJSON"]) == 1
+        assert source.read_bytes() == original
+
     def test_no_make_valid(self, sample_wp: Path, tmp_path: Path) -> None:
         output = tmp_path / "out.geojson"
         code = main([str(sample_wp), str(output), "--no-make-valid"])

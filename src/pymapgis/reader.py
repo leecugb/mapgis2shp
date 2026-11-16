@@ -363,8 +363,15 @@ def _read_attribute_records(
     record_count: int,
     record_length: int,
     fields: List[_Field],
+    max_bytes: Optional[int] = None,
 ) -> pd.DataFrame:
-    """Read attribute records assuming the file position is at the first record."""
+    """Read attribute records assuming the file position is at the first record.
+
+    ``max_bytes`` optionally caps the record area actually read (e.g. to the
+    attribute section's declared volume).  A corrupt ``record_count`` could
+    otherwise request gigabytes from a small file: ``BufferedReader.read(n)``
+    pre-allocates the full *n* bytes before discovering EOF.
+    """
     if record_length <= 0:
         # A file-derived signed int16: negative or zero here makes the
         # bulk read below raise a raw ValueError ("read length must be
@@ -373,19 +380,27 @@ def _read_attribute_records(
         raise MapGISError(f"invalid attribute record length: {record_length}")
 
     # Skip the empty first record (MapGIS convention).
-    file_obj.read(record_length)
+    if max_bytes is not None:
+        max_bytes = max(0, max_bytes)
+        skipped = file_obj.read(min(record_length, max_bytes))
+        remaining = max_bytes - len(skipped)
+    else:
+        file_obj.read(record_length)
+        remaining = None
 
     if record_count <= 1:
         return pd.DataFrame(columns=[field.name for field in fields])
 
     # Read all remaining records in one go, then split into fixed-length views.
     total_bytes = (record_count - 1) * record_length
+    if remaining is not None:
+        total_bytes = min(total_bytes, remaining)
     records_buf = file_obj.read(total_bytes)
-    if len(records_buf) < total_bytes:
-        usable = len(records_buf) // record_length
-        records_buf = records_buf[: usable * record_length]
-    else:
-        usable = record_count - 1
+    # Derive the usable count from bytes actually available in every case.
+    # In particular, a zero-byte cap must not be treated as a complete read of
+    # millions of zero-length records when record_count is forged.
+    usable = min(record_count - 1, len(records_buf) // record_length)
+    records_buf = records_buf[: usable * record_length]
 
     records: List[List[Any]] = []
     for i in range(usable):
@@ -1382,19 +1397,33 @@ class Reader:
         header_entries = _read_header_entries(
             file_obj, data_start, _HEADER_COUNT_PHYSICAL
         )
+        # Establish the real file size before honouring any declared section
+        # extent: a forged (start, volume) pointing past EOF must fail here
+        # instead of making ``read(volume)`` pre-allocate the full declared
+        # volume (BufferedReader allocates *n* up front even when the file
+        # holds far fewer bytes).
+        file_obj.seek(0, 2)
+        file_size = file_obj.tell()
         self._raw_sections: Dict[int, bytes] = {}
         self._raw_tail = b""
-        end = max((s + v for s, v in header_entries if v), default=0)
+        end = 0
+        for i, (s, v) in enumerate(header_entries):
+            if not v:
+                continue
+            if s > file_size or v > file_size - s:
+                raise MapGISError(
+                    f"section {i} extends past end of file: start={s}, "
+                    f"volume={v}, file_size={file_size}"
+                )
+            end = max(end, s + v)
         for i, (s, v) in enumerate(header_entries):
             if v:
                 file_obj.seek(s)
                 self._raw_sections[i] = file_obj.read(v)
-        file_obj.seek(0, 2)
-        file_size = file_obj.tell()
         file_obj.seek(end)
         self._raw_tail = file_obj.read(max(0, file_size - end))
 
-        attr_start, _ = header_entries[_ATTR_HEADER_INDEX[self.shapeType]]
+        attr_start, attr_volume = header_entries[_ATTR_HEADER_INDEX[self.shapeType]]
         record_count, record_length, fields, raw_descriptors = (
             _read_attribute_header(file_obj, attr_start)
         )
@@ -1420,8 +1449,16 @@ class Reader:
             ],
             "raw_descriptors": raw_descriptors,
         }
+        # The attribute header may leave the stream at the first record.  Cap
+        # record reads to the declared section so a forged record count cannot
+        # request memory beyond it or consume the following section.
+        attr_record_bytes = max(0, attr_volume - (file_obj.tell() - attr_start))
         self.data = _read_attribute_records(
-            file_obj, record_count, record_length, fields
+            file_obj,
+            record_count,
+            record_length,
+            fields,
+            max_bytes=attr_record_bytes,
         )
 
         self.crs, scale = _read_crs(file_obj)

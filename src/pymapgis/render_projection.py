@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Target-CRS resolution for rendering pipelines.
 
 Reader never calls :func:`to_crs`.  These helpers run after layers are loaded,
