@@ -27,42 +27,79 @@ def test_conic_first_standard_parallel_roundtrip(tmp_path, projection):
     assert "+lat_1=36.25" in Reader(path).crs.to_proj4()
 
 
-def test_lcc_header_stamps_for_mapgis_standard_parallel_display(tmp_path):
-    """MapGIS requires @91-92=0x0103 and @93/@101=coordinate factor on LCC files.
+def test_crs_header_stamps_for_mapgis_parameter_display(tmp_path):
+    """MapGIS requires the @91-92 flag and @93/@101=100.0 on every CRS file.
 
-    2026-11 native-reference finding: without these stamps MapGIS cannot
-    display the standard parallels of LCC files written by the Writer
-    (verified against NEWLIN.WL / writer_lcc1.wl; tmerc natives leave the
-    region zeroed, so the stamp is LCC-specific).
+    2026-11 native-reference finding (NEWLIN*.WL corpus, verified in MapGIS):
+    without these stamps MapGIS cannot display CRS parameters (standard
+    parallels, projection settings).  Geographic files carry bytes 01 04;
+    every projected type (codes 1/2/3) carries 03 01.  @93/@101 are the
+    constant double 100.0 regardless of the header scale field.
     """
-    crs = (
+    lcc = (
         "+proj=lcc +lat_0=0 +lon_0=75 +lat_1=25 +lat_2=47 "
         "+x_0=0 +y_0=0 +a=6378140 +b=6356755.288157528 +units=m +no_defs"
     )
-    frame = gpd.GeoDataFrame(
-        {"name": ["lcc"]},
-        geometry=[Point(0, 0)],
-        crs=crs,
-    )
-    path = tmp_path / "lcc.wt"
-    Writer(frame, map_scale=100000).to_file(path)
-    raw = path.read_bytes()
-    assert raw[91:93] == b"\x03\x01"
-    assert struct.unpack_from("<d", raw, 93)[0] == 100.0
-    assert struct.unpack_from("<d", raw, 101)[0] == 100.0
+    aea = lcc.replace("+proj=lcc", "+proj=aea")
+    cases = [
+        ("lcc", lcc, b"\x03\x01"),
+        ("aea", aea, b"\x03\x01"),
+        ("utm", "EPSG:32611", b"\x03\x01"),
+        ("geo", "EPSG:4326", b"\x01\x04"),
+    ]
+    for label, crs, flag in cases:
+        kwargs = {"preserve_utm": True} if label == "utm" else {}
+        frame = gpd.GeoDataFrame(
+            {"name": [label]},
+            geometry=[Point(500000, 3735000)] if label == "utm"
+            else [Point(0, 0)],
+            crs=crs,
+        )
+        path = tmp_path / f"{label}.wt"
+        Writer(frame, map_scale=100000, **kwargs).to_file(path)
+        raw = path.read_bytes()
+        assert raw[91:93] == flag, label
+        assert struct.unpack_from("<d", raw, 93)[0] == 100.0, label
+        assert struct.unpack_from("<d", raw, 101)[0] == 100.0, label
 
-    # Non-LCC files keep the region zeroed, matching native tmerc samples.
-    utm = gpd.GeoDataFrame(
+    # Files without a CRS keep the whole region zeroed, matching the
+    # official no-CRS SHP->MapGIS conversion outputs.
+    plain = gpd.GeoDataFrame(
+        {"name": ["none"]}, geometry=[Point(0, 0)],
+    )
+    plain_path = tmp_path / "none.wt"
+    Writer(plain, map_scale=1000).to_file(plain_path)
+    raw_plain = plain_path.read_bytes()
+    assert raw_plain[91:93] == b"\x00\x00"
+    assert struct.unpack_from("<d", raw_plain, 93)[0] == 0.0
+    assert struct.unpack_from("<d", raw_plain, 101)[0] == 0.0
+
+
+def test_utm_preserved_writes_native_code_1_and_reads_back(tmp_path):
+    """preserve_utm=True stores projection code 1 (native UTM, NEWLIN_UTM.WL)."""
+    frame = gpd.GeoDataFrame(
         {"name": ["utm"]},
         geometry=[Point(500000, 3735000)],
         crs="EPSG:32611",
     )
-    utm_path = tmp_path / "utm.wt"
-    Writer(utm, preserve_utm=True, map_scale=1000).to_file(utm_path)
-    raw_utm = utm_path.read_bytes()
-    assert raw_utm[91:93] == b"\x00\x00"
-    assert struct.unpack_from("<d", raw_utm, 93)[0] == 0.0
-    assert struct.unpack_from("<d", raw_utm, 101)[0] == 0.0
+    path = tmp_path / "utm.wt"
+    Writer(frame, preserve_utm=True, map_scale=100000).to_file(path)
+    raw = path.read_bytes()
+    assert raw[109] == 1  # projection code: UTM
+    crs = Reader(path).crs
+    # pyproj normalises tmerc k=0.9996 back to +proj=utm, which is the
+    # correct UTM-equivalent round-trip for the native code-1 path.
+    assert "+proj=utm +zone=11" in crs.to_proj4()
+
+    # Native code-1 files carry a stub (1.0) in the projection-scale field:
+    # NEWLIN_UTM.WL stores 1.0 at offset 232, yet its coordinates match the
+    # geographic ground truth exactly at k=0.9996 (and are 1.8 km off at
+    # k=1.0).  The reader must force UTM's k regardless of the stub.
+    stub = bytearray(raw)
+    struct.pack_into("<d", stub, 232, 1.0)
+    stub_path = tmp_path / "utm-stub.wt"
+    stub_path.write_bytes(bytes(stub))
+    assert "+proj=utm +zone=11" in Reader(stub_path).crs.to_proj4()
 
 
 def test_append_native_attribute_preserves_values_and_layout(tmp_path):

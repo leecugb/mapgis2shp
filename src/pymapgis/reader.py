@@ -470,7 +470,9 @@ def _read_crs(file_obj: BinaryIO) -> Tuple[Any, float]:
     file_obj.seek(_CRS_SCALE_OFFSET)
     scale = _read_struct(file_obj, "<d")[0]
 
-    proj_name = {5: "tmerc", 2: "aea", 3: "lcc"}.get(projection_code)
+    # Code 1 is UTM (native NEWLIN_UTM.WL sample, 2026-11); code 5 is the
+    # Gauss-Kruger / generic Transverse Mercator.  Both parse as tmerc.
+    proj_name = {1: "tmerc", 5: "tmerc", 2: "aea", 3: "lcc"}.get(projection_code)
     ellipsoid = _ELLIPSOID_PROJ4.get(ellipsoid_code)
 
     if ellipsoid is None:
@@ -504,14 +506,21 @@ def _read_crs(file_obj: BinaryIO) -> Tuple[Any, float]:
         return "", 1.0
 
     try:
-        if projection_code == 5:  # Transverse Mercator
-            file_obj.seek(_CRS_PROJECTION_SCALE_OFFSET)
-            raw_projection_scale = file_obj.read(8)
-            projection_scale = 1.0
-            if len(raw_projection_scale) == 8:
-                candidate = struct.unpack("<d", raw_projection_scale)[0]
-                if np.isfinite(candidate) and candidate > 0:
-                    projection_scale = candidate
+        if projection_code in (1, 5):  # UTM / Transverse Mercator
+            if projection_code == 1:
+                # Native UTM: k is fixed at 0.9996; the @232 field is a stub
+                # (NEWLIN_UTM.WL stores 1.0 there, but its coordinates match
+                # the geographic ground truth exactly at k=0.9996 and are
+                # 1.8 km off at k=1.0 -- 2026-11 native-reference check).
+                projection_scale = 0.9996
+            else:
+                file_obj.seek(_CRS_PROJECTION_SCALE_OFFSET)
+                raw_projection_scale = file_obj.read(8)
+                projection_scale = 1.0
+                if len(raw_projection_scale) == 8:
+                    candidate = struct.unpack("<d", raw_projection_scale)[0]
+                    if np.isfinite(candidate) and candidate > 0:
+                        projection_scale = candidate
             crs = pyproj.CRS(
                 f"+proj={proj_name} +lat_0=0 +lon_0={central_meridian} "
                 f"+k={projection_scale} +x_0=500000 +y_0=0 "
