@@ -75,8 +75,19 @@ src/pymapgis/semantics/
 !tests/fixtures/writer_batch4/*.WL
 !tests/fixtures/writer_batch4/*.WP
 tests/fixtures/jwd/
-tests/fixtures/slib/
 tests/fixtures/reader_native/
+
+# Bundled USGS-role testdata and generic SLIB are explicitly distributable.
+!tests/fixtures/testdata/
+!tests/fixtures/testdata/*.WT
+!tests/fixtures/testdata/*.WL
+!tests/fixtures/testdata/*.WP
+!tests/fixtures/slib/
+!tests/fixtures/slib/*.lib
+!tests/fixtures/usgs_conejo/native/
+!tests/fixtures/usgs_conejo/native/*.WT
+!tests/fixtures/usgs_conejo/native/*.WL
+!tests/fixtures/usgs_conejo/native/*.WP
 
 # MapGIS project / raster overlay files
 *.MPJ

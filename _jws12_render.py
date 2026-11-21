@@ -8,11 +8,16 @@ geosciml4china 分析的 12 文件（D:/jws 域内 11 矢量 + README）：
 输出：每文件单渲 + 合成全图。
 """
 import sys
-sys.path.insert(0, r'D:\JWD\src')
+import os
+from pathlib import Path
+
+# 跨平台路径：默认本仓 src；可用 PYMAPGIS_SRC/JWS_ROOT/MAPSGIS_SLIB_DIR 覆盖
+_SRC = os.environ.get("PYMAPGIS_SRC", str(Path(__file__).parent / "src"))
+if _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
 import warnings
 warnings.filterwarnings('ignore')
 import math
-import os
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -26,15 +31,28 @@ from pymapgis.fillgrph import FillgrphLib, pattern_geometry
 from pymapgis.reader import Reader
 from pymapgis.linesty import LinestyLib, feature_rhythm
 from pymapgis.slib import SubgraphLib, symbol_geometries
+from pymapgis.rendering.pattern_engine import _polygon_path_patch
 
-ROOT = r'D:\jws'
-LST = LinestyLib(r'D:\SLIB\LINESTY.lib')
-SLIB = SubgraphLib(r'D:\SLIB\Subgraph.lib')
-COLORS = ColorLib(r'D:\SLIB\Colorlib.lib')
-FG = FillgrphLib(r'D:\SLIB\Fillgrph.lib')
+ROOT = os.environ.get("JWS_ROOT", str(Path(__file__).parent))
+SLIB_DIR = os.environ.get("MAPSGIS_SLIB_DIR", r"D:\SLIB")
+LST = LinestyLib(os.path.join(SLIB_DIR, "LINESTY.lib"))
+SLIB = SubgraphLib(os.path.join(SLIB_DIR, "Subgraph.lib"))
+COLORS = ColorLib(os.path.join(SLIB_DIR, "Colorlib.lib"))
+FG = FillgrphLib(os.path.join(SLIB_DIR, "Fillgrph.lib"))
+
+
+def P(name):
+    return os.path.join(ROOT, name)
 
 MM2DEG = 250.0 / 111320.0         # 1:250000：1mm=250m→度（纬度向）
 TILE_PX = 26                      # 瓦片栅格分辨率（约 2× 超采样）
+# 显示下限（pt）只用于防止完全不可见；不再用 0.5pt 强制加粗原笔宽。
+LINE_MIN_PT = float(os.environ.get("GRAPHIC_LINE_MIN_PT", "0.05"))
+DOT_MIN_PT = float(os.environ.get("GRAPHIC_DOT_MIN_PT", "0.2"))
+SYMBOL_LW_PT = float(os.environ.get("GRAPHIC_SYMBOL_LW_PT", "0.25"))
+POLYGON_EDGE_LW_PT = float(os.environ.get("GRAPHIC_POLYGON_EDGE_LW_PT", "0.0"))
+POLYGON_EDGE_COLOR = os.environ.get("GRAPHIC_POLYGON_EDGE_COLOR", "none")
+ATTITUDE_TEXT_SCALE = float(os.environ.get("GRAPHIC_ATTITUDE_TEXT_SCALE", "0.45"))
 
 
 def color(idx):
@@ -153,8 +171,7 @@ def draw_pattern(ax, geom, pat_no, pat_rgb, w_mm, h_mm):
         im = ax.imshow(big, extent=(x0, x0 + nx * td_x,
                                     y0, y0 + ny * td_y),
                        origin='upper', interpolation='bilinear', zorder=3)
-        clip = Polygon(np.asarray(p.exterior.coords), closed=True,
-                       fc='none', ec='none')
+        clip = _polygon_path_patch(p, facecolor='none', edgecolor='none')
         ax.add_patch(clip)
         im.set_clip_path(clip)
     return True
@@ -258,6 +275,68 @@ def draw_linestyle(ax, lt, aux, lw_scale=1.0):
     return False
 
 
+# 复合线型默认严格使用原始折线；平滑化仅作显式试验开关，非默认行为
+SMOOTH_COMPOSITE = os.environ.get("GRAPHIC_SMOOTH_COMPOSITE", "0") == "1"
+
+
+def _smooth_polyline(pts, samples_per_seg=10):
+    """通过全部原始顶点的平滑折线（保留首末点；锐角不强行圆滑）。"""
+    pts = np.asarray(pts, dtype=float)
+    if len(pts) < 3 or not SMOOTH_COMPOSITE:
+        return pts
+    d = np.diff(pts, axis=0)
+    lens = np.hypot(d[:, 0], d[:, 1])
+    if np.any(lens <= 1e-12):
+        return pts
+    ang = np.arctan2(d[:, 1], d[:, 0])
+    turn = np.abs(np.angle(np.exp(1j * np.diff(ang))))
+    if float(turn.max(initial=0.0)) > math.radians(120.0):
+        return pts
+    if float(turn.max(initial=0.0)) < 1e-3:
+        return pts
+    # 端点复制，保证曲线通过首末原始坐标
+    p = np.vstack([pts[0], pts, pts[-1]])
+    alpha = 0.5
+    out = []
+    for i in range(len(pts) - 1):
+        p0, p1, p2, p3 = p[i], p[i + 1], p[i + 2], p[i + 3]
+        t0 = 0.0
+        t1 = alpha * float(np.hypot(*(p1 - p0)))
+        t2 = t1 + alpha * float(np.hypot(*(p2 - p1)))
+        t3 = t2 + alpha * float(np.hypot(*(p3 - p2)))
+        if min(t1, t2 - t1, t3 - t2) <= 1e-12:
+            out.append(p1)
+            continue
+        for t in np.linspace(t1, t2, samples_per_seg, endpoint=False):
+            a1 = (t1 - t) / (t1 - t0) * p0 + (t - t0) / (t1 - t0) * p1
+            a2 = (t2 - t) / (t2 - t0) * p1 + (t - t0) / (t2 - t0) * p2
+            a3 = (t3 - t) / (t3 - t0) * p2 + (t - t0) / (t3 - t0) * p3
+            b1 = (t2 - t) / (t2 - t1) * a1 + (t - t1) / (t2 - t1) * a2
+            b2 = (t3 - t) / (t3 - t1) * a2 + (t - t1) / (t3 - t1) * a3
+            c = (t2 - t) / (t2 - t1) * b1 + (t - t1) / (t2 - t1) * b2
+            out.append(c)
+    out.append(pts[-1])
+    return np.asarray(out)
+
+
+def _draw_raised_parallel(ax, pts, rhy, col, yc, lw):
+    """48|0：实线严格使用原始坐标，虚线为平行偏移后的间断线。"""
+    from shapely.geometry import LineString
+    # 实线不重采样、不简化、不改点序
+    ax.plot(pts[:, 0], pts[:, 1], color=col, lw=lw,
+            solid_capstyle='butt', zorder=4)
+    raised = next((float(t[2]) for t in rhy.get('lines', [])
+                   if len(t) > 2 and t[2] != 0.0), 0.1)
+    offset = raised * yc * MM2DEG
+    if offset == 0.0:
+        return
+    curve = LineString(pts).offset_curve(offset)
+    for part in ([curve] if curve.geom_type == 'LineString' else curve.geoms):
+        xy = np.asarray(part.coords)
+        ax.plot(xy[:, 0], xy[:, 1], color=col, lw=lw,
+                linestyle=(0, (3, 2)), dash_capstyle='butt', zorder=4)
+
+
 # ---------- 1. WL 线层：线型沿几何戳印（rhythm 单源） ----------
 def _stamp_along(pts, rhy, xc, yc, buf):
     """把 rhythm 印记沿折线戳印（矢量数组，追加到 buf）。
@@ -265,6 +344,8 @@ def _stamp_along(pts, rhy, xc, yc, buf):
     X 系数沿线伸缩（周期×xc）、Y 系数垂向伸缩；元素坐标 mm→度。
     buf: dict(segs=[], seg_col=[], seg_lw=[], dots=[], dot_sz=[],
     dot_col=[], fills=[], fill_col=[])。"""
+    # 先通过原始顶点构造平滑曲线，再按弧长戳印；不是折线拼接
+    pts = _smooth_polyline(pts)
     P = rhy['period_mm'] * xc * MM2DEG          # 周期（度）
     stm = _rhythm_stamps(rhy)
     d = np.diff(pts, axis=0)
@@ -275,11 +356,14 @@ def _stamp_along(pts, rhy, xc, yc, buf):
     total = cum[-1]
     if total <= 1e-12:
         return
-    n = int(total / P) + 2
+    # 仅生成起点落在原线长度内的周期；不再固定多生成两个周期
+    n = max(1, int(np.ceil(total / P)))
     kk = np.arange(n)
 
     def anchor(S):
         """弧长 S（度，任意形状）→ 沿线 (x, y) 与单位切向 (tx, ty)。"""
+        # 末端周期也只允许到原线端点，禁止沿切向继续外插
+        S = np.clip(S, 0.0, total)
         idx = np.searchsorted(cum, S, side='right') - 1
         np.clip(idx, 0, len(segl) - 1, out=idx)
         sl = np.where(segl[idx] > 0, segl[idx], 1.0)
@@ -345,15 +429,17 @@ def draw_wl_layer(ax, g, report=None):
     """WL 线层：线型沿几何戳印（feature_rhythm 单源）。
 
     调用方须先定轴限（transData 换算显示尺度）。solid 族与无 rhythm
-    线直绘；图案线经 _stamp_along 矢量化（LineCollection/散点/
-    PolyCollection）。report 计数 dict(solid/pattern/fallback)。"""
+    线直绘；复合线默认严格按原始折线坐标戳印（LineCollection/散点/
+    PolyCollection）。GRAPHIC_SMOOTH_COMPOSITE=1 时才启用试验性曲线化。
+    report 计数 dict(solid/pattern/fallback/aux_pattern)。"""
     rep = report if report is not None else dict(solid=0, pattern=0, fb=0)
+    rep.setdefault('aux_pattern', 0)
     tr = ax.transData
     pts_per_deg = tr.transform((1.0, 0.0))[0] - tr.transform((0.0, 0.0))[0]
     pts_per_deg = max(abs(pts_per_deg), 1e-9)
     buf = dict(segs=[], seg_col=[], seg_lw=[], dots=[], dot_sz=[],
                dot_col=[], fills=[], fill_col=[])
-    buf['_rmin'] = 0.8 / pts_per_deg      # 点径显示下限（度）
+    buf['_rmin'] = DOT_MIN_PT / pts_per_deg  # 点径显示下限（度）
     for _, row in g.iterrows():
         geom = row.geometry
         if geom.geom_type != 'LineString':
@@ -361,27 +447,45 @@ def draw_wl_layer(ax, g, report=None):
         pts = np.asarray(geom.coords)
         col = color(int(row.get('color', 0) or 0))
         w = float(row.get('width', 0.1) or 0.1)
-        buf['_lw'] = max(w * MM2DEG * pts_per_deg, 0.5)
+        buf['_lw'] = max(w * MM2DEG * pts_per_deg, LINE_MIN_PT)
         lt = int(row['linetype'])
         aux = int(row.get('aux_linetype', 0) or 0)
         xc = float(row.get('x_coef', 1.0) or 1.0)
         yc = float(row.get('y_coef', 1.0) or 1.0)
         st = LST.decode(lt)
-        rhy = feature_rhythm(st, aux) if st else None
+        # 主线型与辅助线型号分别解析；aux_linetype 不是主记录子线索引
+        rhy = feature_rhythm(st, 0) if st else None
         if rhy is None or rhy['kind'] == 'solid_pen':
             ax.plot(pts[:, 0], pts[:, 1], color=col, lw=buf['_lw'],
-                    solid_capstyle='round', zorder=4)
+                    solid_capstyle='butt', zorder=4)
             rep['solid' if rhy is not None else 'fb'] += 1
-            continue
-        buf['_col'] = col
-        _stamp_along(pts, rhy, xc, yc, buf)
-        rep['pattern'] += 1
+        else:
+            if rhy['kind'] == 'raised_lines':
+                _draw_raised_parallel(ax, pts, rhy, col, yc, buf['_lw'])
+            else:
+                buf['_col'] = col
+                _stamp_along(pts, rhy, xc, yc, buf)
+            rep['pattern'] += 1
+
+        # 辅助线型号（如 1|2）：独立解码、独立节奏，使用 aux_color（若有）
+        if aux:
+            st_aux = LST.decode(aux)
+            rhy_aux = feature_rhythm(st_aux, 0) if st_aux else None
+            ac = int(row.get('aux_color', 0) or 0)
+            aux_col = color(ac) if ac else col
+            if rhy_aux is None or rhy_aux['kind'] == 'solid_pen':
+                ax.plot(pts[:, 0], pts[:, 1], color=aux_col, lw=buf['_lw'],
+                        solid_capstyle='butt', zorder=4)
+            else:
+                buf['_col'] = aux_col
+                _stamp_along(pts, rhy_aux, xc, yc, buf)
+                rep['aux_pattern'] += 1
     if buf['segs']:
         from matplotlib.collections import LineCollection, PolyCollection
         segs = np.concatenate(buf['segs'], axis=0)
         ax.add_collection(LineCollection(
             segs, colors=buf['seg_col'], linewidths=buf['seg_lw'],
-            capstyle='round', zorder=4))
+            capstyle='butt', zorder=4))
     if buf['dots']:
         pts_d = np.concatenate(buf['dots'], axis=0)
         ax.scatter(pts_d[:, 0], pts_d[:, 1],
@@ -399,7 +503,7 @@ def draw_wl_layer(ax, g, report=None):
 def render_wl():
     """WL 线层单图输出（轴限先行，供 transData 尺度换算）。"""
     for name in ('LDLYAAE001', 'LDZOFBA002', 'LDZOFBA003', 'LDZOFBA005'):
-        fp = ROOT + '\\' + name + '.WL'
+        fp = P(name + '.WL')
         g = Reader(fp, read_graphic_params=True).geodataframe
         fig, ax = plt.subplots(figsize=(10, 8))
         b = g.total_bounds
@@ -410,7 +514,7 @@ def render_wl():
                      % (name, len(g), rep['pattern'], rep['solid'],
                         rep['fb']), fontsize=9)
         ax.set_aspect('equal'); ax.axis('off')
-        fig.savefig(ROOT + '\\_render_%s.png' % name, dpi=110,
+        fig.savefig(P('_render_%s.png' % name), dpi=110,
                     bbox_inches='tight', pad_inches=0.02)
         plt.close(fig)
         print('WL', name, len(g), 'pattern %d solid %d fb %d'
@@ -428,9 +532,11 @@ WP_SOURCE = {
 
 def draw_wp_layer(ax, g):
     """把 WP 面层画到 ax（单源：reader 布局 v2 列）；返回计数 dict。"""
-    cnt = dict(pat=0, pat_none=0, infer=0, fb=0)
+    cnt = dict(pat=0, pat_none=0, infer=0, fb=0, holes=0)
     for _, row in g.iterrows():
         geom = row.geometry
+        polys_for_holes = [geom] if geom.geom_type == 'Polygon' else list(geom.geoms)
+        cnt['holes'] += sum(len(p.interiors) for p in polys_for_holes)
         frgb, st = fill_rgb(int(row['fill_color']))
         if st == "inferred":
             cnt['infer'] += 1
@@ -438,8 +544,10 @@ def draw_wp_layer(ax, g):
             cnt['fb'] += 1
         polys = [geom] if geom.geom_type == 'Polygon' else list(geom.geoms)
         for p in polys:
-            ax.add_patch(Polygon(np.asarray(p.exterior.coords), closed=True,
-                                 fc=frgb, ec='#666666', lw=0.3, zorder=2))
+            # 支持内孔；WP 不额外描边，地质边界由 WL 图层负责
+            ax.add_patch(_polygon_path_patch(
+                p, facecolor=frgb, edgecolor=POLYGON_EDGE_COLOR,
+                linewidth=POLYGON_EDGE_LW_PT, zorder=2))
         # 花纹层：尺寸非零才显示（对话框锚定的显示闸门）
         pat = int(row['pattern'])
         h = float(row['pattern_height'])
@@ -457,7 +565,7 @@ def render_wp():
     """WP 面层单图输出。"""
     for name in ('LDLYAAE002', 'LDZOFBB001', 'LDZOFBB002', 'LDZOFBB003',
                  'LDZOFBB004'):
-        fp = ROOT + '\\' + WP_SOURCE.get(name, name + '.WP')
+        fp = P(WP_SOURCE.get(name, name + '.WP'))
         g = Reader(fp, read_graphic_params=True).geodataframe
         fig, ax = plt.subplots(figsize=(10, 8))
         cnt = draw_wp_layer(ax, g)
@@ -467,7 +575,7 @@ def render_wp():
                         cnt['infer'], cnt['fb']), fontsize=9)
         ax.set_aspect('equal'); ax.axis('off')
         ax.autoscale_view()
-        fig.savefig(ROOT + '\\_render_%s.png' % name, dpi=110,
+        fig.savefig(P('_render_%s.png' % name), dpi=110,
                     bbox_inches='tight', pad_inches=0.02)
         plt.close(fig)
         print('WP', name, 'src=' + src, len(g),
@@ -483,9 +591,11 @@ def symbol_geo(no):
     return _SYM_CACHE[no]
 
 
-def draw_symbol_point(ax, x, y, no, h_mm, w_mm, angle_deg, rgb, lw=0.7):
+def draw_symbol_point(ax, x, y, no, h_mm, w_mm, angle_deg, rgb, lw=None):
     """子图实例化：库几何（1mm 设计单位）× (w,h) 毫米 × 角度旋转（CCW）。
     圆/弧采样折线过同一变换（w≠h 时自然成椭圆）。解析失败诚实返回 False。"""
+    if lw is None:
+        lw = SYMBOL_LW_PT
     geo = symbol_geo(no)
     if geo is None or 'error' in geo:
         return False
@@ -522,11 +632,43 @@ def draw_symbol_point(ax, x, y, no, h_mm, w_mm, angle_deg, rgb, lw=0.7):
     return True
 
 
+def draw_text_annotation(ax, row):
+    """文本注记实例化：CHFCED 原文 + MapGIS 控制码 + 字高/角度/颜色。
+
+    点坐标按左下锚点处理；#- 下标、#+ 上标、#= 恢复正文。
+    当前不展开逐字 spacing/width 拉伸（保留原字段供后续精化）。
+    """
+    raw = str(row.get('CHFCED', '') or '')
+    if not raw.strip():
+        return False
+    from pymapgis.rendering.pdf_writer import _code_to_mathtext
+    label = _code_to_mathtext(raw.replace('#-', '↓').replace('#+', '↑')
+                              .replace('#=', '→'))
+    if not label:
+        return False
+    x, y = row.geometry.x, row.geometry.y
+    h = float(row.get('height') or 2.0)
+    category = str(row.get('CHFCEC', '') or '').strip()
+    scale = ATTITUDE_TEXT_SCALE if category in ('产状', '断层辅助点', '断层产状') else 1.0
+    fs = max(h * 2.845 * scale, 0.8)  # 地层/断层产状注记统一缩小
+    en = row.get('font_en')
+    family = 'Noto Sans CJK JP' if en == 4 else 'Noto Serif CJK JP'
+    ax.text(x, y, label, fontsize=fs, color=color(int(row.get('color', 0) or 0)),
+            ha='left', va='baseline', rotation=float(row.get('angle', 0) or 0),
+            rotation_mode='anchor', fontfamily=family, zorder=6)
+    return True
+
+
 def draw_wt_layer(ax, g, report=None):
     """WT 点层：子图点按 Subgraph.lib 实例化；文本点暂以淡点标注
     （注记实例化挂账）。report 计数 dict（sym_ok/sym_none/text）。"""
     rep = report if report is not None else dict(sym_ok=0, sym_none=0, text=0)
+    rep.setdefault('geo_code_skipped', 0)
     for _, row in g.iterrows():
+        # 地质单元代号注记按类别整体关闭；其它注记（产状/断层/化石等）保留
+        if str(row.get('CHFCEC', '') or '').strip() == '代号':
+            rep['geo_code_skipped'] += 1
+            continue
         x, y = row.geometry.x, row.geometry.y
         if int(row['point_type']) == 1:
             ok = draw_symbol_point(
@@ -538,14 +680,18 @@ def draw_wt_layer(ax, g, report=None):
             else:
                 rep['sym_none'] += 1
         else:
-            ax.plot([x], [y], '.', color='#c0392b', ms=1.5, zorder=5)
-            rep['text'] += 1
+            if draw_text_annotation(ax, row):
+                rep['text'] += 1
+            else:
+                # 无文本内容才保留点位，避免把未解析注记静默丢弃
+                ax.plot([x], [y], '.', color='#c0392b', ms=1.5, zorder=5)
+                rep['text'] += 1
     return rep
 
 
 def render_wt():
     for name in ('LDZOFBA016', 'LDZOFBB099'):
-        fp = ROOT + '\\' + name + '.WT'
+        fp = P(name + '.WT')
         g = Reader(fp, read_graphic_params=True,
                    read_point_params=True).geodataframe
         fig, ax = plt.subplots(figsize=(10, 8))
@@ -554,7 +700,7 @@ def render_wt():
                      % (name, len(g), rep['sym_ok'], rep['sym_none'],
                         rep['text']), fontsize=9)
         ax.set_aspect('equal'); ax.axis('off')
-        fig.savefig(ROOT + '\\_render_%s.png' % name, dpi=110,
+        fig.savefig(P('_render_%s.png' % name), dpi=110,
                     bbox_inches='tight', pad_inches=0.02)
         plt.close(fig)
         print('WT', name, len(g), 'sym %d none %d text %d'
@@ -588,14 +734,14 @@ def render_panel():
                 fontfamily='monospace')
     fig.subplots_adjust(left=0.24, right=0.98, top=0.99, bottom=0.004,
                         hspace=0.3)
-    fig.savefig(ROOT + '\\_render_linestyle_panel.png', dpi=110,
+    fig.savefig(P('_render_linestyle_panel.png'), dpi=110,
                 bbox_inches='tight', pad_inches=0.02)
     print('linestyle panel ok')
 
 
 if __name__ == '__main__':
+    render_wp()  # 面 → 线 → 点
     render_wl()
-    render_wp()
     render_wt()
     render_panel()
     print('ALL DONE')

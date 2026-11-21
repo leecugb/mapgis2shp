@@ -1,0 +1,1298 @@
+EXP  0 /POOL5/B/PCOSSETTE/FSKN-OF/POINTS.REL.E00                                
+IFO  2
+POINTS.REL                           3   3 326       258
+P-TAG            25-1   14-1  25-1 20-1  -1  -1-1                   1-
+P-DEF           100-1  264-1 100-1 20-1  -1  -1-1                   2-
+P-EXP           200-1 1264-1 200-1 20-1  -1  -1-1                   3-
+B1                       .BEDS.HRZB.SDPM.ORG.
+                                             .bedding.sedimentary.horizontal.str
+ike and dip measured at site.original data.
+
+
+B2                       .BEDS.INCB.SDPM.ORG.
+                                             .bedding.sedimentary.inclined.strik
+e and dip measured at site.original data.
+
+
+B3                       .BEDS.INCB.FADT.SDPM.ORG.
+                                             .bedding.sedimentary.inclined.top o
+f beds determined from facing structures.strike and dip measured at site.origina
+l data.
+
+B4                       .BEDS.VERB.SDPM.ORG.
+                                             .bedding.sedimentary.vertical.strik
+e and dip measured at site.original data.
+
+
+B5                       .BEDS.VERB.FADT.SDPM.ORG.
+                                             .bedding.sedimentary.vertical.top o
+f beds determined from facing structures.strike and dip measured at site.origina
+l data.
+
+B6                       .BEDS.OVTB.SDPM.ORG.
+                                             .bedding.sedimentary.overturned.str
+ike and dip measured at site.original data.
+
+
+B7                       .BEDS.OVTB.FADT.SDPM.ORG.
+                                             .bedding.sedimentary.overturned.top
+ of beds determined from facing structures.strike and dip measured at site.origi
+nal data.
+
+B8                       .BEDS.INCB.FADU.SDPM.ORG.
+                                             .bedding.sedimentary.inclined.facin
+g unknown.strike and dip measured at site.original data.
+
+
+B9                       .BEDS.VERB.FADU.SDPM.ORG.
+                                             .bedding.sedimentary.vertical.facin
+g unknown.strike and dip measured at site.original data.
+
+
+B10                      .BEDS.OVTB.FADU.SDPM.ORG.
+                                             .bedding.sedimentary.overturned.fac
+ing unknown.strike and dip measured at site.original data.
+
+
+B11                      .BEDSW.INCB.SDPM.ORG.
+                                             .bedding.sedimentary.wavy or crinkl
+ed.inclined.strike and dip measured at site.original data.
+
+
+B12                      .BEDSW.VERB.SDPM.
+                                             .bedding.sedimentary.wavy or crinkl
+ed.vertical.strike and dip measured at site.original data.
+
+
+B13                      .BEDSW.OVTB.SDPM.ORG.
+                                             .bedding.sedimentary.wavy or crinkl
+ed.overturned.strike and dip measured at site.original data.
+
+
+B14                      .BEDS.INCB.SDPAI.ORG.
+                                             .bedding.sedimentary.inclined.appro
+ximate.strike and dip direction indicated but not measured.original data.
+
+
+B15                      .BEDS.VERB.SDPAI.ORG.
+                                             .bedding.sedimentary.vertical.appro
+ximate.strike and dip direction indicated but not measured.original data.
+
+
+B16                      .BEDS.OVTB.SDPAI.ORG.
+                                             .bedding.sedimentary.overturned.app
+roximate.strike and dip direction indicated but not measured.original data.
+
+
+B17                      .BEDS.INCB.SDPAE.ORG.
+                                             .bedding.sedimentary.inclined.appro
+ximate.strike and dip estimated.original data.
+
+
+B18                      .BEDS.VERB.SDPAE.ORG.
+                                             .bedding.sedimentary.vertical.appro
+ximate.strike and dip estimated.original data.
+
+
+B19                      .BEDS.INCB.SDPAEB.ORG.
+                                             .bedding.sedimentary.inclined.appro
+ximate.strike and dip estimated from binocular observation.original data.
+
+
+B20                      .BEDS.VERB.SDPAEB.ORG.
+                                             .bedding.sedimentary.vertical.appro
+ximate.strike and dip estimated from binocular observation.original data.
+
+
+B21                      .BEDS.INCB.SDPAEA.ORG.
+                                             .bedding.sedimentary.inclined.appro
+ximate.strike and dip estimated from aerial photographs.original data.
+
+
+B22                      .BEDS.VERB.SDPAEA.ORG.
+                                             .bedding.sedimentary.vertical.appro
+ximate.strike and dip estimated from aerial photographs.original data.
+
+
+B23                      .BEDS.INCB.CPD.
+                                             .bedding.sedimentary.inclined.compi
+led data.
+
+
+B24                      .BEDS.VERB.CPD.
+                                             .bedding.sedimentary.vertical.compi
+led data.
+
+
+B25                      .BEDS.OVTB.CPD.
+                                             .bedding.sedimentary.overturned.com
+piled data.
+
+
+B26                      .BEDV.HRZB.SDPM.ORG.
+                                             .bedding.volcanogenic.horizontal.st
+rike and dip measured at site.original data.
+
+
+B27                      .BEDV.INCB.SDPM.ORG.
+                                             .bedding.volcanogenic.inclined.stri
+ke and dip measured at site.original data.
+
+
+B28                      .BEDV.INCB.FADT.SDPM.ORG.
+                                             .bedding.volcanogenic.inclined.top
+of beds determined from facing structures.strike and dip measured at site.origin
+al data.
+
+B29                      .BEDV.VERB.SDPM.ORG.
+                                             .bedding.volcanogenic.vertical.stri
+ke and dip measured at site.original data.
+
+
+B30                      .BEDV.VERB.FADT.SDPM.ORG.
+                                             .bedding.volcanogenic.vertical.top
+of beds determined from facing structures.strike and dip measured at site.origin
+al data.
+
+B31                      .BEDV.OVTB.SDPM.ORG.
+                                             .bedding.volcanogenic.overturned.st
+rike and dip measured at site.original data.
+
+
+B32                      .BEDV.OVTB.FADT.SDPM.ORG.
+                                             .bedding.volcanogenic.overturned.to
+p of beds determined from facing structures.strike and dip measured at site.orig
+inal data.
+
+B33                      .BEDV.INCB.FADU.SDPM.ORG.
+                                             .bedding.volcanogenic.inclined.faci
+ng unknown.strike and dip measured at site.original data.
+
+
+B34                      .BEDV.VERB.FADU.SDPM.ORG.
+                                             .bedding.volcanogenic.vertical.faci
+ng unknown.strike and dip measured at site.original data.
+
+
+B35                      .BEDV.OVTB.FADU.SDPM.ORG.
+                                             .bedding.volcanogenic.overturned.fa
+cing unknown.strike and dip measured at site.original data.
+
+
+B36                      .BEDVW.INCB.SDPM.ORG.
+                                             .bedding.volcanogenic.wavy or crink
+led.inclined.strike and dip measured at site.original data.
+
+
+B37                      .BEDVW.VERB.SDPM.
+                                             .bedding.volcanogenic.wavy or crink
+led.vertical.strike and dip measured at site.original data.
+
+
+B38                      .BEDVW.OVTB.SDPM.ORG.
+                                             .bedding.volcanogenic.wavy or crink
+led.overturned.strike and dip measured at site.original data.
+
+
+B39                      .BEDV.INCB.SDPAI.ORG.
+                                             .bedding.volcanogenic.inclined.appr
+oximate.strike and dip direction indicated but not measured.original data.
+
+
+B40                      .BEDV.VERB.SDPAI.ORG.
+                                             .bedding.volcanogenic.vertical.appr
+oximate.strike and dip direction indicated but not measured.original data.
+
+
+B41                      .BEDV.OVTB.SDPAI.ORG.
+                                             .bedding.volcanogenic.overturned.ap
+proximate.strike and dip direction indicated but not measured.original data.
+
+
+B42                      .BEDV.INCB.SDPAE.ORG.
+                                             .bedding.volcanogenic.inclined.appr
+oximate.strike and dip estimated.original data.
+
+
+B43                      .BEDV.VERB.SDPAE.ORG.
+                                             .bedding.volcanogenic.vertical.appr
+oximate.strike and dip estimated.original data.
+
+
+B44                      .BEDV.INCB.SDPAEB.ORG.
+                                             .bedding.volcanogenic.inclined.appr
+oximate.strike and dip estimated from binocular observation.original data.
+
+
+B45                      .BEDV.VERB.SDPAEB.ORG.
+                                             .bedding.volcanogenic.vertical.appr
+oximate.strike and dip estimated from binocular observation.original data.
+
+
+B46                      .BEDV.INCB.SDPAEA.ORG.
+                                             .bedding.volcanogenic.inclined.appr
+oximate.strike and dip estimated from aerial photographs.original data.
+
+
+B47                      .BEDV.VERB.SDPAEA.ORG.
+                                             .bedding.volcanogenic.vertical.appr
+oximate.strike and dip estimated from aerial photographs.original data.
+
+
+B48                      .BEDV.INCB.CPD.
+                                             .bedding.volcanogenic.inclined.comp
+iled data.
+
+
+B49                      .BEDV.VERB.CPD.
+                                             .bedding.volcanogenic.vertical.comp
+iled data.
+
+
+B50                      .BEDV.OVTB.CPD.
+                                             .bedding.volcanogenic.overturned.co
+mpiled data.
+
+
+MT1                      .FOLI.MTX.SDPM.ORG.
+                                             .foliation.igneous.massive texture.
+measured at site.original data.
+
+
+FN1                      .FOLN.HRZF.SDPM.ORG.
+                                             .foliation.origin not determined.ho
+rizontal.strike and dip measured at site.original data.
+
+
+FN2                      .FOLN.INCF.SDPM.ORG.
+                                             .foliation.origin not determined.in
+clined.strike and dip measured at site.original data.
+
+
+FN3                      .FOLN.VERF.SDPM.ORG.
+                                             .foliation.origin not determined.ve
+rtical.strike and dip measured at site.original data.
+
+
+FN4                      .FOLN.INCF.SDPAI.ORG.
+                                             .foliation.origin not determined.in
+clined.approximate.strike and dip direction indicated but not measured.original
+data.
+
+FN5                      .FOLN.VERF.SDPAI.ORG.
+                                             .foliation.origin not determined.ve
+rtical.approximate.strike and dip direction indicated but not measured.original
+data.
+
+FN6                      .FOLN.INCF.SDPAEB.ORG.
+                                             .foliation.origin not determined.in
+clined.approximate.strike and dip determined from binocular observation.original
+ data.
+
+FN7                      .FOLN.VERF.SDPAEB.ORG.
+                                             .foliation.origin not determined.ve
+rtical.approximate.strike and dip determined from binocular observation.original
+ data.
+
+FN8                      .FOLN.INCF.SDPAEA.ORG.
+                                             .foliation.origin not determined.in
+clined.approximate.strike and dip determined from aerial photographs.original da
+ta.
+
+FN9                      .FOLN.VERF.SDPAEA.ORG.
+                                             .foliation.origin not determined.ve
+rtical.approximate.strike and dip determined from aerial photographs.original da
+ta.
+
+FN10                     .FOLN.INCF.CPD.
+                                             .foliation.origin not determined.in
+clined.compiled data.
+
+
+FN11                     .FOLN.VERF.CPD.
+                                             .foliation.origin not determined.co
+mpiled data. FN12
+
+
+FN13                     .FOLI.FLW.INCF.SDPM.ORG.
+                                             .foliation.igneous.flow origin.incl
+ined.strike and dip measured at site.original data.
+
+
+FN14                     .FOLI.FLW.VERF.SDPM.ORG.
+                                             .foliation.igneous.flow origin.vert
+ical.strike and dip measured at site.original data.
+
+
+FN15                     .FOLI.FLW.INCF.SDPAI.ORG.
+                                             .foliation.igneous.flow origin.incl
+ined.approximate.strike and dip direction indicated but not measured.original da
+ta.
+
+FN16                     .FOLI.FLW.VERF.SDPAI.ORG.
+                                             .foliation.igneous.flow origin.vert
+ical.approximate.strike and dip direction indicated but not measured.original da
+ta.
+
+FN17                     .FOLI.FLW.INCF.SDPAEB.ORG.
+                                             .foliation.igneous.flow origin.incl
+ined.approximate.strike and dip determined from binocular observation.original d
+ata.
+
+FN18                     .FOLI.FLW.VERF.SDPAEB.ORG.
+                                             .foliation.igneous.flow origin.vert
+ical.approximate.strike and dip determined from binocular observation.original d
+ata.
+
+FN19                     .FOLI.FLW.INCF.SDPAEA.ORG.
+                                             .foliation.igneous.flow origin.incl
+ined.approximate.strike and dip determined from aerial photographs.original data
+.
+
+FN20                     .FOLI.FLW.VERF.SDPAEA.ORG.
+                                             .foliation.igneous.flow origin.vert
+ical.approximate.strike and dip determined from aerial photographs.original data
+.
+
+FN21                     .FOLI.FLW.INCF.CPD.
+                                             .foliation.igneous.flow origin.incl
+ined.compiled data.
+
+
+FN22                     .FOLI.FLW.VERF.CPD.
+                                             .foliation.igneous.flow origin.vert
+ical.compiled data.foliation.igneous.cumulate.
+
+
+FN23                     .FOLIC.HRZF.SDPM.ORG.
+                                             .foliation.igneous.cumulate.horizon
+tal.strike and dip measured at site.original data.
+
+
+FN24                     .FOLIC.INCF.SDPM.ORG.
+                                             .foliation.igneous.cumulate.incline
+d.strike and dip measured at site.original data.
+
+
+FN25                     .FOLIC.INCF.FADT.SDPM.ORG.
+                                             .foliation.igneous.cumulate.incline
+d.top of layering determined from facing structures.strike and dip measured at s
+ite.original data.
+
+FN26                     .FOLIC.VERF.SDPM.ORG.
+                                             .foliation.igneous.cumulate.vertica
+l.strike and dip measured at site.original data.
+
+
+FN27                     .FOLIC.VERF.FADT.SDPM.ORG.
+                                             .foliation.igneous.cumulate.vertica
+l.top of layering determined from facing structures.strike and dip measured at s
+ite.original data.
+
+FN28                     .FOLIC.INCF.CPD.
+                                             .foliation.igneous.cumulate.incline
+d.compiled data.
+
+
+FN29                     .FOLIC.VERF.CPD.
+                                             .foliation.igneous.cumulate.vertica
+l.compiled data.
+
+
+FN30                     .FOLS.HRZF.SDPM.ORG.
+                                             .foliation.strain dominated.horizon
+tal.strike and dip measured at site.original data.
+
+
+FN31                     .FOLS.INCF.SDPM.ORG.
+                                             .foliation.strain dominated.incline
+d.strike and dip measured at site.original data.
+
+
+FN32                     .FOLS.VERF.SDPM.ORG.
+                                             .foliation.strain dominated.vertica
+l.strike and dip measured at site.original data.
+
+
+FN33                     .FOLS.INCF.SDPAI.ORG.
+                                             .foliation.strain dominated.incline
+d.approximate.strike and dip direction indicated but not
+
+
+measured.original data.
+
+
+
+
+FN34                     .FOLS.VERF.SDPAI.ORG.
+                                             .foliation.strain dominated.vertica
+l.approximate.strike and dip direction indicated but not measured.original data.
+
+
+FN35                     .FOLS.INCF.SDPAEB.ORG.
+                                             .foliation.strain dominated.incline
+d.approximate.strike and dip determined from binocular observation.original data
+.
+
+FN36                     .FOLS.VERF.SDPAEB.ORG.
+                                             .foliation.strain dominated.vertica
+l.approximate.strike and dip determined from binocular observation.original data
+.
+
+FN37                     .FOLS.INCF.SDPAEA.ORG.
+                                             .foliation.strain dominated.incline
+d.approximate.strike and dip determined from aerial photographs.original data.
+
+
+FN38                     .FOLS.VERF.SDPAEA.ORG.
+                                             .foliation.strain dominated.vertica
+l.approximate.strike and dip determined from aerial photographs.original data.
+
+
+FN39                     .FOLS.INCF.CPD.
+                                             .foliation.strain dominated.incline
+d.compiled data.
+
+
+FN40                     .FOLS.VERF.CPD.
+                                             .foliation.strain dominated.vertica
+l.compiled data.
+
+
+FN41                     .FOLM.HRZF.SDPM.ORG.
+                                             .foliation.metamorphic.horizontal.s
+trike and dip measured at site.original data.
+
+
+FN42                     .FOLM.INCF.SDPM.ORG.
+                                             .foliation.metamorphic.inclined.str
+ike and dip measured at site.original data.
+
+
+FN43                     .FOLM.VERF.SDPM.ORG.
+                                             .foliation.metamorphic.vertical.str
+ike and dip measured at site.original data.
+
+
+FN44                     .FOLM.INCF.SDPAI.ORG.
+                                             .foliation.metamorphic.inclined.app
+roximate.strike and dip direction indicated but not measured.original data.
+
+
+FN45                     .FOLM.VERF.SDPAI.ORG.
+                                             .foliation.metamorphic.vertical.app
+roximate.strike and dip direction indicated but not measured.original data.
+
+
+FN46                     .FOLM.INCF.SDPAEB.ORG.
+                                             .foliation.metamorphic.inclined.app
+roximate.strike and dip determined from binocular observation.original data.
+
+
+FN47                     .FOLM.VERF.SDPAEB.ORG.
+                                             .foliation.metamorphic.vertical.app
+roximate.strike and dip determined from binocular observation.original data.
+
+
+FN48                     .FOLM.INCF.SDPAEA.ORG.
+                                             .foliation.metamorphic.inclined.app
+roximate.strike and dip determined from aerial photographs.original data.
+
+
+FN49                     .FOLM.VERF.SDPAEA.ORG.
+                                             .foliation.metamorphic.vertical.app
+roximate.strike and dip determined from aerial photographs.original data.
+
+
+FN50                     .FOLM.INCF.CPD.
+                                             .foliation.metamorphic.inclined.com
+piled data.
+
+
+FN51                     .FOLM.VERF.CPD.
+                                             .foliation.metamorphic.vertical.com
+piled data.
+
+
+FN52                     .FOLMU.HRZF.SDPM.ORG.
+                                             .foliation.metamorphic.undulatory.h
+orizontal.strike and dip measured at site.original data.
+
+
+FN53                     .FOLMU.INCF.SDPM.ORG.
+                                             .foliation.metamorphic.undulatory.i
+nclined.strike and dip measured at site.original data.
+
+
+FN54                     .FOLMU.VERF.SDPM.ORG.
+                                             .foliation.metamorphic.undulatory.v
+ertical.strike and dip measured at site.original data.
+
+
+FN55                     .FOLMU.INCF.SDPAI.ORG.
+                                             .foliation.metamorphic.undulatory.i
+nclined.approximate.strike and dip direction indicated but not measured.original
+ data.
+
+FN56                     .FOLMU.VERF.SDPAI.ORG.
+                                             .foliation.metamorphic.undulatory.v
+ertical.approximate.strike and dip direction indicated but not measured.original
+ data.
+
+FN57                     .FOLMU.INCF.SDPAEB.ORG.
+                                             .foliation.metamorphic.undulatory.i
+nclined.approximate.strike and dip determined from binocular observation.origina
+l data.
+
+FN58                     .FOLMU.VERF.SDPAEB.ORG.
+                                             .foliation.metamorphic.undulatory.v
+ertical.approximate.strike and dip determined from binocular observation.origina
+l data.
+
+FN59                     .FOLMU.INCF.SDPAEA.ORG.
+                                             .foliation.metamorphic.undulatory.i
+nclined.approximate.strike and dip determined from aerial photographs.original d
+ata.
+
+FN60                     .FOLMU.VERF.SDPAEA.ORG.
+                                             .foliation.metamorphic.undulatory.v
+ertical.approximate.strike and dip determined from aerial photographs.original d
+ata.
+
+FN61                     .FOLMU.INCF.CPD.
+                                             .foliation.metamorphic.undulatory.i
+nclined.compiled data.
+
+
+FN62                     .FOLMU.VERF.CPD.
+                                             .foliation.metamorphic.undulatory.v
+ertical.compiled data.
+
+
+J1                       .JNTS.INCJ.SDPM.ORG.
+                                             .joint.sedimentary.inclined.strike
+and dip measured at site.original data.
+
+
+J2                       .JNTS.VERJ.SDPM.ORG.
+                                             .joint.sedimentary.vertical.strike
+and dip measured at site.original data.
+
+
+J3                       .JNTS.INCJ.SDPAEB.ORG.
+                                             .joint.sedimentary.inclined.approxi
+mate.strike and dip estimated from binocular observation.original data.
+
+
+J4                       .JNTS.VERJ.SDPAEB.ORG.
+                                             .joint.sedimentary.vertical.approxi
+mate.strike and dip estimated from binocular observation.original data.
+
+
+J5                       .JNTS.INCJ.SDPAEA.ORG.
+                                             .joint.sedimentary.inclined.approxi
+mate.strike and dip estimated from aerial photographs.original data.
+
+
+J6                       .JNTS.VERJ.SDPAEA.ORG.
+                                             .joint.sedimentary.vertical.approxi
+mate.strike and dip estimated from aerial photographs.original data.
+
+
+J7                       .JNTS.INCJ.CPD.
+                                             .joint.sedimentary.inclined.compile
+d data.
+
+
+J8                       .JNTS.VERJ.CPD.
+                                             .joint.sedimentary.vertical.compile
+d data.
+
+
+J9                       .JNTIP.INCJ.SDPM.ORG.
+                                             .joint.igneous.plutonic.inclined.st
+rike and dip measured at site.original data.
+
+
+J10                      .JNTIP.VERJ.SDPM.ORG.
+                                             .joint.igneous.plutonic.vertical.st
+rike and dip measured at site.original data.
+
+
+J11                      .JNTIP.INCJ.SDPAEB.ORG.
+                                             .joint.igneous.plutonic.inclined.ap
+proximate.strike and dip estimated from binocular observation.original data.
+
+
+J12                      .JNTIP.VERJ.SDPAEB.ORG.
+                                             .joint.igneous.plutonic.vertical.ap
+proximate.strike and dip estimated from binocular observation.original data.
+
+
+J13                      .JNTIP.INCJ.SDPAEA.ORG.
+                                             .joint.igneous.plutonic.inclined.ap
+proximate.strike and dip estimated from aerial photographs.original data.
+
+
+J14                      .JNTIP.VERJ.SDPAEA.ORG.
+                                             .joint.igneous.plutonic.vertical.ap
+proximate.strike and dip estimated from aerial photographs.original data.
+
+
+J15                      .JNTIP.INCJ.CPD.
+                                             .joint.igneous.plutonic.inclined.co
+mpiled data.
+
+
+J16                      .JNTIP.VERJ.CPD.
+                                             .joint.igneous.plutonic.vertical.co
+mpiled data.
+
+
+J17                      .JNTIV.INCJ.SDPM.ORG.
+                                             .joint.igneous.volcanic.inclined.st
+rike and dip measured at site.original data.
+
+
+J18                      .JNTIV.VERJ.SDPM.ORG.
+                                             .joint.igneous.volcanic.vertical.st
+rike and dip measured at site.original data.
+
+
+J19                      .JNTIV.INCJ.SDPAEB.ORG.
+                                             .joint.igneous.volcanic.inclined.ap
+proximate.strike and dip estimated from binocular observation.original data.
+
+
+J20                      .JNTIV.VERJ.SDPAEB.ORG.
+                                             .joint.igneous.volcanic.vertical.ap
+proximate.strike and dip estimated from binocular observation.original data.
+
+
+J21                      .JNTIV.INCJ.SDPAEA.ORG.
+                                             .joint.igneous.volcanic.inclined.ap
+proximate.strike and dip estimated from aerial photographs.original data.
+
+
+J22                      .JNTIV.VERJ.SDPAEA.ORG.
+                                             .joint.igneous.volcanic.vertical.ap
+proximate.strike and dip estimated from aerial photographs.original data.
+
+
+J23                      .JNTIV.INCJ.CPD.
+                                             .joint.igneous.volcanic.inclined.co
+mpiled data.
+
+
+J24                      .JNTIV.VERJ.CPD.
+                                             .joint.igneous.volcanic.vertical.co
+mpiled data.
+
+
+CLV1                     .CLVO.HRZC.SDPM.ORG.
+                                             .cleavage.one cleavage.horizontal.s
+trike and dip measured at site.original data.
+
+
+CLV2                     .CLVO.INCC.SDPM.ORG.
+                                             .cleavage.one cleavage.inclined.str
+ike and dip measured at site.original data.
+
+
+CLV3                     .CLVO.INCC.CPD.
+                                             .cleavage.one cleavage.inclined.com
+piled data.
+
+
+CLV4                     .CLVO.VERC.SDPM.ORG.
+                                             .cleavage.one cleavage.vertical.str
+ike and dip measured at site.original data.
+
+
+CLV5                     .CLVO.VERC.CPD.
+                                             .cleavage.one cleavage.vertical.com
+piled data.
+
+
+CLV6                     .CLVT.HRZC.SDPM.ORG.
+                                             .cleavage.two cleavages.horizontal.
+strike and dip measured at site.original data.
+
+
+CLV7                     .CLVT.INCC.SDPM.ORG.
+                                             .cleavage.two cleavages.inclined.st
+rike and dip measured at site.original data.
+
+
+CLV8                     .CLVT.VERC.SDPM.ORG.
+                                             .cleavage.two cleavages.vertical.st
+rike and dip measured at site.original data.
+
+
+L1                       .LINN.ORG.
+                                             .lineation.origin not determined.or
+iginal data.
+
+
+L2                       .LINS.PALU.ORG.
+                                             .lineation.sedimentary.paleocurrent
+ direction.unidirectional.original data.
+
+
+L3                       .LINS.PALB.ORG.
+                                             .lineation.sedimentary.paleocurrent
+ direction.bidirectional.original data.
+
+
+L4                       .LINFU.ORG.
+                                             .lineation.fault-slip direction.uni
+directional.original data.
+
+
+L5                       .LINFB.ORG.
+                                             .lineation.fault-slip direction.bid
+irectional.original data.
+
+
+L6                       .LINIF.ORG.
+                                             .lineation.igneous.flow related.ori
+ginal data.
+
+
+L7                       .LINIF.HRZLI.ORG.
+                                             .lineation.igneous.horizontal in pl
+ane of inclined foliation.original data.
+
+
+L8                       .LINIF.HRZLV.ORG.
+                                             .lineation.igneous.horizontal in pl
+ane of vertical foliation.original data.
+
+
+L9                       .LINI.AMGI.ORG.
+                                             .lineation.igneous.aligned mineral
+grains.original data.
+
+
+L10                      .LINM.HRZLI.ORG.
+                                             .lineation.metamorphic.horizontal i
+n plane of inclined foliation.original data.
+
+
+L11                      .LINM.HRZLV.ORG.
+                                             .lineation.metamorphic.horizontal i
+n plane of vertical foliation.original data.
+
+
+L12                      .LINH.HRZLI.ORG.
+                                             .lineation.high-strain rock.horizon
+tal in plane of inclined foliation.original data.
+
+
+L13                      .LINH.HRZLV.ORG.
+                                             .lineation.high-strain rock.horizon
+tal in plane of vertical foliation.original data.
+
+
+L14                      .LINH.CSTH.ORG.
+                                             .lineation.high-strain rock.crushed
+ and streaked mineral grains.original data.
+
+
+L15                      .LINH.RODH.ORG.
+                                             .lineation.high-strain rock.rodding
+.original data.
+
+
+L16                      .LINH.CSRH.ORG.
+                                             .lineation.high-strain rock.crushed
+ and streaked mineral grains together with rodding.original data.
+
+
+L17                      .LINH.AMGH.ORG.
+                                             .lineation.high-strain rock.aligned
+ mineral grains.original data.
+
+
+L18                      .LINH.CSAH.ORG.
+                                             .lineation.high-strain rock.crushed
+ and streaked mineral grains together with aligned mineral grains.metamorphic.or
+iginal data.
+
+L19                      .LINM.CSTM.ORG.
+                                             .lineation.metamorphic.crushed and
+streaked mineral grains.original data.
+
+
+L20                      .LINM.RODM.ORG.
+                                             .lineation.metamorphic.rodding.orig
+inal data.
+
+
+L21                      .LINM.CSRM.ORG.
+                                             .lineation.metamorphic.crushed and
+streaked mineral grains together with rodding.original data.
+
+
+L22                      .LINM.AMGM.ORG.
+                                             .lineation.metamorphic.aligned mine
+ral grains.original data.
+
+
+L23                      .LINM.CSAM.ORG.
+                                             .lineation.metamorphic.crushed and
+streaked mineral grains together with aligned mineral grains.metamorphic.origina
+l data.
+
+L24                      .LINS.RODS.ORG.
+                                             .lineation.sedimentary.rodding.orig
+inal data.
+
+
+L25                      .LINS.IBC.ORG.
+                                             .lineation.sedimentary.intersection
+ of bedding and cleavage.original data.
+
+
+L26                      .LINM.IFC.ORG.
+                                             .lineation.metamorphic.intersection
+ of foliation and cleavage.original data.
+
+
+L27                      .LINM.BDG.ORG.
+                                             .lineation.boudinage.original data.
+
+
+
+L28                      .LINAI.GND.ORG.
+                                             .lineation.minor fold axis.igneous.
+fold geometry not determined.original data.
+
+
+L29                      .LINAI.SFL.ORG.
+                                             .lineation.minor fold axis.igneous.
+synformal.original data.
+
+
+L30                      .LINAI.AFL.ORG.
+                                             .lineation.minor fold axis.igneous.
+antiformal.original data.
+
+
+L31                      .LINAI.ROTD.ORG.
+                                             .lineation.minor fold axis.igneous.
+dextral rotation.original data.
+
+
+L32                      .LINAI.ROTS.ORG.
+                                             .lineation.minor fold axis.igneous.
+sinistral rotation.original data.
+
+
+L33                      .LINAI.ROTN.ORG.
+                                             .lineation.minor fold axis.igneous.
+rotation sense not determined.original data.
+
+
+L34                      .LINAI.KKF.ORG.
+                                             .lineation.minor fold axis.igneous.
+kink band fold.original data.
+
+
+L35                      .LINAI.RFHA.ORG.
+                                             .lineation.minor fold axis.igneous.
+rootless fold hinge.antiformal.original data.
+
+
+L36                      .LINAI.RFHS.ORG.
+                                             .lineation.minor fold axis.igneous.
+rootless fold hinge.synformal.original data.
+
+
+L37                      .LINAM.GND.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.fold geometry not determined.original data.
+
+
+L38                      .LINAM.SFL.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.synformal.original data.
+
+
+L39                      .LINAM.AFL.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.antiformal.original data.
+
+
+L40                      .LINAM.ROTD.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.dextral rotation.original data.
+
+
+L41                      .LINAM.ROTS.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.sinistral rotation.original data.
+
+
+L42                      .LINAM.ROTN.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.rotation sense not determined.original data.
+
+
+L43                      .LINAM.KKF.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.kink band fold.original data.
+
+
+L44                      .LINAM.RFHA.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.rootless fold hinge.antiformal.original data.
+
+
+L45                      .LINAM.RFHS.ORG.
+                                             .lineation.minor fold axis.metamorp
+hic.rootless fold hinge.synformal.original data.
+
+
+L46                      .LINAS.GND.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.fold geometry not determined.original data.
+
+
+L47                      .LINAS.SFL.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.synformal.original data.
+
+
+L48                      .LINAS.AFL.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.antiformal.original data.
+
+
+L49                      .LINAS.ROTD.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.dextral rotation.original data.
+
+
+L50                      .LINAS.ROTS.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.sinistral rotation.original data.
+
+
+L51                      .LINAS.ROTN.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.rotation sense not determined.original data.
+
+
+L52                      .LINAS.KKF.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.kink band fold.original data.
+
+
+L53                      .LINAS.RFHA.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.rootless fold hinge.antiformal.original data.
+
+
+L54                      .LINAS.RFHS.ORG.
+                                             .lineation.minor fold axis.sediment
+ary.rootless fold hinge.synformal.original data.
+
+
+L55                      .LINAH.GND.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.fold geometry not determined.original data.
+
+
+L56                      .LINAH.SFL.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.synformal.original data.
+
+
+L57                      .LINAH.AFL.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.antiformal.original data.
+
+
+L58                      .LINAH.ROTD.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.dextral rotation.original data.
+
+
+L59                      .LINAH.ROTS.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.sinistral rotation.original data.
+
+
+L60                      .LINAH.ROTN.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.rotation sense not determined.original data.
+
+
+L61                      .LINAH.KKF.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.kink band fold.original data.
+
+
+L62                      .LINAH.RFHA.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.rootless fold hinge.antiformal.original data.
+
+
+L63                      .LINAH.RFHS.ORG.
+                                             .lineation.minor fold axis.high-str
+ain rock.rootless fold hinge.synformal.original data.
+
+
+L64                      .LIN.TLNP.ORG.
+                                             .lineation.two parallel lineations.
+metamorphic.original data.
+
+
+L65                      .LIN.LINT.ORG.
+                                             .lineation.two lineations normal to
+ each other.metamorphic.original data.
+
+
+L66                      .LIN.ORG.
+                                             .lineation.original data.
+
+
+
+L67                      .LIN.ORG.
+                                             .lineation.original data.
+
+
+
+CC1                      .PACD.ORG.
+                                             .geologic contact attribute.dip dir
+ection.original data.
+
+
+CC2                      .PACOK.ORG.
+                                             .geologic contact attribute.clearly
+ observable.knife-edge.original data.
+
+
+CC3                      .PACOT.ORG.
+                                             .geologic contact attribute.clearly
+ observable.transitional over 1 to 10 meters.original data.
+
+
+CC4                      .PACOG.ORG.
+                                             .geologic contact attribute.clearly
+ observable.gradational over 1 to 10 meters.original data.
+
+
+FC1                      .PAFB.
+                                             .fault attribute.bar and ball on do
+wndropped block.
+
+
+FC2                      .PAFSR.
+                                             .fault attribute.strike slip arrows
+.right lateral.
+
+
+FC3                      .PAFSL.
+                                             .fault attribute.strike slip arrows
+.left lateral.
+
+
+FC4                      .PAFD.ORG.
+                                             .fault attribute.fault dip directio
+n.original data.
+
+
+FC5                      .PAFA.
+                                             .fault attribute.annotation balloon
+.
+
+
+FAC1                     .PAOAF.UPRA.
+                                             .fold attribute.antiform.upright ax
+ial plane.
+
+
+FAC2                     .PAOAF.OVTA.
+                                             .fold attribute.antiform.overturned
+ axial plane.
+
+
+FAC3                     .PAOAF.OVTA.
+                                             .fold attribute.antiform.overturned
+ axial plane.
+
+
+FAC4                     .PAOAC.UPRA.
+                                             .fold attribute.anticline.upright a
+xial plane.
+
+
+FAC5                     .PAOAC.OVTA.
+                                             .fold attribute.anticline.overturne
+d axial plane.
+
+
+FAC6                     .PAOAC.OVTA.
+                                             .fold attribute.anticline.overturne
+d axial plane.
+
+
+FAC7                     .PAOSF.UPRA.
+                                             .fold attribute.synform.upright axi
+al plane.
+
+
+FAC8                     .PAOSF.OVTA.
+                                             .fold attribute.synform.overturned
+axial plane.
+
+
+FAC9                     .PAOSF.OVTA.
+                                             .fold attribute.synform.overturned
+axial plane.
+
+
+FAC10                    .PAOSC.UPRA.
+                                             .fold attribute.syncline.upright ax
+ial plane.
+
+
+FAC11                    .PAOSC.OVTA.
+                                             .fold attribute.syncline.overturned
+ axial plane.
+
+
+FAC12                    .PAOSC.OVTA.
+                                             .fold attribute.syncline.overturned
+ axial plane.
+
+
+FAC13                    .PAORN.
+                                             .fold attribute.refolded fold.fold
+form not determined.
+
+
+FAC14                    .PAORD.AFS.
+                                             .fold attribute.refolded fold.fold
+form determined.antiformal syncline.
+
+
+FAC15                    .PAORD.SFA.
+                                             .fold attribute.refolded fold.fold
+form determined.synformal anticline.
+
+
+FAC16                    .PAOAF.PLD.
+                                             .fold attribute.antiform.plunge dir
+ection.
+
+
+FAC17                    .PAOAC.PLD.
+                                             .fold attribute.anticline.plunge di
+rection.
+
+
+FAC18                    .PAOSF.PLD.
+                                             .fold attribute.synform.plunge dire
+ction.
+
+
+FAC19                    .PAOSC.PLD.
+                                             .fold attribute.syncline.plunge dir
+ection.
+
+
+FAC20                    .PAORN.PLD.
+                                             .fold attribute.refolded fold.fold
+form not determined.plunge direction.
+
+
+FAC21                    .PAORD.AFS.PLD.
+                                             .fold attribute.refolded fold.fold
+form determined.antiformal syncline.plunge direction.
+
+
+FAC22                    .PAORD.SFA.PLD.
+                                             .fold attribute.refolded fold.fold
+form determined.synformal anticline.plunge direction.
+
+
+OS1                      .OSTG.ORG.
+                                             .observation station.general observ
+ation.original data.
+
+
+OS2                      .OSTL.ORG.
+                                             .observation station.lithologic des
+cription.original data.
+
+
+OS3                      .OSTSE.ORG.
+                                             .observation station.soil profile e
+xamined.original data.
+
+
+OS4                      .OSTSD.ORG.
+                                             .observation station.soil profile d
+escribed.original data.
+
+
+OS5                      .OSTFC.ORG.
+                                             .observation station.fossil collect
+ion.original data.
+
+
+OS6                      .OSTFD.ORG.
+                                             .observation station.fossil descrip
+tion.original data.
+
+
+OS7                      .OSTFO.ORG.
+                                             .observation station.fossils observ
+ed.original data.
+
+
+OS8                      .OSTM.ORG.
+                                             .observation station.modal mineralo
+gy determination.original data.
+
+
+OS9                      .OSTB.ORG.
+                                             .observation station.subsurface bor
+ing site.original data.
+
+
+OS10                     .OSTA.ORG.
+                                             .observation station.annotation sit
+e.original data.
+
+
+OS11                     .OSTI.ORG.
+                                             .observation station.isotopic-age d
+etermination.original data.
+
+
+OS12                     .OSTP.ORG.
+                                             .observation station.paleomagnetic
+determination.original data.
+
+
+OS13                     .OSTC.ORG.
+                                             .observation station.geochemistry d
+etermination.original data.
+
+
+OS14                     .OSTU.ORG.
+                                             .observation station.magnetic susce
+ptibility determination.original data.
+
+
+OS15                     .OSTV.ORG.
+                                             .observation station.gravitydetermi
+nation.original data.
+
+
+EOI
+EOS

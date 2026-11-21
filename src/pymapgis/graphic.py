@@ -36,12 +36,28 @@ from pymapgis.linesty import (
     feature_rhythm,
 )
 from pymapgis.pcolor import PcolorLib
-from pymapgis.reader import Reader
+from pymapgis.reader import (
+    Reader,
+    _LINE_PARAM_COLUMNS,
+    _POINT_PARAM_COLUMNS,
+    _POLYGON_PARAM_COLUMNS,
+)
 from pymapgis.slib import SubgraphLib
 
 PathLike = Union[str, Path]
 RGB = Tuple[float, float, float]
 MM_TO_PT = 72.0 / 25.4
+
+# Native graphic parameter columns as concatenated by Reader (DBF attributes
+# first, native parameters last). field5/6/7 are unpublished WP payload
+# placeholders, never consulted by the renderer.
+_GRAPHIC_PARAMETER_NAMES = frozenset(
+    name
+    for name in (
+        set(_POINT_PARAM_COLUMNS) | set(_LINE_PARAM_COLUMNS) | set(_POLYGON_PARAM_COLUMNS)
+    )
+    if name not in {"field5", "field6", "field7"}
+)
 
 
 @dataclass
@@ -168,6 +184,11 @@ class GraphicRenderer:
         Maximum size of one expanded RGBA pattern image. The default is
         128 MiB; larger requests are reported as ``pattern_too_large`` before
         allocation.
+    vector_patterns:
+        Emit Fillgrph tiles as vector LineCollection/PolyCollection artists
+        instead of raster images. Required for fully vector GeoPDF output.
+    max_vector_pattern_elements:
+        Maximum number of expanded vector pattern primitives per polygon.
     max_pattern_cycles:
         Maximum repeat cycles for one WL feature. Excessively dense patterns
         are skipped and counted as ``cycle_limit`` in the layer report.
@@ -184,17 +205,65 @@ class GraphicRenderer:
     polygon_label_scale:
         Multiplier applied to ``polygon_label_fontsize``. The default 0.70
         produces 3.15 pt from the default base size.
+    polygon_label_avoid_collisions:
+        If true, measure text extents and try in-polygon offsets before
+        accepting a label. ``label_skipped_collision`` records hidden labels
+        and ``label_offset`` records labels moved to avoid overlap.
+    polygon_label_buffer_pt:
+        Padding around each measured label box, in typographic points.
+    polygon_label_max_offset_pt:
+        Maximum in-polygon offset tried for collision avoidance.
+    polygon_label_randomize:
+        Randomize the order in which labels compete for space. Geometry order
+        is unchanged. Use ``polygon_label_seed`` for reproducible visibility.
+    polygon_label_seed:
+        Optional seed for randomized label visibility. A new generator is
+        created for each render, so identical inputs and seed are repeatable.
     exclude_text_categories:
-        Optional CHFCEC categories to omit. Defaults to ``{"代号"}`` so
-        fragmented WT unit-code annotations are not duplicated over the
-        polygon-derived labels. Use ``exclude_text_categories=()`` together
-        with ``polygon_labels=False`` for the legacy WT-only behaviour.
+        Optional CHFCEC categories whose native *text annotations* are omitted.
+        Subgraph points are never dropped by this filter, so ``("产状",)``
+        suppresses native dip annotations while retaining attitude symbols and
+        their attribute-derived labels. Defaults to ``{"代号"}`` so fragmented
+        WT unit-code annotations are not duplicated over polygon labels. Use
+        ``exclude_text_categories=()`` together with ``polygon_labels=False``
+        for the legacy WT-only behaviour.
     text_category_scales:
         Optional CHFCEC-specific font-size multipliers.
     attitude_text_scale:
         Additional multiplier for the CHFCEC categories ``产状``、``断层产状``
         and ``断层辅助点``. The default 0.30 is compounded with ``text_scale``
         and any category-specific multiplier.
+    attitude_dip_labels:
+        Derive dip-number labels from ``dip``/``GZBBAD`` for Subgraph attitude
+        points, using the geoscimlchina right-of-dip-tick placement rule.
+        ``dip_az``/``GZBBAC`` supplies the dip direction. Only empty/``产状``
+        categories participate; lineation is not treated as planar attitude.
+    attitude_dip_fontsize:
+        Dip-label size in typographic points; default 3.5 pt.
+    attitude_dip_tick_mm:
+        Notional dip-tick length used for label placement, in paper
+        millimetres. The default 2.0 mm is independent of map scale and output
+        DPI; only its ground-coordinate conversion changes with map scale.
+    attitude_dip_tick_px:
+        Deprecated compatibility override measured in output pixels. New code
+        should use ``attitude_dip_tick_mm`` so the paper size is independent
+        of DPI.
+    attitude_dip_label_buffer_pt:
+        Padding used when attitude dip labels participate in the shared label
+        collision domain. The default 0.5 pt is independent of the polygon
+        label buffer. Dip labels are never silently deleted by collision
+        avoidance; unresolved cases are reported in
+        ``attitude_dip_label_collision``.
+    attitude_dip_label_direction:
+        ``"attribute"`` uses ``dip_az``/``GZBBAC`` with geoscimlchina's
+        north-clockwise convention. ``"symbol"`` measures the actual Subgraph
+        short stroke for T-shaped symbols 1245/1249 after native rotation and
+        places the label at that stroke's endpoint. Other symbol types retain
+        the attribute rule so triangles, inverted attitudes and lineation are
+        not mistaken for a T-shaped dip tick.
+    attitude_symbol_scale:
+        Multiplier for native height/width of empty/``产状`` category symbols.
+        Lineation and other categories are unchanged. The default is 1.0.
     text_font_family:
         Optional Matplotlib font family or fallback list for text annotations.
     native_text_layout:
@@ -230,8 +299,10 @@ class GraphicRenderer:
         polygon_edge_color: str = "none",
         polygon_edge_width_pt: float = 0.0,
         tile_pixels: int = 26,
+        vector_patterns: bool = False,
         max_pattern_tiles: int = 40000,
         max_pattern_bytes: int = 128 * 1024 ** 2,
+        max_vector_pattern_elements: int = 2000000,
         max_pattern_cycles: int = 100000,
         fallback_to_solid: bool = True,
         symbol_fills: bool = True,
@@ -239,9 +310,21 @@ class GraphicRenderer:
         polygon_label_fields: Sequence[str] = ("QDUECC_eff", "QDUECC", "QDUECD"),
         polygon_label_fontsize: float = 4.5,
         polygon_label_scale: float = 0.7,
+        polygon_label_avoid_collisions: bool = False,
+        polygon_label_buffer_pt: float = 1.5,
+        polygon_label_max_offset_pt: float = 24.0,
+        polygon_label_randomize: bool = False,
+        polygon_label_seed: Optional[int] = None,
         exclude_text_categories: Sequence[str] = ("代号",),
         text_category_scales: Optional[Mapping[str, float]] = None,
         attitude_text_scale: float = 0.3,
+        attitude_dip_labels: bool = False,
+        attitude_dip_fontsize: float = 3.5,
+        attitude_dip_tick_mm: float = 2.0,
+        attitude_dip_label_buffer_pt: float = 0.5,
+        attitude_dip_label_direction: str = "attribute",
+        attitude_symbol_scale: float = 1.0,
+        attitude_dip_tick_px: Optional[float] = None,
         text_scale: float = 1.0,
         text_font_family: Any = None,
         native_text_layout: bool = True,
@@ -249,14 +332,15 @@ class GraphicRenderer:
         font_en_map: Optional[Mapping[int, Any]] = None,
         font_style_map: Optional[Mapping[int, Mapping[str, Any]]] = None,
     ) -> None:
-        if scale <= 0:
+        if not math.isfinite(float(scale)) or float(scale) <= 0:
             raise ValueError("scale must be positive")
         if fill_library not in {"auto", "color", "pcolor"}:
             raise ValueError("fill_library must be 'auto', 'color' or 'pcolor'")
         if fill_library == "pcolor" and libraries.pcolor is None:
             raise ValueError("fill_library='pcolor' requires Pcolor.lib")
         self.fill_library = fill_library
-        if map_units_per_mm is not None and map_units_per_mm <= 0:
+        if map_units_per_mm is not None and (
+                not math.isfinite(float(map_units_per_mm)) or float(map_units_per_mm) <= 0):
             raise ValueError("map_units_per_mm must be positive")
         if tile_pixels < 4:
             raise ValueError("tile_pixels must be at least 4")
@@ -284,8 +368,10 @@ class GraphicRenderer:
         self.polygon_edge_color = polygon_edge_color
         self.polygon_edge_width_pt = float(polygon_edge_width_pt)
         self.tile_pixels = int(tile_pixels)
+        self.vector_patterns = bool(vector_patterns)
         self.max_pattern_tiles = int(max_pattern_tiles)
         self.max_pattern_bytes = int(max_pattern_bytes)
+        self.max_vector_pattern_elements = int(max_vector_pattern_elements)
         self.max_pattern_cycles = int(max_pattern_cycles)
         self.fallback_to_solid = bool(fallback_to_solid)
         self.symbol_fills = bool(symbol_fills)
@@ -297,6 +383,19 @@ class GraphicRenderer:
         self.polygon_label_scale = float(polygon_label_scale)
         if not math.isfinite(self.polygon_label_scale) or self.polygon_label_scale <= 0:
             raise ValueError("polygon_label_scale must be positive and finite")
+        self.polygon_label_avoid_collisions = bool(polygon_label_avoid_collisions)
+        self.polygon_label_buffer_pt = float(polygon_label_buffer_pt)
+        if not math.isfinite(self.polygon_label_buffer_pt) or self.polygon_label_buffer_pt < 0:
+            raise ValueError("polygon_label_buffer_pt must be non-negative and finite")
+        self.polygon_label_max_offset_pt = float(polygon_label_max_offset_pt)
+        if (not math.isfinite(self.polygon_label_max_offset_pt)
+                or self.polygon_label_max_offset_pt <= 0):
+            raise ValueError("polygon_label_max_offset_pt must be positive and finite")
+        self.polygon_label_randomize = bool(polygon_label_randomize)
+        self.polygon_label_seed = polygon_label_seed
+        self._label_rng = None
+        self._label_boxes = []
+        self._label_renderer = None
         self.exclude_text_categories = {
             str(x).strip() for x in self._string_tuple(exclude_text_categories)
         }
@@ -312,6 +411,30 @@ class GraphicRenderer:
         self.attitude_text_scale = float(attitude_text_scale)
         if not math.isfinite(self.attitude_text_scale) or self.attitude_text_scale <= 0:
             raise ValueError("attitude_text_scale must be positive and finite")
+        self.attitude_dip_labels = bool(attitude_dip_labels)
+        self.attitude_dip_fontsize = float(attitude_dip_fontsize)
+        if not math.isfinite(self.attitude_dip_fontsize) or self.attitude_dip_fontsize <= 0:
+            raise ValueError("attitude_dip_fontsize must be positive and finite")
+        self.attitude_dip_tick_mm = float(attitude_dip_tick_mm)
+        if not math.isfinite(self.attitude_dip_tick_mm) or self.attitude_dip_tick_mm <= 0:
+            raise ValueError("attitude_dip_tick_mm must be positive and finite")
+        self.attitude_dip_tick_px = (
+            None if attitude_dip_tick_px is None else float(attitude_dip_tick_px)
+        )
+        if (self.attitude_dip_tick_px is not None
+                and (not math.isfinite(self.attitude_dip_tick_px)
+                     or self.attitude_dip_tick_px <= 0)):
+            raise ValueError("attitude_dip_tick_px must be positive and finite when specified")
+        self.attitude_dip_label_buffer_pt = float(attitude_dip_label_buffer_pt)
+        if (not math.isfinite(self.attitude_dip_label_buffer_pt)
+                or self.attitude_dip_label_buffer_pt < 0):
+            raise ValueError("attitude_dip_label_buffer_pt must be non-negative and finite")
+        if attitude_dip_label_direction not in {"attribute", "symbol"}:
+            raise ValueError("attitude_dip_label_direction must be 'attribute' or 'symbol'")
+        self.attitude_dip_label_direction = attitude_dip_label_direction
+        self.attitude_symbol_scale = float(attitude_symbol_scale)
+        if not math.isfinite(self.attitude_symbol_scale) or self.attitude_symbol_scale <= 0:
+            raise ValueError("attitude_symbol_scale must be positive and finite")
         self.text_scale = float(text_scale)
         if not math.isfinite(self.text_scale) or self.text_scale <= 0:
             raise ValueError("text_scale must be positive and finite")
@@ -326,6 +449,7 @@ class GraphicRenderer:
         self._line_style_cache: Dict[int, Any] = {}
         self._symbol_cache: Dict[int, Any] = {}
         self._tile_cache: Dict[int, Optional[np.ndarray]] = {}
+        self._pattern_geometry_cache: Dict[int, Optional[dict]] = {}
 
     @staticmethod
     def _string_tuple(values: Union[str, Sequence[str]]) -> Tuple[str, ...]:
@@ -343,17 +467,42 @@ class GraphicRenderer:
         return values  # type: ignore[return-value]
 
     @staticmethod
+    def _deduplicate_graphic_parameters(frame):
+        """Keep native graphic parameters when DBF names collide.
+
+        Reader concatenates DBF attributes first and native parameters last.
+        The last occurrence is therefore the authoritative value for drawing.
+        """
+        for name in sorted(_GRAPHIC_PARAMETER_NAMES):
+            positions = [index for index, column in enumerate(frame.columns) if column == name]
+            if len(positions) > 1:
+                native = frame.iloc[:, positions[-1]].to_numpy()
+                frame = frame.drop(columns=[name])
+                frame[name] = native
+        return frame
+
+    @staticmethod
     def read_layer(path: PathLike) -> Any:
         """Read a WL/WP/WT file with all graphic parameters enabled."""
         source = Path(path)
         suffix = source.suffix.lower()
         if suffix not in (".wl", ".wp", ".wt"):
             raise ValueError("Expected a .wl, .wp or .wt file: {}".format(source))
-        return Reader(
+        reader = Reader(
             str(source),
             read_graphic_params=True,
             read_point_params=(suffix == ".wt"),
-        ).geodataframe
+        )
+        frame = reader.geodataframe
+        # MapGIS SHP import retains same-named DBF attributes and native
+        # graphic parameters.  Pandas otherwise returns a DataFrame for
+        # row.get("fill_color"/"linetype"/"point_type"), causing black fills,
+        # solid fallbacks and symbols being mistaken for text.  Native graphic
+        # parameters are authoritative for rendering, while other DBF fields
+        # and Reader metadata are preserved.
+        frame = GraphicRenderer._deduplicate_graphic_parameters(frame)
+        frame.attrs = reader.geodataframe.attrs.copy()
+        return frame
 
     def render(
         self,
@@ -362,6 +511,7 @@ class GraphicRenderer:
         *,
         figsize: Tuple[float, float] = (10.0, 8.0),
         dpi: int = 300,
+        axes_rect: Optional[Sequence[float]] = None,
         margin: float = 0.01,
         title: Optional[str] = None,
     ) -> GraphicRenderResult:
@@ -381,9 +531,16 @@ class GraphicRenderer:
                 "Graphic rendering requires matplotlib; install mapgis2shp[render]"
             ) from exc
 
-        fig = Figure(figsize=figsize)
+        if axes_rect is not None:
+            if len(axes_rect) != 4 or any(not math.isfinite(float(v)) for v in axes_rect):
+                raise ValueError("axes_rect must contain four finite values")
+            left, bottom, width, height = (float(v) for v in axes_rect)
+            if left < 0 or bottom < 0 or width <= 0 or height <= 0 or left + width > 1 or bottom + height > 1:
+                raise ValueError("axes_rect must be [left, bottom, width, height] within the figure")
+
+        fig = Figure(figsize=figsize, dpi=dpi)
         FigureCanvasAgg(fig)
-        ax = fig.add_subplot(111)
+        ax = fig.add_subplot(111) if axes_rect is None else fig.add_axes(axes_rect)
         reports = self.draw_layers(ax, layers, margin=margin)
         if title:
             ax.set_title(title)
@@ -408,12 +565,90 @@ class GraphicRenderer:
             raise ValueError("Graphic output must be .png or .pdf: {}".format(output))
         output.parent.mkdir(parents=True, exist_ok=True)
         if suffix == ".pdf":
-            from matplotlib.backends.backend_pdf import FigureCanvasPdf
-
-            FigureCanvasPdf(fig)
+            # savefig selects the PDF backend without replacing the figure's
+            # existing canvas.  Keeping the Agg canvas allows callers to add
+            # collision-checked labels to the returned figure afterwards.
             fig.savefig(str(output), format="pdf")
         else:
             fig.savefig(str(output), format="png", dpi=dpi)
+
+    def _reset_label_state(self) -> None:
+        """Start an independent label-layout operation with repeatable state."""
+        self._label_boxes = []
+        self._label_rng = np.random.default_rng(self.polygon_label_seed)
+        self._label_renderer = None
+
+    def _get_label_renderer(self, ax: Any) -> Any:
+        """Return a cached text-measurement renderer for the current canvas."""
+        cached = self._label_renderer
+        if cached is not None and cached[0] is ax.figure.canvas:
+            return cached[1]
+        get_renderer = getattr(ax.figure.canvas, "get_renderer", None)
+        if callable(get_renderer):
+            renderer = get_renderer()
+        else:
+            # PDF/SVG canvases resolve a renderer through a print cycle. Cache
+            # it once per drawing operation, not once per candidate label.
+            # Figure._get_renderer is private and absent on older Matplotlib.
+            figure_get_renderer = getattr(ax.figure, "_get_renderer", None)
+            if figure_get_renderer is None:
+                raise ValueError(
+                    "Collision-aware text measurement requires a canvas with "
+                    "get_renderer (for example Agg); this figure's canvas "
+                    "provides none and its Matplotlib has no _get_renderer"
+                )
+            renderer = figure_get_renderer()
+        self._label_renderer = (ax.figure.canvas, renderer)
+        return renderer
+
+    def _buffered_text_bounds(self, ax: Any, text: Any, buffer_pt: float) -> Any:
+        """Measure a text artist and expand its box in typographic points."""
+        from matplotlib.transforms import Bbox
+
+        bounds = text.get_window_extent(renderer=self._get_label_renderer(ax))
+        buffer_px = float(buffer_pt) * ax.figure.dpi / 72.0
+        return Bbox.from_extents(
+            bounds.x0 - buffer_px, bounds.y0 - buffer_px,
+            bounds.x1 + buffer_px, bounds.y1 + buffer_px,
+        )
+
+    def inspect_text_collisions(self, ax: Any, *, buffer_pt: float = 0.0) -> Dict[str, Any]:
+        """Return every pairwise overlap among visible text artists.
+
+        This final-layout audit is independent of the candidate-placement
+        algorithm. It can therefore detect unresolved dip labels, native WT
+        annotations and any other text that was added by caller customisation.
+        """
+        if not math.isfinite(buffer_pt) or buffer_pt < 0:
+            raise ValueError("buffer_pt must be non-negative and finite")
+        ax.figure.canvas.draw()
+        texts = [
+            text for text in ax.texts
+            if text.get_visible() and text.get_text().strip()
+        ]
+        boxes = [self._buffered_text_bounds(ax, text, buffer_pt) for text in texts]
+        overlaps = []
+        for index, left in enumerate(texts):
+            for right_index in range(index + 1, len(texts)):
+                if not boxes[index].overlaps(boxes[right_index]):
+                    continue
+                right = texts[right_index]
+                overlaps.append({
+                    "left_index": index,
+                    "right_index": right_index,
+                    "left_text": left.get_text(),
+                    "right_text": right.get_text(),
+                    "left_xy": list(left.get_position()),
+                    "right_xy": list(right.get_position()),
+                    "left_fontsize_pt": float(left.get_fontsize()),
+                    "right_fontsize_pt": float(right.get_fontsize()),
+                })
+        return {
+            "checked_text_artists": len(texts),
+            "buffer_pt": float(buffer_pt),
+            "overlap_count": len(overlaps),
+            "overlaps": overlaps,
+        }
 
     def draw_layers(
         self,
@@ -427,10 +662,13 @@ class GraphicRenderer:
 
         Extent is established before any WL drawing because display point sizes
         and pattern stamps depend on ``ax.transData``.  Set ``set_extent=False``
-        only when the caller has already set suitable x/y limits.
+        only when the caller has already set suitable x/y limits.  Each call
+        starts an independent label-layout operation: labels already on the
+        axes from earlier draw calls are not collision obstacles.
         """
         if not layers:
             raise ValueError("At least one graphic layer is required")
+        self._reset_label_state()
         prepared = [self._coerce_layer(layer) for layer in layers]
         order = {"wp": 0, "wl": 1, "wt": 2}
         prepared = sorted(prepared, key=lambda layer: order[layer.kind])
@@ -442,14 +680,44 @@ class GraphicRenderer:
         ax.axis("off")
         # Initialise transData before line widths and dot minima are computed.
         ax.figure.canvas.draw()
-        return [self._draw_layer(ax, layer) for layer in prepared]
+        reports = [
+            {
+                "source": layer.source,
+                "kind": layer.kind,
+                "features": int(len(layer.gdf)),
+                "drawn": 0,
+                "unknown_colors": {},
+                "overridden_colors": {},
+            }
+            for layer in prepared
+        ]
+        if self.polygon_label_avoid_collisions:
+            # Native WT annotations become fixed obstacles first, dip labels
+            # are placed next, and WP/WL follow. Z-order still controls the
+            # visual stack; this drawing order controls only label competition.
+            def layout_priority(layer):
+                if layer.kind == "wt":
+                    return 1 if self._layer_has_attitude_dips(layer.gdf) else 0
+                return 2 if layer.kind == "wp" else 3
+
+            report_by_layer = {id(layer): report for layer, report in zip(prepared, reports)}
+            drawing_order = sorted(prepared, key=layout_priority)
+            for layer in drawing_order:
+                self._draw_layer(ax, layer, report=report_by_layer[id(layer)])
+        else:
+            for layer, report in zip(prepared, reports):
+                self._draw_layer(ax, layer, report=report)
+        return reports
 
     def draw_layer(self, ax: Any, layer: Any, *, kind: Optional[str] = None) -> Dict[str, Any]:
         """Draw one layer onto an Axes whose extent is already established.
 
-        GeoDataFrames may set ``attrs['source']`` for report attribution and
-        ``attrs['kind']`` to ``wl``/``wp``/``wt`` when geometry is empty.
+        This starts an independent label-layout operation. Use ``draw_layers``
+        when several layers must share one collision domain. GeoDataFrames may
+        set ``attrs['source']`` for report attribution and ``attrs['kind']``
+        to ``wl``/``wp``/``wt`` when geometry is empty.
         """
+        self._reset_label_state()
         prepared = self._coerce_layer(layer, kind=kind)
         ax.figure.canvas.draw()
         return self._draw_layer(ax, prepared)
@@ -465,6 +733,7 @@ class GraphicRenderer:
             metadata = getattr(gdf, "attrs", {}) or {}
             inferred = str(metadata.get("kind", ""))
             source = str(metadata.get("source", "<GeoDataFrame>"))
+        gdf = self._deduplicate_graphic_parameters(gdf)
         kind = (kind or inferred or self._infer_kind(gdf)).lower()
         if kind not in ("wl", "wp", "wt"):
             raise ValueError("Layer kind must be wl, wp or wt; got {!r}".format(kind))
@@ -538,15 +807,38 @@ class GraphicRenderer:
         ax.set_xlim(xmin - pad, xmax + pad)
         ax.set_ylim(ymin - pad, ymax + pad)
 
-    def _draw_layer(self, ax: Any, layer: _Layer) -> Dict[str, Any]:
-        report: Dict[str, Any] = {
-            "source": layer.source,
-            "kind": layer.kind,
-            "features": int(len(layer.gdf)),
-            "drawn": 0,
-            "unknown_colors": {},
-            "overridden_colors": {},
-        }
+    def _layer_has_attitude_dips(self, gdf: Any) -> bool:
+        """Return whether a WT layer can produce derived attitude dip labels."""
+        if not self.attitude_dip_labels:
+            return False
+        for _, row in gdf.iterrows():
+            if self._int(row.get("point_type")) != 1:
+                continue
+            # Keep the producer's category gate: only empty/产状 subgraph rows
+            # emit dip labels; 断层产状/lineation rows must not promote the
+            # layer into the dip-label layout band.
+            category = self._text(row.get("CHFCEC", "")).strip()
+            if category and category != "产状":
+                continue
+            dip = self._float(row.get("dip"), float("nan"))
+            if not math.isfinite(dip):
+                dip = self._float(row.get("GZBBAD"), 0.0)
+            if dip > 0:
+                return True
+        return False
+
+    def _draw_layer(
+        self, ax: Any, layer: _Layer, *, report: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        if report is None:
+            report = {
+                "source": layer.source,
+                "kind": layer.kind,
+                "features": int(len(layer.gdf)),
+                "drawn": 0,
+                "unknown_colors": {},
+                "overridden_colors": {},
+            }
         if layer.kind == "wp":
             self._draw_wp(ax, layer.gdf, report)
         elif layer.kind == "wl":
@@ -671,6 +963,57 @@ class GraphicRenderer:
             )
         return PathPatch(MplPath(vertices, codes), **kwargs)
 
+    def _label_offset_steps(self) -> List[float]:
+        """Offset ladder in typographic points shared by polygon/dip labels."""
+        steps = [0.0] + [
+            value for value in (4.0, 8.0, 12.0, 18.0, 24.0)
+            if value < self.polygon_label_max_offset_pt
+        ]
+        steps.append(self.polygon_label_max_offset_pt)
+        return steps
+
+    def _place_polygon_label_with_buffer(
+        self, ax, label, point, geom, fontsize, kwargs, report
+    ):
+        """Place a label only when its buffered text box does not overlap."""
+        inverse = ax.transData.inverted()
+        base = ax.transData.transform((point.x, point.y))
+        pixels_per_point = ax.figure.dpi / 72.0
+        label_geometry = geom.buffer(1e-9)
+        steps = self._label_offset_steps()
+        directions = [(0.0, 0.0)]
+        for angle in range(0, 360, 45):
+            radians = math.radians(angle)
+            directions.append((math.cos(radians), math.sin(radians)))
+        for step in steps:
+            for dx, dy in directions:
+                # The origin belongs only to step zero; do not retry it at
+                # every offset with another text add/measure/remove cycle.
+                if (step == 0.0) != (dx == 0.0 and dy == 0.0):
+                    continue
+                pixel = base + (dx * step * pixels_per_point,
+                                dy * step * pixels_per_point)
+                x, y = inverse.transform(pixel)
+                candidate = type(point)(x, y)
+                if not label_geometry.contains(candidate):
+                    continue
+                text = ax.text(
+                    x, y, label, fontsize=fontsize, ha="center", va="center",
+                    zorder=12, parse_math=label.startswith("$\\mathrm{"),
+                    bbox={"boxstyle": "round,pad=0.05", "fc": "white", "ec": "none", "alpha": 0.5},
+                    **kwargs,
+                )
+                bounds = self._buffered_text_bounds(
+                    ax, text, self.polygon_label_buffer_pt,
+                )
+                if not any(bounds.overlaps(other) for other in self._label_boxes):
+                    self._label_boxes.append(bounds)
+                    if step:
+                        self._bump(report, "label_offset")
+                    return True
+                text.remove()
+        return False
+
     def _draw_polygon_label(
         self, ax: Any, row: Any, geom: Any, report: Dict[str, Any]
     ) -> None:
@@ -684,18 +1027,27 @@ class GraphicRenderer:
         point = geom.representative_point()
         has_greek = any("Ͱ" <= char <= "Ͽ" for char in raw_label)
         kwargs = {"fontfamily": "Times New Roman"} if has_greek else {}
-        ax.text(
-            point.x,
-            point.y,
-            label,
-            fontsize=self.polygon_label_fontsize * self.polygon_label_scale,
-            ha="center",
-            va="center",
-            zorder=12,
-            parse_math=label.startswith("$\\mathrm{"),
-            bbox={"boxstyle": "round,pad=0.05", "fc": "white", "ec": "none", "alpha": 0.5},
-            **kwargs,
-        )
+        fontsize = self.polygon_label_fontsize * self.polygon_label_scale
+        if self.polygon_label_avoid_collisions:
+            placed = self._place_polygon_label_with_buffer(
+                ax, label, point, geom, fontsize, kwargs, report
+            )
+            if not placed:
+                self._bump(report, "label_skipped_collision")
+                return
+        else:
+            ax.text(
+                point.x,
+                point.y,
+                label,
+                fontsize=fontsize,
+                ha="center",
+                va="center",
+                zorder=12,
+                parse_math=label.startswith("$\\mathrm{"),
+                bbox={"boxstyle": "round,pad=0.05", "fc": "white", "ec": "none", "alpha": 0.5},
+                **kwargs,
+            )
         self._bump(report, "polygon_label")
 
     def _draw_wp(self, ax: Any, gdf: Any, report: Dict[str, Any]) -> None:
@@ -727,7 +1079,6 @@ class GraphicRenderer:
                         zorder=2,
                     )
                 )
-            self._draw_polygon_label(ax, row, row.geometry, report)
             pattern = self._int(row.get("pattern"))
             height = self._float(row.get("pattern_height"), 0.0)
             width = self._float(row.get("pattern_width"), 0.0)
@@ -744,12 +1095,46 @@ class GraphicRenderer:
                 self._bump(report, "pattern_too_large")
             else:
                 self._bump(report, "pattern_unresolved")
+        if self.polygon_label_randomize:
+            if self._label_rng is None:
+                self._label_rng = np.random.default_rng(self.polygon_label_seed)
+            label_order = self._label_rng.permutation(len(gdf))
+        else:
+            label_order = range(len(gdf))
+        for index in label_order:
+            row = gdf.iloc[index]
+            if self._int(row.get("class", 1), 1) == 0:
+                continue
+            if next(self._iter_polygons(row.geometry), None) is None:
+                continue
+            self._draw_polygon_label(ax, row, row.geometry, report)
         if fill_patches:
             from matplotlib.collections import PatchCollection
 
             collection = PatchCollection(fill_patches, match_original=True)
             collection.set_zorder(2)
             ax.add_collection(collection)
+
+    @staticmethod
+    def _fillgrph_stroke_weight(native_width: int) -> float:
+        """Fillgrph pen-width class as a weight relative to the class-4 default.
+
+        Fillgrph stores width *classes*, not adjudicated millimetres. Class 4
+        is the reference weight, other positive classes preserve their stored
+        contrast, and 65535 is the native hairline flag (half of class 1).
+        Missing or zero widths retain the default rather than disappearing.
+        """
+        if native_width == 65535:
+            return 0.125
+        if native_width > 0:
+            return native_width / 4.0
+        return 1.0
+
+    @classmethod
+    def _tile_stroke_lw(cls, native_width: int, size: int) -> float:
+        """Map native pen-width classes to the legacy tile's relative weight."""
+        base = 0.8 * 100.0 / size
+        return base * cls._fillgrph_stroke_weight(native_width)
 
     def _tile_mask(self, number: int) -> Optional[np.ndarray]:
         if number in self._tile_cache:
@@ -758,7 +1143,7 @@ class GraphicRenderer:
         from matplotlib.figure import Figure
         from matplotlib.patches import Circle, Polygon
 
-        geometry = pattern_geometry(self.libraries.fillgrph, number)
+        geometry = self._pattern_geometry(number)
         if geometry is None:
             self._tile_cache[number] = None
             return None
@@ -775,24 +1160,28 @@ class GraphicRenderer:
         ax.patch.set_alpha(0)
         for ring in geometry["fill_polygons"]:
             ax.add_patch(Polygon(ring, closed=True, fc="k", ec="none"))
-        for points in geometry["polylines"]:
+        polyline_widths = geometry.get("polyline_widths", [])
+        for index, points in enumerate(geometry["polylines"]):
+            native_width = polyline_widths[index] if index < len(polyline_widths) else 4
             ax.plot(
                 [p[0] for p in points],
                 [p[1] for p in points],
                 "k-",
-                lw=0.8 * 100.0 / size,
+                lw=self._tile_stroke_lw(native_width, size),
                 solid_capstyle="round",
             )
         for cx, cy, radius in geometry["circles"]:
             ax.add_patch(Circle((cx, cy), radius, fc="k", ec="none"))
-        for cx, cy, radius, a0, a1 in geometry["arcs"]:
+        arc_widths = geometry.get("arc_widths", [])
+        for index, (cx, cy, radius, a0, a1) in enumerate(geometry["arcs"]):
+            native_width = arc_widths[index] if index < len(arc_widths) else 4
             sweep = (a1 - a0) % 360.0
             angles = [math.radians(a0 + sweep * i / 12.0) for i in range(13)]
             ax.plot(
                 [cx + radius * math.cos(t) for t in angles],
                 [cy + radius * math.sin(t) for t in angles],
                 "k-",
-                lw=0.8 * 100.0 / size,
+                lw=self._tile_stroke_lw(native_width, size),
             )
         fig.canvas.draw()
         rgba = np.asarray(fig.canvas.buffer_rgba())
@@ -801,9 +1190,120 @@ class GraphicRenderer:
         fig.clear()
         return mask
 
+    def _pattern_geometry(self, number: int) -> Optional[dict]:
+        if number not in self._pattern_geometry_cache:
+            self._pattern_geometry_cache[number] = pattern_geometry(
+                self.libraries.fillgrph, number
+            )
+        return self._pattern_geometry_cache[number]
+
+    def _vector_tile_stroke_lw(self, native_width: int) -> float:
+        """Preserve native width hierarchy in physical PDF points."""
+        return self.symbol_line_width_pt * self._fillgrph_stroke_weight(native_width)
+
+    def _draw_vector_pattern(
+        self, ax: Any, poly: Any, number: int, rgb: RGB, width: float, height: float
+    ) -> str:
+        """Expand Fillgrph geometry as clipped vector collections, never an image."""
+        from matplotlib.collections import LineCollection, PolyCollection
+
+        geometry = self._pattern_geometry(number)
+        if geometry is None:
+            return "unresolved"
+        minx, miny, maxx, maxy = poly.bounds
+        x0 = math.floor(minx / width) * width
+        y0 = math.floor(miny / height) * height
+        nx = max(1, int(math.ceil((maxx - x0) / width)))
+        ny = max(1, int(math.ceil((maxy - y0) / height)))
+        tile_count = nx * ny
+        if tile_count > self.max_pattern_tiles:
+            return "too_large"
+        primitive_count = (
+            len(geometry["fill_polygons"])
+            + sum(max(0, len(line) - 1) for line in geometry["polylines"])
+            + len(geometry["circles"])
+            + 12 * len(geometry["arcs"])
+        )
+        if tile_count * primitive_count > self.max_vector_pattern_elements:
+            return "too_large"
+        if primitive_count == 0:
+            # Every stroke was dropped as sub-visible; match the raster path's
+            # transparent tile without leaking an unused clip patch.
+            return "rendered"
+
+        polygons = []
+        segments = []
+        segment_widths = []
+        polyline_widths = geometry.get("polyline_widths", [])
+        arc_widths = geometry.get("arc_widths", [])
+        for iy in range(ny):
+            ty = y0 + iy * height
+            for ix in range(nx):
+                tx = x0 + ix * width
+
+                def transform(points):
+                    return np.asarray([
+                        (tx + point[0] * width, ty + point[1] * height)
+                        for point in points
+                    ], dtype=float)
+
+                for ring in geometry["fill_polygons"]:
+                    if len(ring) >= 3:
+                        polygons.append(transform(ring))
+                for index, points in enumerate(geometry["polylines"]):
+                    native_width = (
+                        polyline_widths[index] if index < len(polyline_widths) else 4
+                    )
+                    line_width = self._vector_tile_stroke_lw(native_width)
+                    for start, end in zip(points, points[1:]):
+                        if start != end:
+                            segments.append(transform((start, end)))
+                            segment_widths.append(line_width)
+                for cx, cy, radius in geometry["circles"]:
+                    angles = np.linspace(0.0, 2.0 * math.pi, 17)
+                    ring = [
+                        (cx + radius * math.cos(angle), cy + radius * math.sin(angle))
+                        for angle in angles
+                    ]
+                    polygons.append(transform(ring))
+                for index, (cx, cy, radius, a0, a1) in enumerate(geometry["arcs"]):
+                    native_width = arc_widths[index] if index < len(arc_widths) else 4
+                    line_width = self._vector_tile_stroke_lw(native_width)
+                    sweep = (a1 - a0) % 360.0
+                    angles = [math.radians(a0 + sweep * i / 12.0) for i in range(13)]
+                    points = [
+                        (cx + radius * math.cos(angle), cy + radius * math.sin(angle))
+                        for angle in angles
+                    ]
+                    for start, end in zip(points, points[1:]):
+                        segments.append(transform((start, end)))
+                        segment_widths.append(line_width)
+
+        clip = self._polygon_patch(poly, facecolor="none", edgecolor="none")
+        ax.add_patch(clip)
+        if polygons:
+            collection = PolyCollection(
+                polygons, facecolors=[rgb], edgecolors="none", zorder=3
+            )
+            ax.add_collection(collection)
+            collection.set_clip_path(clip)
+        if segments:
+            collection = LineCollection(
+                segments,
+                colors=[rgb],
+                linewidths=segment_widths,
+                capstyle="round",
+                zorder=3,
+            )
+            ax.add_collection(collection)
+            collection.set_clip_path(clip)
+        return "rendered"
+
     def _draw_pattern(
         self, ax: Any, poly: Any, number: int, rgb: RGB, width: float, height: float
     ) -> str:
+        if self.vector_patterns:
+            return self._draw_vector_pattern(ax, poly, number, rgb, width, height)
         mask = self._tile_mask(number)
         if mask is None:
             return "unresolved"
@@ -1013,9 +1513,29 @@ class GraphicRenderer:
                 if rhythm is not None:
                     result = self._normalise_rhythm(rhythm)
             elif len(style.sublines) == 1 and style.sublines[0].is_solid:
-                result = self._normalise_rhythm(
-                    {"kind": "solid_pen", "lines": [], "period_mm": 1.0}
-                )
+                # A 24-byte record is a pen payload, not proof of a full
+                # horizontal 0→1 stroke. Preserve its stored partial,
+                # reversed, offset or vertical segment on the implicit
+                # one-millimetre cycle; only the exact full baseline takes
+                # the solid-line fast path.
+                segment = style.sublines[0].seg
+                finite = segment is not None and all(math.isfinite(v) for v in segment)
+                if finite and all(
+                    math.isclose(actual, expected, rel_tol=0.0, abs_tol=1e-12)
+                    for actual, expected in zip(segment, (0.0, 0.0, 1.0, 0.0))
+                ):
+                    result = self._normalise_rhythm(
+                        {"kind": "solid_pen", "lines": [], "period_mm": 1.0}
+                    )
+                elif finite:
+                    x0, y0, x1, y1 = segment
+                    result = self._normalise_rhythm({
+                        "kind": "single_pen",
+                        "strokes": [((x0, y0), (x1, y1))],
+                        "period_mm": 1.0,
+                    })
+                # Non-finite payloads stay unresolved so the WL fallback is
+                # reported honestly rather than becoming an empty pattern.
             else:
                 variant = (
                     _aux_selects_subline(style, aux)
@@ -1066,9 +1586,12 @@ class GraphicRenderer:
             style = self._line_style(linetype)
             independent_aux = bool(aux) and not _aux_selects_subline(style, aux)
             rhythm = self._rhythm(linetype, aux)
+            aux_rhythm = self._rhythm(aux) if independent_aux else None
+            main_pattern = False
+            aux_pattern = False
             for line in lines:
                 points = np.asarray(line.coords, dtype=float)
-                self._draw_wl_line(
+                outcome = self._draw_wl_line(
                     ax,
                     points,
                     rhythm,
@@ -1083,14 +1606,14 @@ class GraphicRenderer:
                     prefix="",
                     transparent_fills=transparent_fills,
                 )
+                main_pattern = main_pattern or outcome == "pattern"
                 if independent_aux:
-                    aux_rhythm = self._rhythm(aux)
                     aux_number = self._int(row.get("aux_color"))
                     aux_color = self._color(aux_number, report) if aux_number else color
                     aux_transparent_fills = self._int(row.get("transparent"), 0) != 0 and all(
                         abs(component - 1.0) <= 1e-12 for component in aux_color
                     )
-                    self._draw_wl_line(
+                    aux_outcome = self._draw_wl_line(
                         ax,
                         points,
                         aux_rhythm,
@@ -1105,6 +1628,18 @@ class GraphicRenderer:
                         prefix="aux_",
                         transparent_fills=aux_transparent_fills,
                     )
+                    aux_pattern = aux_pattern or aux_outcome == "pattern"
+            # Unresolved fill geometry is a per-feature diagnostic. Count it
+            # only when at least one part actually rendered, never once per
+            # part or for a feature rejected by the cycle guard.
+            if rhythm is not None and main_pattern:
+                unknown_fills = int(rhythm.get("unknown_fills", 0))
+                if unknown_fills:
+                    self._bump(report, "unknown_fill", unknown_fills)
+            if aux_rhythm is not None and aux_pattern:
+                unknown_fills = int(aux_rhythm.get("unknown_fills", 0))
+                if unknown_fills:
+                    self._bump(report, "aux_unknown_fill", unknown_fills)
         self._flush_stamps(ax, buffer, points_per_unit)
 
     def _draw_wl_line(
@@ -1123,9 +1658,9 @@ class GraphicRenderer:
         *,
         prefix: str,
         transparent_fills: bool = False,
-    ) -> None:
+    ) -> Optional[str]:
         if len(points) < 2:
-            return
+            return None
         if rhythm is None:
             self._bump(report, prefix + "fallback")
             if self.fallback_to_solid:
@@ -1137,7 +1672,7 @@ class GraphicRenderer:
                     solid_capstyle="butt",
                     zorder=4,
                 )
-            return
+            return "fallback"
         if rhythm["kind"] == "solid_pen":
             self._bump(report, prefix + "solid")
             ax.plot(
@@ -1148,16 +1683,13 @@ class GraphicRenderer:
                 solid_capstyle="butt",
                 zorder=4,
             )
-            return
+            return "solid"
         before = (
             len(buffer.segments),
             len(buffer.dots),
             len(buffer.fills),
             len(ax.lines),
         )
-        unknown_fills = int(rhythm.get("unknown_fills", 0))
-        if unknown_fills:
-            self._bump(report, prefix + "unknown_fill", unknown_fills)
         if rhythm["kind"] == "raised_lines":
             outcome = self._draw_raised_parallel(
                 ax, points, rhythm, color, xc, yc, unit, line_width
@@ -1183,10 +1715,14 @@ class GraphicRenderer:
         )
         if outcome == "too_many_cycles":
             self._bump(report, prefix + "cycle_limit")
+            report_outcome = "cycle_limit"
         elif before == after:
             self._bump(report, prefix + "empty_pattern")
+            report_outcome = "empty_pattern"
         else:
             self._bump(report, prefix + "pattern")
+            report_outcome = "pattern"
+        return report_outcome
 
     def _draw_raised_parallel(
         self,
@@ -1337,8 +1873,21 @@ class GraphicRenderer:
             fraction = (distance - cumulative[indices]) / safe_lengths
             bx = points[indices, 0] + fraction * delta[indices, 0]
             by = points[indices, 1] + fraction * delta[indices, 1]
-            tx = delta[indices, 0] / safe_lengths
-            ty = delta[indices, 1] / safe_lengths
+            # Position interpolation stays on the selected source segment.
+            # Tangents, however, must come from a non-zero segment: a trailing
+            # duplicate vertex otherwise turns perpendicular offsets into zero.
+            nonzero = np.flatnonzero(lengths > 0)
+            insertion = np.searchsorted(nonzero, indices, side="left")
+            previous = nonzero[np.clip(insertion - 1, 0, len(nonzero) - 1)]
+            following = nonzero[np.clip(insertion, 0, len(nonzero) - 1)]
+            tangent_indices = np.where(
+                lengths[indices] > 0,
+                indices,
+                np.where(insertion > 0, previous, following),
+            )
+            tangent_lengths = lengths[tangent_indices]
+            tx = delta[tangent_indices, 0] / tangent_lengths
+            ty = delta[tangent_indices, 1] / tangent_lengths
             return bx, by, tx, ty
 
         offset_curves = {}
@@ -1654,6 +2203,8 @@ class GraphicRenderer:
             if not points:
                 continue
             transformed = [transform(px, py) for px, py in points]
+            # zorder 5.5 keeps symbol strokes above WL dot stamps (zorder 5)
+            # even when label collision avoidance draws WT layers first.
             if len(transformed) == 1:
                 ax.plot(
                     [transformed[0][0]],
@@ -1661,7 +2212,7 @@ class GraphicRenderer:
                     ".",
                     color=stroke_rgb,
                     ms=2.0,
-                    zorder=5,
+                    zorder=5.5,
                 )
             else:
                 ax.plot(
@@ -1670,7 +2221,7 @@ class GraphicRenderer:
                     color=stroke_rgb,
                     lw=line_width_pt,
                     solid_capstyle="round",
-                    zorder=5,
+                    zorder=5.5,
                 )
         return True
 
@@ -1719,6 +2270,37 @@ class GraphicRenderer:
                 tokens.append((char, mode))
         return tokens
 
+    def _register_native_text(
+        self,
+        ax: Any,
+        artist: Any,
+        report: Dict[str, Any],
+        *,
+        obstacle_base: Optional[int] = None,
+    ) -> None:
+        """Register a native annotation as a fixed obstacle in full layout mode.
+
+        ``obstacle_base`` excludes boxes at or beyond that index from the
+        collision count; spaced-text callers pass the list length captured
+        before their first character so adjacent glyphs of the SAME
+        annotation are obstacles for later texts without counting as
+        collisions with each other.
+        """
+        if not self.polygon_label_avoid_collisions:
+            return
+        bounds = self._buffered_text_bounds(
+            ax, artist, self.attitude_dip_label_buffer_pt,
+        )
+        existing = (
+            self._label_boxes if obstacle_base is None
+            else self._label_boxes[:obstacle_base]
+        )
+        if any(bounds.overlaps(other) for other in existing):
+            # Native annotation anchors are not moved merely to make the map
+            # look cleaner. Their pre-existing collisions remain explicit.
+            self._bump(report, "native_text_collision")
+        self._label_boxes.append(bounds)
+
     def _draw_annotation(
         self, ax: Any, row: Any, point: Any, rgb: RGB, unit: float, report: Dict[str, Any]
     ) -> None:
@@ -1742,6 +2324,7 @@ class GraphicRenderer:
             ca = math.cos(math.radians(angle))
             sa = math.sin(math.radians(angle))
             has_controls = any(mark in raw for mark in ("#-", "#+", "#=", "→", "↓", "↑"))
+            obstacle_base = len(self._label_boxes)
             for index, (char, mode) in enumerate(tokens):
                 # Script size/baseline is a display approximation; the stored
                 # character advance itself is used without an inferred factor.
@@ -1752,7 +2335,7 @@ class GraphicRenderer:
                 content = _mathtext_escape(char) if has_controls else char
                 if has_controls:
                     content = "$\\mathrm{" + content + "}$"
-                ax.text(
+                artist = ax.text(
                     x,
                     y,
                     content,
@@ -1765,6 +2348,9 @@ class GraphicRenderer:
                     parse_math=has_controls,
                     zorder=6,
                     **self._font_kwargs(row, char, report),
+                )
+                self._register_native_text(
+                    ax, artist, report, obstacle_base=obstacle_base
                 )
             self._bump(report, "text")
             self._bump(report, "spaced_text")
@@ -1781,7 +2367,7 @@ class GraphicRenderer:
         if not label:
             self._bump(report, "text_skipped")
             return
-        ax.text(
+        artist = ax.text(
             point.x,
             point.y,
             label,
@@ -1795,40 +2381,226 @@ class GraphicRenderer:
             zorder=6,
             **self._font_kwargs(row, raw[:1] or " ", report),
         )
+        self._register_native_text(ax, artist, report)
         self._bump(report, "text")
         self._bump(report, "drawn")
 
+    def _draw_attitude_dip_label(
+        self, ax: Any, row: Any, point: Any, rgb: RGB, unit: float, crs: Any, report: Dict[str, Any]
+    ) -> None:
+        """Place a dip number using geoscimlchina's right-of-tick rule.
+
+        The text remains horizontal. Its offset combines a safe margin and the
+        text box's projected half-width/half-height, so the label does not sit
+        on the dip tick. Only native attitude fields are consumed.
+        """
+        category = self._text(row.get("CHFCEC", "")).strip()
+        if category and category != "产状":
+            return
+        dipdir = self._float(row.get("dip_az"), float("nan"))
+        if not math.isfinite(dipdir):
+            dipdir = self._float(row.get("GZBBAC"), float("nan"))
+        dip = self._float(row.get("dip"), float("nan"))
+        if not math.isfinite(dip):
+            dip = self._float(row.get("GZBBAD"), 0.0)
+        if not math.isfinite(dip) or dip <= 0:
+            return
+
+        if crs is not None and crs.is_geographic:
+            x_factor = 111320.0 * math.cos(math.radians(point.y))
+            y_factor = 111320.0
+        else:
+            axis = crs.axis_info[0] if crs is not None and crs.axis_info else None
+            metres_per_unit = (
+                getattr(axis, "unit_conversion_factor", 1.0) if axis else 1.0
+            )
+            x_factor = y_factor = metres_per_unit or 1.0
+
+        end = None
+        dx = dy = 0.0
+        if self.attitude_dip_label_direction == "symbol" and self._int(
+            row.get("symbol_no")
+        ) in {1245, 1249}:
+            angle = math.radians(self._float(row.get("angle"), 0.0))
+            ca, sa = math.cos(angle), math.sin(angle)
+            symbol = self._symbol(self._int(row.get("symbol_no")))
+            candidates = []
+            if symbol is not None:
+                for subpath in symbol.subpaths:
+                    if len(subpath.points) < 2:
+                        continue
+                    first = subpath.points[0]
+                    last = subpath.points[-1]
+                    length = math.hypot(last[0] - first[0], last[1] - first[1])
+                    if length > 0:
+                        candidates.append((length, first, last))
+            if candidates:
+                # The short stroke in a T-shaped attitude symbol is its dip
+                # tick. Use its actual transformed endpoint, not GZBBAC or a
+                # pixel-length proxy, so left/right is judged on the real SLIB.
+                _, first, last = min(candidates, key=lambda item: item[0])
+                dimensions = [
+                    abs(self._float(row.get("height"), 1.0) * self.attitude_symbol_scale),
+                    abs(self._float(row.get("width"), 1.0) * self.attitude_symbol_scale),
+                ]
+                positive = [value for value in dimensions if value > 0]
+                scale = (min(positive) if positive else 1.0) * unit
+                end = (
+                    point.x + (last[0] * ca - last[1] * sa) * scale,
+                    point.y + (last[0] * sa + last[1] * ca) * scale,
+                )
+                dx = (last[0] - first[0]) * ca - (last[1] - first[1]) * sa
+                dy = (last[0] - first[0]) * sa + (last[1] - first[1]) * ca
+                norm = math.hypot(dx, dy)
+                dx, dy = dx / norm, dy / norm
+        if end is None:
+            if not math.isfinite(dipdir):
+                return
+            dipdir = math.radians(dipdir)
+            dx, dy = math.sin(dipdir), math.cos(dipdir)
+            tick_mm = self.attitude_dip_tick_mm
+            if self.attitude_dip_tick_px is not None:
+                tick_mm = self.attitude_dip_tick_px * 25.4 / ax.figure.dpi
+            tick_m = tick_mm * self.attitude_symbol_scale * unit * y_factor
+            end = (
+                point.x + dx * tick_m / x_factor,
+                point.y + dy * tick_m / y_factor,
+            )
+
+        scale_ratio = self.scale / 250000.0
+        text = "%g" % dip
+        width_m = max(len(text), 1) * 180.0 * scale_ratio
+        height_m = 310.0 * scale_ratio
+        margin_m = 60.0 * scale_ratio
+        rx, ry = dy, -dx  # right-hand normal of the actual dip tick
+        offset_m = (
+            margin_m + (width_m / 2.0) * abs(rx) + (height_m / 2.0) * abs(ry)
+        )
+        offset_x = rx * offset_m / x_factor
+        offset_y = ry * offset_m / y_factor
+        x = end[0] + offset_x
+        y = end[1] + offset_y
+        artist = ax.text(
+            x,
+            y,
+            text,
+            fontsize=self.attitude_dip_fontsize,
+            color=rgb,
+            ha="center",
+            va="center",
+            zorder=21,
+        )
+        if self.polygon_label_avoid_collisions:
+            original = (x, y)
+            bounds = self._buffered_text_bounds(
+                ax, artist, self.attitude_dip_label_buffer_pt,
+            )
+            if any(bounds.overlaps(other) for other in self._label_boxes):
+                base = ax.transData.transform(original)
+                # Probe the escape direction with the same data-space offset
+                # the anchor applied; raw (rx, ry) is only isotropic when the
+                # CRS unit conversion is uniform (x_factor == y_factor).
+                normal_display = (
+                    ax.transData.transform((x + offset_x, y + offset_y)) - base
+                )
+                normal_length = float(np.linalg.norm(normal_display))
+                inverse = ax.transData.inverted()
+                placed = False
+                if normal_length > 0:
+                    normal_display = normal_display / normal_length
+                    steps = [
+                        value for value in self._label_offset_steps() if value > 0
+                    ]
+                    for step in steps:
+                        pixel = base + normal_display * (step * ax.figure.dpi / 72.0)
+                        candidate = inverse.transform(pixel)
+                        artist.set_position((candidate[0], candidate[1]))
+                        bounds = self._buffered_text_bounds(
+                            ax, artist, self.attitude_dip_label_buffer_pt,
+                        )
+                        if not any(bounds.overlaps(other) for other in self._label_boxes):
+                            self._bump(report, "attitude_dip_label_offset")
+                            placed = True
+                            break
+                if not placed:
+                    # Never delete a dip number merely to make the audit look
+                    # clean. Restore its rule-based anchor and disclose the
+                    # unresolved collision for final inspection.
+                    artist.set_position(original)
+                    bounds = self._buffered_text_bounds(
+                        ax, artist, self.attitude_dip_label_buffer_pt,
+                    )
+                    self._bump(report, "attitude_dip_label_collision")
+            self._label_boxes.append(bounds)
+        self._bump(report, "attitude_dip_label")
+
+    def _draw_wt_row(
+        self,
+        ax: Any,
+        row: Any,
+        unit: float,
+        crs: Any,
+        report: Dict[str, Any],
+        *,
+        symbols_only: Optional[bool] = None,
+    ) -> None:
+        category = self._text(row.get("CHFCEC", "")).strip()
+        is_subgraph = self._int(row.get("point_type")) == 1
+        if symbols_only is not None and is_subgraph != symbols_only:
+            return
+        # Category exclusion is for native text annotations only. Attitude
+        # Subgraph points must remain available for symbol drawing and
+        # attribute-derived dip labels even when their native text twins
+        # are excluded to prevent duplication.
+        if category in self.exclude_text_categories and not is_subgraph:
+            self._bump(report, "excluded_text")
+            return
+        points = list(self._iter_points(row.geometry))
+        if not points:
+            return
+        rgb = self._color(row.get("color"), report)
+        symbol_scale = (
+            self.attitude_symbol_scale if category in {"", "产状"} else 1.0
+        )
+        for point in points:
+            if is_subgraph:
+                ok = self._draw_symbol(
+                    ax,
+                    point.x,
+                    point.y,
+                    self._int(row.get("symbol_no")),
+                    self._float(row.get("height"), 1.0) * symbol_scale,
+                    self._float(row.get("width"), 1.0) * symbol_scale,
+                    self._float(row.get("angle"), 0.0),
+                    rgb,
+                    unit,
+                    report,
+                    pen_width_mm=self._float(row.get("pen_width"), 0.0),
+                )
+                self._bump(report, "symbols" if ok else "symbols_unresolved")
+                if ok:
+                    self._bump(report, "drawn")
+                    if self.attitude_dip_labels:
+                        self._draw_attitude_dip_label(
+                            ax, row, point, rgb, unit, crs, report
+                        )
+            else:
+                self._draw_annotation(ax, row, point, rgb, unit, report)
+
     def _draw_wt(self, ax: Any, gdf: Any, report: Dict[str, Any]) -> None:
         unit = self._unit(gdf)
+        crs = getattr(gdf, "crs", None)
+        if self.polygon_label_avoid_collisions and self.attitude_dip_labels:
+            # Native annotations are immovable obstacles while dip labels can
+            # slide along the dip normal. Register every annotation in the
+            # layer before any dip label competes for the same space.
+            for _, row in gdf.iterrows():
+                self._draw_wt_row(ax, row, unit, crs, report, symbols_only=False)
+            for _, row in gdf.iterrows():
+                self._draw_wt_row(ax, row, unit, crs, report, symbols_only=True)
+            return
         for _, row in gdf.iterrows():
-            category = self._text(row.get("CHFCEC", "")).strip()
-            if category in self.exclude_text_categories:
-                self._bump(report, "excluded_text")
-                continue
-            points = list(self._iter_points(row.geometry))
-            if not points:
-                continue
-            rgb = self._color(row.get("color"), report)
-            for point in points:
-                if self._int(row.get("point_type")) == 1:
-                    ok = self._draw_symbol(
-                        ax,
-                        point.x,
-                        point.y,
-                        self._int(row.get("symbol_no")),
-                        self._float(row.get("height"), 1.0),
-                        self._float(row.get("width"), 1.0),
-                        self._float(row.get("angle"), 0.0),
-                        rgb,
-                        unit,
-                        report,
-                        pen_width_mm=self._float(row.get("pen_width"), 0.0),
-                    )
-                    self._bump(report, "symbols" if ok else "symbols_unresolved")
-                    if ok:
-                        self._bump(report, "drawn")
-                else:
-                    self._draw_annotation(ax, row, point, rgb, unit, report)
+            self._draw_wt_row(ax, row, unit, crs, report)
 
 
 _GREEK_MATHTEXT = {
@@ -1929,9 +2701,9 @@ def render_graphic_map(
 
     ``slib`` may be an SLIB directory or an existing :class:`GraphicLibraries`.
     Renderer options (``scale``, ``map_units_per_mm``, ``color_overrides``, …)
-    and output options (``figsize``, ``dpi``, ``margin``, ``title``) are passed
-    as keyword arguments. ``channel_order`` is forwarded when ``slib`` is a
-    directory.
+    and output options (``figsize``, ``dpi``, ``axes_rect``, ``margin``,
+    ``title``) are passed as keyword arguments. ``channel_order`` is forwarded
+    when ``slib`` is a directory.
 
     Example
     -------
@@ -1940,7 +2712,7 @@ def render_graphic_map(
     ...     scale=250000, dpi=300,
     ... )  # doctest: +SKIP
     """
-    output_keys = {"figsize", "dpi", "margin", "title"}
+    output_keys = {"figsize", "dpi", "axes_rect", "margin", "title"}
     render_options = {key: kwargs.pop(key) for key in list(kwargs) if key in output_keys}
     channel_order = kwargs.pop("channel_order", "KCMY")
     if isinstance(slib, GraphicLibraries):

@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Locate synthetic fixtures and optional user-supplied JWD/SLIB data.
+"""Locate bundled fixtures and optional user-supplied JWD/SLIB data.
 
-Synthetic and Writer fixtures are available in source checkouts under
-``tests/fixtures`` and in wheel installations under ``pymapgis/testing/fixtures``.
-Original NGAC JWD/SLIB data are external and must be supplied explicitly through
-``PYMAPGIS_JWD`` and ``PYMAPGIS_SLIB`` when they are absent locally.
+Synthetic, USGS, Writer, testdata and generic SLIB fixtures are available in
+source checkouts under ``tests/fixtures`` and in wheel installations under
+``pymapgis/testing/fixtures``. Original NGAC JWD vectors remain external and
+must be supplied through ``PYMAPGIS_JWD`` when no authorized local copy exists.
+``PYMAPGIS_SLIB`` can always override the bundled generic SLIB directory.
 """
 from __future__ import annotations
 
@@ -12,7 +13,7 @@ import os
 from pathlib import Path
 from typing import Optional, Tuple
 
-__all__ = ["fixture_path", "jwd_path", "slib_path"]
+__all__ = ["fixture_path", "jwd_path", "slib_path", "testdata_path", "usgs_conejo_path"]
 
 
 def _candidate_roots():
@@ -41,6 +42,16 @@ def _external_path(env_var: str, parts: Tuple[str, ...]) -> Optional[Path]:
     raise FileNotFoundError(f"{env_var} points to a missing fixture: {candidate} ({target})")
 
 
+def usgs_conejo_path(name: str = "") -> Path:
+    """Return the bundled public-domain USGS Conejo Well fixture path."""
+    return fixture_path("usgs_conejo", name)
+
+
+def testdata_path(name: str = "") -> Path:
+    """Return the bundled seven-layer standard-renderer testdata path."""
+    return fixture_path("testdata", name)
+
+
 def jwd_path(name: str = "") -> Path:
     """Return an external JWD directory/file or raise acquisition guidance."""
     external = _external_path("PYMAPGIS_JWD", (name,))
@@ -57,7 +68,7 @@ def jwd_path(name: str = "") -> Path:
 
 
 def slib_path(name: str = "") -> Path:
-    """Return an external SLIB directory/file or raise acquisition guidance."""
+    """Return bundled generic SLIB or an external override directory/file."""
     external = _external_path("PYMAPGIS_SLIB", (name,))
     if external is not None:
         return external
@@ -65,7 +76,7 @@ def slib_path(name: str = "") -> Path:
         return fixture_path("slib", name)
     except FileNotFoundError as exc:
         raise FileNotFoundError(
-            "Original SLIB data are not bundled. Obtain the five matching libraries "
-            "through the official J43C001002 channel, then set PYMAPGIS_SLIB to "
-            "their directory. See DATA_ATTRIBUTION.md."
+            "The bundled generic SLIB fixture is unavailable. Install the complete "
+            "mapgis2shp source/wheel fixture package, or set PYMAPGIS_SLIB to a "
+            "directory containing the five matching libraries. See DATA_ATTRIBUTION.md."
         ) from exc

@@ -157,6 +157,22 @@ def test_published_wp_backup_layout_quickstart(tmp_path):
     assert summary["unknown_fonts"] == []
 
 
+def test_original_wp_backup_is_not_loaded_alongside_normalized_wp(tmp_path):
+    root = _jwd_root()
+    duplicate = tmp_path / "duplicate_jwd"
+    shutil.copytree(root, duplicate)
+    for name in ("LDLYAAE002.WP", "LDZOFBB003.WP"):
+        shutil.copy2(duplicate / name, duplicate / (name + "~"))
+
+    layers = regression_layers(duplicate)
+    names = [layer.attrs["source"] if hasattr(layer, "attrs") else layer.name for layer in layers]
+    assert len(layers) == len(names) == len(set(names)) == 12
+    assert "LDLYAAE002.WP~" in names
+    assert "LDZOFBB003.WP~" in names
+    assert "LDLYAAE002.WP" not in names
+    assert "LDZOFBB003.WP" not in names
+
+
 def test_real_jwd_quaternary_library_colors():
     root = _jwd_root()
     slib = _slib_root()

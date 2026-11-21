@@ -1,6 +1,6 @@
 # MapGIS regression fixtures
 
-This directory contains small synthetic MapGIS binaries and an explicitly integrated real JWD/SLIB dataset. The synthetic files support basic tests without external data; the real dataset supports self-contained graphic-library rendering regression.
+This directory contains small synthetic MapGIS binaries, the processed seven-layer USGS-derived `testdata` fixture, and five generic SLIB libraries. Synthetic files support basic tests without external data; `testdata` supports self-contained graphic-library rendering regression. Original NGAC JWD vectors remain external.
 
 ## Contents
 
@@ -41,15 +41,15 @@ Regeneration rewrites the three binaries and their manifest. Header timestamps o
 
 ## Optional user-supplied JWD and SLIB integration data
 
-The original JWD vectors and five matching SLIB libraries are **not bundled** in the current Git tree, wheel or source archive. They must be obtained through the official National Geological Archives of China channel and supplied locally. The redistribution surface is covered by the acquisition terms, so public access, non-classified status and test-only use are not treated as redistribution permission.
+The original JWD vectors are **not bundled** in the current Git tree, wheel or source archive. They are openly accessible through the official National Geological Archives of China application channel and must be supplied locally. Open application does not remove the acquisition terms or imply permission to redistribute them in the package. The five generic SLIB libraries **are bundled** under `slib/` and in wheel installations; `PYMAPGIS_SLIB` can override them.
 
 - `jwd_slib_manifest.json` remains as the provenance and SHA-256 registry for the original 12 vectors and five libraries, totalling 19,381,767 bytes.
-- Set `PYMAPGIS_JWD` to the directory containing the original 12 vectors and `PYMAPGIS_SLIB` to the directory containing the five original libraries.
+- Set `PYMAPGIS_JWD` to the directory containing the original 12 vectors. `PYMAPGIS_SLIB` is optional when the bundled generic library is intended.
 - `PYMAPGIS_COLORLIB` and `PYMAPGIS_PCOLOR` can override individual colour libraries. `PYMAPGIS_READER_NATIVE` points to the optional native SHP export directory.
-- Missing external data produces an explicit optional-integration skip with acquisition guidance. An explicitly supplied invalid path or a checksum mismatch still fails the test instead of silently skipping it.
-- Archive inspection rejects any actual JWD, SLIB or `reader_native` data file. Synthetic fixtures and the independent Writer SHP batches remain required and are checked strictly.
+- Missing original JWD vectors produce an explicit optional-integration skip with acquisition guidance. An explicitly supplied invalid path or a checksum mismatch still fails the test instead of silently skipping it.
+- Archive inspection rejects any actual original JWD vector or `reader_native` data file. Processed testdata, generic SLIB, synthetic fixtures and the independent Writer SHP batches remain required and are checked strictly.
 
-The authoritative source is the public V1 *Spatial database of serial suite-tectonic map-sheets of mainland China (1:250,000)*, sheet **J43C001002**, produced by the Development and Research Center of China Geological Survey and distributed by the National Geological Archives of China. Dataset DOI: **10.23650/data.A.2018.NGA131703.K1.1.1.V1**; companion article DOI: **10.12029/gc2018Z101**. See [DATA_ATTRIBUTION.md](../../DATA_ATTRIBUTION.md) for citations, acquisition guidance and the usage boundary. No coordinate-warped or virtual-geological-unit derivatives are used.
+The authoritative source is the public V1 *Spatial database of serial suite tectonic map-sheets of mainland China (1:250, 000)*, sheet **J43C001002**, produced by the Development and Research Center of China Geological Survey and distributed by the National Geological Archives of China. Dataset DOI: **10.23650/data.A.2018.NGA131703.K1.1.1.V1**; companion article DOI: **10.12029/gc2018Z101**. The [official dataset application page](http://dcc.cgs.gov.cn/geologicalData/rest/geologicalData/geologicalDataDetail/8adaeff963f39bf80163fdeb9fc400f7) provides the acquisition route. See [DATA_ATTRIBUTION.md](../../DATA_ATTRIBUTION.md) for citations and the usage boundary. No coordinate-warped or virtual-geological-unit derivatives are used.
 
 Run the real integration tests after configuring the external data:
 
@@ -58,7 +58,13 @@ python -m pytest -q tests/test_graphic_real_jwd.py
 python -m pytest -q tests/test_pure.py -k "ColorLib or PcolorLib"
 ```
 
-The tests verify Reader and graphic-library behaviour, report invariants and PNG/PDF generation. They do not replace native MapGIS display, editing, save/reopen or visual acceptance.
+The tests verify Reader and graphic-library behaviour, report invariants and PNG/PDF generation. They do not replace native MapGIS write-back acceptance. Manual visual comparison of the JWD rendering is recorded separately and is consistent with the native geological map, with differences limited to fonts and line weights.
+
+## Processed testdata and generic SLIB
+
+`testdata/` contains seven user-processed MapGIS files derived from public-domain USGS Conejo Well data. They are organized using the Chinese suite-tectonic database attribute structure and SLIB styles, with the user's current colour and Fillgrph parameters preserved. They are not original NGAC JWD vectors and are not the unencoded USGS native conversion layers. `manifest.json` records all seven files, 8,512 features, native EPSG:32611, storage scale 1:1000 and SHA-256 values.
+
+`slib/` contains the five generic libraries required by the parser and renderer. These files contain symbol, line-style, fill and colour definitions only, not geological spatial features. `testdata_path()` and `slib_path()` locate the same fixtures in source checkouts and wheel installations; `PYMAPGIS_SLIB` remains an explicit override. USGS native six-layer comparison data are optional and are not required by this processed fixture.
 
 ## Native Writer SHP conversion batch
 
@@ -80,7 +86,7 @@ The tests compare source semantics and native default point/line graphic paramet
 python -m pytest -q tests/test_writer_native_batch3.py
 ```
 
-UTM inputs are reprojected to Gauss-Kruger (k=1) before encoding because MapGIS 6x does not store the UTM zone scale factor. The tests reproject the written result back to EPSG:32643 and use an explicit 1e-5 m Hausdorff tolerance for projection round-trips. Null geometry must be rejected by default and is retained only through an explicit `on_empty="drop"` request; fully degenerate rings are rejected rather than silently written as empty polygons.
+By default, UTM inputs are converted to the same-datum Gauss–Krüger `tmerc + k=1` target before encoding. `Writer(..., preserve_utm=True)` instead keeps northern-hemisphere UTM coordinates and stores `k=0.9996` at offset 232; southern-hemisphere preservation is explicitly rejected. The projection round-trip uses an explicit 1e-5 m Hausdorff tolerance. Null geometry must be rejected by default and is retained only through an explicit `on_empty="drop"` request; fully degenerate rings are rejected rather than silently written as empty polygons.
 
 For writer batch2/3, each manifest retains the originally supplied `bytes` and `sha256`. Text files also carry `lf_bytes` and `lf_sha256`, computed after CRLF/CR to LF normalization, so Git checkout line-ending policy does not cause cross-platform false failures. Binary SHP components and native WT/WL/WP files are always checked against their original raw byte counts and SHA-256 values.
 

@@ -1,0 +1,1651 @@
+Identification_Information:
+
+  Citation:
+    Citation_Information:
+      Originator: Robert E. Powell
+      Originator: Pamela M. Cossette (digital cartography)
+      Publication_Date: 2001
+      Title:
+        Geologic map and digital database of the Conejo Well 7.5
+        minute quadrangle, Riverside County, California
+      Edition: Version 1.0
+      Geospatial_Data_Presentation_Form: Vector digital data
+      Series_Information:
+        Series_Name: U.S. Geological Survey Open-File Report
+        Issue_Identification: USGS OF 01-31
+      Publication_Information:
+        Publication_Place: Menlo Park, California
+        Publisher: U.S. Geological Survey
+      Online_Linkage: http://geopubs.wr.usgs.gov/open-file/of01-31
+
+  Description:
+
+    Abstract:
+      This data set maps and describes the geology of the Conejo
+      Well 7.5 minute quadrangle, Riverside County, southern
+      California. The quadrangle, situated in Joshua Tree
+      National Park in the eastern Transverse Ranges
+      physiographic and structural province, encompasses part of
+      the northern Eagle Mountains and part of the south flank
+      of Pinto Basin. It is underlain by a basement terrane
+      comprising Proterozoic metamorphic rocks, Mesozoic
+      plutonic rocks, and Mesozoic and Mesozoic or Cenozoic
+      hypabyssal dikes. The basement terrane is capped by a
+      widespread Tertiary erosion surface preserved in remnants
+      in the Eagle Mountains and buried beneath Cenozoic
+      deposits in Pinto Basin. Locally, Miocene basalt overlies
+      the erosion surface.  A sequence of at least three
+      Quaternary pediments is planed into the north piedmont of
+      the Eagle Mountains, each in turn overlain by successively
+      younger residual and alluvial deposits.
+
+      The Tertiary erosion surface is deformed and broken by
+      north-northwest-trending, high-angle, dip-slip faults in
+      the Eagle Mountains and an east-west trending system of
+      high-angle dip- and left-slip faults. In and adjacent to
+      the Conejo Well quadrangle, faults of the
+      northwest-trending set displace Miocene sedimentary rocks
+      and basalt deposited on the Tertiary erosion surface and
+      Pliocene and (or) Pleistocene deposits that accumulated on
+      the oldest pediment.  Faults of this system appear to be
+      overlain by Pleistocene deposits that accumulated on
+      younger pediments.  East-west trending faults are younger
+      than and perhaps in part coeval with faults of the
+      northwest-trending set.
+
+      The Conejo Well database was created using ARCVIEW and ARC/INFO,
+      which are geographical information system (GIS) software
+      products of Envronmental Systems Research Institute (ESRI). The
+      database consists of the following items: (1) a map coverage
+      showing faults and geologic contacts and units, (2) a separate
+      coverage showing dikes, (3) a coverage showing structural data,
+      (4) a point coverage containing line ornamentation, and (5) a
+      scanned topographic base at a scale of 1:24,000.  The coverages
+      include attribute tables for geologic units (polygons and
+      regions), contacts (arcs), and site-specific data (points).  The
+      database, accompanied by a pamphlet file and this metadata file,
+      also includes the following graphic and text products: (1) A
+      portable document file (.pdf) containing a navigable graphic of
+      the geologic map on a 1:24,000 topographic base.  The map is
+      accompanied by a marginal explanation consisting of a
+      Description of Map and Database Units (DMU), a Correlation of
+      Map and Database Units (CMU), and a key to point-and
+      line-symbols. (2) Separate .pdf files of the DMU and CMU,
+      individually.  (3) A PostScript graphic-file containing the
+      geologic map on a 1:24,000 topographic base accompanied by the
+      marginal explanation.  (4) A pamphlet that describes the
+      database and how to access it. Within the database, geologic
+      contacts , faults, and dikes are represented as lines (arcs),
+      geologic units as polygons and regions, and site-specific data
+      as points. Polygon, arc, and point attribute tables (.pat, .aat,
+      and .pat, respectively) uniquely identify each geologic datum
+      and link it to other tables (.rel) that provide more detailed
+      geologic information.
+    Purpose:
+      The data set for the Conejo Well quadrangle has been prepared
+      by the Southern California Areal Mapping Project (SCAMP), a
+      cooperative project sponsored jointly by the U.S. Geological
+      Survey and the California Division of Mines and Geology. The
+      Conejo Well data set represents part of an ongoing effort to
+      create a regional GIS geologic database for southern
+      California. This regional digital database, in turn, is being
+      developed as a contribution to the National Geologic Map
+      Database of the National Cooperative Geologic Mapping Program
+      of the USGS. The Conejo Well database has been prepared in
+      cooperation with the National Park Service as part of an
+      ongoing project to provide Joshua Tree National Park with a
+      geologic map base for use in managing Park resources and
+      developing interpretive materials.
+
+      The digital geologic map database for the Conejo Well
+      quadrangle has been created as a general-purpose data set
+      that is applicable to land-related investigations in the
+      earth and biological sciences. Along with geologic map
+      databases in preparation for adjoining quadrangles, the
+      Conejo Well database has been generated to further our
+      understanding of bedrock and surficial processes at work in
+      the region and to document evidence for seismotectonic
+      activity in the eastern Transverse Ranges. The database is
+      designed to serve as a base layer suitable for ecosystem and
+      mineral resource assessment and for building a hydrogeologic
+      framework for Pinto Basin.
+    Supplemental_Information:
+      Map nomenclature and symbols
+
+      Within the geologic map database, map units are identified by
+      standard geologic map criteria such as formation-name, age,
+      and lithology. The authors have attempted to adhere to the
+      stratigraphic nomenclature of the U.S. Geological Survey and
+      the North American Stratigraphic Code, but the database has
+      not received a formal editorial review of geologic names.
+
+      Special symbols are associated with some map units. Question
+      marks have been added to the unit symbol (e.g., QTs?, Jmi?)
+      and unit name where unit assignment based on interpretation
+      of aerial photographs is uncertain. Question marks are
+      plotted as part of the map unit symbol for those polygons to
+      which they apply, but they are not shown in the CMU or DMU
+      unless all polygons of a given unit are queried. To locate
+      queried map-unit polygons in a search of database, the
+      question mark must be included as part of the unit symbol. In
+      some polygons, multiple units crop out in individual domains
+      that are too small or too intricately intermingled to
+      distinguish at 1:24,000, or for which relations are not well
+      documented. For these polygons, unit symbols are combined
+      using plus (+) signs (e.g., Qyaos + Qyas2) in the LABL and
+      PLABL items.
+
+      Geologic map unit labels entered in database items LABL and PLABL
+      contain substitute characters for conventional stratigraphic age
+      symbols: Proterozoic appears as 'Pr' in LABL and as '<' in PLABL,
+      Triassic appears as 'Tr' in LABL and as '^' in PLABL.  The
+      substitute characters in PLABL invoke their corresponding symbols
+      from the GeoAge font group to generate map unit labels with
+      conventional stratigraphic symbols.
+  Time_Period_of_Content:
+    Time_Period_Information:
+      Range_of_Dates/Times:
+        Beginning_Date: 1973
+        Ending_Date: 2000
+
+    Currentness_Reference: New data
+  Status:
+    Progress: Complete
+    Maintenance_and_Update_Frequency: As Needed
+
+  Spatial_Domain:
+    Bounding_Coordinates:
+      West_Bounding_Coordinate: -115.75009096
+      East_Bounding_Coordinate: -115.62490904
+      North_Bounding_Coordinate: 33.87499995
+      South_Bounding_Coordinate: 33.7499842
+
+  Keywords:
+    Theme:
+      Theme_Keyword_Thesaurus: None
+      Theme_Keyword: geologic map
+      Theme_Keyword: geology
+      Theme_Keyword: surficial geology
+      Theme_Keyword: bedrock geology
+      Theme_Keyword: fault
+      Theme_Keyword: erosion surface
+      Theme_Keyword: pediment
+      Theme_Keyword: soil
+      Theme_Keyword: alluvial deposits
+      Theme_Keyword: dike
+      Theme_Keyword: batholith
+      Theme_Keyword: metamorphic rocks
+      Theme_Keyword: plutonic rocks
+      Theme_Keyword: hypabyssal rocks
+    Place:
+      Place_Keyword_Thesaurus: None
+      Place_Keyword: southern California
+      Place_Keyword: Riverside County
+      Place_Keyword: Joshua Tree National Park
+      Place_Keyword: eastern Transverse Ranges
+      Place_Keyword: Eagle Mountains
+      Place_Keyword: Pinto Basin
+      Place_Keyword: Conejo Well 7.5 minute quadrangle
+      Place_Keyword: Pinto Basin 15 minute quadrangle
+      Place_Keyword: Eagle Mountains 30 x 60 minute quadrangle
+
+    Stratum:
+      Stratum_Keyword_Thesaurus: None
+      Stratum_Keyword: Granite gneiss of Joshua Tree
+      Stratum_Keyword: Pinto Gneiss
+      Stratum_Keyword: Augen gneiss of Monument Mountain
+      Stratum_Keyword: Granodiorite of Pinto Basin
+      Stratum_Keyword: Monzogranite of Cottonwood Pass
+      Stratum_Keyword: Monzogranite of Red Butte Wash
+      Stratum_Keyword: Monzodiorite of Munsen Canyon
+      Stratum_Keyword: Quartzite of Pinto Mountain
+      Stratum_Keyword: Dolomite of Iron Chief mine
+      Stratum_Keyword: Basalt
+      Stratum_Keyword: Alluvium
+  Access_Constraints: None
+  Use_Constraints:
+    Spatial Resolution.  Use of this digital geologic map should
+    not violate the spatial resolution of the data. The Conejo
+    Well geologic map and database was developed using digital
+    orthophotograph quarter quadrangles (DOQQs) as a base. DOQQs
+    have a pixel resolution of 1 m and are accurate to a scale of
+    1:12,000 (1 in = 1,000 ft). Any enlargement beyond 1:12,000
+    exceeds the spatial resolution of the geologic data and
+    should not be used in lieu of a more detailed site-specific
+    geologic evaluation.  Similarly, the digital topographic base
+    map is derived from the U.S. Geological Survey,
+    1:24,000-scale Conejo Well 7.5 minute quadrangle (provisional
+    edition, 1986); any enlargement beyond 1:24,000 exceeds the
+    spatial resolution of the topographic data. Plotting or
+    viewing of the data at scales larger than 1:12,000 on the
+    DOQQ base, or larger than 1:24,000 on the topographic base,
+    will not yield greater real detail, although it may reveal
+    fine-scale irregularities below the intended resolution of
+    the database. Where the geologic data is used in combination
+    with the topographic data, the resolution of the combined
+    output is limited by the lower resolution of the topographic
+    data.  Where this database is used in combination with other
+    data of higher resolution, the resolution of the combined
+    output will be limited by the lower resolution of these data.
+
+    Content.  This database, identified as "Geologic map and
+    digital database of the Conejo Well 7.5 minute quadrangle,
+    Riverside County, California" has been approved for release
+    and publication by the Director of the U.S. Geological
+    Survey. Although this database has been subjected to rigorous
+    review and is substantially complete, the USGS reserves the
+    right to revise the data pursuant to further analysis and
+    review.  Furthermore, it is released on the condition that
+    neither the USGS nor the United States Government may be held
+    responsible for any damages resulting from its authorized or
+    unauthorized use. This database is preliminary and has not
+    been reviewed for conformity with U.S. Geological Survey
+    editorial standards or with the North American Stratigraphic
+    Code. Any use of trade, product, or firm names is for
+    descriptive purposes only and does not imply endorsement by
+    the U.S. Government.
+
+    Faults.  The Conejo Well database is sufficiently detailed
+    to identify and characterize many actual and potential
+    geologic hazards represented by faults, but it is not
+    sufficiently detailed for site-specific determinations or
+    evaluations of these features.  Faults shown do not take
+    the place of fault-rupture hazard zones designated by the
+    California State Geologist (see, for example, Hart, 1988;
+    Hart and Bryant, 1997).
+
+    Hart, E. W., 1988, Fault-rupture zones in California;
+    Alquist-Priolo Special Studies Zones Act of 1972 with index
+    to special studies zones maps (revised, 1988): California
+    Division of Mines and Geology Special Publication 42.
+
+    Hart, E. W., and Bryant, W.A., 1997, Fault-rupture zones in
+    California; Alquist-Priolo Special Studies Zones Act of
+    1972 with index to special studies zones maps (revised,
+    1997): California Division of Mines and Geology Special
+    Publication 42.
+  Point_of_Contact:
+    Contact_Information:
+      Contact_Person_Primary:
+        Contact_Person: Robert E. Powell
+        Contact_Organization: U.S.Geological Survey, Western Region, Earth Surface Processes Team
+      Contact_Position: Project geologist
+      Contact_Address:
+        Address_Type: mailing address
+        Address:
+          U.S. Geological Survey
+          Room 202
+          West 904 Riverside Avenue
+        City: Spokane
+        State_or_Province: Washington
+        Postal_Code: 99201-1087
+        Country: USA
+      Contact_Voice_Telephone: (509) 368-3120
+      Contact_Facsimile_Telephone: (509) 368-3199
+      Contact_Electronic_Mail_Address: rpowell@usgs.gov
+
+  Browse_Graphic:
+    Browse_Graphic_File_Name: http://geopubs.wr.usgs.gov/open-file/of01-31/images/cwell_browse.jpg
+    Browse_Graphic_File_Description:
+      Non-navigable .jpg image of the geologic map, topographic base,
+      Correlation of Map and Database Units, Description of Map and
+      Database Units and key to point and line symbols.
+    Browse_Graphic_File_Type: .jpg
+  Browse_Graphic:
+    Browse_Graphic_File_Name: http://geopubs.wr.usgs.gov/open-file/of01-31/images/cwell_map.pdf
+    Browse_Graphic_File_Description:
+      Navigable portable document file (.pdf) image of the geologic map,
+      topographic base, Correlation of Map and Database Units,
+      Description of Map and Database Units and key to point and line
+      symbols.
+    Browse_Graphic_File_Type: .pdf
+  Data_Set_Credit:
+    Geologic mapping, topical studies, and digital preparation
+    for this report were sponsored jointly by the following: (1)
+    the National Cooperative Geologic Mapping Program of the
+    U.S.  Geological Survey, (2) California Division of Mines
+    and Geology, and (3) the National Park Service (Joshua Tree
+    National Park).
+
+    This database was prepared in the GIS laboratory at the
+    Spokane Field Office of the USGS in Spokane, Washington. The
+    facility is maintained primarily by the Mineral Resource
+    Surveys Program and supported in part by the National
+    Geologic Mapping Program. We thank Paul C. Hyndman and
+    Steven R. Munts in Spokane and Rachel Hauser Alvarez of the
+    SCAMP GIS laboratory at the University of California,
+    Riverside for their assistance in solving problems
+    encountered during digital preparation of the data set.
+
+    Technical review by Fred K. Miller has led to significant
+    improvements in the database and in the map plot file.
+    David R. Bedford has examined the digital database file for
+    internal logical consistency, has reviewed the metadata
+    file, and has tested the viability of digital products.
+
+
+
+  Native_Data_Set_Environment:
+    SunOS, 5.6, sun4u UNIX
+    ARC/INFO version 7.2.1
+
+  Cross_Reference:
+    Citation_Information:
+      Originator: Robert E. Powell
+      Publication_Date: 2001
+      Title:
+        Geologic map and digital database of the Porcupine Wash 7.5
+        minute quadrangle, Riverside County, California
+      Geospatial_Data_Presentation_Form: map
+      Series_Information:
+        Series_Name: U.S. Geological Survey Open-File Report
+        Issue_Identification: USGS OF 01-30
+      Publication_Information:
+        Publication_Place: Menlo park, California
+        Publisher: U.S. Geological Survey
+      Online_Linkage: http://geopubs.wr.usgs.gov/open-file/of01-30
+
+Data_Quality_Information:
+  Attribute_Accuracy:
+    Attribute_Accuracy_Report:
+      This initial version of the Conejo Well geologic map database
+      relies extensively on interpretation of aerial photographs;
+      field study of bedrock units was conducted in the context of
+      smaller-scale regional mapping and field study of surficial
+      deposits has been minimal. The map represents the state of
+      knowledge for the quadrangle and provides a basis for
+      gathering additional field data to resolve questions raised
+      in making the map.  Attributes assigned to regions, polygons,
+      lines, and points in the Conejo Well database are reasonably
+      accurate as determined by the normal range of checks and
+      balances applied in making a geologic map by a combination of
+      hands-on and remote field observation, sampling, and
+      interpretation of aerial photographs. Additional field
+      investigation, however, is required to verify the accuracy of
+      polygon (map unit) attributes and to establish relations
+      among units. Where anomalous descriptive characteristics lead
+      to particular uncertainty of unit assignment of a polygon, a
+      question mark (?) is appended to the unit label. In the
+      Conejo Well quadrangle, this device has been used chiefly for
+      unit assignments of unvisited polygons that appear anomalous
+      on aerial photographs.
+  Logical_Consistency_Report:
+    Polygon and chain-node topology present.
+
+    The areal extent of the map is represented digitally by an
+    appropriately projected (Polyconic projection),
+    mathematically generated box.  Consequently, polygons
+    intersecting the lines that comprise the map boundary are
+    closed by that boundary.  Polygons internal to the map
+    boundary are completely enclosed by line segments which are
+    themselves a set of sequentially numbered coordinate pairs.
+    Point data are represented by coordinate pairs.
+  Completeness_Report:
+    The geologic map and digital database of the Conejo Well 7.5
+    minute quadrangle contain new data that have been subjected
+    to rigorous review and are a substantially complete
+    representation of the current state of knowledge concerning
+    the geology of the quadrangle.
+  Positional_Accuracy:
+    Horizontal_Positional_Accuracy:
+      Horizontal_Positional_Accuracy_Report:
+        Until uniform National geologic map accuracy standards are
+        developed and adopted by the U.S. Geological Survey in
+        cooperation with various state geological agencies, the SCAMP
+        project has proposed interim map-accuracy standards for
+        1:24,000-scale geologic maps produced by the project. For
+        mapping compiled on USGS 1:24000-scale topographic maps,
+        geologic lines and points on SCAMP geologic maps are judged
+        to meet the map-accuracy standard if they are located to
+        within 15 meters of their position relative to topographic or
+        cultural features on the topographic base map. In mapping on
+        USGS digital orthophotographs in the desert of southern
+        California, however, points and exposed, sharply defined
+        linear features are readily located to within 10 m, or even 5
+        m.
+
+        Linear features in the Conejo Well geologic map database are
+        represented as solid, dashed, and dotted lines. Using the
+        DOQQ base, points and linear features represented by solid
+        lines are located to within 10 m or less of their position on
+        the ground. Linear features represented as dashed lines may
+        or may not be located to within 10 m of their position on the
+        ground. Linear features represented by dotted lines are
+        concealed beneath overlying mapped units. The accuracy of the
+        various lines is identified in the digital database as well
+        as on the geologic-map plot.
+
+        Contacts between lithologic domains that make up surficial
+        deposits as mapped on the DOQQs typically are readily located
+        to within 10 m, but to make domains that can be resolved at
+        1:24,000 contacts are often drawn by approximating the
+        dominant unit on a percentage basis. Interspersal of well-
+        and approximately located contacts is common among the many
+        hundreds of contact segments present in the Conejo Well
+        quadrangle. Given that many quadrangles are being mapped in a
+        relatively short time interval, it was deemed too
+        time-consuming to distinguish well-located and approximately
+        located contacts between surficial deposits; therefore, all
+        surficial contacts are represented as approximately located
+        and shown with a dashed line symbol.
+  Lineage:
+    Process_Step:
+      Process_Description:
+        Geologic mapping for Ph.D. dissertation, supported in
+        part by U.S.  Geological Survey (Powell, 1981). Bedrock
+        units and faults mapped in field on 1:36,000-scale
+        true-color aerial photographs (USGS, 1973), compiled
+        onto a 1:62,500-scale topographic base map of the Pinto
+        Basin 15 minute quadrangle (1963, paper copy), then
+        reduced onto a 125,000 topographic base (base-stable
+        mylar greenline).  Bedrock units in the Pinto Basin
+        quadrangle were mapped, described, and interpreted by
+        conducting field traverses and interpolating between
+        the traverses by interpretation of aerial photographs.
+        This mapping was part of a regional study of the
+        geology and structure of the eastern Transverse Ranges
+        province south of the Pinto Mountain fault. The
+        southwest quarter of the Pinto Basin quadrangle
+        topographic map has subsequently been published as the
+        Conejo Well 7.5 minute quadrangle (provisional edition,
+        1986).
+
+        Powell, R.E., 1981, Geology of the crystalline basement
+        complex, eastern Transverse Ranges, southern
+        California: Constraints on regional tectonic
+        interpretation [Ph.D.  thesis]: Pasadena, California
+        Institute of Technology, 441 p.
+
+        USGS, 1973, True color aerial photographs labeled
+        GS-SE.  Photographs taken along northwest-southeast
+        oriented flight lines covering the eastern Transverse
+        Ranges south of the Pinto Mountain fault. Lines flown
+        at moderate to low sun-angle in October 1973; scale
+        1:36,000.
+      Process_Date: 1973 to 1981
+
+    Process_Step:
+      Process_Description:
+        Additional observations were made in bedrock units of the
+        Pinto Basin quadrangle during the course of wilderness
+        studies of BLM-managed land in the Eagle Mountains (Powell
+        and others, 1984) and during ongoing geologic studies in the
+        eastern Transverse Ranges province (Powell, 1993).
+
+        Powell, R. E., Whittington, C. L., Grauch, V. J. S., and
+        McColly, R. A., 1984, Mineral resource potential of the Eagle
+        Mountains Wilderness Study Area (CDCA-334), Riverside County,
+        California: U.S. Geological Survey Open-File Report 84-631,
+        25 p., scale 1:62,500.
+
+        Powell, R.E., 1993, Balanced palinspastic reconstruction of
+        pre-late Cenozoic paleogeology, southern California: Geologic
+        and kinematic constraints on evolution of the San Andreas
+        fault system, in Powell, R.E., Weldon, R.J., II, and Matti,
+        J.C., eds., The San Andreas fault system: Displacement,
+        palinspastic reconstruction, and geologic evolution:
+        Geological Society of America Memoir 178, p. 1-106.
+      Process_Date: 1982 to 1995
+    Process_Step:
+      Process_Description:
+        The geologic map and database for the Conejo Well
+        quadrangle was generated by combining the bedrock
+        mapping of previous process-steps with new,
+        larger-scale mapping both of bedrock units and
+        surficial deposits. The new mapping is based chiefly on
+        interpretation of 1:24,000-scale color photographs
+        (USGS, 1998), 1:40,000-scale NAPP infrared color
+        photographs (USGS, 1996), and 1:80,000-scale NHAP
+        infrared color photographs (USGS, 1983-1984) with
+        minimal new fieldwork at this stage.  Using ARCVIEW and
+        its Image Analysis extension, geologic contacts,
+        faults, and dikes were mapped on georeferenced USGS
+        digital orthophotograph quarter quadrangles (DOQQs).
+        The lines generated in ARCVIEW were assigned basic
+        attributes and exported to ARCINFO where a line-polygon
+        coverage was generated for the geology layer. This
+        coverage was exported back to ARCVIEW as line and
+        polygon shape files. Polygons were assigned their basic
+        attributes in ARCVIEW and re-exported to ARCINFO for
+        more complete attribution in the full coverage.
+        Polygons in the coverage are attributed to generate the
+        plot-file map. These plot-file map units, as well as
+        other mapped units and aggregates of units that are
+        included in the database but not shown on the plot-file
+        map, are further attributed as region features (groups
+        of polygons).
+
+        USGS, 1998, True color aerial photographs labeled
+        J.T.N.P.  Photographs taken along east-west oriented
+        flight lines covering part of Joshua Tree National Park
+        in Pinto Basin and parts of the Coxcomb, Pinto, Eagle,
+        Cottonwood, Hexie, and Little San Bernardino Mountains.
+        Lines flown at high sun-angle in May 1998; scale
+        1:24,000.
+      Process_Date: 1997-2000
+    Process_Step:
+      Process_Description:
+        The source of the base hypsography, hydrography, and
+        culture for the geologic map is the U.S. Geological
+        Survey, 1:24,000-scale topographic map of the Conejo
+        Well 7.5 minute quadangle (provisional edition, 1986).
+        The topographic map was photographically reproduced on
+        scale-stable clear film. The resulting blackline
+        photo-positive image was scanned at 500 dpi using an
+        Anatech Eagle 4080 monochrome 800 dpi rasterizing
+        scanner.  The raster scan was imported into ARC/INFO,
+        registered and rectified to the Conejo Well quadrangle,
+        and saved in GEOTIFF format. Topographic elements on
+        the base map are geospatially located by this process,
+        but no features are attributed. The topographic base
+        map is provided for locational reference only.
+      Process_Date: 2000
+    Process_Step:
+      Process_Description:
+        To provide a topographic base for the geologic map, the
+        monochromatic raster scan file and the geologic map
+        coverages were converted to ARC/INFO grids, merged,
+        resulting in the topographic and cultural information
+        drawn in gray and the geologic map unit colors drawn
+        with their respective colors.  The combined map is a
+        digital image in which geologic and topographic lines
+        and points are displayed in their proper geospatial
+        locations, but for which no information other than
+        location is attached to the lines and points.
+      Process_Date: 2000
+    Process_Step:
+      Process_Description:
+        First draft of metadata created by Pamela M. Cossette using
+        FGDCMETA.AML ver. 1.2 05/14/98 on ARC/INFO data set
+        /pool2/cossette/2_joshua/2_cwell/cw_union/cw_1219
+      Process_Date: 20001219
+
+    Process_Step:
+      Process_Description:
+        Final draft of metadata created by Pamela M. Cossette
+        using FGDCMETA.AML ver. 1.2 05/14/98 on ARC/INFO data
+        set /pool2/cossette/2_joshua/2_cwell/cw_union/cwell_geo
+      Process_Date: 02052001
+Spatial_Data_Organization_Information:
+  Direct_Spatial_Reference_Method: Vector
+  Point_and_Vector_Object_Information:
+    SDTS_Terms_Description:
+      SDTS_Point_and_Vector_Object_Type: Point
+      Point_and_Vector_Object_Count: 2498
+      SDTS_Point_and_Vector_Object_Type: String
+      Point_and_Vector_Object_Count: 5991
+      SDTS_Point_and_Vector_Object_Type: GT-polygon composed of chains
+      Point_and_Vector_Object_Count: 2499
+
+Spatial_Reference_Information:
+  Horizontal_Coordinate_System_Definition:
+    Planar:
+      Map_Projection:
+        Map_Projection_Name: Polyconic
+        Polyconic:
+          Longitude_of_Central_Meridian: -115.6875
+          Latitude_of_Projection_Origin: 33.75
+          False_Easting: 0.00000
+          False_Northing: 0.00000
+      Planar_Coordinate_Information:
+        Planar_Coordinate_Encoding_Method: coordinate pair
+        Coordinate_Representation:
+          Abscissa_Resolution: 0.0027666760142
+          Ordinate_Resolution: 0.0027666760142
+        Planar_Distance_Units: Meters
+    Geodetic_Model:
+      Horizontal_Datum_Name: North American Datum of 1927
+      Ellipsoid_Name: Clarke 1866
+      Semi-major_Axis: 6378206.4
+      Denominator_of_Flattening_Ratio: 294.98
+
+Entity_and_Attribute_Information:
+  Overview_Description:
+    Entity_and_Attribute_Overview:
+      The geologic map and digital database of the Conejo Well
+      7.5 minute quadrangle includes five geospatial datasets as
+      ARC/INFO coverages: cwell_geo (geology), cwell_dk (dikes),
+      cwell_str (structural point data), cwell_orn (structural
+      line ornamentation), and cwell_ldr (annotation leaders).
+      Geospatial entities in ARC/INFO coverages have the
+      following software-defined attributes: <cover>.pat contains
+      AREA, PERIMETER, cover#, and cover-ID; <cover>.aat contains
+      FNODE#, TNODE#, LPOLY#, RPOLY#, LENGTH, cover#, and
+      cover-ID. User-defined attributes are described in detail
+      below.
+      
+      (1) The coverage cwell_geo includes the following feature
+      attribute tables: (a) a polygon attribute table
+      (cwell_geo.pat) that describes the geospatial distribution
+      of rock units represented in the Postscript (.ps) and
+      Portable Document Format (.pdf) plotfiles of the geologic
+      maps; (b)region subclass attribute tables
+      (cwell_geo.patmetunit, cwell_geo.patpedunit,
+      cwell_geo.patplutunit, cwell_geo.patsedunit,
+      cwell_geo.patveinunit, cwell_geo.patvolcunit,
+      cwell_geo.hydaltunit) that describe all geologic units
+      contained in the database; and (c) an arc attribute table
+      (cwell_geo.aat) that describes the contacts and faults that
+      bound rock-unit polygons.  For display purposes in the .ps
+      and .pdf geologic maps, the geology coverage includes one
+      annotation subclass (anno.geo) which contains unit labels
+      derived from the coded item PLABL.
+      
+      (2) The coverage cwell_dk includes an arc attribute
+      table (cwell_dk.aat) that describes hypabyssal dikes.
+      Dikes are planar intrusive features that intersect
+      the Earth's surface as linear features; they are
+      represented as lines where their surface widths are
+      too narrow to be represented as polygons at a scale
+      of 1:24,000.
+      
+      (3) The coverage cwell_str includes a point attribute
+      table (cwell_str.pat) that describes geologic
+      structural point data, including the types and
+      orientation of bedding, foliation, and lineation. An
+      annotation subclass (anno.value) displays the dip or
+      plunge values associated with point data.
+      
+      (4) The coverage cwell_orn includes a point
+      attribute table (cwell_orn.pat) that describes
+      structural line ornamentation. An annotation subclass
+      (anno.line) displays the sense of movement on a fault.
+      
+      (5) The coverage cwell_ldr includes an arc
+      attribute table (cwell_ldr.pat) that describes
+      annotation leaders. Unit symbols that are placed
+      outside the perimeter of a particular polygon
+      identify that polygon with annotation leaders.
+    Entity_and_Attribute_Detail_Citation: http://geopubs.wr.usgs.gov/open-file/of01-31/cwell_pamph.pdf
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_geo.pat
+      Entity_Type_Definition:
+        Geologic units shown on geologic map in Postscript (.ps)
+        and Portable Document Format (.pdf) files
+    Attribute:
+      Attribute_Label: LABL
+      Attribute_Definition:
+        Geologic map unit label. Plain text is substituted for
+        conventional geologic age symbols (Pr for Proterozoic; Tr
+        for Triassic) and unit label subscripts as shown on map
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qa
+          Enumerated_Domain_Value_Definition: Very young alluvial deposits (late Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qa2
+          Enumerated_Domain_Value_Definition: Very young alluvial deposits, Unit 2 (late Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qa1
+          Enumerated_Domain_Value_Definition: Very young alluvial deposits, Unit 1 (late Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyai1
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, insensitive source, Unit 1 (middle and
+            (or) early Holocene and (or) latest Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyas2,3
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, sensitive source, Units 2 and 3 (late
+            and (or) middle Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyas3
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, sensitive source, Unit 3 (late and
+            (or) middle Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyas2
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, sensitive source, Unit 2 (late and
+            (or) middle Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyaos
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, oxidized, sensitive source (Holocene
+            and latest Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyaos + Qyas2
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, oxidized, sensitive source + Young
+            alluvial deposits, sensitive source, Unit 2 (Holocene and
+            latest Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qye?
+          Enumerated_Domain_Value_Definition: Young eolian deposits? (Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoai3
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, insensitive source, Unit 3 (late
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoai2
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, insensitive source, Unit 2 (middle?
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoai1
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, insensitive source, Unit 1 (middle and
+            early Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoai1?
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, insensitive source, Unit 1? (middle and
+            early Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoaps
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, pavemented, sensitive source (late
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoaos
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, oxidized, sensitive source (middle?
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoars
+          Enumerated_Domain_Value_Definition:
+            Old alluvial and (or) regolithic deposits, sensitive source
+            (middle? Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoc
+          Enumerated_Domain_Value_Definition: Old colluvial deposits (Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoc3
+          Enumerated_Domain_Value_Definition: Old colluvial deposits, Unit 3 (late Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoc1,2
+          Enumerated_Domain_Value_Definition: Old colluvial deposits, Units 1 and 2 (Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qovork
+          Enumerated_Domain_Value_Definition:
+            Old and (or) very old regolithic deposits, cemented (middle? and
+            (or) early Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qvoa
+          Enumerated_Domain_Value_Definition: Very old alluvial deposits (middle and early Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qvoa?
+          Enumerated_Domain_Value_Definition: Very old alluvial deposits? (middle and early Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTs?
+          Enumerated_Domain_Value_Definition: Sedimentary deposits? (Quaternary and (or) Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrcp2
+          Enumerated_Domain_Value_Definition:
+            Regolith, monzogranite of Cottonwood Pass, Unit 2
+            (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrrb
+          Enumerated_Domain_Value_Definition:
+            Regolith, monzogranite of Red Butte Wash (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrgd
+          Enumerated_Domain_Value_Definition: Regolith, granodiorite (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrpb
+          Enumerated_Domain_Value_Definition:
+            Regolith, granodiorite of Pinto Basin (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrpb3
+          Enumerated_Domain_Value_Definition:
+            Regolith, granodiorite of Pinto Basin, Unit 3 (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrpb2
+          Enumerated_Domain_Value_Definition:
+            Regolith, granodiorite of Pinto Basin, Unit 2 (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrpb1
+          Enumerated_Domain_Value_Definition:
+            Regolith, granodiorite of Pinto Basin, Unit 1 (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrqm
+          Enumerated_Domain_Value_Definition:
+            Regolith, quartz monzonite, monzogranite, and granodiorite
+            (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrjg
+          Enumerated_Domain_Value_Definition:
+            Regolith, granite gneiss of Joshua Tree (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrp
+          Enumerated_Domain_Value_Definition: Regolith, Pinto Gneiss (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrp?
+          Enumerated_Domain_Value_Definition: Regolith, Pinto Gneiss? (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Tb
+          Enumerated_Domain_Value_Definition: Basalt (late Miocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: KJmgc
+          Enumerated_Domain_Value_Definition: Monzogranite, coarse-grained (Cretaceous and (or) Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: KJmgccp
+          Enumerated_Domain_Value_Definition: Monzogranite of Cottonwood Pass (Cretaceous or Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: KJmgcrb?
+          Enumerated_Domain_Value_Definition: Monzogranite of Red Butte Wash? (Cretaceous or Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Kgd
+          Enumerated_Domain_Value_Definition: Granodiorite (Cretaceous)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Kgdpb
+          Enumerated_Domain_Value_Definition: Granodiorite of Pinto Basin (Cretaceous)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jqm
+          Enumerated_Domain_Value_Definition: Quartz monzonite, monzogranite, and granodiorite (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jqmp
+          Enumerated_Domain_Value_Definition:
+            Porphyritic quartz monzonite, monzogranite, and granodiorite
+            (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jmi
+          Enumerated_Domain_Value_Definition: Mafic and intermediate intrusive suite (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jmi?
+          Enumerated_Domain_Value_Definition: Mafic and intermediate intrusive suite? (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: TrPmc
+          Enumerated_Domain_Value_Definition: Monzodiorite of Munsen Canyon (Triassic or Permian)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prmag
+          Enumerated_Domain_Value_Definition: Augen gneiss of Monument Mountain (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prpgd
+          Enumerated_Domain_Value_Definition: Pinto Gneiss, dark (Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prpgd?
+          Enumerated_Domain_Value_Definition: Pinto Gneiss, dark? (Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prpq
+          Enumerated_Domain_Value_Definition: Quartzite of Pinto Mountain (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prid
+          Enumerated_Domain_Value_Definition: Dolomite of Iron Chief mine (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Pridf
+          Enumerated_Domain_Value_Definition: Ferriferous dolomite of Iron Chief mine (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prjgg
+          Enumerated_Domain_Value_Definition: Granite gneiss of Joshua Tree (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prjmr
+          Enumerated_Domain_Value_Definition: Metamorphosed regolith (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: TKq? (Tertiary or Cretaceous)
+          Enumerated_Domain_Value_Definition: Quartz?
+        Enumerated_Domain:
+          Enumerated_Domain_Value: TJh?
+          Enumerated_Domain_Value_Definition: Hypabyssal intrusive rocks? (Tertiary or Jurassic)
+    Attribute:
+      Attribute_Label: PLABL
+      Attribute_Definition: Coded geologic map unit label used to generate plot label.
+    Attribute:
+      Attribute_Label: SHDPS
+      Attribute_Definition:
+        Coded integer that relates polygon to color in shadeset
+        scamp2.shd
+    Attribute:
+      Attribute_Label: SHDFIL
+      Attribute_Definition:
+        Coded integer that relates polygon to fill pattern in
+        shadeset geology2.shd
+    Attribute:
+      Attribute_Label: NAME
+      Attribute_Definition: Geologic name of map unit (see list under LABL attribute)
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_geo.patmetunit
+      Entity_Type_Definition: Metamorphic units contained in the database
+    Attribute:
+      Attribute_Label: LABL
+      Attribute_Definition: Metamorphic unit label
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prhgc
+          Enumerated_Domain_Value_Definition: Gneiss complex of Hexie Mountains (Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prmag
+          Enumerated_Domain_Value_Definition: Augen gneiss of Monument Mountain (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prmg
+          Enumerated_Domain_Value_Definition:
+            Porphyritic granodiorite,  monzogranite, and augen gneiss of
+            Monument Mountain (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prpg
+          Enumerated_Domain_Value_Definition: Pinto Gneiss of Miller, 1938 (Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prpgd
+          Enumerated_Domain_Value_Definition: Pinto Gneiss, dark (Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prpq
+          Enumerated_Domain_Value_Definition: Quartzite of Pinto Mountain (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prid
+          Enumerated_Domain_Value_Definition: Dolomite of Iron Chief mine (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Pridf
+          Enumerated_Domain_Value_Definition: Ferriferous dolomite of Iron Chief mine (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prjgg
+          Enumerated_Domain_Value_Definition: Granite gneiss of Joshua Tree (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prjmr
+          Enumerated_Domain_Value_Definition:
+            Metamorphosed regolith, granite gneiss of Joshua Tree (Middle
+            Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prjg
+          Enumerated_Domain_Value_Definition:
+            Porphyritic granite and granite gneiss of Joshua Tree (Middle
+            Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prems
+          Enumerated_Domain_Value_Definition: Metasedimentary rocks of Eagle Mountains (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Pre
+          Enumerated_Domain_Value_Definition: Eagle Mountains assemblage (Middle Proterozoic)
+    Attribute:
+      Attribute_Label: PARENT
+      Attribute_Definition:
+        Label for metamorphic unit of next higher stratigraphic rank
+        than that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: CHILD
+      Attribute_Definition:
+        Labels for metamorphic units of lower stratigraphic rank than
+        that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: UTYPE
+      Attribute_Definition: Class of geologic unit
+    Attribute:
+      Attribute_Label: NAME
+      Attribute_Definition: Name of metamorphic unit
+    Attribute:
+      Attribute_Label: AGE
+      Attribute_Definition: Age of metamorphic unit
+    Attribute:
+      Attribute_Label: PLABL
+      Attribute_Definition: Coded geologic map unit label used to generate plot label.
+    Attribute:
+      Attribute_Label: SHDPS
+      Attribute_Definition:
+        Coded integer that relates polygon to color in shadeset
+        scamp2.shd
+    Attribute:
+      Attribute_Label: SHDFIL
+      Attribute_Definition:
+        Coded integer that relates polygon to fill pattern in shadeset
+        geology2.shd
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_geo.patpedunit
+      Entity_Type_Definition: Pedogenic units contained in the database
+    Attribute:
+      Attribute_Label: LABL
+      Attribute_Definition: Pedogenic unit label
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qovork
+          Enumerated_Domain_Value_Definition:
+            Old and (or) very old regolithic deposits, cemented (middle?
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTr
+          Enumerated_Domain_Value_Definition: Regolith (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrcp
+          Enumerated_Domain_Value_Definition:
+            Regolith, monzogranite of Cottonwood Pass (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrcp2
+          Enumerated_Domain_Value_Definition:
+            Regolith, monzogranite of Cottonwood Pass, Unit 2 (Quaternary
+            and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrrb
+          Enumerated_Domain_Value_Definition:
+            Regolith, monzogranite of Red Butte Wash (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrmgc
+          Enumerated_Domain_Value_Definition:
+            Regolith, coarse-grained monzogranite (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrgd
+          Enumerated_Domain_Value_Definition: Regolith, granodiorite (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrpb
+          Enumerated_Domain_Value_Definition: Regolith, granodiorite of Pinto Basin (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrpb3
+          Enumerated_Domain_Value_Definition:
+            Regolith, granodiorite of Pinto Basin, Unit 3
+            (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrpb2
+          Enumerated_Domain_Value_Definition:
+            Regolith, granodiorite of Pinto Basin, Unit 2
+            (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrpb1
+          Enumerated_Domain_Value_Definition:
+            Regolith, granodiorite of Pinto Basin, Unit 1
+            (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrqm
+          Enumerated_Domain_Value_Definition:
+            Regolith, quartz monzonite, monzogranite, and granodiorite
+            (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrjg
+          Enumerated_Domain_Value_Definition:
+            Regolith, granite gneiss of Joshua Tree (Quaternary and
+            Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTrp
+          Enumerated_Domain_Value_Definition: Regolith, Pinto Gneiss (Quaternary and Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prjmr
+          Enumerated_Domain_Value_Definition: Metamorphosed regolith (Middle Proterozoic)
+    Attribute:
+      Attribute_Label: PARENT
+      Attribute_Definition:
+        Label for pedogenic unit of next higher stratigraphic rank than that of unit
+        indicated in LABL
+    Attribute:
+      Attribute_Label: CHILD
+      Attribute_Definition:
+        Labels for pedogenic units of lower stratigraphic rank than
+        that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: UTYPE
+      Attribute_Definition: Class of geologic unit
+    Attribute:
+      Attribute_Label: NAME
+      Attribute_Definition: Name of pedogenic unit
+    Attribute:
+      Attribute_Label: AGE
+      Attribute_Definition: Age of pedogenic unit
+    Attribute:
+      Attribute_Label: PLABL
+      Attribute_Definition: Coded geologic map unit label used to generate plot label.
+    Attribute:
+      Attribute_Label: SHDPS
+      Attribute_Definition:
+        Coded integer that relates polygon to color in shadeset
+        scamp2.shd
+    Attribute:
+      Attribute_Label: SHDFIL
+      Attribute_Definition:
+        Coded integer that relates polygon to fill pattern in shadeset
+        geology2.shd
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_geo.patplutunit
+      Entity_Type_Definition: Plutonic units contained in the database
+    Attribute:
+      Attribute_Label: LABL
+      Attribute_Definition: Plutonic unit label
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: KJmgc
+          Enumerated_Domain_Value_Definition: Monzogranite, coarse-grained (Cretaceous and (or) Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: KJmgccp
+          Enumerated_Domain_Value_Definition: Monzogranite of Cottonwood Pass (Cretaceous or Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: KJmgcrb
+          Enumerated_Domain_Value_Definition: Monzogranite of Red Butte Wash (Cretaceous or Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Kgd
+          Enumerated_Domain_Value_Definition: Granodiorite (Cretaceous)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Kgdpb
+          Enumerated_Domain_Value_Definition: Granodiorite of Pinto Basin (Cretaceous)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jipe
+          Enumerated_Domain_Value_Definition: Intrusive suite of Pinto and Eagle Mountains (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jqm
+          Enumerated_Domain_Value_Definition: Quartz monzonite, monzogranite, and granodiorite (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jqmp
+          Enumerated_Domain_Value_Definition:
+            Porphyritic quartz monzonite, monzogranite, and granodiorite
+            (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jmi
+          Enumerated_Domain_Value_Definition: Mafic and intermediate intrusive suite (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: TrPmc
+          Enumerated_Domain_Value_Definition: Monzodiorite of Munsen Canyon (Triassic or Permian)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Mzb
+          Enumerated_Domain_Value_Definition:
+            Batholith of Transverse Ranges and Mojave Desert
+            (Mesozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Mzbc
+          Enumerated_Domain_Value_Definition:
+            Batholith of Transverse Ranges and Mojave Desert,
+            central belt (Mesozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Mzbe
+          Enumerated_Domain_Value_Definition:
+            Batholith of Transverse Ranges and Mojave Desert,
+            eastern belt (Mesozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prmag
+          Enumerated_Domain_Value_Definition: Augen gneiss of Monument Mountain (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prmg
+          Enumerated_Domain_Value_Definition:
+            Porphyritic granodiorite,  monzogranite, and augen gneiss of
+            Monument Mountain (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prjgg
+          Enumerated_Domain_Value_Definition: Granite gneiss of Joshua Tree (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prjg
+          Enumerated_Domain_Value_Definition:
+            Porphyritic granite and granite gneiss of Joshua Tree (Middle
+            Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prpgg
+          Enumerated_Domain_Value_Definition:
+            Porphyritic granitoids and augen gneiss (Middle
+            Proterozoic)
+    Attribute:
+      Attribute_Label: PARENT
+      Attribute_Definition:
+        Label for plutonic unit of next higher stratigraphic rank than
+        that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: CHILD
+      Attribute_Definition:
+        Labels for plutonic units of lower stratigraphic rank than that
+        of unit indicated in LABL
+    Attribute:
+      Attribute_Label: UTYPE
+      Attribute_Definition: Class of geologic unit
+    Attribute:
+      Attribute_Label: NAME
+      Attribute_Definition: Name of plutonic unit
+    Attribute:
+      Attribute_Label: AGE
+      Attribute_Definition: Age of plutonic unit
+    Attribute:
+      Attribute_Label: PLABL
+      Attribute_Definition: Coded geologic map unit label used to generate plot label.
+    Attribute:
+      Attribute_Label: SHDPS
+      Attribute_Definition:
+        Coded integer that relates polygon to color in shadeset
+        scamp2.shd
+    Attribute:
+      Attribute_Label: SHDFIL
+      Attribute_Definition:
+        Coded integer that relates polygon to fill pattern in shadeset
+        geology2.shd
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_geo.patsedunit
+      Entity_Type_Definition: Sedimentary units contained in the database
+    Attribute:
+      Attribute_Label: LABL
+      Attribute_Definition: Sedimentary unit label
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qa
+          Enumerated_Domain_Value_Definition: Very young alluvial deposits (late Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qa2
+          Enumerated_Domain_Value_Definition: Very young alluvial deposits, Unit 2 (late Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qa1
+          Enumerated_Domain_Value_Definition: Very young alluvial deposits, Unit 1 (late Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qya
+          Enumerated_Domain_Value_Definition: Young alluvial deposits (Holocene and latest Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyai
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, insensitive source (Holocene and
+            latest Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyai1
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, insensitive source, Unit 1 (middle and
+            (or) early Holocene and (or) latest Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyas
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, sensitive source (Holocene and latest
+            Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyas2,3
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, sensitive source, Units 2 and 3 (late
+            and (or) middle Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyas3
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, sensitive source, Unit 3 (late and
+            (or) middle Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyas2
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, sensitive source, Unit 2 (late and
+            (or) middle Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyaos
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, oxidized, sensitive source (Holocene
+            and latest Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyaos + Qyas2
+          Enumerated_Domain_Value_Definition:
+            Young alluvial deposits, oxidized, sensitive source + Young
+            alluvial deposits, sensitive source, Unit 2 (Holocene and
+            latest Pleistocene?)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qye?
+          Enumerated_Domain_Value_Definition: Young eolian deposits? (Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoa
+          Enumerated_Domain_Value_Definition: Old alluvial deposits (Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoai
+          Enumerated_Domain_Value_Definition: Old alluvial deposits, insensitive source (Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoai3
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, insensitive source, Unit 3 (late
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoai2
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, insensitive source, Unit 2 (middle?
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoai1
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, insensitive source, Unit 1 (middle and
+            early Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoas
+          Enumerated_Domain_Value_Definition: Old alluvial deposits, sensitive source (Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoaps
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, pavemented, sensitive source (late
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoaos
+          Enumerated_Domain_Value_Definition:
+            Old alluvial deposits, oxidized, sensitive source (middle?
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoars
+          Enumerated_Domain_Value_Definition:
+            Old alluvial and (or) regolithic deposits, sensitive source
+            (middle? Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoc
+          Enumerated_Domain_Value_Definition: Old colluvial deposits (Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoc3
+          Enumerated_Domain_Value_Definition: Old colluvial deposits, Unit 3 (late Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoc1,2
+          Enumerated_Domain_Value_Definition: Old colluvial deposits, Units 1 and 2 (Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qoua
+          Enumerated_Domain_Value_Definition: Old and very old alluvial deposits (Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qovork
+          Enumerated_Domain_Value_Definition:
+            Old and (or) very old regolithic deposits, cemented (middle?
+            Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qvoa
+          Enumerated_Domain_Value_Definition: Very old alluvial deposits (middle and early Pleistocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: QTs?
+          Enumerated_Domain_Value_Definition: Sedimentary deposits? (Quaternary and (or) Tertiary)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Qyua
+          Enumerated_Domain_Value_Definition: Very young and young alluvial deposits (Holocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prid
+          Enumerated_Domain_Value_Definition: Dolomite of Iron Chief mine (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Pridf
+          Enumerated_Domain_Value_Definition:
+            Ferriferous dolomite of Iron Chief mine (Middle
+            Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prpq
+          Enumerated_Domain_Value_Definition: Quartzite of Pinto mountain (Middle Proterozoic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Prs
+          Enumerated_Domain_Value_Definition: Sedimentary rocks (Proterozoic)
+    Attribute:
+      Attribute_Label: PARENT
+      Attribute_Definition:
+        Label for sedimentary unit of next higher stratigraphic rank
+        than that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: CHILD
+      Attribute_Definition:
+        Labels for sedimentary units of lower stratigraphic rank than
+        that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: UTYPE
+      Attribute_Definition: Class of geologic unit
+    Attribute:
+      Attribute_Label: NAME
+      Attribute_Definition: Name of sedimentary unit
+    Attribute:
+      Attribute_Label: AGE
+      Attribute_Definition: Age of sedimentary unit
+    Attribute:
+      Attribute_Label: PLABL
+      Attribute_Definition: Coded geologic map unit label used to generate plot label.
+    Attribute:
+      Attribute_Label: SHDPS
+      Attribute_Definition:
+        Coded integer that relates polygon to color in shadeset
+        scamp2.shd
+    Attribute:
+      Attribute_Label: SHDFIL
+      Attribute_Definition:
+        Coded integer that relates polygon to fill pattern in shadeset
+        geology2.shd
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_geo.patveinunit
+      Entity_Type_Definition: Hydrothermal vein units contained in the database
+    Attribute:
+      Attribute_Label: LABL
+      Attribute_Definition: Hydrothermal vein unit label
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: TKq?
+          Enumerated_Domain_Value_Definition: Quartz? (Tertiary or Cretaceous)
+    Attribute:
+      Attribute_Label: PARENT
+      Attribute_Definition:
+        Label for hydrothermal vein unit of next higher stratigraphic
+        rank than that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: CHILD
+      Attribute_Definition:
+        Labels for hydrothermal vein units of lower stratigraphic rank
+        than that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: UTYPE
+      Attribute_Definition: Class of geologic unit
+    Attribute:
+      Attribute_Label: NAME
+      Attribute_Definition: Name of hydrothermal vein unit
+    Attribute:
+      Attribute_Label: AGE
+      Attribute_Definition: Age of hydrothermal vein unit
+    Attribute:
+      Attribute_Label: PLABL
+      Attribute_Definition: Coded geologic map unit label used to generate plot label.
+    Attribute:
+      Attribute_Label: SHDPS
+      Attribute_Definition:
+        Coded integer that relates polygon to color in shadeset
+        scamp2.shd
+    Attribute:
+      Attribute_Label: SHDFIL
+      Attribute_Definition:
+        Coded integer that relates polygon to fill pattern in shadeset
+        geology2.shd
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_geo.patvolcunit
+      Entity_Type_Definition: Volcanic and hypabyssal units contained in the database
+    Attribute:
+      Attribute_Label: LABL
+      Attribute_Definition: Volcanic or hypabyssal unit label
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Tb
+          Enumerated_Domain_Value_Definition: Basalt (Miocene)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: TJh?
+          Enumerated_Domain_Value_Definition: Hypabyssal intrusive rocks? (Tertiary or Jurassic)
+    Attribute:
+      Attribute_Label: PARENT
+      Attribute_Definition:
+        Label for volcanic or hypabyssal unit of next higher
+        stratigraphic rank than that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: CHILD
+      Attribute_Definition:
+        Labels for volcanic or hypabyssal units of lower stratigraphic
+        rank than that of unit indicated in LABL
+    Attribute:
+      Attribute_Label: UTYPE
+      Attribute_Definition: Class of geologic unit
+    Attribute:
+      Attribute_Label: NAME
+      Attribute_Definition: Name of volcanic or hypabyssal unit
+    Attribute:
+      Attribute_Label: AGE
+      Attribute_Definition: Age of volcanic or hypabyssal unit
+    Attribute:
+      Attribute_Label: PLABL
+      Attribute_Definition: Coded geologic map unit label used to generate plot label.
+    Attribute:
+      Attribute_Label: SHDPS
+      Attribute_Definition:
+        Coded integer that relates polygon to color in shadeset
+        scamp2.shd
+    Attribute:
+      Attribute_Label: SHDFIL
+      Attribute_Definition:
+        Coded integer that relates polygon to fill pattern in shadeset
+        geology2.shd
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_geo.aat
+      Entity_Type_Definition: Geologic contacts and faults that bound rock-unit polygons
+    Attribute:
+      Attribute_Label: L-TAG
+      Attribute_Definition:
+        Coded alpha-numerical symbol that relates arc to definition of
+        line type in dictionary look-up table (lines.rel). For
+        description of attributes in line classification dictionary,
+        refer to USGS Open-File Report 97-861 (see
+        Entity_and_Attribute_Detail_Citation)
+    Attribute:
+      Attribute_Label: L-SYMB
+      Attribute_Definition:
+        Coded integer symbol that relates arc to cartographic line
+        symbol in lineset look-up table (geoscamp2.lin)
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_dk.aat
+      Entity_Type_Definition: Dikes
+    Attribute:
+      Attribute_Label: LTYPE
+      Attribute_Definition: Linear feature type
+    Attribute:
+      Attribute_Label: LABL
+      Attribute_Definition: Geologic map unit labels, in plain text
+      Attribute_Domain_Values:
+        Enumerated_Domain:
+          Enumerated_Domain_Value: TKdp
+          Enumerated_Domain_Value_Definition: Dacite porphyry dike (Tertiary or Cretaceous)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: TJd
+          Enumerated_Domain_Value_Definition: Dike (Tertiary?, Cretaceous, or Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Jql
+          Enumerated_Domain_Value_Definition: Quartz latite dike (Jurassic)
+        Enumerated_Domain:
+          Enumerated_Domain_Value: Kap
+          Enumerated_Domain_Value_Definition: Aplite dike (Cretaceous)
+    Attribute:
+      Attribute_Label: L-SYMB
+      Attribute_Definition:
+        Coded integer symbol that relates arc to cartographic line
+        symbol in lineset look-up table (geoscamp2.lin)
+    Attribute:
+      Attribute_Label: NAME
+      Attribute_Definition: Lithologic name of dike
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_str.pat
+      Entity_Type_Definition: Structural point data
+    Attribute:
+      Attribute_Label: P-TAG
+      Attribute_Definition:
+        Coded alpha-numerical symbol that relates point to
+        definition of point type in dictionary INFO
+        table, points.rel. For description of attributes in point
+        classification dictionary, refer to USGS Open-File Report
+        97-859 (see Entity_and_Attribute_Detail_Citation)
+    Attribute:
+      Attribute_Label: P-SYMB
+      Attribute_Definition:
+        Coded integer symbol that relates point to cartographic point
+        symbol in markerset look-up table (geoscamp2.mrk)
+    Attribute:
+      Attribute_Label: P-STRIKE
+      Attribute_Definition: Azimuthal strike of planar feature
+    Attribute:
+      Attribute_Label: P-DIP
+      Attribute_Definition: Dip of planar feature
+    Attribute:
+      Attribute_Label: P-DIPDIR
+      Attribute_Definition: Azimuthal direction of dip of planar feature
+    Attribute:
+      Attribute_Label: P-PLUNGE
+      Attribute_Definition: Plunge of linear feature
+    Attribute:
+      Attribute_Label: P-BEARING
+      Attribute_Definition: Azimuthal direction of plunge of linear feature
+    Attribute:
+      Attribute_Label: P-SOURCE
+      Attribute_Definition: Source of data
+    Attribute:
+      Attribute_Label: PTTYPE
+      Attribute_Definition: Structural point datum type
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_orn.pat
+      Entity_Type_Definition: Line ornamentation
+    Attribute:
+      Attribute_Label: P-TAG
+      Attribute_Definition:
+        Coded alpha-numerical symbol that relates point to
+        definition of point type in dictionary INFO table,
+        points.rel. For description of attributes in point
+        classification dictionary, refer to USGS Open-File Report
+        97-859 (see Entity_and_Attribute_Detail_Citation)
+    Attribute:
+      Attribute_Label: P-SYMB
+      Attribute_Definition:
+        Coded integer symbol that relates point to cartographic point
+        symbol in markerset look-up table (geoscamp2.mrk)
+    Attribute:
+      Attribute_Label: PTTYPE
+      Attribute_Definition: Line ornamentation type
+  Detailed_Description:
+    Entity_Type:
+      Entity_Type_Label: cwell_ldr.aat
+      Entity_Type_Definition: Annotation leader
+    Attribute:
+      Attribute_Label: L-SYMB
+      Attribute_Definition:
+        Coded integer symbol (1) that relates arcs to cartographic
+        line symbol in lineset geoscamp2.lin
+Distribution_Information:
+  Distributor:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: U.S. Geological Survey Information Services
+      Contact_Address:
+        Address_Type: mailing address
+        Address: Box 25286 Denver Federal Center
+        City: Denver
+        State_or_Province: CO
+        Postal_Code: 80225
+        Country: USA
+      Contact_Voice_Telephone: 303-202-4700
+
+      Contact_Facsimile_Telephone: 303-202-4693
+  Distribution_Liability:
+    The U.S. Geological Survey (USGS) provides these
+    geographic data "as is."  The USGS makes no guarantee
+    or warranty concerning the accuracy of information
+    contained in the geographic data.  The USGS further
+    makes no warranties, either expressed or implied as to
+    any other matter whatsoever, including, without
+    limitation, the condition of the product, or its
+    fitness for any particular purpose.  The burden for
+    determining fitness for use lies entirely with the
+    user.  Although these data have been processed
+    successfully on computers at the USGS, no warranty,
+    expressed or implied, is made by the USGS regarding the
+    use of these data on any other system, nor does the
+    fact of distribution constitute or imply any such
+    warranty.
+
+    In no event shall the USGS have any liability
+    whatsoever for payment of any consequential,
+    incidental, indirect, special, or tort damages of any
+    kind, including, but not limited to, any loss of
+    profits arising out of use of or reliance on the
+    geographic data or arising out of delivery,
+    installation, operation, or support by USGS.
+
+    This digital, geologic map database of the Conejo Well
+    7.5 minute quadrangle, and any derivative maps thereof, is not
+    meant to be used or displayed at any map scale larger
+    than 1:12,000 on the DOQQ base or 1:24,000 on the
+    topographic base.
+
+Metadata_Reference_Information:
+  Metadata_Date: 20010220
+  Metadata_Review_Date: 2001
+  Metadata_Contact:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: U.S. Geological Survey
+        Contact_Person: Pamela M. Cossette
+      Contact_Position: Geographer
+      Contact_Address:
+        Address_Type: mailing address
+        Address:
+          U.S. Geological Survey
+          West 904 Riverside Avenue
+        City: Spokane
+        State_or_Province: Washington
+        Postal_Code: 99201-1087
+        Country: USA
+      Contact_Voice_Telephone: 509-368-3123
+      Contact_Facsimile_Telephone: 509-368-3199
+      Contact_Electronic_Mail_Address: pcossette@usgs.gov
+  Metadata_Standard_Name: FGDC Content Standards for Digital Geospatial Metadata
+  Metadata_Standard_Version: Version of June 8, 1994
+  Metadata_Access_Constraints: none
+  Metadata_Use_Constraints: none

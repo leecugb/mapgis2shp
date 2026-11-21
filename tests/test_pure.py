@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import importlib.util
 import io
 import math
 import os
@@ -32,6 +33,10 @@ from pymapgis.reader import (
     _read_topology_table,
 )
 from pymapgis.slib import Element, SubgraphLib, parse_elements, symbol_geometries
+
+
+def _has_optional_adjudicated_tables() -> bool:
+    return importlib.util.find_spec("pymapgis.linesty_adjudicated") is not None
 
 
 class TestDecodeGbk:
@@ -445,6 +450,10 @@ class TestPublicApi:
         assert "dotline_params" not in pymapgis.__all__
         assert "linedot_params" not in pymapgis.__all__
 
+    @pytest.mark.skipif(
+        not _has_optional_adjudicated_tables(),
+        reason="optional adjudicated tables are excluded from clean distributions",
+    )
     def test_adjudicated_tables_repo_side(self) -> None:
         """仓内环境（可导入 linesty_adjudicated）裁定表可用。"""
         from pymapgis import linesty
@@ -516,6 +525,10 @@ class TestContactForm:
     互证一致；2|1/2|4/2|18/16|1 为已裁定等价族。
     """
 
+    @pytest.mark.skipif(
+        not _has_optional_adjudicated_tables(),
+        reason="optional adjudicated tables are excluded from clean distributions",
+    )
     def test_contact_form_entries(self) -> None:
         from pymapgis.linesty import contact_semantics
         assert contact_semantics(1, 0)["contact"] == "整合接触"
@@ -1048,7 +1061,7 @@ class TestSlibRegion:
                 + struct.pack("<62H", *([3] * 62))
                 + b"".join(struct.pack("<2f", x, y) for x, y in pts))
 
-    def _lib_with_region(self, tmp_path) -> "SubgraphLib":
+    def _lib_with_region(self, tmp_path, extra: bytes = b"") -> "SubgraphLib":
         """复刻真实库边界机制：2 索引 + 1 尾链 + 大头区域首记录 +
         FF00 止链填充（任意字节对齐的 (t,n) 均不过 _rec_like——
         偶对齐 t=255/n=255 奇，奇对齐 t=65280 超限）。"""
@@ -1057,7 +1070,7 @@ class TestSlibRegion:
         recT = self._record(3, [(0.5, 0.5), (0.4, 0.4)])
         rec3 = self._big_header_region_record()
         data = (struct.pack("<2I", 8, 8 + len(rec0))
-                + rec0 + rec1 + recT + rec3 + b"\xff\x00" * 32)
+                + rec0 + rec1 + recT + rec3 + extra + b"\xff\x00" * 32)
         path = tmp_path / "Subgraph.lib"
         path.write_bytes(data)
         return SubgraphLib(str(path))
@@ -1078,6 +1091,47 @@ class TestSlibRegion:
     def test_region_symbol_count_includes_walked(self, tmp_path) -> None:
         lib = self._lib_with_region(tmp_path)
         assert lib.symbol_count == 2 + lib.n_tail + 1
+
+    def test_region_dense_record_uses_header_window_not_point_count(self, tmp_path) -> None:
+        """n>13120 的合法密集记录不得被 npts>_REGION_WIN 误拒。"""
+        dense = self._region_record(
+            300, [], [2] * 3500, [(0.01, 0.01)] * 7000
+        )
+        lib = self._lib_with_region(tmp_path, extra=dense)
+        symbol = lib.decode(2 + lib.n_tail + 1)
+        assert symbol is not None
+        assert symbol.n == 14000
+        assert len(symbol.subpaths) == 3500
+        assert all(len(path.points) == 2 for path in symbol.subpaths)
+
+
+class TestSlibTruncatedInputs:
+    @pytest.mark.parametrize("data", [
+        struct.pack("<I", 4),
+        struct.pack("<2I", 8, 16),
+        b"",
+    ])
+    def test_index_only_or_truncated_index_stops_honestly(self, tmp_path, data) -> None:
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data)
+        lib = SubgraphLib(str(path))
+        assert lib.n_tail == 0
+        assert lib.n_region == 0
+        assert lib.decode(0) is None
+
+    def test_mid_record_truncation_stops_honestly(self, tmp_path) -> None:
+        """合法后继记录头后载荷不完整时，双门抽样不得越过 EOF。"""
+        rec0 = TestSlibRegion._record(1, [(0.1, 0.2), (0.3, 0.4)])
+        rec1 = TestSlibRegion._record(2, [(0.2, 0.1), (0.4, 0.3)])
+        rec_tail = TestSlibRegion._record(3, [(0.5, 0.5), (0.4, 0.4)])
+        rec_region = TestSlibRegion._big_header_region_record()
+        data = (struct.pack("<2I", 8, 8 + len(rec0))
+                + rec0 + rec1 + rec_tail + rec_region + b"\xff\x00" * 32)
+        path = tmp_path / "Subgraph.lib"
+        path.write_bytes(data[:97])
+        lib = SubgraphLib(str(path))
+        assert lib.n_tail == 1
+        assert lib.decode(2 + lib.n_tail) is None
 
 
 class TestSlibDenseRmsGate:

@@ -1,0 +1,354 @@
+
+
+Geologic map and digital database of the Conejo Well 7.5 minute quadrangle, Riverside County, California
+
+By  Robert E. Powell1
+
+Digital preparation by  Pamela M. Cossette1
+
+
+Pamphlet, version 1.0
+
+
+Open-File Report 01-31
+Online version 1.0
+
+http://geopubs.wr.usgs.gov/open-file/01-31
+
+
+
+2001
+
+
+
+
+U.S. Department of the Interior
+U.S. Geological Survey
+
+Prepared in cooperation with
+National Park Service
+California Division of Mines and Geology
+
+A product of the Southern California Areal Mapping Project
+____________________
+1 U.S. Geological Survey, Western Region Earth Surface Processes Team
+   W904 Riverside Avenue, Spokane, WA 99201-1087
+
+  For database limitations, see following page
+
+DATABASE LIMITATIONS
+
+Content
+
+This database is preliminary and has not been reviewed for conformity with U.S. Geological Survey editorial standards or with the North American Stratigraphic Code. Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. Government.
+
+This database, identified as "Geologic map and digital database of the Conejo Well 7.5 minute quadrangle, Riverside County, California," has been approved for release and publication by the Director of the U.S. Geological Survey. Although this database has been subjected to rigorous review and is substantially complete, the USGS reserves the right to revise the data pursuant to further analysis and review. Furthermore, it is released on the condition that neither the USGS nor the United States Government may be held responsible for any damages resulting from its authorized or unauthorized use.
+
+Spatial Resolution
+
+Use of this digital geologic map should not violate the spatial resolution of the data. The Conejo Well database was developed using digital orthophotograph quarter quadrangles (DOQQs) as a base. DOQQs have a pixel resolution of 1 m and are accurate to a scale of 1:12,000 (1 in = 1,000 ft). Any enlargement beyond 1:12,000 exceeds the spatial resolution of the geologic data and should not be used in lieu of a more detailed site-specific geologic evaluation. Similarly, the digital topographic base map is derived from the U.S. Geological Survey, 1:24,000-scale Conejo Well 7.5 minute quadrangle (provisional edition, 1986); any enlargement beyond 1:24,000 exceeds the spatial resolution of the topographic data. Where the geologic data is used in combination with the topographic data, the resolution of the combined output is limited by the lower resolution of the topographic data. Where this database is used in combination with other data of higher resolution, the resolution of the combined output will be limited by the lower resolution of these data.
+
+	Table of contents
+
+	DATABASE LIMITATIONS  ................................................	ii	
+		Content  .......................................................	ii	
+		Spatial Resolution  ............................................	ii
+	
+	INTRODUCTION  ........................................................	1
+		Overview  ......................................................	1
+		Purpose  .......................................................	2
+		Approach to assembling the database  ...........................	2
+
+	DIGITAL GEOLOGIC MAP SPECIFICATIONS   ................................	5
+		Map coordinates and projection  ................................	5
+		Digital geologic data  .........................................	5
+			Data acquisition  ........................................	5
+			Map nomenclature and symbols  ............................	6
+			Faults  ..................................................	6
+		Digital base layer data  .......................................	6
+			Topographic base map  ....................................	6
+			Digital orthophotgraph quarter quadrgangle base  .........	7
+		Geologic map with topographic base  ............................	7
+		Locational accuracy  ...........................................	7
+		Spatial resolution  ............................................	8
+
+	GEOSPATIAL OBJECTS AND RELATIONSHIPS  ................................  9
+		Lines (arcs)  ..................................................	10
+		Areas  .........................................................	11
+			Polygons .................................................	11
+			Regions  .................................................	12
+		Points  ........................................................	13
+
+	ACKNOWLEDGMENTS ......................................................	14
+
+	LIST OF URLs CITED  ..................................................	15
+		U.S. Geological Survey websites  ...............................	15
+		Software websites   ............................................	16
+
+	REFERENCES CITED  ....................................................	17
+INTRODUCTION
+
+Overview
+
+	Open-File Report 01-31 is a digital geologic data set that maps and describes the geology of the Conejo Well 7.5 minute quadrangle, Riverside County, southern California. The Conejo Well database is one of several quadrangle databases that are in preparation for Joshua Tree National Park and vicinity. These quadrangles are a subset of digital quadrangle maps being generated for the Southern California Areal Mapping Project (SCAMP), a cooperative project sponsored jointly by the U.S. Geological Survey (USGS) and the California Division of Mines and Geology (CDMG). The SCAMP maps are, in turn, part of the nation-wide digital geologic map coverage being developed by the National Geologic Map Database Project (NGMDB) of the USGS.
+
+	The Conejo Well data set consists of a digital geologic map database accompanied by files containing a map plot, map graphics, and explanatory documents. The digital database was created using ARCVIEW, version 3.2, and ARC/INFO, version 7.2.1, commercial Geographical Information System (GIS) software designed by Environmental Systems Research Institute (ESRI), Redlands, California (http://www.esri.com). The data set includes the following files:
+
+* Readme file that describes how to obtain and access the data set and summarizes its contents;
+* This explanatory pamphlet that describes the approach used in building database, and discusses the purpose, content, and geologic framework of database;
+* Database files that represent the geology of the quadrangle in five map coverage layers, contain dictionaries of line and point symbols, and provide the symbolsets needed to plot the map;
+* FGDC-compliant metadata file that contains detailed technical descriptions of structure and content of the digital database
+* Geologic map: PostScript file that will plot a 1:24.000-scale, full-color geologic map of the Conejo Well quadrangle on its topographic base and accompanied by a map-margin explanation. The map margin includes a Description of Map and Database Units (DMU), a Correlation of Map and Database Units (CMU), and a key to point and line symbols. The map is displayed in a format that is similar to the USGS Miscellaneous Investigations (MF) map series, but has not undergone formal editing for strict conformity with technical layout guidelines. As yet, not all of the detailed information about geologic units contained in the map-margin explanation has been entered into the digital database;
+* Geologic map: Portable Document Format file that also contains a full-color geologic map of the Conejo Well quadrangle on its topographic base and accompanied by a map-margin explanation. The map graphic provides a full-resolution, navigable image for on-screen viewing and will also generate a paper plot;
+* Stand-alone versions of CMU and DMU in Portable Document Format files;
+* Topographic base map (Geotiff file):  raster-scanned at 500 dpi; 1:24,000-scale 
+
+Purpose
+
+	The data set for the Conejo Well quadrangle has been prepared by SCAMP as part of an ongoing effort to create a regional GIS geologic database for southern California. This regional database, in turn, is being developed as a contribution to the National Geologic Map Database of the National Cooperative Geologic Mapping Program of the USGS. The Conejo Well database has been prepared in cooperation with the National Park Service as part of an ongoing project to provide Joshua Tree National Park (JTNP) with a geologic map base for use in managing Park resources and developing interpretive materials.
+
+	The digital geologic map database for the Conejo Well quadrangle has been created as a general-purpose data set that is applicable to land-related investigations in the earth and biological sciences. Along with geologic map databases in preparation for adjoining quadrangles, the Conejo Well database has been generated to further our understanding of bedrock and surficial processes at work in the region and to document evidence for seismotectonic activity in the eastern Transverse Ranges. The database is designed to serve as a base layer suitable for ecosystem and mineral resource assessment and for building a hydrogeologic framework for Pinto Basin.
+
+Approach to assembling the database
+
+	The Conejo Well geologic map and digital database has been assembled within the context of a broader effort to structure regional and national geologic map databases. At the national level, the USGS, in collaboration with the Association of American State Geologists, is in the process of developing a national geologic map database (http://ncgmp.usgs.gov/ngmdbproject/standards/). Necessary steps toward achieving a seamless national database include: (1) designing a data model to facilitate archiving, retrieving, and utilizing geologic information related to maps, (2) developing digital cartographic standards to represent that information, and (3) reaching consensus on science language used to describe the geologic content of the database. Simultaneously on a regional level, SCAMP, in cooperation with CDMG, is developing cartographic standards and science language for representing the varied and complex geology of southern Califonria (http://geology.wr.usgs.gov/wgmt/scamp/attrib/attribute.html). On a sub-regional level, SCAMP is producing the detailed geologic mapping (1:24,000-scale) that is needed by JTNP as part of its database for land-resource management and interpretive products. Science language and cartographic standards, developed as needed for SCAMP's sub-regional database for JTNP and vicinity, are applied consistently to the various quadrangle data sets that constitute the sub-regional database.
+
+	Our approach in structuring the Conejo Well and other local digital geologic map data sets in JTNP has been guided by the choice to make preliminary versions available as soon as possible to the local user community. Subsequent versions of the Conejo Well geologic database will be produced as revisions are made to its content and structure. Geologic investigations in JTNP and vicinity are ongoing and the geologic content of the database is undergoing further evaluation, especially those features that relied largely on interpretation of aerial photographs. Moreover, pending completion and agency-wide adoption of a data model and of uniform standards and language, interim digital map products such as the Conejo Well database will lack the unifying structure anticipated for the national database. These interim products eventually will have to be made compatible with and part of regional and national databases.
+
+	In making a geologic map, it is principally through the recognition and definition of units, and the nature of the contacts between units, that the geologist is able to contribute to our understanding of earth processes and to apply that understanding to societal issues. The geologist chooses the units that best represent and communicate his or her interpretation of the geologic features being studied. In a digital geologic map database, areas in which geologic units are exposed are represented by polygons that are defined in polygon attribute tables. Because any geologic map consists of units, unit labels are expedient primary keys for identifying units in the database polygon attribute table. Attribution of polygons using unit labels as primary keys results in a digital version of a traditional geologic map. This approach is useful for generating local geologic map databases, although it is likely to prove untenable for assembling local databases into large regional or national databases.
+
+	In the Conejo Well geologic map database, version 1.0, polygon features are attributed using the map unit label as the primary key. In the polygon coverage, geologic contacts are represented as arcs and map-units as polygons, all attributed to provide a searchable digital map database and to generate a traditional end-product geologic map as a plot-file. For the plot-file, the geologic map is drawn from the ARC/INFO coverages and combined with a map-margin explanation generated externally in Adobe Illustrator and imported into the plot-file. Polygons in the digital map coverage are attributed with the particular map unit labels chosen to represent the geology of the Conejo Well quadrangle in the plot-file map. 
+
+	In making a geologic map, however, the geologist may encounter a body of rock or a deposit that can be represented as different units, depending on the purpose of the map. For an analog geologic map, the geologist typically chooses the unit designation that best characterizes those aspects of the rock body or deposit that he or she wishes to emphasize. The digital database, unlike the analog geologic map, allows the geologist to attribute any given polygon with more than one unit designation. The digital database is thereby capable of supporting the display of a folio of geologic maps that represent various characteristics of the earth materials present in the study area. 
+
+	For the Conejo Well database, the polygon features that constitute the map coverage attributed in the polygon attribute table are also grouped and attributed as region features to show additional units that are not represented on the plot-file map. These regions, constituting subclasses of the polygon coverage, display different arrays of units and emphasize other aspects of the geology of the quadrangle than those displayed and emphasized in the plot-file map included in this open-file report. For example, granitic units in the area of the Conejo Well quadrangle were deeply weathered in the Tertiary and further weathered in the Quaternary. Uplift and erosion have exposed areas of saprolite, weathered rock, and relatively fresh rock. All the polygons that represent these rocks are granite; some of the polygons also represent regolithic units. In another example, augen gneiss units in and around the Conejo Well quadrangle can be traced laterally into undeformed porphyritic granite. In a third example, for some uses it may be sufficient to represent the multiple mapped units of young and very young alluvial deposits as one unit that includes all Holocene alluvial deposits. Similarly, it may be desirable to represent the various mapped lithosomes of Proterozoic gneiss simply as Pinto Gneiss. Polygons of mapped units have been grouped variously by metamorphic grade, geomorphic setting, degree of hydrothermal alteration, and so forth.
+
+	To create a fully attributed digital database in the context of a geologic map data model, the geologist deconstructs the traditional end-product geologic map and organizes its observational components into relational tables that are the archives of the database. These tables store and relate several distinct classes of information: (1) spatial attributes that record the geographic coordinates and topologic definitions of map features; (2) descriptive attributes that describe the various geologic characteristics (lithology, composition, texture, age, etc.) that define a map feature; (3) classification attributes that define correlations and groupings among map features; (4) metadata attributes that describe the source, quality, and character of data contained within the database; and (5) legend attributes that define the cartographic representation of map features. In the data model being designed for the national database, the various data contained in the spatial and descriptive archives are related to unit classification tables and are used to generate maps by means of map-legend relational tables. The traditional end-product map can be generated from these tables, but that particular map is only one of many end-product maps that could be generated.
+
+	The Conejo Well database, version 1.0, comprises a limited array of tables that combines groups of data that eventually may be reorganized within the framework of the national geologic map data model. In this version, most of the spatial, descriptive, classifying, and cartographic data are contained in feature-attribute tables and a few dictionary tables. These attributes are listed in fields that are designed to be consistent with those for adjoining quadrangle databases in JTNP so that the 7.5 minute quadrangle databases eventually can be merged into 30 x 60 minute quadrangle database. For the purposes of cross-reference, eventual integration into a regional database, and utilization of SCAMP symbolsets, attributes are also listed in fields that link to SCAMP dictionaries and symbolsets.  Tabulating and relating all the observational data and inferences that go into a geologic map is a daunting task that can greatly delay publication of digital map databases. This process is especially time-consuming if the field data has been recorded in notebooks rather than in digital form. As time permits, this information will be tabulated for subsequent versions of the Conejo Well database.
+
+
+
+DIGITAL GEOLOGIC MAP SPECIFICATIONS
+
+Map coordinates and projection
+
+	The Conejo Well quadrangle lies between 115° 37( 30(( and 115° 45( west longitude and 33° 52( 30(( and 33° 45' north latitude. The 7.5-minute quadrangle is subdivided in latitude and longitude by a 2.5-minute tic grid that is marked on the topographic map. For the digital coverages, only the four corner tics that represent the geographic extent of the quadrangle have been generated mathematically in ARC/INFO. Geologic map information entered into ARC/INFO has been spatially registered using the four tics that represent the geographic extent of the quadrangle. Both the geologic database and the topographic base map are represented in polyconic projection referenced to the NAD27 datum. (See metadata 'Identification Information: Spatial Domain' and 'Spatial Reference Information' sections for detailed coordinate and projection information.)
+
+Digital geologic data
+Data acquisition 
+	The geologic map database contains original USGS data generated by detailed field observation and by interpretation of aerial photographs, 1:24,000 and 1:36,000 color photographs and 1:40,000 NAPP and 1:80,000 NHAP infrared photographs. Using ARCVIEW and its Image Analysis extension (version 1.0), geologic contacts, faults, and dikes were mapped on georeferenced USGS digital orthophotograph quarter quadrangles (DOQQs). Geologic data integrated onto the DOQQs includes bedrock mapping originally carried out on 1:36,000 color aerial photographs (USGS, 1973), compiled on 1:62,500 topographic maps, and further reduced to 1:125,000 (Powell, 1981). Additional observations were mapped on the 1:36,000 photographs during the course of wilderness studies of BLM-managed land in the Eagle Mountains (Powell and others, 1984). Mapping of Quaternary surficial deposits and augmentation of the older bedrock mapping is based on interpreting the 1:24,000 color aerial photographs (USGS, 1998) and the DOQQs. The lines generated in ARCVIEW were assigned basic attributes and exported to ARC/INFO where a line-polygon coverage was generated for the geology layer. This coverage was exported back to ARCVIEW as line and polygon shape files. Polygons were assigned their basic attributes in ARCVIEW and re-exported to ARC/INFO for more complete attribution in the full coverage. (See metadata 'Lineage' section for detailed information about the processes by which digital data was acquired.)
+
+	Geologic information is stored in the database in the following ways. In mapping real-world geologic features into the database, geologic contacts, faults, and dikes are represented as lines (arcs), geologic units as polygons and regions, and site-specific structural data as points. ARC/INFO records the spatial coordinates and topology of each feature and links it to a polygon, arc, or point attribute table (.pat, .aat, and .pat, respectively) that uniquely identifies the feature. Feature-attribute tables can be related to other tables that further describe and classify the geologic features. In version 1.0, this additional tabular information is limited to dictionaries that contain the definitions of points and lines as described by Matti and others (1997a,b,c). (See 'Database structure and content' below; also see Esri, 1992, 1994)
+
+	For the purposes of plotting and viewing, the digital geologic map is combined with a traditional map-margin explanation, including Description of Map and Database Units, Correlation of Map and Database Units, key to map symbols, and an index figure. The map-margin explanation contains detailed descriptive and interpretive information about geologic units that has not been entered into database tables in version 1.0. This information can be viewed on-screen or as a paper plot, either as part of the geologic map (cwell_map.pdf, cwell_map.ps) or as stand-alone versions of the DMU and CMU (cwell_dmu.pdf, cwell_cmu.pdf).
+
+Map nomenclature and symbols 
+	Within the geologic map database, map units are identified by standard geologic map criteria such as formation-name, age, and lithology. The authors have attempted to adhere to the stratigraphic nomenclature of the USGS and the North American Stratigraphic Code, but the database has not received a formal editorial review of geologic names.
+
+	Special symbols are associated with some map units. Question marks have been added to the unit symbol (e.g., QTs?, Jmi?) and unit name where unit assignment based on interpretation of aerial photographs is uncertain. Question marks are plotted as part of the map unit symbol for those polygons to which they apply, but they are not shown in the CMU or DMU unless all polygons of a given unit are queried. To locate queried map-unit polygons in a search of database, the question mark must be included as part of the unit symbol. In some polygons, multiple units crop out in individual domains that are too small or too intricately intermingled to distinguish at 1:24,000, or for which relations are not well documented. For these polygons, unit symbols are combined using plus (+) signs (e.g., Qyaos + Qyas2) in the LABL and PLABL items (see 'Database structure and contents, Areas, Polygons' below).
+
+	Geologic map unit labels entered in database items LABL and PLABL (See 'Polygons' below) contain substitute characters for conventional stratigraphic age symbols: Proterozoic appears as 'Pr' in LABL and as '<' in PLABL, Triassic appears as 'Tr' in LABL and as '^' in PLABL. The substitute characters in PLABL invoke their corresponding symbols (<, ^) from the GeoAge font group to generate map plots with conventional stratigraphic symbols.
+
+Faults
+	The Conejo Well database is sufficiently detailed to identify and characterize many actual and potential geologic hazards represented by faults, but it is not sufficiently detailed for site-specific determinations or evaluations of these features.  Faults shown do not take the place of fault-rupture hazard zones designated by the California State Geologist (see, for example, Hart, 1988; Hart and Bryant, 1997).
+
+Digital base layer data
+Topographic base map 
+	The source of the base hypsography, hydrography, and culture for the geologic map is the USGS, 1:24,000-scale topographic map of the Conejo Well 7.5 minute quadangle (provisional edition, 1986). The topographic map was photographically reproduced on scale-stable clear film. The resulting blackline photo-positive image was scanned at 500 dpi using an Anatech Eagle 4080 monochrome 800 dpi rasterizing scanner.  The raster scan was imported into ARC/INFO, registered and rectified to the Conejo Well quadrangle, and saved in GEOTIFF format. Topographic elements on the base map are geospatially located by this process, but no features are attributed. The topographic base map is provided for locational reference only.
+
+Digital orthophotograph quarter quadrangle base
+	The digital geologic map database was generated on the four digital orthophotograph quarter quadrangles that make up the Conejo Well quadrangle. The correspondence between the mapped geology in the database and these orthophotographic images can be viewed directly by exporting the digital geologic map database as SHAPE files to ARCVIEW. To accomplish this, the database must be re-projected to UTM projection, and matched to the DOQQs in either the NAD 27 datum (by changing the header files of the DOQQs) or the NAD 83 datum (by changing the projection of the database). DOQQs are not provided with this database, but can be ordered as CD-ROMs online (http://www-wmc.wr.usgs.gov/doq/) or from USGS Earth Science Information Centers (call 1-888-ASK-USGS, toll-free).
+
+Geologic map with topographic base
+
+	To provide a topographic base for the geologic map, the monochromatic raster scan file (cwell_topo.tif) and the geologic map coverages were converted to ARC/INFO grids. The grids were then merged to display the topographic and cultural information from the raster scan in gray, with geologic map unit colors filling the intervening areas of the topographic map. The combined map (cwell_map.ps, cwell_map.pdf) is a digital image in which geologic and topographic lines and points are displayed in their proper geospatial locations, but for which no information other than location is attached to the lines and points.
+ 
+Locational accuracy
+
+	Until uniform National geologic map accuracy standards are developed and adopted by the USGS in cooperation with various state geological agencies, the SCAMP project has proposed interim map-accuracy standards for 1:24,000-scale geologic maps produced by the project. For mapping compiled on USGS 1:24000-scale topographic maps, geologic lines and points on SCAMP geologic maps are judged to meet the map-accuracy standard if they are located to within 15 meters of their position relative to topographic or cultural features on the topographic base map. In mapping on USGS digital orthophotographs in the desert of southern California, however, points and exposed, sharply defined linear features are readily located to within 10 m, or even 5 m.
+
+Linear features in the Conejo Well geologic map database are represented as solid, dashed, and dotted lines. Using the DOQQ base, points and linear features represented by solid lines are located to within 10 m or less of their position on the ground. Linear features represented as dashed lines may or may not be located to within 10 m of their position on the ground. Linear features represented by dotted lines are concealed beneath overlying mapped units. The accuracy of the various lines is identified in the digital database as well as on the geologic-map plot.
+
+	Contacts between lithologic domains that make up surficial deposits as mapped on the DOQQs typically are readily located to within 10 m, but to make domains that can be resolved at 1:24,000 contacts are often drawn by approximating the dominant unit on a percentage basis. Interspersal of well- and approximately located contacts is common among the many hundreds of contact segments present in the Conejo Well quadrangle. Given that many quadrangles are being mapped in a relatively short time interval, it was deemed too time-consuming to distinguish well-located and approximately located contacts between surficial deposits; therefore, all surficial contacts are represented as approximately located and shown with a dashed line symbol.
+
+Spatial resolution
+
+	Use of this digital geologic map should not violate the spatial resolution of the data. The Conejo Well database was developed using digital orthophotograph quarter quadrangles (DOQQs) as a base. DOQQs have a pixel resolution of 1 m and are accurate to a scale of 1:12,000 (1 in = 1,000 ft). Any enlargement beyond 1:12,000 exceeds the spatial resolution of the geologic data and should not be used in lieu of a more detailed site-specific geologic evaluation. Similarly, the digital topographic base map is derived from the USGS, 1:24,000-scale Conejo Well 7.5 minute quadrangle (provisional edition, 1986); any enlargement beyond 1:24,000 exceeds the spatial resolution of the topographic data. Plotting or viewing of the data at scales larger than 1:12,000 on the DOQQ base, or larger than 1:24,000 on the topographic base, will not yield greater real detail, although it may reveal fine-scale irregularities below the intended resolution of the database. Where the geologic data is used in combination with the topographic data, the resolution of the combined output is limited by the lower resolution of the topographic data. Where this database is used in combination with other data of higher resolution, the resolution of the combined output will be limited by the lower resolution of these data.
+
+
+
+GEOSPATIAL OBJECTS AND RELATIONSHIPS
+
+	The Conejo Well geologic map database consists of five ARC/INFO coverages and INFO data tables that relate to the map features. The coverages that comprise the data set consist of feature classes and subclasses that include lines (arcs), areas (polygons and regions), points, and annotation.
+
+	Coverage: 			
+		Feature class:	Feature
+			Subclass	attribute table		Contents	
+	=============================================================
+	cwell_geo/							Geology
+		Arcs			cwell_geo.aat		Contacts and faults
+		Polygons		cwell_geo.pat		Geologic map units
+		Regions		
+			Metunit	cwell_geo.patmetunit	Metamorphic rock units
+			Pedunit	cwell_geo.patpedunit	Pedogenic rock units
+			Plutunit	cwell_geo.patplutunit	Plutonic rock units
+			Sedunit	cwell_geo.patsedunit	Sedimentary rock units
+			Veinunit	cwell_geo.patveinunit	Vein rock units
+			Volcunit	cwell_geo.patvolcunit	Volcanic and hypabyssal 									rock units
+			Hydaltunit	cwell_geo.pathydaltunit	Hydrothermally altered 										rock units
+		Annotations			
+			Geo (anno.geo)				Geologic map unit labels	
+	-------------------------------------------------------------------------
+	cwell_dk/							Dikes
+		Arcs			cwell_dk.aat		Dikes
+	-------------------------------------------------------------------------
+	cwell_str/							Structure
+		Points		cwell_str.pat	Spatial orientation of point 									data:
+									Azimuth and dip of planar 									features
+									Azimuth and plunge of 										linear features
+		Annotations		
+			Value (anno.value)		Dip and plunge values
+	-------------------------------------------------------------------------
+
+	Coverage: 			
+		Feature class:	Feature
+			Subclass	attribute table		Contents	
+	==========================================================================
+	cwell_orn/							Ornamentation at points on 									lines
+		Points		cwell_orn.pat		Ornamentation 
+									Fold axis symbols
+									Fault symbols:  slip 											arrows
+		Annotations				
+			Line (anno.line)				Fault symbols:  U / D
+	-------------------------------------------------------------------------
+	cwell_ldr/							Leaders for annotated unit 									labels	
+		Arcs			cwell_ldr.aat		Leaders	
+	
+
+Lines (arcs)
+
+	In ARC/INFO, linear geographic features are recorded as strings of vectors and described in an arc attribute table (.aat) for each coverage that contains lines. In the Conejo Well geologic database, lines include the map boundary, geologic contacts, faults, linear geologic units (dikes), and leaders for map-unit annotation labels. These lines are tabulated in three arc attribute tables: cwell_geo.aat contains the map boundary, map unit contacts, and faults; cwell_dk.aat contains dikes; and cwell_ldr.aat contains annotation leaders. In cwell_geo.aat, the type of line is recorded as an alphanumeric code in the L-TAG item (field). In cwell_dk.aat, the type of line (dike) is recorded in plain language in the LTYPE item, each dike is identified as a geologic unit by a plain-text unit label in the LABL item (e.g., Jql) and by a lithologic name in the NAME item (e.g., Quartz latite dike), and the age of the dike is recorded in the LAGE item (e.g., Jurassic). In a later version of the database, the item LTYPE will be added to cwell_geo.aat and tailored to science language requirements for attributing geologic features in JTNP and adjoining regions of the southeastern California desert. The item L-TAG links line types to their definitions and geologic explanations in the INFO data table lines.rel (see Matti and others, 1997a). Designed as part of a provisional data model for SCAMP geologic map coverages, the data table lines.rel contains a parsed-code-string scheme for science-language terms that is used on an interim basis for attributing line-types in version 1.0 of the Conejo Well database. To show each type of line on the map-plot, the item L-SYMB invokes the appropriate symbol from the geologic lineset (geoscamp2.lin). (See metadata 'Entity and Attribute Information' section for detailed descriptions of the structure and content of arc attribute tables.) 
+
+Areas
+Polygons
+	In ARC/INFO, areal geographic features are recorded as polygons and described in a polygon attribute table (.pat) for each coverage that contains polygons. In the Conejo Well geologic database, polygons are used to represent areas where geologic units crop out at the Earth's surface. As such, polygons represent areas that are underlain by domains of earth materials that share lithologic characteristics and that are bounded by geologic contacts and faults, and by the map boundary. With a few exceptions, polygons tabulated in the attribute table cwell_geo.pat of the database identify the units that are displayed on the geologic map of the Conejo Well quadrangle as provided in the plot- and pdf-files. (Additional rock units are described below as regions.)
+
+	Map units are identified by a plain-text unit label in the LABL item (e.g., Qyai1, Kgdpb, Prjgg) and by unit name in the NAME item. For the purpose of plotting the map, the item PLABL identifies the unit label as it is to be plotted but without subscripts (e.g., Qyai1 or Kgdpb,, < jgg), SHDFIL identifies the map-unit color from the shadeset (scamp2.shd), and SHDPS identifies the map-unit fill pattern, if any, from the geologic shadeset (geology2.shd). Geologic map unit labels entered in LABL and PLABL contain substitute characters for conventional stratigraphic age symbols: Proterozoic appears as 'Pr' in LABL and as '<' in PLABL, Triassic appears as 'Tr' in LABL and as '^' in PLABL. The substitute characters in PLABL invoke their corresponding symbols (<, ^) from the GeoAge font group to generate map plots with conventional stratigraphic symbols. Annotation labels for map units, derived from the item PLABL but showing subscripts (e.g., Qyai1 or Kgdpb), are stored in the annotation subclass anno.geo of the polygon coverage cwell_geo/. Where unit assignment based on interpretation of aerial photographs is uncertain, question marks have been added to the unit symbol (e.g., QTs?, Jmi?) in the LABL and PLABL items and to the unit name in the NAME item. (See metadata 'Entity and Attribute Information' section for detailed descriptions of the structure and content of polygon attribute tables.)
+
+	The exceptions to the general rule that polygons represent the units displayed on the geologic map are as follows: Polygons attributed with QTrcp2 (LABL) are displayed on the map as QTrcp (PLABL) and polygons attributed with QTrpb1, QTrpb2, or QTrpb3 (LABL) are displayed on the map as QTrpb (PLABL). Because the distinctions represented by these numerically subscripted units are preliminary and tentative, we have chosen to display these polygons on the map as their parent units, which are stored in the region subclass polygon attribute table cwell_geo.patsedunit (See 'Regions' below).
+
+Regions
+	In ARC/INFO, regions are areal geographic features that comprise one or more polygons. Regions are stored as subclasses of the polygon feature class. Each region subclass has its own subclass polygon attribute table that is independent from the polygon attribute table and from the attribute tables of other regions in the same coverage. Thus, more than one region can share the same polygon feature, thereby allowing one to represent more complex relations among polygons than those represented in the polygon attribute table alone. Related polygons can be grouped as regions in three ways: (1) to display hierarchical groupings, (2) to associate sets of contiguous or non-contiguous areal features that make up a single geographic feature, or (3) to represent geographic features that overlap other geographic features of the same class (ESRI, 1994).
+
+	In the Conejo Well database, regions are used to group polygons into various classes of geologic units. Within each class, units include, but are not limited to, those shown on the plot-file geologic map. Region units include hierarchical parents of stratigraphically or lithologically related groups of polygon units. Unit polygons that are queried in the polygon attribute table are included with the unqueried unit polygons in the units described in the region attribute tables. Polygons are grouped into region features that define sedimentary units (cwell_geo.patsedunit), plutonic units (cwell_geo.patplutunit), metamorphic rock units (cwell_geo.patmetunit), volcanic and hypabyssal units (cwell_geo.volcunit), pedogenic units (cwell_geo.patpedunit), and vein rock units (cwell_geo.veinunit). The region, hydrothermally altered rock units (cwell_geo.hydaltunit), has been created, but is unpopulated in version 1.0.  Included in these various categories are units of a higher stratigraphic rank than those represented by polygons in the polygon coverage. For example, the region "Young alluvial deposits" (Qya) is a unit that includes polygons of Qya1, Qya2, and Qya3. In another example, the region "Pinto Gneiss" (Prpg) includes leucocratic granitic orthogneiss (Prpgl) and dark gneiss (Prpgd), which in turn includes, laminated biotite-quartz-feldspar±garnet orthogneiss, metasedimentary and (or) metamorphosed hydrothermally altered rocks, and amphibolite. In the two examples where region units are displayed on the plot-file map rather than the polygon units (see 'Polygons' above), "Regolith, monzogranite of Cottonwood Pass" (QTrcp) includes polygons of QTrcp2, and "Regolith, granodiorite of Pinto Basin" (QTrpb) includes polygons of QTrpb1, QTrpb2, and QTrpb3.
+
+	As with units in the polygon attribute table, units in the attribute table for each region subclass are identified by a plain-text unit label in the LABL item (e.g., Qyai1, QTrcp, Prpg) and by unit name in the NAME item. Descriptions for some of these region units are included in the DMU on the plot-file and pdf-file geologic maps, where they are indicated by unit labels in open boxes. For the purpose of plotting maps, the item PLABL identifies the unit label as it is to be plotted but without subscripts (e.g., Qyai1 or QTrcp, <pg), SHDFIL identifies the map-unit color from the shadeset (scamp2.shd), and SHDPS identifies the map-unit fill pattern, if any, from the geologic shadeset (geology2.shd). Annotation labels for map units, derived from the item PLABL but showing subscripts (e.g., Qyai1 or QTrcp), are stored in the annotation subclass anno.geo of the polygon coverage cwell_geo/. In version 1.0, the items PLABL, SHDFIL, and SHDPS are provided only for the units attributed in LABL as QTrcp and QTrpb.  Item PARENT identifies the unit label for the region unit of next higher stratigraphic or lithologic rank than that of unit indicated in LABL item. Item CHILD lists unit labels for the region units of lower stratigraphic or lithologic rank that comprise the unit indicated in LABL. Item AGE indicates the geologic age of the region unit. For each unit within each region, item UTYPE specifies a class that represents a lithologic subcategory of the region (e.g., 'regolith' as a class of unit within the region PEDUNIT; 'metasedimentary strata' as a class of unit within the region METUNIT; and 'surificial' or 'sedimentary protolith' as classes of units within the region SEDUNIT). (See metadata 'Entity and Attribute Information' section for detailed descriptions of the structure and content of region attribute tables.)
+
+Points
+	In ARC/INFO, points are recorded as coordinate pairs and are described in point attribute tables (.pat). In the Conejo Well geologic database, points are stored in two point coverages: cwell_str/ and cwell_orn/. Quantitative measurements of the spatial orientation of planar features (e.g., bedding, foliation, cleavage) are recorded in cwell_str.pat as azimuth of a horizontal line in the measured plane (P-STRIKE), inclination of the plane (P-DIP), and azimuth of the direction of dip (P-DIPDIR). Quantitative measurements of the spatial orientation of linear features (e.g., fold-axes, stretched pebbles) are recorded in cwell_str.pat as azimuth of the horizontal trend of the linear feature in the direction in which it plunges (P-STRIKE) and plunge of the linear feature (P-PLUNGE). The type of point (PTTYPE and P-TAG) also is recorded in cwell_str.pat. Item PTTYPE is a plain-language phrase for the type of point (e.g., minor fold axis, metamorphosed bedding, stretched pebble). Item P-TAG is an alphanumeric code for point type that links point types to their definitions and geologic explanations in the INFO data table points.rel (see Matti and others, 1997b). Designed as part of a provisional data model for SCAMP geologic map coverages, the data table points.rel contains a parsed-code-string scheme for science-language terms that is used on an interim basis for attributing point-types in version 1.0 of the Conejo Well database. To show each type of point on the map-plot, the item P-SYMB invokes the appropriate symbol from the geologic markerset (geoscamp2.mrk). Annotation labels for dips of structural attitudes are stored in the annotation subclass anno.value of the point coverage cwell_str/. Map ornamentation symbols located at points along structural lines  are recorded in cwell_orn.pat where item PTTYPE identifies the type of symbol (e.g., fold-axis symbols and fault-slip arrows). Annotation symbols for the up and down movement (U/D) of fault blocks relative to one another are stored in the annotation subclass anno.line of the point coverage cwell_orn/. (See metadata 'Entity and Attribute Information' section for detailed descriptions of the structure and content of point attribute tables.)
+
+
+
+ACKNOWLEDGMENTS
+
+	Geologic mapping, topical studies, and digital preparation for this report were sponsored jointly by the following: (1) the National Cooperative Geologic Mapping Program of the U.S. Geological Survey, (2) California Division of Mines and Geology, and (3) the National Park Service (Joshua Tree National Park).
+
+	Previous mapping in the Conejo Well quadrangle includes a 1:62,500-scale reconnaissance map of Joshua Tree National Monument (Weir and Bader, 1963), a 1:62,500-scale dissertation map along the Blue Cut fault by Hope (1966), a 1:125,000-scale dissertation map of the southeastern Transverse Ranges (Powell, 1981), and unpublished reconnaissance mapping conducted by T.H. Rogers and C.W. Jennings  of the CDMG for compilation on the 1° x 2° Salton Sea sheet of the 1:250,000-scale geologic map of California (Jennings, 1967).
+
+	This database was prepared in the GIS laboratory at the Spokane Field Office of the USGS in Spokane, Washington. The facility is maintained primarily by the Mineral Resource Surveys Program, supported in part by the National Geologic Mapping Program. We thank Paul C. Hyndman and Steven R. Munts in Spokane and Rachel Hauser Alvarez of the SCAMP GIS laboratory at the University of California, Riverside for their assistance in digital preparation of the data set.
+
+	Technical review by Fred K. Miller has led to significant improvements in the database, the plot file, and in the discussion of the geology of the Conejo Well quadrangle in the accompanying summary pamphlet. Todd T. Fitzgibbon has examined the digital database file for internal logical consistency, has reviewed the metadata file and explanatory pamphlet, and has tested the viability of digital products.
+
+
+LIST OF URLs CITED
+
+U.S. Geological Survey websites
+
+	Conejo Well 7.5 minute quadrangle
+		Open-File Report: http://geopubs.wr.usgs.gov/open-file/01-31
+		Metadata: http://geo-nsdi.er.usgs.gov/metadata/open-file/01-31/metadata.faq.html
+
+	Southern California Areal Mapping Project (SCAMP) website 
+		GIS attributes: http://geology.wr.usgs.gov/wgmt/scamp/attrib/attribute.html
+		Databases: http://geology.wr.usgs.gov/wgmt/scamp/
+
+	Western Region Geologic Publication Server
+		Open-File Reports:
+			http://geopubs.wr.usgs.gov/open-file/of00-  (followed by the OFR number)
+		All digital publications
+			http://geopubs.wr.usgs.gov/
+
+	U.S. Geological Survey website  (http://geology.usgs.gov)
+		Open-File Reports
+			Digital maps: http://geology.usgs.gov/open-file/maps.html
+			Metadata: http://geo-nsdi.er.usgs.gov/cgi-bin/publication?open-file
+
+		Metadata (USGS Node of the National Geospatial Data Clearinghouse)
+			http://nsdi.usgs.gov/
+
+		Digital orthophotograph quarter quadrangles (DOQQs): 
+			http://www-wmc.wr.usgs.gov/doq/
+			
+		National Geologic Map Database 
+			http://ncgmp.usgs.gov/ngmdbproject/standards/
+			http://geology.usgs.gov/dm/
+
+
+
+
+
+Software websites
+
+	GIS systems
+		Environmental Systems Research Institute (ESRI): http://www.esri.com
+		MapInfo:  http://www.mapinfo.com 
+	
+	Compression and tar software
+		Gnu Software: http://www.gnu.org/order/ftp.html (UNIX tar and gzip)
+			(This web page links to mirror archive sites for Gnu tar and 			gzip utilities)
+		Gnu zip: http://www.gzip.org (UNIX gzip)
+		CNET Shareware: http://shareware.cnet.com/ (Macintosh and Windows)
+			(Search for 'tar' or 'gzip' for any Macintosh or Windows 				operating system.)
+		WinZip: http://www.winzip.com (Windows gzip)
+		USGS Public Domain Software web page:
+			http://edcwww.cr.usgs.gov/doc/edchome/ndcdb/public.html 
+			(UNIX, Macintosh)	(Provides links to Washington University at 			St. Louis Gnu archive for UNIX tar and gzip; and to AOL mirror 			site for Macintosh tar and gzip)
+		Internet Literacy's Common Internet File Formats:
+			http://www.matisse.net/files/formats.html (Macintosh and 				Windows tar and gzip)
+			(Note: this website has not been maintained since December 				1995)
+
+	Portable document reader
+		Adobe web site: http://www.adobe.com
+	
+
+REFERENCES CITED
+
+Environmental Systems Research Institute, Inc., 1991, ARC/INFO command references 6.0: Redlands, CA.
+
+Environmental Systems Research Institute, Inc, 1992, Understanding GIS; The Arc/Info method, Rev. 6: Redlands, CA.
+
+Environmental Systems Research Institute, Inc., 1994, ARC/INFO data management: Redlands, CA.
+
+Hart, E. W., 1988, Fault-rupture zones in California; Alquist-Priolo Special Studies Zones Act of 1972 with index to special studies zones maps (revised, 1988): California Division of Mines and Geology Special Publication 42.
+
+Hart, E. W., and Bryant, W.A., 1997, Fault-rupture zones in California; Alquist-Priolo Special Studies Zones Act of 1972 with index to special studies zones maps (revised, 1997): California Division of Mines and Geology Special Publication 42.
+
+Hope, R. A., 1966, Geology and structural setting of the eastern Transverse Ranges, southern California [Ph.D. thesis]:  Los Angeles, University of California, 158 p.
+
+Jennings, C.W., compiler, 1967, Geologic map of California, Salton Sea sheet: California Division of Mines and Geology, scale 1:250,000.
+
+Matti, J.C., Powell, R.E., Miller, F.K., Kennedy, S.A., Ruppert, K.R., Morton, G.L., and Cossette, P.M., 1997a, Geologic-line attributes for digital geologic-map databases produced by the Southern California Areal Mapping Project (SCAMP), Version 1.0: U.S.Geological Survey Open-File Report 97-861
+
+Matti, J.C., Miller, F.K., Powell, R.E., Kennedy, S.A., Bunyapanasarn, T.P., Koukladas, Catherine, Hauser, R.M., and Cossette, P.M., 1997b, Geologic-point attributes for digital geologic-map databases produced by the Southern California Areal Mapping Project (SCAMP), Version 1.0: U.S.Geological Survey Open-File Report 97-859
+
+Matti, J.C., Miller, F.K., Powell, R.E., Kennedy, S.A., and Cossette, P.M., 1997c, Geologic-polygon attributes for digital geologic-map databases produced by the Southern California Areal Mapping Project (SCAMP), Version 1.0: U.S.Geological Survey Open-File Report 97-860
+
+Powell, R.E., 1981, Geology of the crystalline basement complex, eastern Transverse Ranges, southern California:  Constraints on regional tectonic interpretation [Ph.D. thesis]:  Pasadena, California Institute of Technology, 441 p.
+
+Powell, R.E., 1993, Balanced palinspastic reconstruction of pre-late Cenozoic paleogeology, southern California: Geologic and kinematic constraints on evolution of the San Andreas fault system, in Powell, R.E., Weldon, R.J., II, and Matti, J.C., eds., The San Andreas fault system: Displacement, palinspastic reconstruction, and geologic evolution: Geological Society of America Memoir 178, p. 1-106.
+
+Powell, R. E., Whittington, C. L., Grauch, V. J. S., and McColly, R. A., 1984, Mineral resource potential of the Eagle Mountains Wilderness Study Area (CDCA-334), Riverside County, California: U.S. Geological Survey Open-File Report 84-631, 25 p., scale 1:62,500.
+
+Weir, J.K., Jr., and Bader, J.S., 1963, Groundwater and related geology of Joshua Tree National Monument, California: U.S. Geological Survey Open-File Report, 127 p., scale 1:62,500. 
+

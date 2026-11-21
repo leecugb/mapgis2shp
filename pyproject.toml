@@ -44,6 +44,8 @@ dependencies = [
 [project.optional-dependencies]
 render = [
     "matplotlib>=3.5",
+    "pymupdf>=1.24,<1.27; python_version < '3.10'",
+    "pymupdf>=1.24; python_version >= '3.10'",
 ]
 dev = [
     "geopandas>=0.12,<1.2",
@@ -81,6 +83,11 @@ exclude = [
     "/src/pymapgis/linesty_adjudicated.py",
 ]
 
+[tool.hatch.build.targets.sdist.force-include]
+"tests/fixtures/testdata" = "tests/fixtures/testdata"
+"tests/fixtures/slib" = "tests/fixtures/slib"
+"tests/fixtures/usgs_conejo" = "tests/fixtures/usgs_conejo"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/pymapgis"]
 exclude = [
@@ -91,6 +98,9 @@ exclude = [
 
 [tool.hatch.build.targets.wheel.force-include]
 "tests/fixtures/mapgis" = "pymapgis/testing/fixtures/mapgis"
+"tests/fixtures/usgs_conejo" = "pymapgis/testing/fixtures/usgs_conejo"
+"tests/fixtures/testdata" = "pymapgis/testing/fixtures/testdata"
+"tests/fixtures/slib" = "pymapgis/testing/fixtures/slib"
 "tests/fixtures/writer_batch2" = "pymapgis/testing/fixtures/writer_batch2"
 "tests/fixtures/writer_batch2_manifest.json" = "pymapgis/testing/fixtures/writer_batch2_manifest.json"
 "tests/fixtures/writer_batch3" = "pymapgis/testing/fixtures/writer_batch3"
