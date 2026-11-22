@@ -23,8 +23,8 @@ GeoTransform = Tuple[float, float, float, float, float, float]
 
 def matplotlib_geotransform(figure: Any, axes: Any, dpi: int) -> GeoTransform:
     """Return a north-up GeoTransform for a full-canvas Matplotlib PNG."""
-    if dpi <= 0:
-        raise ValueError("dpi must be positive")
+    if not math.isfinite(dpi) or dpi <= 0:
+        raise ValueError("dpi must be positive and finite")
     figure.canvas.draw()
     bbox = axes.get_window_extent()
     # ``get_window_extent`` uses figure.dpi, while savefig may use another DPI.
@@ -88,8 +88,8 @@ def write_geopdf(
     pixel grid). ``matplotlib_geotransform`` always returns a compatible
     north-up transform.
     """
-    if dpi <= 0:
-        raise ValueError("dpi must be positive")
+    if not math.isfinite(dpi) or dpi <= 0:
+        raise ValueError("dpi must be positive and finite")
     if not math.isfinite(scale_denominator) or scale_denominator <= 0:
         raise ValueError("scale_denominator must be positive and finite")
     if len(geotransform) != 6:

@@ -1,7 +1,4 @@
 """Regression tests for geosciml4china-backed synthetic semantic data."""
-import os
-from pathlib import Path
-
 import pytest
 
 pytest.importorskip("geosciml4china")
@@ -18,6 +15,7 @@ from examples.generate_synthetic_geology import (  # noqa: E402
     write_layers,
 )
 from examples.render_bundled_jwd import summarise  # noqa: E402
+from pymapgis.testing import slib_path  # noqa: E402
 
 etree = pytest.importorskip("lxml.etree")
 pytest.importorskip("geosciml4china")
@@ -60,12 +58,7 @@ def test_semantic_records_and_gml(tmp_path):
 
 
 def test_semantic_native_roundtrip_and_render(tmp_path, monkeypatch):
-    slib = os.environ.get("PYMAPGIS_SLIB")
-    if not slib and Path(r"D:\SLIB\SLIB").is_dir():
-        slib = r"D:\SLIB\SLIB"
-    if not slib:
-        pytest.skip("Set PYMAPGIS_SLIB to the five official graphic libraries")
-    monkeypatch.setenv("PYMAPGIS_SLIB", slib)
+    monkeypatch.setenv("PYMAPGIS_SLIB", str(slib_path()))
     layers = enrich_layers(generate_layers(seed=42))
     write_layers(layers, tmp_path / "vectors")
     native = read_layers(tmp_path / "vectors")

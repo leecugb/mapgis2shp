@@ -1,9 +1,4 @@
 """Regression tests for the independent synthetic geological-map generator."""
-import os
-from pathlib import Path
-
-import pytest
-
 from examples.generate_synthetic_geology import (
     LAYER_NAMES,
     generate_layers,
@@ -12,6 +7,7 @@ from examples.generate_synthetic_geology import (
     write_layers,
 )
 from examples.render_bundled_jwd import summarise
+from pymapgis.testing import slib_path
 
 
 def test_synthetic_layers_are_independent_and_typed():
@@ -42,12 +38,7 @@ def test_synthetic_layers_are_independent_and_typed():
 
 
 def test_synthetic_native_roundtrip_and_render(tmp_path, monkeypatch):
-    slib = os.environ.get("PYMAPGIS_SLIB")
-    if not slib and Path(r"D:\SLIB\SLIB").is_dir():
-        slib = r"D:\SLIB\SLIB"
-    if not slib:
-        pytest.skip("Set PYMAPGIS_SLIB to the five official graphic libraries")
-    monkeypatch.setenv("PYMAPGIS_SLIB", slib)
+    monkeypatch.setenv("PYMAPGIS_SLIB", str(slib_path()))
     layers = generate_layers(seed=42)
     write_layers(layers, tmp_path / "vectors")
     native_layers = read_layers(tmp_path / "vectors")

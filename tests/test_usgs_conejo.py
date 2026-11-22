@@ -1,5 +1,4 @@
 """Regression tests for the real USGS Conejo Well MapGIS conversion."""
-import os
 import struct
 from pathlib import Path
 
@@ -21,12 +20,7 @@ from examples.convert_usgs_conejo import (
 )
 from examples.render_bundled_jwd import summarise
 from pymapgis import GraphicRenderResult
-from pymapgis.testing import usgs_conejo_path
-
-pytestmark = pytest.mark.skipif(
-    not (usgs_conejo_path() / "native").is_dir(),
-    reason="optional native USGS comparison files are not included in this clean distribution",
-)
+from pymapgis.testing import slib_path, usgs_conejo_path
 
 
 def _source_dir():
@@ -106,12 +100,7 @@ def test_fast_e00_geometry_and_info_tables():
 def test_usgs_native_conversion_and_render(tmp_path, monkeypatch):
     if not SOURCE.is_dir():
         pytest.skip("USGS Conejo Well source archive is not downloaded")
-    slib = os.environ.get("PYMAPGIS_SLIB")
-    if not slib and Path(r"D:\SLIB\SLIB").is_dir():
-        slib = r"D:\SLIB\SLIB"
-    if not slib:
-        pytest.skip("Set PYMAPGIS_SLIB to the five official graphic libraries")
-    monkeypatch.setenv("PYMAPGIS_SLIB", slib)
+    monkeypatch.setenv("PYMAPGIS_SLIB", str(slib_path()))
     layers = load_layers(SOURCE)
     assert tuple(layers) == LAYER_NAMES
     assert all(layer.crs == "EPSG:32611" for layer in layers.values())

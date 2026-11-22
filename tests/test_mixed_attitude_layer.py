@@ -1,5 +1,4 @@
 """Verify that one WT can contain both subgraph and annotation records."""
-import os
 import struct
 from pathlib import Path
 
@@ -32,8 +31,6 @@ def test_mixed_attitude_wt_symbols_and_annotations(tmp_path):
     assert flags[:23] == (65536,) * 23
     assert flags[23:] == (65538,) * 23
 
-    if not os.environ.get("PYMAPGIS_SLIB") and not Path(r"D:/SLIB/SLIB").is_dir():
-        pytest.skip("SLIB is unavailable")
     layer = reader.geodataframe
     layer.attrs["source"] = path.name
     layer.attrs["kind"] = "wt"
