@@ -28,6 +28,7 @@ from typing import Optional, Tuple
 _TABLE_START = 16        # 色表区起点（"C.U.G  Colorg"13B + \x03 3B）
 _ENTRY = 4               # 4B/条目 (K, C, M, Y)
 _CHANNEL_ORDERS = {"KCMY", "YMCK"}
+_SIGNATURE = b"C.U.G  Colorg"
 
 
 def _convert_cmyk(channels: Tuple[int, int, int, int], order: str) -> Tuple[int, int, int]:
@@ -51,6 +52,8 @@ class ColorLib:
             raise ValueError(f"unsupported channel order: {channel_order}")
         self.channel_order = channel_order
         self.data = Path(path).read_bytes()
+        if not self.data.startswith(_SIGNATURE):
+            raise ValueError("Colorlib.lib lacks the C.U.G Colorg signature")
         # 可容纳的最大色号（0 基）
         self.max_no = (len(self.data) - _TABLE_START) // _ENTRY - 1
 

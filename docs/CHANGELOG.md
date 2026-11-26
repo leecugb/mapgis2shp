@@ -7,6 +7,9 @@
 - Compute symbol export bounds from drawable paths, circles and arcs; restrict raster GeoPDF input to finite, non-degenerate north-up GeoTransforms
 - Synchronize citation, example, OSGeo and provenance documentation; add contribution and conduct guides and mark non-bundled historical evidence explicitly
 - Reorganize the README around installation, conversion, writing, rendering and limitations; preserve detailed format and release material in dedicated documents, and add the executable `examples/render_testdata.py` workflow
+- Reject non-finite Writer coordinates, out-of-range unsigned graphic parameters and non-finite float32 graphic parameters instead of writing masked or NaN/Inf values
+- Wrap attribute encoding failures in `WriterError`, recognise NumPy scalar missing values, and require the Colorlib `C.U.G Colorg` signature before decoding colours
+- Compare verification round-trips in the source CRS so Writer's documented default UTM-to-Gauss-Kruger conversion is not misreported as coordinate corruption
 
 ## 2.7.3 (2026-11-14)
 

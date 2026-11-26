@@ -66,6 +66,8 @@ The tests verify Reader and graphic-library behaviour, report invariants and PNG
 
 `slib/` contains the five generic libraries required by the parser and renderer. These files contain symbol, line-style, fill and colour definitions only, not geological spatial features. `testdata_path()` and `slib_path()` locate the same fixtures in source checkouts and wheel installations; `PYMAPGIS_SLIB` remains an explicit override. USGS native six-layer comparison data are optional and are not required by this processed fixture.
 
+The E00 conversion tests in `tests/test_usgs_conejo.py` use the bundled source coverage and generic SLIB without the optional `native/` comparison directory. Only `tests/test_six_usgs_layers.py` requires that directory.
+
 ## Native Writer SHP conversion batch
 
 `writer_batch2/` contains eleven small synthetic SHP cases and their MapGIS-native WT/WL/WP conversion outputs, supplied for Writer auditing. The cases cover minimal rings, holes, multipart polygons, shared edges, duplicate vertices, an invalid bowtie, points with nullable dates and MultiLineString input. The MapGIS version and conversion settings were not provided and are not inferred. `writer_batch2_manifest.json` records provenance, byte counts and SHA-256 for all 68 files.

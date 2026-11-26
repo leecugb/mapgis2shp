@@ -215,10 +215,14 @@ class _FieldSpec:
 
 
 def _is_missing(value: Any) -> bool:
-    """Scalar missing-value check covering None / pd.NA / pd.NaT / NaN."""
-    if value is None or value is pd.NA or value is pd.NaT:
+    """Scalar missing-value check covering None / pd.NA / NaN-like values."""
+    if value is None:
         return True
-    return isinstance(value, float) and bool(np.isnan(value))
+    try:
+        missing = pd.isna(value)
+    except (TypeError, ValueError):
+        return False
+    return isinstance(missing, (bool, np.bool_)) and bool(missing)
 
 
 def _series_max_gbk_bytes(series: pd.Series) -> int:
@@ -397,11 +401,17 @@ def _pack_attribute_field(value: Any, spec: _FieldSpec) -> bytes:
     fmt = _STRUCT_FORMATS.get(spec.type_code)
     if fmt is None:
         raise WriterError(f"unsupported attribute type code {spec.type_code}")
-    if spec.type_code in (_ATTR_TYPE_FLOAT, _ATTR_TYPE_DOUBLE):
-        number = float("nan") if missing else float(value)
-    else:
-        number = 0 if missing else int(value)
-    return struct.pack(f"<{fmt}", number)
+    try:
+        if spec.type_code in (_ATTR_TYPE_FLOAT, _ATTR_TYPE_DOUBLE):
+            number = float("nan") if missing else float(value)
+        else:
+            number = 0 if missing else int(value)
+        return struct.pack(f"<{fmt}", number)
+    except (OverflowError, TypeError, ValueError, struct.error) as exc:
+        raise WriterError(
+            f"attribute field {spec.name!r} cannot encode {value!r} "
+            f"as type code {spec.type_code}"
+        ) from exc
 
 
 def _pack_field_descriptor(index: int, spec: _FieldSpec) -> bytes:
@@ -841,56 +851,83 @@ def _encode_points(gdf: gpd.GeoDataFrame, params: Optional[pd.DataFrame], factor
         struct.pack_into("<d", record, 15, float(geom.y) * factor)
 
         row = params.iloc[i] if params is not None else None
-        point_type = int(row["point_type"]) if row is not None else _DEFAULT_POINT_TYPE
+        point_type = _uint8_parameter(
+            row["point_type"] if row is not None else _DEFAULT_POINT_TYPE,
+            "point_type",
+            _DEFAULT_POINT_TYPE,
+        )
+        if point_type not in (0, POINT_TYPE_SYMBOL):
+            raise WriterError(f"point_type must be 0 or {POINT_TYPE_SYMBOL}; got {point_type}")
         record[31] = point_type
+        height = _float32_parameter(
+            row["height"] if row is not None else _DEFAULT_POINT_SIZE,
+            "height",
+            _DEFAULT_POINT_SIZE,
+        )
+        width = _float32_parameter(
+            row["width"] if row is not None else _DEFAULT_POINT_SIZE,
+            "width",
+            _DEFAULT_POINT_SIZE,
+        )
+        angle = _float32_parameter(
+            row["angle"] if row is not None else 0.0,
+            "angle",
+            0.0,
+        )
         if point_type == POINT_TYPE_SYMBOL:
             symbol_no = _int16_parameter(
                 row["symbol_no"] if row is not None else _DEFAULT_SYMBOL_NO,
                 "symbol_no",
                 _DEFAULT_SYMBOL_NO,
             )
-            height = float(row["height"]) if row is not None else _DEFAULT_POINT_SIZE
-            width = float(row["width"]) if row is not None else _DEFAULT_POINT_SIZE
             struct.pack_into("<h", record, 33, symbol_no)
             struct.pack_into("<f", record, 37, height)
             struct.pack_into("<f", record, 41, width)
         else:
-            height = float(row["height"]) if row is not None else _DEFAULT_POINT_SIZE
-            width = float(row["width"]) if row is not None else _DEFAULT_POINT_SIZE
-            spacing = (
-                0.0
-                if row is None or not np.isfinite(row["spacing"])
-                else float(row["spacing"])
+            spacing = _float32_parameter(
+                row["spacing"] if row is not None else 0.0,
+                "spacing",
+                0.0,
             )
             struct.pack_into("<f", record, 33, height)
             struct.pack_into("<f", record, 37, width)
             struct.pack_into("<f", record, 41, spacing)
-        angle = float(row["angle"]) if row is not None else 0.0
         struct.pack_into("<f", record, 45, angle)
         # 2026-10-15 wat 明码补齐（reader.py 对称）：颜色@75/图层@83 两类点
         # 共用；@49 按 kind 分写——字符串点=中文字体 u8(+西文字体@51/字形@53)，
         # 子图点=笔宽 f32。
-        color = (
-            int(row["color"])
-            if (row is not None and "color" in row.index)
-            else _DEFAULT_POINT_COLOR
+        color = _uint8_parameter(
+            row["color"] if row is not None else _DEFAULT_POINT_COLOR,
+            "color",
+            _DEFAULT_POINT_COLOR,
         )
-        layer = int(row["layer"]) if (row is not None and "layer" in row.index) else 0
-        struct.pack_into("<B", record, 75, color & 0xFF)
-        struct.pack_into("<B", record, 83, layer & 0xFF)
+        layer = _uint8_parameter(
+            row["layer"] if row is not None else 0,
+            "layer",
+            0,
+        )
+        record[75] = color
+        record[83] = layer
         if point_type == POINT_TYPE_SYMBOL:
-            pen = (float(row["pen_width"])
-                   if (row is not None and "pen_width" in row.index
-                       and np.isfinite(row["pen_width"]))
-                   else _DEFAULT_POINT_PEN_WIDTH)
+            pen = _float32_parameter(
+                row["pen_width"] if row is not None else _DEFAULT_POINT_PEN_WIDTH,
+                "pen_width",
+                _DEFAULT_POINT_PEN_WIDTH,
+            )
             struct.pack_into("<f", record, 49, pen)
         else:
-            fzh = int(row["font_zh"]) if (row is not None and "font_zh" in row.index) else 1
-            fen = int(row["font_en"]) if (row is not None and "font_en" in row.index) else 0
-            fst = int(row["font_style"]) if (row is not None and "font_style" in row.index) else 0
-            struct.pack_into("<B", record, 49, fzh & 0xFF)
-            struct.pack_into("<B", record, 51, fen & 0xFF)
-            struct.pack_into("<B", record, 53, fst & 0xFF)
+            fzh = _uint8_parameter(
+                row["font_zh"] if row is not None else 1, "font_zh", 1
+            )
+            fen = _uint8_parameter(
+                row["font_en"] if row is not None else 0, "font_en", 0
+            )
+            fst = _uint8_parameter(
+                row["font_style"] if row is not None else 0, "font_style", 0
+            )
+            record[49] = fzh
+            record[51] = fen
+            record[53] = fst
         buf += record
     return bytes(buf)
 
@@ -920,7 +957,11 @@ def _encode_lines(
             "linetype",
             _DEFAULT_LINETYPE,
         )
-        aux = int(row["aux_linetype"]) if row is not None else _DEFAULT_AUX_LINETYPE
+        aux = _uint8_parameter(
+            row["aux_linetype"] if row is not None else _DEFAULT_AUX_LINETYPE,
+            "aux_linetype",
+            _DEFAULT_AUX_LINETYPE,
+        )
         color = _int16_parameter(
             row["color"]
             if row is not None and "color" in row.index
@@ -928,19 +969,31 @@ def _encode_lines(
             "color",
             _DEFAULT_LINE_COLOR,
         )
-        width = float(row["width"]) if row is not None else _DEFAULT_LINE_WIDTH
-        x_coef = float(row["x_coef"]) if row is not None else _DEFAULT_LINE_COEF
-        y_coef = float(row["y_coef"]) if row is not None else _DEFAULT_LINE_COEF
+        width = _float32_parameter(
+            row["width"] if row is not None else _DEFAULT_LINE_WIDTH,
+            "width",
+            _DEFAULT_LINE_WIDTH,
+        )
+        x_coef = _float32_parameter(
+            row["x_coef"] if row is not None else _DEFAULT_LINE_COEF,
+            "x_coef",
+            _DEFAULT_LINE_COEF,
+        )
+        y_coef = _float32_parameter(
+            row["y_coef"] if row is not None else _DEFAULT_LINE_COEF,
+            "y_coef",
+            _DEFAULT_LINE_COEF,
+        )
         struct.pack_into("<h", record, 22, linetype)
         # 2026-10-15 修复：aux 写 u8@24 + 标志字节 @25（原 int16 写两字节，
         # 会把 0 写进 @25 覆盖标志位；现按 reader 对称拆 u8 对）。
-        aux_flag = (
-            int(row["aux_flag"])
-            if (row is not None and "aux_flag" in row.index)
-            else _DEFAULT_AUX_FLAG
+        aux_flag = _uint8_parameter(
+            row["aux_flag"] if row is not None else _DEFAULT_AUX_FLAG,
+            "aux_flag",
+            _DEFAULT_AUX_FLAG,
         )
-        struct.pack_into("<B", record, 24, aux & 0xFF)
-        struct.pack_into("<B", record, 25, aux_flag & 0xFF)
+        record[24] = aux
+        record[25] = aux_flag
         struct.pack_into("<h", record, 26, color)
         struct.pack_into("<f", record, 30, width)
         struct.pack_into("<f", record, 35, x_coef)
@@ -954,15 +1007,19 @@ def _encode_lines(
             "aux_color",
             0,
         )
-        layer = int(row["layer"]) if (row is not None and "layer" in row.index) else 0
-        transparent = (
-            int(row["transparent"])
-            if (row is not None and "transparent" in row.index)
-            else 0
+        layer = _uint8_parameter(
+            row["layer"] if row is not None else 0,
+            "layer",
+            0,
+        )
+        transparent = _uint8_parameter(
+            row["transparent"] if row is not None else 0,
+            "transparent",
+            0,
         )
         struct.pack_into("<h", record, 43, aux_color)
-        struct.pack_into("<B", record, 47, layer & 0xFF)
-        struct.pack_into("<B", record, 48, transparent & 0xFF)
+        record[47] = layer
+        record[48] = transparent
         index += record
     return bytes(index), bytes(coords)
 
@@ -1331,6 +1388,36 @@ def _int16_parameter(value: Any, name: str, default: int = 0) -> int:
     return int(number)
 
 
+def _uint16_parameter(value: Any, name: str, default: int = 0) -> int:
+    """Return a validated unsigned 16-bit graphic parameter."""
+    if _is_missing(value):
+        return default
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as exc:
+        raise WriterError(f"{name} must be an integer in 0..65535") from exc
+    if not np.isfinite(number) or not number.is_integer() or not 0 <= number <= 65535:
+        raise WriterError(f"{name} must be an integer in 0..65535; got {value!r}")
+    return int(number)
+
+
+def _float32_parameter(value: Any, name: str, default: float) -> float:
+    """Return a finite float that can be stored in a 32-bit field."""
+    if _is_missing(value):
+        return default
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as exc:
+        raise WriterError(f"{name} must be a finite number") from exc
+    if not np.isfinite(number):
+        raise WriterError(f"{name} must be finite; got {value!r}")
+    try:
+        struct.pack("<f", number)
+    except (OverflowError, struct.error) as exc:
+        raise WriterError(f"{name} is outside the float32 range; got {value!r}") from exc
+    return number
+
+
 def _encode_polygon_params(
     params: Optional[pd.DataFrame],
     count: int,
@@ -1367,25 +1454,33 @@ def _encode_polygon_params(
                 if col in row.index:
                     record[off] = int(row[col]) & 0xFF
             if "fill_color" in row.index:
-                struct.pack_into("<H", record, 9,
-                                 int(row["fill_color"]) & 0xFFFF)
+                struct.pack_into(
+                    "<H", record, 9,
+                    _uint16_parameter(row["fill_color"], "fill_color", (i + 2) & 0xFF),
+                )
             if "pattern" in row.index:
-                struct.pack_into("<H", record, 13,
-                                 int(row["pattern"]) & 0xFFFF)
+                struct.pack_into(
+                    "<H", record, 13,
+                    _uint16_parameter(row["pattern"], "pattern", 0),
+                )
             if "pattern_height" in row.index:
                 _hi = struct.unpack(
-                    "<I", struct.pack("<f", float(row["pattern_height"]))
+                    "<I", struct.pack(
+                        "<f", _float32_parameter(row["pattern_height"], "pattern_height", 0.0)
+                    )
                 )[0] >> 16
                 struct.pack_into("<H", record, 17, _hi)
             if "pattern_width" in row.index:
                 _hi = struct.unpack(
-                    "<I", struct.pack("<f", float(row["pattern_width"]))
+                    "<I", struct.pack(
+                        "<f", _float32_parameter(row["pattern_width"], "pattern_width", 0.0)
+                    )
                 )[0] >> 16
                 struct.pack_into("<H", record, 21, _hi)
             if "pattern_color" in row.index:
-                record[23] = int(row["pattern_color"]) & 0xFF
+                record[23] = _uint8_parameter(row["pattern_color"], "pattern_color", 0)
             if "layer" in row.index:
-                record[30] = int(row["layer"]) & 0xFF
+                record[30] = _uint8_parameter(row["layer"], "layer", 0)
         if ring_index_offsets is not None:
             pointer = ring_index_offsets[i + 1]
             if not 0 <= pointer <= 0xFFFFFF:
@@ -1703,6 +1798,17 @@ def _normalise_geometries(
         warnings.warn("Z coordinates dropped (MapGIS 6x stores 2D geometry)")
         out = out.set_geometry(
             gpd.GeoSeries(shapely.force_2d(out.geometry.array), index=out.index, crs=out.crs)
+        )
+
+    bad_positions = []
+    for position, geometry in enumerate(out.geometry):
+        coordinates = shapely.get_coordinates(geometry)
+        if coordinates.size and not np.isfinite(coordinates).all():
+            bad_positions.append(position)
+    if bad_positions:
+        raise WriterError(
+            "found non-finite coordinates at row positions "
+            f"{bad_positions[:8]}; MapGIS output requires finite 2D coordinates"
         )
 
     if shape_type == "POINT" and (out.geom_type == "MultiPoint").any():

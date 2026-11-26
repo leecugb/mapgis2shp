@@ -846,6 +846,14 @@ packages are unavailable; they no longer abort collection. Direct `pytest` and
 `python -m pytest` both work because the pytest configuration includes the
 repository root on `sys.path`.
 
+Bundled-data tests do not require `PYMAPGIS_SLIB`, because the five generic
+libraries are resolved through `pymapgis.testing.slib_path()`. The E00 conversion
+tests in `tests/test_usgs_conejo.py` use the bundled source coverage and do not
+require the optional `native/` comparison directory; that directory is needed only
+by `tests/test_six_usgs_layers.py`. GeoPDF geometry, vector-output and DPI tests
+also run without GDAL. Only the three tests that explicitly parse WKT with
+`osgeo.osr` are skipped when that optional dependency is unavailable.
+
 The `dev` extra currently selects `geopandas<1.2` for the test reference
 environment. GeoPandas 1.2 changes edge pixels in the old reference plotting
 path of the optional `pymapgis.rendering` module, which is excluded from release

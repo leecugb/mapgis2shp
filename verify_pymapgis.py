@@ -39,7 +39,9 @@ def roundtrip_file(path: str, tmpdir: Path) -> Dict[str, Any]:
     """Read one MapGIS file, write it back with ``Writer``, and re-read it.
 
     Compares feature count and bounding box against the original, and the
-    total area for polygon layers.  Writes only into *tmpdir*.
+    total area for polygon layers. Coordinates are compared in the source CRS
+    because Writer deliberately converts UTM to Gauss-Kruger by default.
+    Writes only into *tmpdir*.
     """
     result: Dict[str, Any] = {"path": path, "ok": False}
     t0 = time.time()
@@ -51,14 +53,21 @@ def roundtrip_file(path: str, tmpdir: Path) -> Dict[str, Any]:
         out = tmpdir / Path(path).name
         Writer(gdf).to_file(out)
         with Reader(out) as reader:
+            output = reader.geodataframe
+            if (
+                gdf.crs is not None
+                and output.crs is not None
+                and output.crs != gdf.crs
+            ):
+                output = output.to_crs(gdf.crs)
             result["count"] = len(reader)
             result["duration"] = time.time() - t0
             ok = len(reader) == expected_count and np.allclose(
-                reader.bbox, expected_bbox, atol=1e-9
+                output.total_bounds, expected_bbox, atol=1e-9
             )
             if reader.shapeType == "POLYGON":
                 src_area = float(gdf.geometry.area.sum())
-                new_area = float(reader.geodataframe.geometry.area.sum())
+                new_area = float(output.geometry.area.sum())
                 result["area_rel_diff"] = abs(new_area - src_area) / max(src_area, 1e-30)
                 ok = ok and result["area_rel_diff"] < 1e-9
             result["ok"] = ok

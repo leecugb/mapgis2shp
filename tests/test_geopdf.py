@@ -17,9 +17,13 @@ from pymapgis.geopdf import (
 from pymapgis.render_projection import gauss_kruger_crs
 
 pymupdf = pytest.importorskip("pymupdf")
-osr = pytest.importorskip("osgeo.osr")
 
 JWD_CRS = "+proj=longlat +ellps=krass +towgs84=15.8,-154.4,-82.3,0,0,0,0 +no_defs"
+
+
+def _require_osr():
+    """Skip only tests that actually need GDAL's WKT parser."""
+    return pytest.importorskip("osgeo.osr")
 
 
 def make_png(tmp_path):
@@ -57,6 +61,29 @@ def test_geotransform_scales_figure_display_bbox_to_output_dpi(tmp_path):
     )
 
 
+@pytest.mark.parametrize(
+    "bad", (float("nan"), float("inf"), -float("inf")),
+    ids=["nan", "inf", "-inf"],
+)
+def test_matplotlib_geotransform_rejects_non_finite_dpi(tmp_path, bad):
+    figure, axes, _ = make_png(tmp_path)
+    with pytest.raises(ValueError, match="positive and finite"):
+        matplotlib_geotransform(figure, axes, bad)
+
+
+@pytest.mark.parametrize(
+    "bad", (float("nan"), float("inf"), -float("inf")),
+    ids=["nan", "inf", "-inf"],
+)
+def test_write_geopdf_rejects_non_finite_dpi(tmp_path, bad):
+    figure, axes, image = make_png(tmp_path)
+    gt = matplotlib_geotransform(figure, axes, 100)
+    with pytest.raises(ValueError, match="positive and finite"):
+        write_geopdf(
+            tmp_path / "bad-dpi.pdf", image, gt, pyproj.CRS.from_epsg(32643), dpi=bad
+        )
+
+
 def test_geopdf_iso32000_structure_wkt_and_control_points(tmp_path):
     figure, axes, image = make_png(tmp_path)
     gt = matplotlib_geotransform(figure, axes, 100)
@@ -77,7 +104,7 @@ def test_geopdf_iso32000_structure_wkt_and_control_points(tmp_path):
     assert len(readback["gpts"]) == 8
     assert all(math.isfinite(value) for value in readback["gpts"])
 
-    spatial_ref = osr.SpatialReference()
+    spatial_ref = _require_osr().SpatialReference()
     assert spatial_ref.ImportFromWkt(readback["wkt"]) == 0
     assert spatial_ref.GetProjParm("central_meridian") == pytest.approx(75.0)
     assert spatial_ref.GetProjParm("scale_factor") == pytest.approx(1.0)
@@ -103,7 +130,7 @@ def test_geopdf_writes_epsg_when_available(tmp_path):
     write_geopdf(output, image, gt, pyproj.CRS.from_epsg(32643), dpi=100, scale_denominator=100000)
     readback = inspect_geopdf(output)
     assert "/EPSG 32643" in readback["gcs_object"]
-    spatial_ref = osr.SpatialReference()
+    spatial_ref = _require_osr().SpatialReference()
     assert spatial_ref.ImportFromWkt(readback["wkt"]) == 0
     assert spatial_ref.GetProjParm("central_meridian") == pytest.approx(75.0)
     assert spatial_ref.GetProjParm("scale_factor") == pytest.approx(0.9996)
@@ -159,7 +186,7 @@ def test_vector_geopdf_has_no_raster_and_exact_page_scale(tmp_path):
     )
     assert actual_x_scale == pytest.approx(1000, rel=1e-9)
     assert actual_y_scale == pytest.approx(1000, rel=1e-9)
-    spatial_ref = osr.SpatialReference()
+    spatial_ref = _require_osr().SpatialReference()
     assert spatial_ref.ImportFromWkt(readback["wkt"]) == 0
     assert spatial_ref.GetProjParm("central_meridian") == pytest.approx(75.0)
     assert spatial_ref.GetTOWGS84()[:3] == pytest.approx((15.8, -154.4, -82.3))

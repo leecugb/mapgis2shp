@@ -1,7 +1,5 @@
 """Reader and rendering regression using only the six original testdata files."""
 import json
-import os
-from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -52,8 +50,6 @@ def test_six_native_files_reader_and_manifest():
 
 
 def test_six_native_files_original_library_render(tmp_path):
-    if not Path(r"D:/SLIB/SLIB").is_dir() and not os.environ.get("PYMAPGIS_SLIB"):
-        pytest.skip("The five original SLIB libraries are unavailable")
     layers, _ = read_six_layers()
     result = render_six_layers(layers, tmp_path, dpi=60, formats=("png", "pdf", "svg"))
     summary = summarise(result.reports)
@@ -81,8 +77,6 @@ def test_six_native_files_original_library_render(tmp_path):
 
 
 def test_raw_reader_duplicate_columns_use_native_graphics(tmp_path):
-    if not Path(r"D:/SLIB/SLIB").is_dir() and not os.environ.get("PYMAPGIS_SLIB"):
-        pytest.skip("The five original SLIB libraries are unavailable")
     raw = Reader(
         usgs_conejo_path("native/CWELL_GEO_WP.WP"), read_graphic_params=True
     ).geodataframe
@@ -105,8 +99,6 @@ def test_raw_reader_duplicate_columns_use_native_graphics(tmp_path):
 
 
 def test_six_polygon_label_field_labl(tmp_path):
-    if not Path(r"D:/SLIB/SLIB").is_dir() and not os.environ.get("PYMAPGIS_SLIB"):
-        pytest.skip("The five original SLIB libraries are unavailable")
     layers, _ = read_six_layers()
     result = render_six_layers(
         layers, tmp_path, dpi=60, formats=("svg",), label_field="LABL"
@@ -118,8 +110,6 @@ def test_six_polygon_label_field_labl(tmp_path):
 
 
 def test_polygon_label_collision_buffer_skips_overlapping_label(tmp_path):
-    if not Path(r"D:/SLIB/SLIB").is_dir() and not os.environ.get("PYMAPGIS_SLIB"):
-        pytest.skip("The five original SLIB libraries are unavailable")
     polygons = gpd.GeoDataFrame(
         {"LABL": ["A", "B"], "fill_color": [602, 602], "class": [2, 2]},
         geometry=[box(0, 0, 100, 100), box(0, 0, 100, 100)],
@@ -143,8 +133,6 @@ def test_polygon_label_collision_buffer_skips_overlapping_label(tmp_path):
 
 
 def test_polygon_label_randomized_visibility_is_seeded(tmp_path):
-    if not Path(r"D:/SLIB/SLIB").is_dir() and not os.environ.get("PYMAPGIS_SLIB"):
-        pytest.skip("The five original SLIB libraries are unavailable")
     labels = list("ABCDEFGHIJ")
     polygons = gpd.GeoDataFrame(
         {"LABL": labels, "fill_color": [602] * 10, "class": [2] * 10},

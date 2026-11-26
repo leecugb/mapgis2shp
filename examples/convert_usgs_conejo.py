@@ -28,7 +28,11 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from examples.e00_fast import read_coverage, read_info_tables  # noqa: E402
-from examples.generate_synthetic_geology import _line_record, _point_record, _polygon_record  # noqa: E402
+from examples.generate_synthetic_geology import (  # noqa: E402
+    _line_record,
+    _point_record,
+    _polygon_record,
+)
 from examples.render_bundled_jwd import summarise  # noqa: E402
 from examples.usgs_conejo_symbols import (  # noqa: E402
     LEFT_SLIP_PEN_WIDTH_MM,

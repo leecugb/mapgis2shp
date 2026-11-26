@@ -7,14 +7,17 @@ import pytest
 
 from examples.render_bundled_jwd import regression_layers, summarise
 from pymapgis import GraphicLibraries, GraphicRenderer, Reader
-from pymapgis.testing import slib_path
+from pymapgis.testing import jwd_path, slib_path
 
-SOURCE = Path("mapgis2shp_submission/wheel_quickstart_release/pymapgis/testing/fixtures/jwd")
+try:
+    SOURCE = jwd_path()
+except FileNotFoundError:
+    SOURCE = None
 MANIFEST = Path("tests/fixtures/jwd_slib_manifest.json")
 
 
 def test_original_jwd_twelve_reader_and_hashes():
-    if not SOURCE.is_dir():
+    if SOURCE is None or not SOURCE.is_dir():
         pytest.skip("Original JWD fixture directory is unavailable")
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     total = 0
@@ -31,10 +34,8 @@ def test_original_jwd_twelve_reader_and_hashes():
 
 
 def test_original_jwd_twelve_slib_render(tmp_path):
-    if not SOURCE.is_dir():
+    if SOURCE is None or not SOURCE.is_dir():
         pytest.skip("Original JWD fixture directory is unavailable")
-    if not Path(r"D:/SLIB/SLIB").is_dir():
-        pytest.skip("Original SLIB is unavailable")
     raw_layers = regression_layers(SOURCE)
     assert len(raw_layers) == 12
     renderer = GraphicRenderer(
